@@ -1,0 +1,24 @@
+name: Odysseia
+version: 1.0.0
+main: org.metamechanists.odysseia.Odysseia
+api-version: 1.21
+description: Plugin de personalizacion, gestion silenciosa y moderacion creativa para DrakesCraft.
+authors: [JackStar, Antigravity]
+softdepend:
+  - PlaceholderAPI
+  - LuckPerms
+  - Essentials
+
+commands:
+  papademar:
+    description: Entrega la legendaria Papa de mar.
+    permission: odysseia.papademar
+    aliases: [pdm]
+  lenador:
+    description: Invoca al Leñador Loco de manera silenciosa.
+    permission: staff.lumberjack.spawn
+    usage: /lenador [nivel]
+  vanish:
+    description: Desvanecimiento creativo para moderadores.
+    permission: odysseia.vanish
+    aliases: [v]

@@ -1,0 +1,123 @@
+# ╔══════════════════════════════════════════════╗
+# ║             Odysseia — config.yml            ║
+# ╚══════════════════════════════════════════════╝
+
+# Habilitar envio de eventos a Discord
+discord:
+  enabled: true
+  # Pegar aqui la URL completa del webhook de Discord
+  webhook-url: "REPLACE_ME"
+  # Webhook secundario opcional para eventos de moderacion (ban/kick)
+  webhook-moderation-url: "REPLACE_ME"
+
+# ─────────────────────────────────────────────
+#  Ciclo de Prefijos del Propietario (Owner)
+# ─────────────────────────────────────────────
+owner-cycle:
+  # Habilitar el placeholder de PAPI %odysseia_owner_prefix%
+  enabled: true
+  # Intervalo para alternar visualmente (minutos)
+  interval-minutes: 30
+  # Prefijos a alternar para odiseo
+  odiseo:
+    prefix-a: "&8✠ &6&lᴏᴅɪsᴇᴏ &8✦ &6&o"
+    prefix-b: "&8✠ &4&lᴅᴜᴇñᴏ &8✦ &4"
+  # Prefijos a alternar para penelope
+  penelope:
+    prefix-a: "&d✦ &d&lᴘᴇɴᴇʟᴏᴘᴇ &8✦ &d"
+    prefix-b: "&d✦ &d&lᴅᴜᴇñᴀ &8✦ &d"
+
+# ─────────────────────────────────────────────
+#  Efectos de Armadura de Rangos
+# ─────────────────────────────────────────────
+# Se aplican si el jugador tiene el set completo y el permiso correspondiente
+armor-effects:
+  refresh-interval-seconds: 90
+  effect-duration-seconds: 180
+  
+  # Hercules (VIP 1) - requiere essentials.kits.hercules y full diamante
+  hercules:
+    speed: 1
+    resistance: 1
+    
+  # Hestia (VIP 2) - requiere essentials.kits.hestia y full diamante
+  hestia:
+    speed: 2
+    health-boost: 1
+    saturation: true
+    
+  # Hermes (VIP 3) - requiere essentials.kits.hermes y full diamante
+  hermes:
+    speed: 4
+    health-boost: 1
+    saturation: true
+    
+  # Hefesto (VIP 4) - requiere essentials.kits.hefesto y full netherite
+  hefesto:
+    speed: 2
+    health-boost: 2
+    fire-resistance: true
+    saturation: true
+    
+  # Artemisa (VIP 5) - requiere essentials.kits.artemisa y full netherite
+  artemisa:
+    speed: 3
+    health-boost: 2
+    strength: 1
+    saturation: true
+    
+  # Afrodita (VIP 6) - requiere essentials.kits.afrodita y full netherite
+  afrodita:
+    speed: 3
+    health-boost: 3
+    strength: 1
+    regeneration: 1
+    saturation: true
+    
+  # Zeus (VIP 7) - requiere essentials.kits.zeus y full netherite
+  zeus:
+    speed: 4
+    health-boost: 4
+    strength: 2
+    resistance: 1
+    saturation: true
+
+# ─────────────────────────────────────────────
+#  Reliquias Personalizadas
+# ─────────────────────────────────────────────
+papa-de-mar:
+  # Valores al consumir la Papa de mar
+  food-restored: 1
+  saturation-restored: 8.4
+  # Tiempo de entrega automatica a todos los jugadores (minutos)
+  delivery-interval-minutes: 15
+
+# ─────────────────────────────────────────────
+#  ChatGames Scheduler
+# ─────────────────────────────────────────────
+chatgames:
+  # Rango de tiempo aleatorio para lanzar un juego (minutos)
+  min-interval: 15
+  max-interval: 30
+
+# ─────────────────────────────────────────────
+#  Presencia y Eventos (DrakesLabPresence)
+# ─────────────────────────────────────────────
+presence:
+  enabled: true
+  # Identificador legible en mensajes (opcional, por defecto el del servidor)
+  server-label: ""
+  # Intervalo de latido en minutos (minimo 15)
+  heartbeat-minutes: 15
+  # Segundos de espera tras reload/arranque antes del primer POST
+  startup-delay-seconds: 60
+  # Eventos especificos a enviar
+  events:
+    server-startup: true
+    server-shutdown: true
+    player-join: true
+    player-quit: true
+    player-death: true
+    advancement: true
+    rate-limit-per-minute: 12
+
