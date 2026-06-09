@@ -35,11 +35,66 @@
     </filter>
   </defs>
 
+  <style>
+    @keyframes rotate-cw {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes rotate-ccw {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 4px #FCD05F); }
+      50% { filter: drop-shadow(0 0 15px #FCD05F); }
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    .anim-rotate-cw {
+      transform-origin: 256px 256px;
+      animation: rotate-cw 60s linear infinite;
+    }
+    .anim-rotate-ccw {
+      transform-origin: 256px 256px;
+      animation: rotate-ccw 45s linear infinite;
+    }
+    .anim-orbit-1 {
+      transform-origin: 256px 256px;
+      animation: rotate-cw 20s linear infinite;
+    }
+    .anim-orbit-2 {
+      transform-origin: 256px 256px;
+      animation: rotate-ccw 35s linear infinite;
+    }
+    .anim-pulse {
+      animation: pulse 8s ease-in-out infinite;
+    }
+    .anim-star-glow {
+      transform-origin: 256px 256px;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    .anim-sparkle-1 {
+      transform-origin: 140px 120px;
+      animation: sparkle 3s ease-in-out infinite;
+    }
+    .anim-sparkle-2 {
+      transform-origin: 360px 370px;
+      animation: sparkle 4s ease-in-out infinite;
+    }
+  </style>
+
   <!-- Background -->
   <rect width="512" height="512" fill="url(#bgGrad)"/>
   
   <!-- Cosmic Dust / Nebula -->
-  <circle cx="256" cy="256" r="180" fill="url(#purpleGlow)" filter="url(#glow)" />
+  <circle cx="256" cy="256" r="180" fill="url(#purpleGlow)" class="anim-pulse" filter="url(#glow)" />
   
   <!-- Starfield / Galaxy Stars -->
   <g fill="#ffffff" opacity="0.8">
@@ -54,11 +109,11 @@
   </g>
   
   <!-- Outer Constellation/Orbital Ring -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#goldHighlight)" stroke-width="1.5" opacity="0.3" stroke-dasharray="10 15" />
-  <circle cx="256" cy="256" r="175" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" />
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#goldHighlight)" stroke-width="1.5" opacity="0.3" stroke-dasharray="10 15" class="anim-rotate-cw" />
+  <circle cx="256" cy="256" r="175" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" class="anim-rotate-ccw" />
 
   <!-- Constellation lines -->
-  <g stroke="#FCD05F" stroke-width="1" opacity="0.4">
+  <g stroke="#FCD05F" stroke-width="1" opacity="0.4" class="anim-rotate-cw">
     <line x1="256" y1="120" x2="330" y2="180" />
     <line x1="330" y1="180" x2="330" y2="280" />
     <line x1="330" y1="280" x2="256" y2="392" />
@@ -68,7 +123,7 @@
   </g>
 
   <!-- Constellation Nodes (Stars) -->
-  <g fill="#fff" filter="url(#glow)">
+  <g fill="#fff" filter="url(#glow)" class="anim-rotate-cw">
     <circle cx="256" cy="120" r="4" />
     <circle cx="330" cy="180" r="3" />
     <circle cx="330" cy="280" r="3.5" />
@@ -93,7 +148,7 @@
   </g>
 
   <!-- Central Symbol: Elegant "O" Monogram & Galactic Compass -->
-  <g filter="url(#glow)">
+  <g class="anim-star-glow">
     <!-- Crescent Moon (Golden) -->
     <path d="M 230,210 A 55,55 0 1,0 230,302 A 45,45 0 1,1 230,210 Z" fill="url(#goldHighlight)" />
     
@@ -104,18 +159,20 @@
   </g>
 
   <!-- Astrolabe Needle / Pointer -->
-  <line x1="256" y1="256" x2="320" y2="192" stroke="url(#goldGrad)" stroke-width="3" filter="url(#glow)" />
-  <polygon points="320,192 312,197 317,205" fill="url(#goldHighlight)" filter="url(#glow)" />
+  <line x1="256" y1="256" x2="320" y2="192" stroke="url(#goldGrad)" stroke-width="3" class="anim-rotate-ccw" filter="url(#glow)" />
+  <polygon points="320,192 312,197 317,205" fill="url(#goldHighlight)" class="anim-rotate-ccw" filter="url(#glow)" />
 
   <!-- Orbiting Satellites / Planets -->
-  <circle cx="340" cy="180" r="6" fill="#FCD05F" filter="url(#glow)" />
-  <circle cx="160" cy="300" r="4" fill="#a29bfe" filter="url(#glow)" />
+  <g class="anim-orbit-1">
+    <circle cx="340" cy="180" r="6" fill="#FCD05F" filter="url(#glow)" />
+  </g>
+  <g class="anim-orbit-2">
+    <circle cx="160" cy="300" r="4" fill="#a29bfe" filter="url(#glow)" />
+  </g>
 
   <!-- Four Point Stars / Sparkles -->
   <g fill="#ffffff" filter="url(#glow)">
-    <!-- Top Left Sparkle -->
-    <path d="M 140,110 Q 140,120 150,120 Q 140,120 140,130 Q 140,120 130,120 Q 140,120 140,110 Z" />
     <!-- Bottom Right Sparkle -->
-    <path d="M 360,360 Q 360,370 370,370 Q 360,370 360,380 Q 360,370 350,370 Q 360,370 360,360 Z" />
+    <path d="M 360,360 Q 360,370 370,370 Q 360,370 360,380 Q 360,370 350,370 Q 360,370 360,360 Z" class="anim-sparkle-2" />
   </g>
 </svg>
