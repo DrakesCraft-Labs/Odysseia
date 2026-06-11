@@ -129,7 +129,7 @@ store:
   # URL base de la API de la tienda (Fastify)
   api-url: "https://web.drakescraft.cl/api/store"
   # Clave API secreta (debe coincidir con STORE_API_KEY en el .env)
-  api-key: "4f9e1208ad33b5c7f890b2e8c8dfa324"
+  api-key: "REPLACE_ME_STORE_API_KEY"
   # Frecuencia de verificación en segundos
   poll-interval-seconds: 60
   # Webhook para anunciar compras en Discord de forma pública
