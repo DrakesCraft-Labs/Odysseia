@@ -8,6 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
+import org.metamechanists.odysseia.commands.BossCommand;
+import org.metamechanists.odysseia.boss.BossManager;
 import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
 import org.metamechanists.odysseia.listeners.ModerationListener;
@@ -27,6 +29,7 @@ public final class Odysseia extends JavaPlugin {
     private static Odysseia instance;
 
     private VanishCommand vanishCommand;
+    private BossManager bossManager;
     private boolean ownerFlip = false;
     private String instanceId = "";
     private int chatGamesCountdown = 0;
@@ -47,8 +50,15 @@ public final class Odysseia extends JavaPlugin {
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
 
+        // Initialize BossManager
+        this.bossManager = new BossManager(this);
+        BossCommand bossCmd = new BossCommand(this, bossManager);
+        getCommand("boss").setExecutor(bossCmd);
+        getCommand("boss").setTabCompleter(bossCmd);
+
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
+        Bukkit.getPluginManager().registerEvents(bossManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
@@ -81,6 +91,11 @@ public final class Odysseia extends JavaPlugin {
 
         // Stop StoreManager
         org.metamechanists.odysseia.utils.StoreManager.stop();
+
+        // Shutdown BossManager
+        if (bossManager != null) {
+            bossManager.shutdown();
+        }
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");
     }
