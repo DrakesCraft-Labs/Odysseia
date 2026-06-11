@@ -226,7 +226,17 @@ public final class StoreManager {
         String cleanText = discordAnnounce.replace("{player}", nick).replace("{product}", productName);
         String jsonPayload = "{\"username\":\"DrakesCraft · Tienda\","
                 + "\"avatar_url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\","
-                + "\"content\":\"" + Odysseia.escapeJson(cleanText) + "\"}";
+                + "\"embeds\":[{"
+                + "\"title\":\"⚡ ¡Compra Entregada con Éxito! ⚡\","
+                + "\"description\":\"" + Odysseia.escapeJson(cleanText) + "\","
+                + "\"color\":15844367," // Color dorado (#f1c40f = 15844367)
+                + "\"thumbnail\":{\"url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\"},"
+                + "\"fields\":["
+                + "{\"name\":\"🎮 Jugador\",\"value\":\"`" + Odysseia.escapeJson(nick) + "`\",\"inline\":true},"
+                + "{\"name\":\"📦 Producto\",\"value\":\"**" + Odysseia.escapeJson(productName) + "**\",\"inline\":true}"
+                + "],"
+                + "\"footer\":{\"text\":\"DrakesCraft · Tienda Oficial · web.drakescraft.cl\"}"
+                + "}]}";
 
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
