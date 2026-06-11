@@ -121,3 +121,127 @@ presence:
     advancement: true
     rate-limit-per-minute: 12
 
+# ─────────────────────────────────────────────
+#  Entrega Automática de Tienda (StoreManager)
+# ─────────────────────────────────────────────
+store:
+  enabled: true
+  # URL base de la API de la tienda (Fastify)
+  api-url: "https://web.drakescraft.cl/api/store"
+  # Clave API secreta (debe coincidir con STORE_API_KEY en el .env)
+  api-key: "4f9e1208ad33b5c7f890b2e8c8dfa324"
+  # Frecuencia de verificación en segundos
+  poll-interval-seconds: 60
+  # Webhook para anunciar compras en Discord de forma pública
+  announcement-webhook-url: "https://discord.com/api/webhooks/1514625369246929006/4VUUXzSaK59ss_tx11Aciry9Q9QPhXFDYV54hc7kcgYWYkpRh2_kGGZiCFjLZba2tt2_"
+  # Mensaje de felicitaciones en el chat in-game (Soporta códigos de color '&')
+  chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
+  # Mensaje del webhook de Discord
+  discord-announcement: "🎉 **¡Felicidades {player} ha comprado {product} en el servidor! ¡Gracias por mantener el servidor vivo!** 🎉"
+  
+  # Comandos a ejecutar por cada producto de la tienda
+  # {player} se reemplazará por el nick exacto del jugador
+  packages:
+    hercules:
+      require-online: true
+      commands:
+        - "lp user {player} parent add hercules"
+        - "eco give {player} 25000"
+        - "kit hercules {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Hércules!"
+    hestia:
+      require-online: true
+      commands:
+        - "lp user {player} parent add hestia"
+        - "eco give {player} 50000"
+        - "kit hestia {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Hestia!"
+    hermes:
+      require-online: true
+      commands:
+        - "lp user {player} parent add hermes"
+        - "eco give {player} 100000"
+        - "kit hermes {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Hermes!"
+    hefesto:
+      require-online: true
+      commands:
+        - "lp user {player} parent add hefesto"
+        - "eco give {player} 175000"
+        - "kit hefesto {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Hefesto!"
+    artemisa:
+      require-online: true
+      commands:
+        - "lp user {player} parent add artemisa"
+        - "eco give {player} 300000"
+        - "kit artemisa {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Artemisa!"
+    afrodita:
+      require-online: true
+      commands:
+        - "lp user {player} parent add afrodita"
+        - "eco give {player} 500000"
+        - "kit afrodita {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Afrodita!"
+    zeus:
+      require-online: true
+      commands:
+        - "lp user {player} parent add zeus"
+        - "eco give {player} 1000000"
+        - "kit zeus {player}"
+        - "msg {player} &a¡Gracias por comprar el rango Zeus!"
+    # Subrangos (Categoría 2)
+    minero:
+      require-online: true
+      commands:
+        - "lp user {player} parent add minero"
+        - "kit minero {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Minero!"
+    cazador:
+      require-online: true
+      commands:
+        - "lp user {player} parent add cazador"
+        - "kit cazador {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Cazador!"
+    constructor:
+      require-online: true
+      commands:
+        - "lp user {player} parent add constructor"
+        - "kit constructor {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Constructor!"
+    lenador:
+      require-online: true
+      commands:
+        - "lp user {player} parent add lenador"
+        - "kit lenador {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Leñador!"
+    alquimista:
+      require-online: true
+      commands:
+        - "lp user {player} parent add alquimista"
+        - "kit alquimista {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Alquimista!"
+    nomada:
+      require-online: true
+      commands:
+        - "lp user {player} parent add nomada"
+        - "kit nomada {player}"
+        - "msg {player} &a¡Gracias por adquirir el rol de Nómada!"
+    # Dragmas (Categoría 3 de la tienda web - 3 paquetes definidos)
+    dragmas-saco:
+      require-online: true
+      commands:
+        - "eco give {player} 50000"
+        - "msg {player} &a¡Recibiste tu Saco de 50,000 Dragmas!"
+    dragmas-cofre:
+      require-online: true
+      commands:
+        - "eco give {player} 250000"
+        - "msg {player} &a¡Recibiste tu Cofre de 250,000 Dragmas!"
+    dragmas-anfora:
+      require-online: true
+      commands:
+        - "eco give {player} 1000000"
+        - "msg {player} &a¡Recibiste tu Ánfora de 1,000,000 Dragmas!"
+

@@ -15,6 +15,10 @@ import org.metamechanists.odysseia.listeners.PresenceEventListener;
 import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
+import java.time.DayOfWeek;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.logging.Level;
 
 public final class Odysseia extends JavaPlugin {
@@ -59,6 +63,11 @@ public final class Odysseia extends JavaPlugin {
         // Start Tasks
         startSchedulers();
 
+        // Start StoreManager
+        if (getConfig().getBoolean("store.enabled", true)) {
+            org.metamechanists.odysseia.utils.StoreManager.start(this);
+        }
+
         // Send startup webhook
         sendStartupWebhook();
 
@@ -69,6 +78,9 @@ public final class Odysseia extends JavaPlugin {
     public void onDisable() {
         // Send shutdown webhook synchronously
         sendShutdownWebhookSync();
+
+        // Stop StoreManager
+        org.metamechanists.odysseia.utils.StoreManager.stop();
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");
     }
@@ -125,6 +137,7 @@ public final class Odysseia extends JavaPlugin {
         startLenadorLocoScheduler();
         startPapaDeMarDeliveryScheduler();
         startHeartbeatScheduler();
+        startRestartScheduler();
     }
 
     private void startOwnerCycleScheduler() {
@@ -272,6 +285,71 @@ public final class Odysseia extends JavaPlugin {
                 getLogger().log(Level.WARNING, "Error al enviar latido a Discord", e);
             }
         }, delayTicks, periodTicks);
+    }
+
+    private void startRestartScheduler() {
+        if (!getConfig().getBoolean("restart.enabled", false)) {
+            return;
+        }
+        String dayStr = getConfig().getString("restart.day", "MONDAY").toUpperCase();
+        int hour = getConfig().getInt("restart.hour", 5);
+        int minute = getConfig().getInt("restart.minute", 0);
+        String timezone = getConfig().getString("restart.timezone", "America/Santiago");
+
+        DayOfWeek targetDay;
+        try {
+            targetDay = DayOfWeek.valueOf(dayStr);
+        } catch (IllegalArgumentException e) {
+            getLogger().warning("[Restart] Día inválido en config: " + dayStr + ". Usando MONDAY.");
+            targetDay = DayOfWeek.MONDAY;
+        }
+
+        ZoneId zone;
+        try {
+            zone = ZoneId.of(timezone);
+        } catch (Exception e) {
+            getLogger().warning("[Restart] Timezone inválido: " + timezone + ". Usando America/Santiago.");
+            zone = ZoneId.of("America/Santiago");
+        }
+
+        ZonedDateTime now = ZonedDateTime.now(zone);
+        ZonedDateTime next = now.with(TemporalAdjusters.nextOrSame(targetDay))
+                .withHour(hour).withMinute(minute).withSecond(0).withNano(0);
+        if (!next.isAfter(now)) {
+            next = next.with(TemporalAdjusters.next(targetDay));
+        }
+
+        long delaySeconds = java.time.Duration.between(now, next).getSeconds();
+        long delayTicks = delaySeconds * 20L;
+
+        getLogger().info(String.format("[Restart] Próximo reinicio: %s (%s) en %d horas.",
+                next, timezone, delaySeconds / 3600));
+
+        // Avisos previos: 10 min, 5 min, 1 min antes
+        long[] warnOffsets = {10 * 60 * 20L, 5 * 60 * 20L, 60 * 20L};
+        String[] warnMessages = {
+            "&6&l⚡ &eel servidor se reiniciará en &6&l10 minutos&e. Guarda tus cosas.",
+            "&c&l⚡ &cel servidor se reiniciará en &c&l5 minutos&c.",
+            "&4&l⚡ &4Reinicio en &4&l1 minuto&4. Prepárate."
+        };
+        for (int i = 0; i < warnOffsets.length; i++) {
+            long warnTicks = delayTicks - warnOffsets[i];
+            if (warnTicks > 0) {
+                final String msg = ChatColor.translateAlternateColorCodes('&', warnMessages[i]);
+                Bukkit.getScheduler().runTaskLater(this, () ->
+                        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(msg)), warnTicks);
+            }
+        }
+
+        final DayOfWeek finalDay = targetDay;
+        final int finalHour = hour;
+        final int finalMin = minute;
+        final ZoneId finalZone = zone;
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            getLogger().info("[Restart] Ejecutando reinicio semanal programado.");
+            Bukkit.broadcastMessage(ChatColor.RED + "⚡ Reiniciando servidor ahora...");
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+        }, delayTicks);
     }
 
     private void sendStartupWebhook() {
