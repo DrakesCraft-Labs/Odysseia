@@ -19,6 +19,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public final class StoreManager {
@@ -29,6 +31,7 @@ public final class StoreManager {
 
     private static StoreManager instance;
     private final Odysseia plugin;
+    private final Set<String> inFlightTransactions = ConcurrentHashMap.newKeySet();
     private BukkitTask task;
 
     private StoreManager(Odysseia plugin) {
@@ -71,15 +74,15 @@ public final class StoreManager {
         String apiUrl = config.getString("store.api-url", "");
         String apiKey = config.getString("store.api-key", "");
 
-        if (apiUrl == null || apiUrl.isBlank()) {
+        if (apiUrl == null || apiUrl.isBlank() || apiKey == null || apiKey.isBlank() || apiKey.startsWith("REPLACE_ME")) {
             return;
         }
 
         try {
             // Build GET request
-            String requestUrl = apiUrl + "/pending?key=" + apiKey;
-            var req = HttpRequest.newBuilder(URI.create(requestUrl))
+            var req = HttpRequest.newBuilder(URI.create(apiUrl + "/pending"))
                     .timeout(Duration.ofSeconds(15))
+                    .header("X-API-Key", apiKey)
                     .header("User-Agent", "OdysseiaStore/1.0.0")
                     .GET()
                     .build();
@@ -132,11 +135,16 @@ public final class StoreManager {
     }
 
     private void processPurchase(String txnId, String nick, String productId, String productName) {
+        if (!inFlightTransactions.add(txnId)) {
+            return;
+        }
+
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection pkgSection = config.getConfigurationSection("store.packages." + productId);
 
         if (pkgSection == null) {
             plugin.getLogger().warning("[Store] Compra pendiente para producto desconocido en la configuración: " + productId + " (" + nick + ")");
+            inFlightTransactions.remove(txnId);
             return;
         }
 
@@ -145,6 +153,7 @@ public final class StoreManager {
 
         if (requireOnline && (player == null || !player.isOnline())) {
             // Saltamos esta compra porque el jugador no está conectado, volverá a consultarse en el siguiente check
+            inFlightTransactions.remove(txnId);
             return;
         }
 
@@ -169,8 +178,12 @@ public final class StoreManager {
 
             // Confirmar transacción asincrónicamente y enviar webhook de Discord
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                confirmPurchase(txnId);
-                sendDiscordNotification(nick, productName);
+                try {
+                    confirmPurchase(txnId);
+                    sendDiscordNotification(nick, productName);
+                } finally {
+                    inFlightTransactions.remove(txnId);
+                }
             });
         });
     }
@@ -180,18 +193,18 @@ public final class StoreManager {
         String apiUrl = config.getString("store.api-url", "");
         String apiKey = config.getString("store.api-key", "");
 
-        if (apiUrl == null || apiUrl.isBlank()) {
+        if (apiUrl == null || apiUrl.isBlank() || apiKey == null || apiKey.isBlank() || apiKey.startsWith("REPLACE_ME")) {
             return;
         }
 
         try {
-            String requestUrl = apiUrl + "/confirm?key=" + apiKey;
             String jsonBody = "{\"id\":\"" + Odysseia.escapeJson(txnId) + "\"}";
             byte[] bodyUtf8 = jsonBody.getBytes(StandardCharsets.UTF_8);
 
-            var req = HttpRequest.newBuilder(URI.create(requestUrl))
+            var req = HttpRequest.newBuilder(URI.create(apiUrl + "/confirm"))
                     .timeout(Duration.ofSeconds(15))
                     .header("Content-Type", "application/json; charset=UTF-8")
+                    .header("X-API-Key", apiKey)
                     .header("User-Agent", "OdysseiaStore/1.0.0")
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bodyUtf8))
                     .build();
