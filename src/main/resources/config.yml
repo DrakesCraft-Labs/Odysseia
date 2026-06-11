@@ -133,7 +133,7 @@ store:
   # Frecuencia de verificación en segundos
   poll-interval-seconds: 60
   # Webhook para anunciar compras en Discord de forma pública
-  announcement-webhook-url: "https://discord.com/api/webhooks/1514654807271542894/Z7Gxa2DhgBPc3bYEpj_g2QUhfVIdgngsCyTgHGCHXvhF1_0QCwdyf0nQPve2norn1qEG"
+  announcement-webhook-url: "REPLACE_ME"
   # Mensaje de felicitaciones en el chat in-game (Soporta códigos de color '&')
   chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
   # Mensaje del webhook de Discord
@@ -145,49 +145,49 @@ store:
     hercules:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp hercules 30d"
+        - "lp user {player} parent addtemp hercules 30d accumulate"
         - "eco give {player} 25000"
         - "kit hercules {player}"
         - "msg {player} &a¡Gracias por comprar el rango Hércules!"
     hestia:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp hestia 30d"
+        - "lp user {player} parent addtemp hestia 30d accumulate"
         - "eco give {player} 50000"
         - "kit hestia {player}"
         - "msg {player} &a¡Gracias por comprar el rango Hestia!"
     hermes:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp hermes 30d"
+        - "lp user {player} parent addtemp hermes 30d accumulate"
         - "eco give {player} 100000"
         - "kit hermes {player}"
         - "msg {player} &a¡Gracias por comprar el rango Hermes!"
     hefesto:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp hefesto 30d"
+        - "lp user {player} parent addtemp hefesto 30d accumulate"
         - "eco give {player} 175000"
         - "kit hefesto {player}"
         - "msg {player} &a¡Gracias por comprar el rango Hefesto!"
     artemisa:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp artemisa 30d"
+        - "lp user {player} parent addtemp artemisa 30d accumulate"
         - "eco give {player} 300000"
         - "kit artemisa {player}"
         - "msg {player} &a¡Gracias por comprar el rango Artemisa!"
     afrodita:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp afrodita 30d"
+        - "lp user {player} parent addtemp afrodita 30d accumulate"
         - "eco give {player} 500000"
         - "kit afrodita {player}"
         - "msg {player} &a¡Gracias por comprar el rango Afrodita!"
     zeus:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp zeus 30d"
+        - "lp user {player} parent addtemp zeus 30d accumulate"
         - "eco give {player} 1000000"
         - "kit zeus {player}"
         - "msg {player} &a¡Gracias por comprar el rango Zeus!"
@@ -195,37 +195,37 @@ store:
     minero:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp minero 30d"
+        - "lp user {player} parent addtemp minero 30d accumulate"
         - "kit minero {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Minero!"
     cazador:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp cazador 30d"
+        - "lp user {player} parent addtemp cazador 30d accumulate"
         - "kit cazador {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Cazador!"
     constructor:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp constructor 30d"
+        - "lp user {player} parent addtemp constructor 30d accumulate"
         - "kit constructor {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Constructor!"
     lenador:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp lenador 30d"
+        - "lp user {player} parent addtemp lenador 30d accumulate"
         - "kit lenador {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Leñador!"
     alquimista:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp alquimista 30d"
+        - "lp user {player} parent addtemp alquimista 30d accumulate"
         - "kit alquimista {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Alquimista!"
     nomada:
       require-online: true
       commands:
-        - "lp user {player} parent addtemp nomada 30d"
+        - "lp user {player} parent addtemp nomada 30d accumulate"
         - "kit nomada {player}"
         - "msg {player} &a¡Gracias por adquirir el rol de Nómada!"
     # Dragmas (Categoría 3 de la tienda web - 3 paquetes definidos)
@@ -244,4 +244,3 @@ store:
       commands:
         - "eco give {player} 1000000"
         - "msg {player} &a¡Recibiste tu Ánfora de 1,000,000 Dragmas!"
-
