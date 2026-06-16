@@ -10,7 +10,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -162,7 +166,46 @@ public final class ArmorEffectsListener implements Listener {
     }
 
     @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        // Delay 1 tick so inventory is fully loaded before checking
+        Bukkit.getScheduler().runTaskLater(plugin, () -> checkAndApply(e.getPlayer()), 1L);
+    }
+
+    @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         appliedEffects.remove(e.getPlayer().getUniqueId());
+    }
+
+    // Detect armor changes via inventory clicks (drag into armor slots or shift-click)
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        boolean isArmorSlot = e.getSlotType() == InventoryType.SlotType.ARMOR;
+        boolean isShiftClickFromInventory = e.isShiftClick()
+                && e.getInventory().getType() == InventoryType.CRAFTING
+                && e.getCurrentItem() != null
+                && isArmorMaterial(e.getCurrentItem().getType());
+        if (isArmorSlot || isShiftClickFromInventory) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> checkAndApply(player), 1L);
+        }
+    }
+
+    // Detect right-click auto-equip
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        if (e.getItem() == null) return;
+        if (!isArmorMaterial(e.getItem().getType())) return;
+        if (e.getAction() == org.bukkit.event.block.Action.RIGHT_CLICK_AIR
+                || e.getAction() == org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> checkAndApply(e.getPlayer()), 1L);
+        }
+    }
+
+    private boolean isArmorMaterial(org.bukkit.Material m) {
+        return switch (m) {
+            case DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS, DIAMOND_BOOTS,
+                 NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS -> true;
+            default -> false;
+        };
     }
 }

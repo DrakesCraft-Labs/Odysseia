@@ -32,7 +32,7 @@ owner-cycle:
 # ─────────────────────────────────────────────
 # Se aplican si el jugador tiene el set completo y el permiso correspondiente
 armor-effects:
-  refresh-interval-seconds: 90
+  refresh-interval-seconds: 30
   effect-duration-seconds: 180
   
   # Hercules (VIP 1) - requiere essentials.kits.hercules y full diamante
