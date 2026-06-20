@@ -81,6 +81,15 @@ public final class VanishCommand implements CommandExecutor, Listener {
     }
 
     private void playVanishEffects(Player player) {
+        try {
+            spawnVanishEffects(player);
+        } catch (IllegalArgumentException ex) {
+            plugin.getLogger().warning("No se pudieron reproducir las particulas de vanish para "
+                    + player.getName() + ": " + ex.getMessage());
+        }
+    }
+
+    private void spawnVanishEffects(Player player) {
         Location loc = player.getLocation();
         
         // Spawn a double helix of PORTAL and DRAGON_BREATH particles
@@ -94,11 +103,11 @@ public final class VanishCommand implements CommandExecutor, Listener {
             Location particleLoc2 = loc.clone().add(-x, y, -z);
             
             player.getWorld().spawnParticle(Particle.PORTAL, particleLoc1, 2, 0, 0, 0, 0);
-            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, particleLoc2, 1, 0, 0, 0, 0);
+            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, particleLoc2, 1, 0, 0, 0, 0, 1.0f);
         }
 
         // Spawn explosion and cloud puff particles
-        player.getWorld().spawnParticle(Particle.EXPLOSION, loc.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
+        player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, loc.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
         player.getWorld().spawnParticle(Particle.CLOUD, loc.clone().add(0, 1, 0), 5, 0.2, 0.2, 0.2, 0.1);
         
         // Play epic sound
