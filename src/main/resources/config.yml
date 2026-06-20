@@ -93,6 +93,128 @@ papa-de-mar:
   delivery-interval-minutes: 15
 
 # ─────────────────────────────────────────────
+#  Kit de Inicio (StarterKit)
+# ─────────────────────────────────────────────
+starter-kit:
+  enabled: true
+  # Ticks de espera tras el join antes de entregar el kit (100 = 5 segundos)
+  delay-ticks: 100
+  # Mensaje al jugador al recibir el kit (soporta códigos de color '&')
+  welcome-message: "&8[&6&lDrakesCraft&8] &eKit de inicio entregado. ¡Bienvenido a la Odisea!"
+  # Comandos a ejecutar en consola tras entregar el kit ({player} = nombre del jugador)
+  commands:
+    - "ps give novato {player} 1"
+  # Lista de items del kit
+  # Campos por item:
+  #   material:      nombre del material en MAYÚSCULAS (ej. LEATHER_HELMET)
+  #   amount:        cantidad (opcional, default 1)
+  #   enchantments:  mapa de encantamiento: nivel (usa claves minecraft, ej. protection: 5)
+  #   name:          nombre personalizado (opcional, soporta '&')
+  #   lore:          lista de líneas de lore (opcional, soporta '&')
+  items:
+    # ── Armadura de cuero ──────────────────────────────
+    - material: LEATHER_HELMET
+      enchantments:
+        protection: 5
+        thorns: 3
+        unbreaking: 10
+        mending: 1
+        respiration: 3
+        aqua_affinity: 1
+
+    - material: LEATHER_CHESTPLATE
+      enchantments:
+        protection: 5
+        thorns: 3
+        unbreaking: 10
+        mending: 1
+
+    - material: LEATHER_LEGGINGS
+      enchantments:
+        protection: 5
+        thorns: 3
+        unbreaking: 10
+        mending: 1
+
+    - material: LEATHER_BOOTS
+      enchantments:
+        protection: 5
+        thorns: 3
+        unbreaking: 10
+        mending: 1
+        feather_falling: 4
+        depth_strider: 3
+
+    # ── Herramientas ───────────────────────────────────
+    - material: STONE_SWORD
+      enchantments:
+        sharpness: 5
+        looting: 3
+        fire_aspect: 2
+        knockback: 2
+        sweeping_edge: 3
+        unbreaking: 10
+        mending: 1
+      name: "&fEspada del Guardia Inicial"
+      lore:
+        - "&8✦ Arma bendecida por Ares"
+        - "&7Protección de los Dioses"
+        - "&eDefiende tu primera odisea"
+        - "&6No luchas solo, luchas por la Polis"
+
+    - material: IRON_PICKAXE
+      enchantments:
+        efficiency: 5
+        fortune: 3
+        unbreaking: 10
+        mending: 1
+      name: "&fPico del Prospecto Divino"
+      lore:
+        - "&8✦ Herramienta consagrada por Hefesto"
+        - "&7Abre camino hacia tu destino"
+
+    - material: STONE_AXE
+      enchantments:
+        efficiency: 5
+        sharpness: 5
+        unbreaking: 10
+        mending: 1
+      name: "&fHacha del Forjador Sagrado"
+      lore:
+        - "&8✦ Filo forjado en hornos sagrados"
+        - "&7Madera y acero bajo tu mando"
+
+    - material: STONE_SHOVEL
+      enchantments:
+        efficiency: 5
+        silk_touch: 1
+        unbreaking: 10
+        mending: 1
+      name: "&fPala del Sendero Eterno"
+      lore:
+        - "&8✦ Paso firme en tierra desconocida"
+        - "&7Allana rutas para tu equipo"
+
+    - material: SHIELD
+      enchantments:
+        unbreaking: 10
+        mending: 1
+      name: "&bEscudo de la Polis"
+      lore:
+        - "&8✦ Muro sagrado de los héroes"
+        - "&7El muro entre tú y el peligro"
+
+    # ── Consumibles ────────────────────────────────────
+    - material: BREAD
+      amount: 24
+
+    - material: COOKED_BEEF
+      amount: 32
+
+    - material: TORCH
+      amount: 48
+
+# ─────────────────────────────────────────────
 #  ChatGames Scheduler
 # ─────────────────────────────────────────────
 chatgames:
