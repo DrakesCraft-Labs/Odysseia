@@ -270,6 +270,7 @@ store:
         - "lp user {player} parent addtemp hercules 30d accumulate"
         - "eco give {player} 25000"
         - "kit hercules {player}"
+        - "ps give viphercules {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Hércules!"
     hestia:
       require-online: true
@@ -277,6 +278,7 @@ store:
         - "lp user {player} parent addtemp hestia 30d accumulate"
         - "eco give {player} 50000"
         - "kit hestia {player}"
+        - "ps give viphestia {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Hestia!"
     hermes:
       require-online: true
@@ -284,6 +286,7 @@ store:
         - "lp user {player} parent addtemp hermes 30d accumulate"
         - "eco give {player} 100000"
         - "kit hermes {player}"
+        - "ps give viphermes {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Hermes!"
     hefesto:
       require-online: true
@@ -291,6 +294,7 @@ store:
         - "lp user {player} parent addtemp hefesto 30d accumulate"
         - "eco give {player} 175000"
         - "kit hefesto {player}"
+        - "ps give viphefesto {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Hefesto!"
     artemisa:
       require-online: true
@@ -298,6 +302,7 @@ store:
         - "lp user {player} parent addtemp artemisa 30d accumulate"
         - "eco give {player} 300000"
         - "kit artemisa {player}"
+        - "ps give vipartemisa {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Artemisa!"
     afrodita:
       require-online: true
@@ -305,6 +310,7 @@ store:
         - "lp user {player} parent addtemp afrodita 30d accumulate"
         - "eco give {player} 500000"
         - "kit afrodita {player}"
+        - "ps give vipafrodita {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Afrodita!"
     zeus:
       require-online: true
@@ -312,6 +318,7 @@ store:
         - "lp user {player} parent addtemp zeus 30d accumulate"
         - "eco give {player} 1000000"
         - "kit zeus {player}"
+        - "ps give vipzeus {player} 1"
         - "msg {player} &a¡Gracias por comprar el rango Zeus!"
     # Subrangos (Categoría 2)
     minero:
