@@ -224,6 +224,14 @@ public final class StoreManager {
     }
 
     private void sendDiscordNotification(String nick, String productName) {
+        announcePurchase(plugin, nick, productName);
+    }
+
+    /**
+     * Dispara el webhook público de felicitaciones de compra.
+     * Estático para poder invocarse desde un comando (entregas vía Tebex) sin depender del hilo de polling.
+     */
+    public static void announcePurchase(Odysseia plugin, String nick, String productName) {
         FileConfiguration config = plugin.getConfig();
         String webhookUrl = config.getString("store.announcement-webhook-url", "");
         String discordAnnounce = config.getString("store.discord-announcement", "");

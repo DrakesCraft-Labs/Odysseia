@@ -50,6 +50,7 @@ public final class Odysseia extends JavaPlugin {
         getCommand("vanish").setExecutor(vanishCommand);
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
+        getCommand("odysseiaannounce").setExecutor(new org.metamechanists.odysseia.commands.StoreAnnounceCommand(this));
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);

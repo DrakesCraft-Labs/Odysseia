@@ -26,3 +26,7 @@ commands:
     description: Comando administrativo para gestionar jefes míticos.
     permission: odysseia.boss.admin
     usage: /boss spawn <circe|polifemo>
+  odysseiaannounce:
+    description: Dispara el anuncio público de Discord de una compra entregada (uso desde Tebex).
+    permission: odysseia.store.announce
+    usage: /odysseiaannounce <nick> <producto>
