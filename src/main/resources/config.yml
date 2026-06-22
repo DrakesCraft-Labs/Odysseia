@@ -218,6 +218,10 @@ starter-kit:
 #  ChatGames Scheduler
 # ─────────────────────────────────────────────
 chatgames:
+  # Poner en false si ChatGames ya maneja su propio scheduler (automatic-games: true)
+  enabled: false
+  # Comando que se dispara — cambiar sin recompilar
+  command: "chatgames force"
   # Rango de tiempo aleatorio para lanzar un juego (minutos)
   min-interval: 15
   max-interval: 30

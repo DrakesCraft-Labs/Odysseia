@@ -184,6 +184,11 @@ public final class Odysseia extends JavaPlugin {
     }
 
     private void startChatGamesScheduler() {
+        if (!getConfig().getBoolean("chatgames.enabled", false)) {
+            getLogger().info("[ChatGames] Scheduler deshabilitado (chatgames.enabled: false).");
+            return;
+        }
+        String command = getConfig().getString("chatgames.command", "chatgames force");
         chatGamesCountdown = getRandomChatGamesInterval();
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (Bukkit.getOnlinePlayers().isEmpty()) {
@@ -191,10 +196,10 @@ public final class Odysseia extends JavaPlugin {
             }
             chatGamesCountdown--;
             if (chatGamesCountdown <= 0) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "chatgames start");
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 chatGamesCountdown = getRandomChatGamesInterval();
             }
-        }, 1200L, 1200L); // Check every minute (1200 ticks)
+        }, 1200L, 1200L);
     }
 
     private int getRandomChatGamesInterval() {
