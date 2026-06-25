@@ -37,25 +37,30 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2 || !args[0].equalsIgnoreCase("spawn")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus>"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus|loki|odin|kratos>"));
             return true;
         }
 
         String bossType = args[1].toLowerCase();
-        boolean valid = bossType.equals("circe") || bossType.equals("polifemo") || 
-                        bossType.equals("dios_corrupto") || bossType.equals("dios-corrupto") ||
-                        bossType.equals("thor") || bossType.equals("ares") || 
-                        bossType.equals("hades") || bossType.equals("poseidon") || 
-                        bossType.equals("zeus");
+        boolean valid = bossType.equals("circe") || bossType.equals("polifemo")
+                || bossType.equals("dios_corrupto") || bossType.equals("dios-corrupto")
+                || bossType.equals("thor") || bossType.equals("ares")
+                || bossType.equals("hades") || bossType.equals("poseidon")
+                || bossType.equals("zeus") || bossType.equals("loki")
+                || bossType.equals("odin") || bossType.equals("kratos");
 
         if (!valid) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lERROR: &eEl jefe místico '" + bossType + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon o zeus."));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&c&lERROR: &eEl jefe mítico '" + bossType
+                    + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon, zeus, loki, odin o kratos."));
             return true;
         }
 
         var spawned = bossManager.spawnBoss(bossType, player.getLocation());
         if (spawned != null) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&a&l¡ÉXITO! &eHas invocado al jefe místico " + spawned.getDisplayName() + " &een tu posición."));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&a&l¡ÉXITO! &eHas invocado al jefe mítico " + spawned.getDisplayName() + " &een tu posición."));
         } else {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cOcurrió un error al invocar al jefe."));
         }
@@ -76,29 +81,13 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("spawn")) {
             String input = args[1].toLowerCase();
-            if ("circe".startsWith(input)) {
-                completions.add("circe");
-            }
-            if ("polifemo".startsWith(input)) {
-                completions.add("polifemo");
-            }
-            if ("dios_corrupto".startsWith(input) || "dios-corrupto".startsWith(input)) {
-                completions.add("dios_corrupto");
-            }
-            if ("thor".startsWith(input)) {
-                completions.add("thor");
-            }
-            if ("ares".startsWith(input)) {
-                completions.add("ares");
-            }
-            if ("hades".startsWith(input)) {
-                completions.add("hades");
-            }
-            if ("poseidon".startsWith(input)) {
-                completions.add("poseidon");
-            }
-            if ("zeus".startsWith(input)) {
-                completions.add("zeus");
+            List<String> all = List.of(
+                    "circe", "polifemo", "dios_corrupto",
+                    "thor", "ares", "hades", "poseidon", "zeus",
+                    "loki", "odin", "kratos"
+            );
+            for (String b : all) {
+                if (b.startsWith(input)) completions.add(b);
             }
         }
 

@@ -66,6 +66,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new StarterKitListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

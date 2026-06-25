@@ -36,7 +36,7 @@ public class EarthquakeSkill implements BossSkill {
         // Damage and knockback entities in range
         center.getWorld().getNearbyEntities(center, 8.0, 4.0, 8.0).forEach(entity -> {
             if (entity instanceof LivingEntity living && !living.getUniqueId().equals(bossEntity.getUniqueId())) {
-                living.damage(8.0, bossEntity); // 4 hearts
+                living.damage(16.0, bossEntity); // 8 hearts
                 
                 // Apply knockback
                 Vector dir = living.getLocation().toVector().subtract(center.toVector());

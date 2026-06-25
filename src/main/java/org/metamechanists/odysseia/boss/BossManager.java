@@ -28,6 +28,9 @@ import org.metamechanists.odysseia.boss.instances.AresBoss;
 import org.metamechanists.odysseia.boss.instances.HadesBoss;
 import org.metamechanists.odysseia.boss.instances.PoseidonBoss;
 import org.metamechanists.odysseia.boss.instances.ZeusBoss;
+import org.metamechanists.odysseia.boss.instances.LokiBoss;
+import org.metamechanists.odysseia.boss.instances.OdinBoss;
+import org.metamechanists.odysseia.boss.instances.KratosBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
@@ -98,6 +101,15 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("zeus")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.WITHER_SKELETON);
             boss = new ZeusBoss(entity);
+        } else if (type.equalsIgnoreCase("loki")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ILLUSIONER);
+            boss = new LokiBoss(entity);
+        } else if (type.equalsIgnoreCase("odin")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.STRAY);
+            boss = new OdinBoss(entity);
+        } else if (type.equalsIgnoreCase("kratos")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.PIGLIN_BRUTE);
+            boss = new KratosBoss(entity);
         } else {
             return null;
         }
@@ -177,6 +189,18 @@ public class BossManager implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
+        // Handle Loki clone hit
+        if (event.getEntity() instanceof org.bukkit.entity.Illusioner illusioner) {
+            String name = illusioner.getCustomName();
+            if (name != null && name.equals("§aIlusión de Loki")) {
+                event.setCancelled(true);
+                illusioner.getWorld().spawnParticle(org.bukkit.Particle.HAPPY_VILLAGER, illusioner.getLocation().add(0, 1, 0), 20, 0.4, 0.4, 0.4, 0.05);
+                illusioner.getWorld().playSound(illusioner.getLocation(), Sound.ENTITY_BAT_DEATH, 0.8f, 1.2f);
+                illusioner.remove();
+                return;
+            }
+        }
+
         if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
             OdysseyBoss boss = activeBosses.get(event.getEntity().getUniqueId());
             if (boss instanceof DiosCorruptoBoss dios && dios.isShieldActive()) {
@@ -201,10 +225,7 @@ public class BossManager implements Listener {
             // Custom drops / rewards
             event.getDrops().clear();
             if (boss != null) {
-                org.bukkit.inventory.ItemStack dropItem = createCustomDrop(boss.getId());
-                if (dropItem != null) {
-                    event.getDrops().add(dropItem);
-                }
+                event.getDrops().addAll(createCustomDrops(boss.getId()));
             }
             
             event.setDroppedExp(5000); // 5000 XP
@@ -214,72 +235,171 @@ public class BossManager implements Listener {
         }
     }
 
-    private org.bukkit.inventory.ItemStack createCustomDrop(String bossId) {
-        org.bukkit.inventory.ItemStack item = null;
+
+    private java.util.List<org.bukkit.inventory.ItemStack> createCustomDrops(String bossId) {
+        java.util.List<org.bukkit.inventory.ItemStack> drops = new java.util.ArrayList<>();
         switch (bossId.toLowerCase()) {
-            case "thor":
-                item = new org.bukkit.inventory.ItemStack(Material.MACE);
-                var metaThor = item.getItemMeta();
-                if (metaThor != null) {
-                    metaThor.setDisplayName("§6§l✦ Mjolnir ✦");
-                    metaThor.setLore(java.util.List.of("§7El Martillo del Trueno de Thor.", "§7Descarga el poder del Olimpo."));
-                    metaThor.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 5, true);
-                    metaThor.addEnchant(org.bukkit.enchantments.Enchantment.FIRE_ASPECT, 2, true);
-                    metaThor.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 5, true);
-                    item.setItemMeta(metaThor);
+            case "thor": {
+                // Mjolnir — el mazo del trueno, no un tridente
+                org.bukkit.inventory.ItemStack mjolnir = new org.bukkit.inventory.ItemStack(Material.MACE);
+                var meta = mjolnir.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("§6§l⚡ Mjolnir §r§7[El Martillo del Trueno]");
+                    meta.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Thor",
+                        "§7Forjado por los enanos de Nidavellir",
+                        "§7en el corazón de una estrella moribunda.",
+                        "",
+                        "§e§lFURIA DEL TRUENO §r§7— Al golpear,",
+                        "§7lanza un rayo sobre el objetivo.",
+                        "",
+                        "§6§lENCIERRA EL PODER DEL OLIMPO"
+                    ));
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.FIRE_ASPECT, 4, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    mjolnir.setItemMeta(meta);
                 }
+                drops.add(mjolnir);
                 break;
-            case "ares":
-                item = new org.bukkit.inventory.ItemStack(Material.TRIDENT);
-                var metaAres = item.getItemMeta();
-                if (metaAres != null) {
-                    metaAres.setDisplayName("§c§l✦ Lanza de Ares ✦");
-                    metaAres.setLore(java.util.List.of("§7La lanza mítica de Ares.", "§7Infunde el terror de la guerra."));
-                    metaAres.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 5, true);
-                    metaAres.addEnchant(org.bukkit.enchantments.Enchantment.IMPALING, 5, true);
-                    metaAres.addEnchant(org.bukkit.enchantments.Enchantment.LOYALTY, 3, true);
-                    item.setItemMeta(metaAres);
+            }
+            case "ares": {
+                // Espada de guerra — Ares es dios de la guerra, no del mar
+                org.bukkit.inventory.ItemStack espada = new org.bukkit.inventory.ItemStack(Material.NETHERITE_SWORD);
+                var meta = espada.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("§c§l⚔ Filo de Ares §r§7[Espada de la Guerra]");
+                    meta.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Ares",
+                        "§7Bañada en la sangre de mil batallas.",
+                        "§7Quien la empuña entra en frenesí de combate.",
+                        "",
+                        "§c§lSED DE SANGRE §r§7— +15% de daño",
+                        "§7por cada enemigo derrotado (efecto temporal).",
+                        "",
+                        "§4§lCORRUPTA CON LA ESENCIA DE LA GUERRA"
+                    ));
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 12, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.FIRE_ASPECT, 3, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 5, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    espada.setItemMeta(meta);
                 }
-                break;
-            case "hades":
-                item = new org.bukkit.inventory.ItemStack(Material.NETHERITE_HOE);
-                var metaHades = item.getItemMeta();
-                if (metaHades != null) {
-                    metaHades.setDisplayName("§5§l✦ Guadaña del Inframundo ✦");
-                    metaHades.setLore(java.util.List.of("§7La guadaña cosechadora de almas de Hades."));
-                    metaHades.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 5, true);
-                    metaHades.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 3, true);
-                    metaHades.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 2, true);
-                    item.setItemMeta(metaHades);
+                drops.add(espada);
+                // También un escudo espartano
+                org.bukkit.inventory.ItemStack escudo = new org.bukkit.inventory.ItemStack(Material.SHIELD);
+                var metaEscudo = escudo.getItemMeta();
+                if (metaEscudo != null) {
+                    metaEscudo.setDisplayName("§c§lEscudo Espartano de Ares");
+                    metaEscudo.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Ares",
+                        "§7El escudo de los guerreros más feroces.",
+                        "",
+                        "§c§lBLOQUEO PERFECTO §r§7— Refleja el 20%",
+                        "§7del daño bloqueado al atacante."
+                    ));
+                    metaEscudo.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    metaEscudo.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    escudo.setItemMeta(metaEscudo);
                 }
+                drops.add(escudo);
                 break;
-            case "poseidon":
-                item = new org.bukkit.inventory.ItemStack(Material.TRIDENT);
-                var metaPoseidon = item.getItemMeta();
-                if (metaPoseidon != null) {
-                    metaPoseidon.setDisplayName("§9§l✦ Tridente de Poseidón ✦");
-                    metaPoseidon.setLore(java.util.List.of("§7El tridente que controla las mareas y tormentas."));
-                    metaPoseidon.addEnchant(org.bukkit.enchantments.Enchantment.IMPALING, 5, true);
-                    metaPoseidon.addEnchant(org.bukkit.enchantments.Enchantment.RIPTIDE, 3, true);
-                    metaPoseidon.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 5, true);
-                    item.setItemMeta(metaPoseidon);
+            }
+            case "hades": {
+                // Guadaña del inframundo
+                org.bukkit.inventory.ItemStack guadana = new org.bukkit.inventory.ItemStack(Material.NETHERITE_HOE);
+                var meta = guadana.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("§5§l☠ Guadaña del Inframundo §r§7[Segadora de Almas]");
+                    meta.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Hades",
+                        "§7La herramienta del cosechador de almas.",
+                        "§7Cada golpe drena la vida de la víctima.",
+                        "",
+                        "§5§lDRENAJE DE ALMA §r§7— Roba 3♥ de vida",
+                        "§7por golpe y las añade a tu salud.",
+                        "",
+                        "§8§lCOSECHADOR DE ALMAS §r§7— Looting X"
+                    ));
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 5, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    guadana.setItemMeta(meta);
                 }
+                drops.add(guadana);
                 break;
-            case "zeus":
-                item = new org.bukkit.inventory.ItemStack(Material.TRIDENT);
-                var metaZeus = item.getItemMeta();
-                if (metaZeus != null) {
-                    metaZeus.setDisplayName("§e§l✦ Centella de Zeus ✦");
-                    metaZeus.setLore(java.util.List.of("§7El rayo celestial forjado por los Cíclopes."));
-                    metaZeus.addEnchant(org.bukkit.enchantments.Enchantment.IMPALING, 5, true);
-                    metaZeus.addEnchant(org.bukkit.enchantments.Enchantment.CHANNELING, 1, true);
-                    metaZeus.addEnchant(org.bukkit.enchantments.Enchantment.LOYALTY, 3, true);
-                    metaZeus.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 5, true);
-                    item.setItemMeta(metaZeus);
+            }
+            case "poseidon": {
+                // El único que merece un tridente — dios del mar
+                org.bukkit.inventory.ItemStack tridente = new org.bukkit.inventory.ItemStack(Material.TRIDENT);
+                var meta = tridente.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("§9§l🔱 Tridente de Poseidón §r§7[Señor del Mar]");
+                    meta.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Poseidón",
+                        "§7Forjado en las profundidades del Océano Eterno.",
+                        "§7Controla las mareas, las tormentas y los mares.",
+                        "",
+                        "§9§lTSUNAMI §r§7— Lanza una ola de agua al arrojar",
+                        "§7el tridente, empujando a todos los cercanos.",
+                        "",
+                        "§b§lRIPTIDE V — IMPALING X — LOYALTY V"
+                    ));
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.IMPALING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.RIPTIDE, 5, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    tridente.setItemMeta(meta);
                 }
+                drops.add(tridente);
                 break;
+            }
+            case "zeus": {
+                // Zeus usa un bastón/mace de rayos — NO un tridente
+                org.bukkit.inventory.ItemStack rayo = new org.bukkit.inventory.ItemStack(Material.MACE);
+                var meta = rayo.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("§e§l⚡ Rayo de Zeus §r§7[Padre de los Dioses]");
+                    meta.setLore(java.util.List.of(
+                        "§8▸ Arma Mítica de Zeus",
+                        "§7El rayo definitivo forjado por los Cíclopes",
+                        "§7en el taller secreto del Olimpo.",
+                        "",
+                        "§e§lTORMENTA DIVINA §r§7— Al golpear invoca",
+                        "§7tres rayos en un radio de 5 bloques.",
+                        "",
+                        "§e§lPODER DEL OLIMPO — SHARPNESS XII"
+                    ));
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 12, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 5, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
+                    rayo.setItemMeta(meta);
+                }
+                drops.add(rayo);
+                break;
+            }
+            case "loki": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiDagger());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiScepter());
+                break;
+            }
+            case "odin": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinSpear());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinHelmet());
+                break;
+            }
+            case "kratos": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createKratosBlade());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLeviathanAxe());
+                break;
+            }
         }
-        return item;
+        return drops;
     }
 
     @EventHandler
@@ -312,6 +432,16 @@ public class BossManager implements Listener {
             NamespacedKey key = new NamespacedKey(plugin, "boss_rock");
             if (fallingBlock.getPersistentDataContainer().has(key, PersistentDataType.BYTE)) {
                 event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityExplode(org.bukkit.event.entity.EntityExplodeEvent event) {
+        if (event.getEntity() instanceof org.bukkit.entity.EnderCrystal crystal) {
+            NamespacedKey key = new NamespacedKey(plugin, "boss_crystal");
+            if (crystal.getPersistentDataContainer().has(key, PersistentDataType.BYTE)) {
+                event.blockList().clear();
             }
         }
     }
