@@ -22,6 +22,9 @@ import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.instances.CirceBoss;
 import org.metamechanists.odysseia.boss.instances.PolifemoBoss;
 import org.metamechanists.odysseia.boss.instances.DiosCorruptoBoss;
+import org.metamechanists.odysseia.boss.instances.LokiBoss;
+import org.metamechanists.odysseia.boss.instances.OdinBoss;
+import org.metamechanists.odysseia.boss.instances.KratosBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
@@ -77,6 +80,15 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("dios_corrupto") || type.equalsIgnoreCase("dios-corrupto")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.WITHER_SKELETON);
             boss = new DiosCorruptoBoss(entity);
+        } else if (type.equalsIgnoreCase("loki")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ILLUSIONER);
+            boss = new LokiBoss(entity);
+        } else if (type.equalsIgnoreCase("odin")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.STRAY);
+            boss = new OdinBoss(entity);
+        } else if (type.equalsIgnoreCase("kratos")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.PIGLIN_BRUTE);
+            boss = new KratosBoss(entity);
         } else {
             return null;
         }
@@ -156,6 +168,18 @@ public class BossManager implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
+        // Handle Loki clone hit
+        if (event.getEntity() instanceof org.bukkit.entity.Illusioner illusioner) {
+            String name = illusioner.getCustomName();
+            if (name != null && name.equals("§aIlusión de Loki")) {
+                event.setCancelled(true);
+                illusioner.getWorld().spawnParticle(org.bukkit.Particle.HAPPY_VILLAGER, illusioner.getLocation().add(0, 1, 0), 20, 0.4, 0.4, 0.4, 0.05);
+                illusioner.getWorld().playSound(illusioner.getLocation(), Sound.ENTITY_BAT_DEATH, 0.8f, 1.2f);
+                illusioner.remove();
+                return;
+            }
+        }
+
         if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
             OdysseyBoss boss = activeBosses.get(event.getEntity().getUniqueId());
             if (boss instanceof DiosCorruptoBoss dios && dios.isShieldActive()) {
@@ -173,12 +197,33 @@ public class BossManager implements Listener {
     public void onDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
         if (activeBosses.containsKey(entity.getUniqueId())) {
+            OdysseyBoss boss = activeBosses.get(entity.getUniqueId());
             Player killer = entity.getKiller();
             removeBoss(entity.getUniqueId(), killer);
             
             // Custom drops / rewards
             event.getDrops().clear();
-            event.setDroppedExp(1000); // Massive XP
+            
+            if (boss != null) {
+                String type = boss.getId();
+                if ("loki".equalsIgnoreCase(type)) {
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiDagger());
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiScepter());
+                    event.setDroppedExp(5000);
+                } else if ("odin".equalsIgnoreCase(type)) {
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinSpear());
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinHelmet());
+                    event.setDroppedExp(5000);
+                } else if ("kratos".equalsIgnoreCase(type)) {
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createKratosBlade());
+                    event.getDrops().add(org.metamechanists.odysseia.items.OdysseyItemManager.createLeviathanAxe());
+                    event.setDroppedExp(5000);
+                } else {
+                    event.setDroppedExp(1000);
+                }
+            } else {
+                event.setDroppedExp(1000);
+            }
             
             Location loc = entity.getLocation();
             loc.getWorld().playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
@@ -215,6 +260,16 @@ public class BossManager implements Listener {
             NamespacedKey key = new NamespacedKey(plugin, "boss_rock");
             if (fallingBlock.getPersistentDataContainer().has(key, PersistentDataType.BYTE)) {
                 event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityExplode(org.bukkit.event.entity.EntityExplodeEvent event) {
+        if (event.getEntity() instanceof org.bukkit.entity.EnderCrystal crystal) {
+            NamespacedKey key = new NamespacedKey(plugin, "boss_crystal");
+            if (crystal.getPersistentDataContainer().has(key, PersistentDataType.BYTE)) {
+                event.blockList().clear();
             }
         }
     }

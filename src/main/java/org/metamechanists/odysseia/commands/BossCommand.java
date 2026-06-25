@@ -37,13 +37,14 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2 || !args[0].equalsIgnoreCase("spawn")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto>"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|loki|odin|kratos>"));
             return true;
         }
 
         String bossType = args[1].toLowerCase();
-        if (!bossType.equals("circe") && !bossType.equals("polifemo") && !bossType.equals("dios_corrupto") && !bossType.equals("dios-corrupto")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lERROR: &eEl jefe místico '" + bossType + "' no existe. Usa: circe, polifemo o dios_corrupto."));
+        if (!bossType.equals("circe") && !bossType.equals("polifemo") && !bossType.equals("dios_corrupto") && !bossType.equals("dios-corrupto")
+                && !bossType.equals("loki") && !bossType.equals("odin") && !bossType.equals("kratos")) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lERROR: &eEl jefe místico '" + bossType + "' no existe. Usa: circe, polifemo, dios_corrupto, loki, odin o kratos."));
             return true;
         }
 
@@ -78,6 +79,15 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             }
             if ("dios_corrupto".startsWith(input) || "dios-corrupto".startsWith(input)) {
                 completions.add("dios_corrupto");
+            }
+            if ("loki".startsWith(input)) {
+                completions.add("loki");
+            }
+            if ("odin".startsWith(input)) {
+                completions.add("odin");
+            }
+            if ("kratos".startsWith(input)) {
+                completions.add("kratos");
             }
         }
 
