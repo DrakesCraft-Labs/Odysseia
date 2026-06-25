@@ -37,13 +37,19 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2 || !args[0].equalsIgnoreCase("spawn")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto>"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus>"));
             return true;
         }
 
         String bossType = args[1].toLowerCase();
-        if (!bossType.equals("circe") && !bossType.equals("polifemo") && !bossType.equals("dios_corrupto") && !bossType.equals("dios-corrupto")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lERROR: &eEl jefe místico '" + bossType + "' no existe. Usa: circe, polifemo o dios_corrupto."));
+        boolean valid = bossType.equals("circe") || bossType.equals("polifemo") || 
+                        bossType.equals("dios_corrupto") || bossType.equals("dios-corrupto") ||
+                        bossType.equals("thor") || bossType.equals("ares") || 
+                        bossType.equals("hades") || bossType.equals("poseidon") || 
+                        bossType.equals("zeus");
+
+        if (!valid) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&lERROR: &eEl jefe místico '" + bossType + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon o zeus."));
             return true;
         }
 
@@ -78,6 +84,21 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             }
             if ("dios_corrupto".startsWith(input) || "dios-corrupto".startsWith(input)) {
                 completions.add("dios_corrupto");
+            }
+            if ("thor".startsWith(input)) {
+                completions.add("thor");
+            }
+            if ("ares".startsWith(input)) {
+                completions.add("ares");
+            }
+            if ("hades".startsWith(input)) {
+                completions.add("hades");
+            }
+            if ("poseidon".startsWith(input)) {
+                completions.add("poseidon");
+            }
+            if ("zeus".startsWith(input)) {
+                completions.add("zeus");
             }
         }
 
