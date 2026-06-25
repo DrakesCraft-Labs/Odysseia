@@ -323,7 +323,7 @@ public class BossManager implements Listener {
                         "",
                         "§8§lCOSECHADOR DE ALMAS §r§7— Looting X"
                     ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 255, true);
+                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 50, true);
                     meta.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 10, true);
                     meta.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 5, true);
                     meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
