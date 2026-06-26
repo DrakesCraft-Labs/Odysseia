@@ -377,3 +377,25 @@ store:
       commands:
         - "eco give {player} 1000000"
         - "msg {player} &a¡Recibiste tu Ánfora de 1,000,000 Dragmas!"
+
+# ╔══════════════════════════════════════════════╗
+# ║   Spawn natural de jefes míticos (Odysseia)  ║
+# ╚══════════════════════════════════════════════╝
+# Invoca jefes aleatorios cerca de jugadores cada cierto tiempo.
+# NO genera estructuras: solo aparece la entidad en la superficie.
+natural-spawn:
+  # Activar/desactivar el spawn natural automático
+  enabled: false
+  # Cada cuántos segundos se hace un "intento" de spawn (mínimo 60)
+  interval-seconds: 1800
+  # Probabilidad (0.0 - 1.0) de que el intento tenga éxito
+  chance: 0.25
+  # Máximo de jefes naturales vivos al mismo tiempo
+  max-active: 2
+  # Distancia (en bloques) a la que aparece respecto al jugador elegido
+  min-distance: 40
+  max-distance: 80
+  # Mundos permitidos (vacío = todos los mundos)
+  worlds: []
+  # Jefes elegibles (vacío = todos). Ej: [thor, hidra, cerbero, tifon]
+  bosses: []

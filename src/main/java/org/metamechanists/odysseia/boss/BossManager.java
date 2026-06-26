@@ -31,6 +31,12 @@ import org.metamechanists.odysseia.boss.instances.ZeusBoss;
 import org.metamechanists.odysseia.boss.instances.LokiBoss;
 import org.metamechanists.odysseia.boss.instances.OdinBoss;
 import org.metamechanists.odysseia.boss.instances.KratosBoss;
+import org.metamechanists.odysseia.boss.instances.HeimdallBoss;
+import org.metamechanists.odysseia.boss.instances.HidraBoss;
+import org.metamechanists.odysseia.boss.instances.CerberoBoss;
+import org.metamechanists.odysseia.boss.instances.ArtemisaBoss;
+import org.metamechanists.odysseia.boss.instances.TifonBoss;
+import org.metamechanists.odysseia.boss.instances.PrometeoBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
@@ -42,8 +48,16 @@ public class BossManager implements Listener {
 
     private final Odysseia plugin;
     private final Map<UUID, OdysseyBoss> activeBosses = new ConcurrentHashMap<>();
+    private final java.util.Set<UUID> naturalBosses = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private BukkitTask updateTask;
     private BukkitTask skillTask;
+    private BukkitTask naturalSpawnTask;
+
+    /** Jefes elegibles para spawn natural por defecto (si la config no especifica lista). */
+    private static final java.util.List<String> DEFAULT_NATURAL_BOSSES = java.util.List.of(
+            "thor", "ares", "hades", "poseidon", "zeus", "loki", "odin", "kratos",
+            "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
+    );
 
     public BossManager(Odysseia plugin) {
         this.plugin = plugin;
@@ -71,6 +85,74 @@ public class BossManager implements Listener {
                 boss.executeSkillsRotation();
             }
         }, 100L, 100L);
+
+        startNaturalSpawnTask();
+    }
+
+    /**
+     * Spawn natural: cada cierto intervalo, con una probabilidad configurable, invoca un jefe
+     * aleatorio cerca de un jugador (en la superficie). No genera estructuras.
+     * Config en config.yml → sección "natural-spawn".
+     */
+    private void startNaturalSpawnTask() {
+        if (!plugin.getConfig().getBoolean("natural-spawn.enabled", false)) {
+            return;
+        }
+        int intervalSeconds = Math.max(60, plugin.getConfig().getInt("natural-spawn.interval-seconds", 1800));
+        long period = intervalSeconds * 20L;
+        naturalSpawnTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tryNaturalSpawn, period, period);
+        plugin.getLogger().info("[NaturalSpawn] Spawn natural de jefes activado (cada " + intervalSeconds + "s).");
+    }
+
+    private void tryNaturalSpawn() {
+        try {
+            var cfg = plugin.getConfig();
+            if (Math.random() > cfg.getDouble("natural-spawn.chance", 0.25)) {
+                return;
+            }
+            // Respeta el máximo de jefes naturales activos
+            naturalBosses.removeIf(uuid -> !activeBosses.containsKey(uuid));
+            if (naturalBosses.size() >= cfg.getInt("natural-spawn.max-active", 2)) {
+                return;
+            }
+
+            java.util.List<String> allowedWorlds = cfg.getStringList("natural-spawn.worlds");
+            java.util.List<String> bosses = cfg.getStringList("natural-spawn.bosses");
+            if (bosses.isEmpty()) {
+                bosses = DEFAULT_NATURAL_BOSSES;
+            }
+
+            // Candidatos: jugadores vivos en mundos permitidos (lista vacía = todos)
+            java.util.List<Player> candidates = new java.util.ArrayList<>();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.isDead() || p.getGameMode() == org.bukkit.GameMode.SPECTATOR) continue;
+                if (allowedWorlds.isEmpty() || allowedWorlds.contains(p.getWorld().getName())) {
+                    candidates.add(p);
+                }
+            }
+            if (candidates.isEmpty()) {
+                return;
+            }
+
+            java.util.Random rnd = new java.util.Random();
+            Player anchor = candidates.get(rnd.nextInt(candidates.size()));
+            double minDist = cfg.getDouble("natural-spawn.min-distance", 30);
+            double maxDist = cfg.getDouble("natural-spawn.max-distance", 60);
+            double dist = minDist + rnd.nextDouble() * Math.max(0, maxDist - minDist);
+            double angle = rnd.nextDouble() * Math.PI * 2;
+
+            Location base = anchor.getLocation().clone().add(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+            int y = base.getWorld().getHighestBlockYAt(base);
+            Location spawnLoc = new Location(base.getWorld(), base.getBlockX() + 0.5, y + 1, base.getBlockZ() + 0.5);
+
+            String type = bosses.get(rnd.nextInt(bosses.size()));
+            OdysseyBoss boss = spawnBoss(type, spawnLoc);
+            if (boss != null) {
+                naturalBosses.add(boss.getEntity().getUniqueId());
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("[NaturalSpawn] Error al intentar spawn natural: " + e.getMessage());
+        }
     }
 
     public OdysseyBoss spawnBoss(String type, Location loc) {
@@ -110,6 +192,24 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("kratos")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.PIGLIN_BRUTE);
             boss = new KratosBoss(entity);
+        } else if (type.equalsIgnoreCase("heimdall")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.STRAY);
+            boss = new HeimdallBoss(entity);
+        } else if (type.equalsIgnoreCase("hidra")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.RAVAGER);
+            boss = new HidraBoss(entity);
+        } else if (type.equalsIgnoreCase("cerbero")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.RAVAGER);
+            boss = new CerberoBoss(entity);
+        } else if (type.equalsIgnoreCase("artemisa")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
+            boss = new ArtemisaBoss(entity);
+        } else if (type.equalsIgnoreCase("tifon") || type.equalsIgnoreCase("tifón")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.GIANT);
+            boss = new TifonBoss(entity);
+        } else if (type.equalsIgnoreCase("prometeo")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.BLAZE);
+            boss = new PrometeoBoss(entity);
         } else {
             return null;
         }
@@ -122,6 +222,7 @@ public class BossManager implements Listener {
 
     public void removeBoss(UUID uuid, Player killer) {
         OdysseyBoss boss = activeBosses.remove(uuid);
+        naturalBosses.remove(uuid);
         if (boss != null) {
             boss.cleanup();
             if (killer != null) {
@@ -134,6 +235,7 @@ public class BossManager implements Listener {
     public void shutdown() {
         if (updateTask != null) updateTask.cancel();
         if (skillTask != null) skillTask.cancel();
+        if (naturalSpawnTask != null) naturalSpawnTask.cancel();
 
         // Clean up active bosses
         for (OdysseyBoss boss : activeBosses.values()) {
@@ -207,6 +309,10 @@ public class BossManager implements Listener {
                 event.setCancelled(true);
                 dios.getEntity().getWorld().playSound(dios.getEntity().getLocation(), Sound.ENTITY_SHULKER_BULLET_HIT, 1.0f, 1.5f);
                 dios.getEntity().getWorld().spawnParticle(org.bukkit.Particle.REVERSE_PORTAL, dios.getEntity().getLocation().add(0, 1.5, 0), 15, 0.5, 0.5, 0.5, 0.05);
+            } else if (boss instanceof PrometeoBoss prometeo && prometeo.isInvulnerable()) {
+                // Fénix: invulnerable durante la resurrección
+                event.setCancelled(true);
+                prometeo.getEntity().getWorld().spawnParticle(org.bukkit.Particle.FLAME, prometeo.getEntity().getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.05);
             } else {
                 // Update boss bar instantly on damage
                 Bukkit.getScheduler().runTaskLater(plugin, boss::updateBossBar, 1L);
@@ -240,147 +346,24 @@ public class BossManager implements Listener {
         java.util.List<org.bukkit.inventory.ItemStack> drops = new java.util.ArrayList<>();
         switch (bossId.toLowerCase()) {
             case "thor": {
-                // Mjolnir — el mazo del trueno, no un tridente
-                org.bukkit.inventory.ItemStack mjolnir = new org.bukkit.inventory.ItemStack(Material.MACE);
-                var meta = mjolnir.getItemMeta();
-                if (meta != null) {
-                    meta.setDisplayName("§6§l⚡ Mjolnir §r§7[El Martillo del Trueno]");
-                    meta.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Thor",
-                        "§7Forjado por los enanos de Nidavellir",
-                        "§7en el corazón de una estrella moribunda.",
-                        "",
-                        "§e§lFURIA DEL TRUENO §r§7— Al golpear,",
-                        "§7lanza un rayo sobre el objetivo.",
-                        "",
-                        "§6§lENCIERRA EL PODER DEL OLIMPO"
-                    ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.FIRE_ASPECT, 4, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    mjolnir.setItemMeta(meta);
-                }
-                drops.add(mjolnir);
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createMjolnir());
                 break;
             }
             case "ares": {
-                // Espada de guerra — Ares es dios de la guerra, no del mar
-                org.bukkit.inventory.ItemStack espada = new org.bukkit.inventory.ItemStack(Material.NETHERITE_SWORD);
-                var meta = espada.getItemMeta();
-                if (meta != null) {
-                    meta.setDisplayName("§c§l⚔ Filo de Ares §r§7[Espada de la Guerra]");
-                    meta.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Ares",
-                        "§7Bañada en la sangre de mil batallas.",
-                        "§7Quien la empuña entra en frenesí de combate.",
-                        "",
-                        "§c§lSED DE SANGRE §r§7— +15% de daño",
-                        "§7por cada enemigo derrotado (efecto temporal).",
-                        "",
-                        "§4§lCORRUPTA CON LA ESENCIA DE LA GUERRA"
-                    ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 12, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.FIRE_ASPECT, 3, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 5, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    espada.setItemMeta(meta);
-                }
-                drops.add(espada);
-                // También un escudo espartano
-                org.bukkit.inventory.ItemStack escudo = new org.bukkit.inventory.ItemStack(Material.SHIELD);
-                var metaEscudo = escudo.getItemMeta();
-                if (metaEscudo != null) {
-                    metaEscudo.setDisplayName("§c§lEscudo Espartano de Ares");
-                    metaEscudo.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Ares",
-                        "§7El escudo de los guerreros más feroces.",
-                        "",
-                        "§c§lBLOQUEO PERFECTO §r§7— Refleja el 20%",
-                        "§7del daño bloqueado al atacante."
-                    ));
-                    metaEscudo.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    metaEscudo.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    escudo.setItemMeta(metaEscudo);
-                }
-                drops.add(escudo);
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createAresBlade());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createAresShield());
                 break;
             }
             case "hades": {
-                // Guadaña del inframundo
-                org.bukkit.inventory.ItemStack guadana = new org.bukkit.inventory.ItemStack(Material.NETHERITE_HOE);
-                var meta = guadana.getItemMeta();
-                if (meta != null) {
-                    meta.setDisplayName("§5§l☠ Guadaña del Inframundo §r§7[Segadora de Almas]");
-                    meta.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Hades",
-                        "§7La herramienta del cosechador de almas.",
-                        "§7Cada golpe drena la vida de la víctima.",
-                        "",
-                        "§5§lDRENAJE DE ALMA §r§7— Roba 3♥ de vida",
-                        "§7por golpe y las añade a tu salud.",
-                        "",
-                        "§8§lCOSECHADOR DE ALMAS §r§7— Looting X"
-                    ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 50, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.LOOTING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 5, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    guadana.setItemMeta(meta);
-                }
-                drops.add(guadana);
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHadesScythe());
                 break;
             }
             case "poseidon": {
-                // El único que merece un tridente — dios del mar
-                org.bukkit.inventory.ItemStack tridente = new org.bukkit.inventory.ItemStack(Material.TRIDENT);
-                var meta = tridente.getItemMeta();
-                if (meta != null) {
-                    meta.setDisplayName("§9§l🔱 Tridente de Poseidón §r§7[Señor del Mar]");
-                    meta.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Poseidón",
-                        "§7Forjado en las profundidades del Océano Eterno.",
-                        "§7Controla las mareas, las tormentas y los mares.",
-                        "",
-                        "§9§lTSUNAMI §r§7— Lanza una ola de agua al arrojar",
-                        "§7el tridente, empujando a todos los cercanos.",
-                        "",
-                        "§b§lRIPTIDE V — IMPALING X — LOYALTY V"
-                    ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.IMPALING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.RIPTIDE, 5, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    tridente.setItemMeta(meta);
-                }
-                drops.add(tridente);
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createPoseidonTrident());
                 break;
             }
             case "zeus": {
-                // Zeus usa un bastón/mace de rayos — NO un tridente
-                org.bukkit.inventory.ItemStack rayo = new org.bukkit.inventory.ItemStack(Material.MACE);
-                var meta = rayo.getItemMeta();
-                if (meta != null) {
-                    meta.setDisplayName("§e§l⚡ Rayo de Zeus §r§7[Padre de los Dioses]");
-                    meta.setLore(java.util.List.of(
-                        "§8▸ Arma Mítica de Zeus",
-                        "§7El rayo definitivo forjado por los Cíclopes",
-                        "§7en el taller secreto del Olimpo.",
-                        "",
-                        "§e§lTORMENTA DIVINA §r§7— Al golpear invoca",
-                        "§7tres rayos en un radio de 5 bloques.",
-                        "",
-                        "§e§lPODER DEL OLIMPO — SHARPNESS XII"
-                    ));
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 12, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.KNOCKBACK, 5, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 10, true);
-                    meta.addEnchant(org.bukkit.enchantments.Enchantment.MENDING, 1, true);
-                    rayo.setItemMeta(meta);
-                }
-                drops.add(rayo);
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createZeusMace());
                 break;
             }
             case "loki": {
@@ -396,6 +379,33 @@ public class BossManager implements Listener {
             case "kratos": {
                 drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createKratosBlade());
                 drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLeviathanAxe());
+                break;
+            }
+            case "heimdall": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createGjallarhorn());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createBifrostWings());
+                break;
+            }
+            case "hidra": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHydraFang());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHydraScale());
+                break;
+            }
+            case "cerbero": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createCerberoHide());
+                break;
+            }
+            case "artemisa": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createArtemisBow());
+                break;
+            }
+            case "tifon": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createTifonClaw());
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createTifonChestplate());
+                break;
+            }
+            case "prometeo": {
+                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createPrometeoFlame());
                 break;
             }
         }

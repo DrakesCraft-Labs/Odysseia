@@ -38,7 +38,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
 
         if (args.length < 2 || !args[0].equalsIgnoreCase("spawn")) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus|loki|odin|kratos>"));
+                    "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus|loki|odin|kratos|heimdall|hidra|cerbero|artemisa|tifon|prometeo>"));
             return true;
         }
 
@@ -48,12 +48,16 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 || bossType.equals("thor") || bossType.equals("ares")
                 || bossType.equals("hades") || bossType.equals("poseidon")
                 || bossType.equals("zeus") || bossType.equals("loki")
-                || bossType.equals("odin") || bossType.equals("kratos");
+                || bossType.equals("odin") || bossType.equals("kratos")
+                || bossType.equals("heimdall") || bossType.equals("hidra")
+                || bossType.equals("cerbero") || bossType.equals("artemisa")
+                || bossType.equals("tifon") || bossType.equals("tifón")
+                || bossType.equals("prometeo");
 
         if (!valid) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&c&lERROR: &eEl jefe mítico '" + bossType
-                    + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon, zeus, loki, odin o kratos."));
+                    + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon, zeus, loki, odin, kratos, heimdall, hidra, cerbero, artemisa, tifon o prometeo."));
             return true;
         }
 
@@ -84,7 +88,8 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             List<String> all = List.of(
                     "circe", "polifemo", "dios_corrupto",
                     "thor", "ares", "hades", "poseidon", "zeus",
-                    "loki", "odin", "kratos"
+                    "loki", "odin", "kratos",
+                    "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
             );
             for (String b : all) {
                 if (b.startsWith(input)) completions.add(b);

@@ -97,5 +97,56 @@ public abstract class OdysseyBoss {
         }
     }
 
+    // ─── Helpers de targeting reutilizables por los jefes ────────────────────
+
+    /** Jugador vivo más cercano dentro del radio, o null. */
+    protected Player findNearestPlayer(double radius) {
+        Player target = null;
+        double best = Double.MAX_VALUE;
+        for (org.bukkit.entity.Entity e : entity.getNearbyEntities(radius, radius, radius)) {
+            if (e instanceof Player p && p.isOnline() && !p.isDead() && p.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
+                double d = p.getLocation().distanceSquared(entity.getLocation());
+                if (d < best) {
+                    best = d;
+                    target = p;
+                }
+            }
+        }
+        return target;
+    }
+
+    /** Jugador vivo más alejado dentro del radio, o null. */
+    protected Player findFarthestPlayer(double radius) {
+        Player target = null;
+        double best = -1;
+        for (org.bukkit.entity.Entity e : entity.getNearbyEntities(radius, radius, radius)) {
+            if (e instanceof Player p && p.isOnline() && !p.isDead() && p.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
+                double d = p.getLocation().distanceSquared(entity.getLocation());
+                if (d > best) {
+                    best = d;
+                    target = p;
+                }
+            }
+        }
+        return target;
+    }
+
+    /** Todos los jugadores vivos dentro del radio. */
+    protected java.util.List<Player> findPlayersInRange(double radius) {
+        java.util.List<Player> players = new java.util.ArrayList<>();
+        for (org.bukkit.entity.Entity e : entity.getNearbyEntities(radius, radius, radius)) {
+            if (e instanceof Player p && p.isOnline() && !p.isDead() && p.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
+                players.add(p);
+            }
+        }
+        return players;
+    }
+
+    /** Cura al boss una cantidad de HP, sin superar su máximo. */
+    protected void heal(double amount) {
+        if (entity == null || entity.isDead()) return;
+        entity.setHealth(Math.min(maxHealth, entity.getHealth() + amount));
+    }
+
     public abstract void executeSkillsRotation();
 }

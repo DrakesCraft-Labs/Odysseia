@@ -1,8 +1,12 @@
 # 🏛️ Expansión Mítica II — Nuevos Jefes Legendarios
 
-> **Estado:** 📋 Planificado — Próxima expansión de contenido  
+> **Estado:** ✅ Implementado — Heimdall, Hidra, Cerbero, Artemisa, Tifón y Prometeo activos  
 > **Plugin:** Odysseia v1.x  
 > **Servidor:** Purpur 1.21.1  
+>
+> Invocación: `/boss spawn <heimdall|hidra|cerbero|artemisa|tifon|prometeo>`  
+> Spawn natural opcional: sección `natural-spawn` en `config.yml` (desactivado por defecto).  
+> Las skills van implementadas como métodos dentro de cada clase de jefe (no clases `BossSkill` sueltas).  
 
 ---
 
@@ -271,8 +275,8 @@ Patrón de implementación por boss:
 # Compilar
 mvn clean package -DskipTests
 
-# Deployar al servidor
-cp target/Odysseia-1.0.0-SNAPSHOT.jar Z:/plugins/Odysseia.jar
+# Deployar al servidor (DrakesCraft = Y:, NO Z: que es Castelgandolfo)
+cp target/Odysseia-1.0.0-SNAPSHOT.jar Y:/plugins/Odysseia.jar
 
 # Push a GitHub
 git add -A && git commit -m "feat: ..." && git push origin main
