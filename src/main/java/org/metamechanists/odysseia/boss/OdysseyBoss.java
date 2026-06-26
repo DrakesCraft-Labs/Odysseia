@@ -2,7 +2,10 @@ package org.metamechanists.odysseia.boss;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -10,6 +13,8 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.metamechanists.odysseia.Odysseia;
 
 import java.util.HashSet;
@@ -25,6 +30,10 @@ public abstract class OdysseyBoss {
     protected final double maxHealth;
     protected final BossBar bossBar;
     protected final Set<UUID> playersWatching = new HashSet<>();
+
+    // Sistema de fases y diálogos común a todos los jefes.
+    protected int currentPhase = 1;
+    private long lastDialogue = 0L;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -146,6 +155,82 @@ public abstract class OdysseyBoss {
     protected void heal(double amount) {
         if (entity == null || entity.isDead()) return;
         entity.setHealth(Math.min(maxHealth, entity.getHealth() + amount));
+    }
+
+    /** Nombre corto y limpio del jefe para los diálogos. */
+    public String shortName() {
+        String n = ChatColor.stripColor(displayName);
+        int dash = n.indexOf(" - ");
+        if (dash > 0) {
+            n = n.substring(0, dash);
+        }
+        return n.replaceAll("[^\\p{L} ]", "").trim();
+    }
+
+    /** Hace que el jefe "hable" en el chat, con cooldown global para no spamear. */
+    public void speak(String frase) {
+        long now = System.currentTimeMillis();
+        if (now - lastDialogue < 18000) {
+            return;
+        }
+
+        lastDialogue = now;
+        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&',
+                "&8[&6&l✦&8] &e" + shortName() + "&7: &f\"" + frase + "\""));
+    }
+
+    /** Detecta cruces de 66% y 33% de vida y dispara la fase correspondiente. */
+    public void checkPhases() {
+        if (entity == null || entity.isDead()) {
+            return;
+        }
+
+        double pct = entity.getHealth() / maxHealth;
+        if (currentPhase == 1 && pct <= 0.66) {
+            currentPhase = 2;
+            onPhaseChange(2);
+        } else if (currentPhase == 2 && pct <= 0.33) {
+            currentPhase = 3;
+            onPhaseChange(3);
+        }
+    }
+
+    /**
+     * Comportamiento por defecto al entrar en una fase: buff progresivo, aura de
+     * partículas, sonido y diálogo. Los jefes pueden sobreescribirlo para añadir
+     * mecánicas propias (llamando super.onPhaseChange(phase) para conservar esto).
+     */
+    protected void onPhaseChange(int phase) {
+        if (entity == null || entity.isDead()) {
+            return;
+        }
+
+        int amplifier = phase - 1; // fase 2 -> II, fase 3 -> III
+        int duration = 20 * 60 * 20; // 20 minutos, suficiente para el combate sin usar Integer.MAX_VALUE.
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, amplifier, false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, Math.max(0, amplifier - 1), false, false, false));
+        if (phase == 3) {
+            entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 4, false, false, false));
+        }
+
+        var loc = entity.getLocation().add(0, 1, 0);
+        loc.getWorld().spawnParticle(Particle.FLAME, loc, 60, 1, 1.5, 1, 0.1);
+        loc.getWorld().spawnParticle(Particle.LARGE_SMOKE, loc, 30, 1, 1, 1, 0.05);
+        loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1.2f, phase == 3 ? 0.5f : 0.8f);
+        speak(phase == 3
+                ? "¡No conocéis mi verdadero poder!"
+                : "Esto apenas comienza, mortales.");
+    }
+
+    /** Aura de partículas constante según la fase (lo llama el tick del manager). */
+    public void tickAura() {
+        if (entity == null || entity.isDead() || currentPhase < 2) {
+            return;
+        }
+
+        var loc = entity.getLocation().add(0, 1, 0);
+        loc.getWorld().spawnParticle(currentPhase >= 3 ? Particle.SOUL_FIRE_FLAME : Particle.FLAME,
+                loc, currentPhase * 2, 0.5, 0.8, 0.5, 0.01);
     }
 
     public abstract void executeSkillsRotation();

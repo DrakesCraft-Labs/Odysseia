@@ -73,6 +73,8 @@ public class BossManager implements Listener {
                     continue;
                 }
                 boss.updateBossBar();
+                boss.checkPhases();
+                boss.tickAura();
                 if (boss instanceof PolifemoBoss polifemo) {
                     polifemo.updatePathfinding();
                 }
@@ -328,12 +330,18 @@ public class BossManager implements Listener {
             Player killer = entity.getKiller();
             removeBoss(entity.getUniqueId(), killer);
             
-            // Custom drops / rewards
+            // Custom drops / rewards — se sueltan manualmente en el suelo para
+            // garantizar que nunca se pierdan (otros plugins pueden limpiar getDrops()).
             event.getDrops().clear();
             if (boss != null) {
-                event.getDrops().addAll(createCustomDrops(boss.getId()));
+                Location dropLocation = entity.getLocation();
+                for (org.bukkit.inventory.ItemStack drop : createCustomDrops(boss.getId())) {
+                    if (drop != null && dropLocation.getWorld() != null) {
+                        dropLocation.getWorld().dropItemNaturally(dropLocation, drop);
+                    }
+                }
             }
-            
+
             event.setDroppedExp(5000); // 5000 XP
             
             Location loc = entity.getLocation();
