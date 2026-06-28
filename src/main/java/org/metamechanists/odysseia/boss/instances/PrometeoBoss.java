@@ -31,6 +31,7 @@ public class PrometeoBoss extends OdysseyBoss {
     private final Random random = new Random();
     private boolean phoenixUsed = false;
     private boolean invulnerable = false;
+    private boolean hasCurse = false;
 
     public PrometeoBoss(LivingEntity entity) {
         super(entity, "prometeo", "§e§l🔥 Prometeo §7§l- §eTitán del Fuego Robado", 700.0, BarColor.YELLOW, BarStyle.SEGMENTED_10);
@@ -115,13 +116,15 @@ public class PrometeoBoss extends OdysseyBoss {
         for (Player p : findPlayersInRange(28)) {
             if (p.getHealth() > maxHp) { maxHp = p.getHealth(); victim = p; }
         }
-        if (victim == null) return;
+        if (victim == null || hasCurse) return;
+        hasCurse = true;
         final Player target = victim;
         target.sendMessage("§4§l☠ §c¡Prometeo te ha maldecido con el Castigo Eterno!");
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1.0f, 0.5f);
         Bukkit.getScheduler().runTaskTimer(Odysseia.getInstance(), task -> {
             if (entity.isDead() || target.isDead() || !target.isOnline()
                     || target.getLocation().distanceSquared(entity.getLocation()) > 2500) {
+                hasCurse = false;
                 task.cancel();
                 return;
             }

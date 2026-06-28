@@ -3,6 +3,7 @@ package org.metamechanists.odysseia.boss;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -70,32 +71,29 @@ public abstract class OdysseyBoss {
             bossBar.setProgress(0.0);
             return;
         }
-        // Use Math.max and Math.min for clamp, since Math.clamp might be Java 21 only and we want to ensure compatibility or just use it (it is available in Java 21)
         double progress = Math.max(0.0, Math.min(entity.getHealth() / maxHealth, 1.0));
         bossBar.setProgress(progress);
 
-        // Update players in range (e.g., 30 blocks)
+        // Use player list (O(players)) instead of spatial entity scan (O(entities in chunk radius))
         Set<UUID> currentInRange = new HashSet<>();
-        entity.getWorld().getNearbyEntities(entity.getLocation(), 30, 30, 30).forEach(e -> {
-            if (e instanceof Player player) {
+        Location bossLoc = entity.getLocation();
+        for (Player player : entity.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(bossLoc) <= 900) { // 30^2
                 currentInRange.add(player.getUniqueId());
-                if (!playersWatching.contains(player.getUniqueId())) {
+                if (playersWatching.add(player.getUniqueId())) {
                     bossBar.addPlayer(player);
-                    playersWatching.add(player.getUniqueId());
                 }
             }
-        });
-
-        // Remove players out of range
-        Set<UUID> toRemove = new HashSet<>(playersWatching);
-        toRemove.removeAll(currentInRange);
-        for (UUID uuid : toRemove) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                bossBar.removePlayer(player);
-            }
-            playersWatching.remove(uuid);
         }
+
+        playersWatching.removeIf(uuid -> {
+            if (!currentInRange.contains(uuid)) {
+                Player p = Bukkit.getPlayer(uuid);
+                if (p != null) bossBar.removePlayer(p);
+                return true;
+            }
+            return false;
+        });
     }
 
     public void cleanup() {

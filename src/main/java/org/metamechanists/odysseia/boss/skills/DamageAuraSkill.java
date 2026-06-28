@@ -28,7 +28,7 @@ public class DamageAuraSkill implements BossSkill {
                 Location currentLoc = boss.getEntity().getLocation();
                 // Spawn circle particles
                 double radius = 5.0;
-                for (int angle = 0; angle < 360; angle += 15) {
+                for (int angle = 0; angle < 360; angle += 30) {
                     double rad = Math.toRadians(angle);
                     double x = radius * Math.cos(rad);
                     double z = radius * Math.sin(rad);

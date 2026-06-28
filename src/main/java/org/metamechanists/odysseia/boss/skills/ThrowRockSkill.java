@@ -72,7 +72,7 @@ public class ThrowRockSkill implements BossSkill {
                     }
                 }
             }
-        }.runTaskTimer(Odysseia.getInstance(), 1L, 1L);
+        }.runTaskTimer(Odysseia.getInstance(), 1L, 2L);
     }
 
     private void explodeRock(FallingBlock rock, LivingEntity bossEntity) {
