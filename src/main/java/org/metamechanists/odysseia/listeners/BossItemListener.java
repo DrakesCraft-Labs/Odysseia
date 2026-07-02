@@ -280,7 +280,7 @@ public final class BossItemListener implements Listener {
             if (ball.hasMetadata("loki_magic")) {
                 Location loc = ball.getLocation();
                 loc.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc, 35, 1.0, 1.0, 1.0, 0.1);
-                loc.getWorld().spawnParticle(Particle.INSTANT_EFFECT, loc, 15, 0.5, 0.5, 0.5, 0.05);
+                loc.getWorld().spawnParticle(Particle.CRIT, loc, 15, 0.5, 0.5, 0.5, 0.05);
                 loc.getWorld().playSound(loc, Sound.ENTITY_ILLUSIONER_MIRROR_MOVE, 1.0f, 1.2f);
 
                 if (event.getHitEntity() instanceof LivingEntity victim) {
