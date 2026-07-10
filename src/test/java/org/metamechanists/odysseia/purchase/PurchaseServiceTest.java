@@ -131,6 +131,20 @@ class PurchaseServiceTest {
         assertEquals(0, runtime.calls(ActionType.ANNOUNCEMENT));
     }
 
+    @Test void optionalOfflineNotificationDoesNotBlockCompletion() throws Exception {
+        ProductDefinition product = new ProductDefinition("notify_optional", 2, "Optional Notify", "economy", "test", "test", 1,
+                VerificationState.VERIFIED_PRODUCTION, List.of(), List.of(
+                new ProductAction("money", ActionType.ECONOMY, Map.of("amount", "1"), false, RefundPolicy.MANUAL_REVIEW, true),
+                new ProductAction("notify", ActionType.NOTIFICATION, Map.of("message", "ok"), true, RefundPolicy.NOT_REVOCABLE, false),
+                new ProductAction("announce", ActionType.ANNOUNCEMENT, Map.of(), false, RefundPolicy.NOT_REVOCABLE, true)));
+        service = new PurchaseService(new ProductCatalog(List.of(product)), repository, runtime);
+        runtime.online = false;
+        service.deliver("txn-optional-notify", "TestPlayer", "notify_optional", false, "test");
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-optional-notify").getFirst().state());
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
+    }
+
     @Test void invalidInputAndUnknownProductAreRejected() {
         assertFalse(service.deliver("x", "bad name", "missing", false, "test").success());
         assertFalse(service.deliver("txn", "TestPlayer", "missing", false, "test").success());

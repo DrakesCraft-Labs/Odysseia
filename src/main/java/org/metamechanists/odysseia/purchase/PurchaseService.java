@@ -94,9 +94,9 @@ public final class PurchaseService {
                 }
             }
             List<PurchaseRepository.ActionRecord> actions = repository.actions(delivery.id());
-            waiting |= actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.WAITING_FOR_PLAYER);
-            retryable |= actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_RETRYABLE);
-            manual |= actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_MANUAL_REVIEW);
+            waiting = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.WAITING_FOR_PLAYER);
+            retryable = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_RETRYABLE);
+            manual = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_MANUAL_REVIEW);
             boolean incomplete = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && !Set.of(ActionState.COMPLETED, ActionState.SKIPPED).contains(a.state()));
             if (!incomplete) completeAnnouncement(context, actions);
             PurchaseState state = manual ? PurchaseState.FAILED_MANUAL_REVIEW : retryable ? PurchaseState.FAILED_RETRYABLE : waiting ? PurchaseState.WAITING_FOR_PLAYER : incomplete ? PurchaseState.PARTIALLY_DELIVERED : PurchaseState.COMPLETED;

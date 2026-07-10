@@ -16,7 +16,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "35000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hercules}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphercules, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hércules entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hércules entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hércules"}}
   vip_hestia:
     tebex-package-id: 7510348
@@ -32,7 +32,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "75000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hestia}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphestia, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hestia entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hestia entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hestia"}}
   vip_hermes:
     tebex-package-id: 7510349
@@ -48,7 +48,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "150000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hermes}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphermes, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hermes entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hermes entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hermes"}}
   vip_hefesto:
     tebex-package-id: 7510356
@@ -64,7 +64,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "250000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hefesto}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphefesto, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hefesto entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hefesto entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hefesto"}}
   vip_artemisa:
     tebex-package-id: 7510357
@@ -80,7 +80,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "450000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: artemisa}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipartemisa, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Artemisa entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Artemisa entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Artemisa"}}
   vip_afrodita:
     tebex-package-id: 7510358
@@ -96,7 +96,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "700000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: afrodita}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipafrodita, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Afrodita entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Afrodita entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Afrodita"}}
   vip_zeus:
     tebex-package-id: 7510359
@@ -112,7 +112,7 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "1500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: zeus}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipzeus, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Zeus entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Zeus entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Zeus"}}
 
   role_minero: &role_minero
@@ -126,7 +126,7 @@ products:
     dependencies: [LuckPerms]
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: minero, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Minero activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Minero activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Minero"}}
   role_cazador:
     <<: *role_minero
@@ -135,7 +135,7 @@ products:
     description: "Rol mensual Cazador."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: cazador, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Cazador activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Cazador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Cazador"}}
   role_constructor:
     <<: *role_minero
@@ -144,7 +144,7 @@ products:
     description: "Rol mensual Constructor."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: constructor, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Constructor activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Constructor activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Constructor"}}
   role_lenador:
     <<: *role_minero
@@ -153,7 +153,7 @@ products:
     description: "Rol mensual Leñador."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: lenador, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Leñador activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Leñador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Leñador"}}
   role_alquimista:
     <<: *role_minero
@@ -162,7 +162,7 @@ products:
     description: "Rol mensual Alquimista."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: alquimista, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Alquimista activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Alquimista activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Alquimista"}}
   role_nomada:
     <<: *role_minero
@@ -171,7 +171,7 @@ products:
     description: "Rol mensual Nómada."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: nomada, duration: 30d}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRol Nómada activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Nómada activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Nómada"}}
 
   kit_hermes:
@@ -185,7 +185,7 @@ products:
     dependencies: []
     actions:
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hermes}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aKit Hermes entregado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aKit Hermes entregado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Kit Hermes"}}
   kit_zeus:
     tebex-package-id: 7510369
@@ -198,7 +198,7 @@ products:
     dependencies: []
     actions:
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: zeus}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aKit Zeus entregado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aKit Zeus entregado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Kit Zeus"}}
   protection_177:
     tebex-package-id: 7510370
@@ -211,7 +211,7 @@ products:
     dependencies: [ProtectionStones]
     actions:
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphefesto, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 177x177 entregada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 177x177 entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Protección 177x177"}}
   protection_481:
     tebex-package-id: 7510371
@@ -235,7 +235,7 @@ products:
     dependencies: [LuckPerms]
     actions:
       - {id: permission-group, type: LUCKPERMS_PERMANENT, refund: AUTO_REVOKE, parameters: {group: economia-premium}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aEconomía Premium activada."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aEconomía Premium activada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Economía Premium"}}
   dragmas_saco:
     tebex-package-id: 7510373
@@ -248,7 +248,7 @@ products:
     dependencies: [Vault]
     actions:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "50000"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 50.000 Dragmas."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 50.000 Dragmas."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Saco de Dragmas"}}
   dragmas_cofre:
     tebex-package-id: 7510374
@@ -261,7 +261,7 @@ products:
     dependencies: [Vault]
     actions:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "250000"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 250.000 Dragmas."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 250.000 Dragmas."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Cofre de Dragmas"}}
   dragmas_anfora:
     tebex-package-id: 7510375
@@ -274,7 +274,7 @@ products:
     dependencies: [Vault]
     actions:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "1000000"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 1.000.000 Dragmas."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRecibiste 1.000.000 Dragmas."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Ánfora de Dragmas"}}
   sfmaster_1h:
     tebex-package-id: 7545828
@@ -287,7 +287,7 @@ products:
     dependencies: [LuckPerms, Slimefun]
     actions:
       - {id: pass, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 1h}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 1 hora activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 1 hora activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase SFMaster 1 hora"}}
   sfmaster_24h:
     tebex-package-id: 7545831
@@ -300,5 +300,5 @@ products:
     dependencies: [LuckPerms, Slimefun]
     actions:
       - {id: pass, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 24h}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 24 horas activado."}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 24 horas activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase SFMaster 24 horas"}}

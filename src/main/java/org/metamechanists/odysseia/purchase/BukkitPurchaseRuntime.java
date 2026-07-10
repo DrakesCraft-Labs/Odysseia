@@ -120,7 +120,12 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
         RegisteredServiceProvider<Economy> registration = Bukkit.getServicesManager().getRegistration(Economy.class);
         if (registration == null) return ActionResult.retryable("Vault Economy no disponible");
         double amount = Double.parseDouble(action.parameters().get("amount"));
-        var response = registration.getProvider().depositPlayer(Bukkit.getOfflinePlayer(context.uuid()), amount);
+        Economy economy = registration.getProvider();
+        OfflinePlayer target = Bukkit.getOfflinePlayer(context.uuid());
+        if (!economy.hasAccount(target) && !economy.createPlayerAccount(target)) {
+            return ActionResult.retryable("Vault no pudo crear cuenta para " + context.player());
+        }
+        var response = economy.depositPlayer(target, amount);
         return response.transactionSuccess() ? ActionResult.completed("amount=" + amount + ";balance=" + response.balance) : ActionResult.retryable(response.errorMessage);
     }
 
