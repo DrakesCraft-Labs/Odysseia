@@ -50,6 +50,8 @@ public class BossManager implements Listener {
     private final Map<UUID, OdysseyBoss> activeBosses = new ConcurrentHashMap<>();
     private final java.util.Set<UUID> naturalBosses = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<String, Long> lastSpawnAnnouncements = new ConcurrentHashMap<>();
+    // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
+    private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -340,8 +342,14 @@ public class BossManager implements Listener {
                 event.setCancelled(true);
                 prometeo.getEntity().getWorld().spawnParticle(org.bukkit.Particle.FLAME, prometeo.getEntity().getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.05);
             } else {
-                // Update boss bar instantly on damage
-                Bukkit.getScheduler().runTaskLater(plugin, boss::updateBossBar, 1L);
+                // Debounced bossbar update — sólo una tarea pendiente por boss a la vez
+                UUID bid = boss.getEntity().getUniqueId();
+                if (pendingBarUpdate.add(bid)) {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        pendingBarUpdate.remove(bid);
+                        boss.updateBossBar();
+                    }, 1L);
+                }
             }
         }
     }

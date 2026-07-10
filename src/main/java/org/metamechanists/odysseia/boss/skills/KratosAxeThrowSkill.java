@@ -45,6 +45,6 @@ public final class KratosAxeThrowSkill implements BossSkill {
             }
             snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 4, 0.1, 0.1, 0.1, 0.02);
             snowball.getWorld().spawnParticle(Particle.SNOWFLAKE, snowball.getLocation(), 2, 0.1, 0.1, 0.1, 0.0);
-        }, 1L, 1L);
+        }, 1L, 2L);
     }
 }
