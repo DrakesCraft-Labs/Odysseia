@@ -30,3 +30,7 @@ commands:
     description: Dispara el anuncio público de Discord de una compra entregada (uso desde Tebex).
     permission: odysseia.store.announce
     usage: /odysseiaannounce <nick> <producto>
+  odysseiapurchase:
+    description: Motor transaccional de entregas de tienda.
+    permission: odysseia.purchase.admin
+    usage: /odysseiapurchase <deliver|status|pending|retry|history|validate|dry-run|refund|chargeback> ...

@@ -16,6 +16,7 @@ import org.metamechanists.odysseia.listeners.ModerationListener;
 import org.metamechanists.odysseia.listeners.PresenceEventListener;
 import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
+import org.metamechanists.odysseia.purchase.PurchaseEngine;
 
 import java.time.DayOfWeek;
 import java.time.ZoneId;
@@ -33,6 +34,7 @@ public final class Odysseia extends JavaPlugin {
     private boolean ownerFlip = false;
     private String instanceId = "";
     private int chatGamesCountdown = 0;
+    private PurchaseEngine purchaseEngine;
 
     @Override
     public void onEnable() {
@@ -50,6 +52,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
         getCommand("odysseiaannounce").setExecutor(new org.metamechanists.odysseia.commands.StoreAnnounceCommand(this));
+        this.purchaseEngine = new PurchaseEngine(this);
+        getCommand("odysseiapurchase").setExecutor(new org.metamechanists.odysseia.commands.PurchaseCommand(purchaseEngine));
+        Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
@@ -98,6 +103,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Stop StoreManager
         org.metamechanists.odysseia.utils.StoreManager.stop();
+        if (purchaseEngine != null) purchaseEngine.close();
 
         // Shutdown BossManager
         if (bossManager != null) {
