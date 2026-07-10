@@ -90,6 +90,47 @@ class PurchaseServiceTest {
         assertTrue(repository.actions(service.status("txn-refund").getFirst().id()).stream().anyMatch(action -> action.state() == ActionState.FAILED_MANUAL_REVIEW));
     }
 
+    @Test void chargebackUsesTheSameFinancialIdempotencyGuard() throws Exception {
+        runtime.online = true;
+        service.deliver("txn-chargeback", "TestPlayer", "dragmas_saco", false, "test");
+        assertTrue(service.financialEvent("txn-chargeback", "dragmas_saco", true, "admin").success());
+        assertTrue(service.financialEvent("txn-chargeback", "dragmas_saco", true, "admin").success());
+        assertEquals(PurchaseState.CHARGEBACK, service.status("txn-chargeback").getFirst().state());
+    }
+
+    @Test void restartResumesOnlyPendingActions() throws Exception {
+        runtime.online = false;
+        service.deliver("txn-restart", "TestPlayer", "dragmas_saco", false, "test");
+        repository.close();
+        repository = new PurchaseRepository(new File(directory, "purchases.db"));
+        runtime.online = true;
+        ProductDefinition product = service.catalog().get("dragmas_saco");
+        service = new PurchaseService(new ProductCatalog(List.of(product)), repository, runtime);
+        service.resumePlayer("TestPlayer", "restart");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-restart").getFirst().state());
+    }
+
+    @Test void retryActionDoesNotRepeatCompletedActions() throws Exception {
+        runtime.online = true;
+        runtime.failKitOnce = true;
+        service.deliver("txn-action", "TestPlayer", "dragmas_saco", false, "test");
+        long actionId = repository.actions(service.status("txn-action").getFirst().id()).stream()
+                .filter(action -> action.type() == ActionType.KIT).findFirst().orElseThrow().id();
+        service.retryAction("txn-action", actionId, "admin");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(2, runtime.calls(ActionType.KIT));
+    }
+
+    @Test void unavailableDependencyRemainsRetryable() throws Exception {
+        runtime.online = true;
+        runtime.failEconomy = true;
+        service.deliver("txn-dependency", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(PurchaseState.FAILED_RETRYABLE, service.status("txn-dependency").getFirst().state());
+        assertEquals(0, runtime.calls(ActionType.ANNOUNCEMENT));
+    }
+
     @Test void invalidInputAndUnknownProductAreRejected() {
         assertFalse(service.deliver("x", "bad name", "missing", false, "test").success());
         assertFalse(service.deliver("txn", "TestPlayer", "missing", false, "test").success());
@@ -111,10 +152,12 @@ class PurchaseServiceTest {
         private final Map<ActionType, Integer> counts = new EnumMap<>(ActionType.class);
         private boolean online;
         private boolean failKitOnce;
+        private boolean failEconomy;
         @Override public UUID resolveUuid(String player) { return UUID.nameUUIDFromBytes(player.getBytes()); }
         @Override public boolean isOnline(String player) { return online; }
         @Override public ActionResult execute(ExecutionContext context, ProductAction action) {
             counts.merge(action.type(), 1, Integer::sum);
+            if (action.type() == ActionType.ECONOMY && failEconomy) return ActionResult.retryable("Vault unavailable");
             if (action.requiresOnline() && !online) return ActionResult.waiting("offline");
             if (action.type() == ActionType.KIT && failKitOnce) { failKitOnce = false; return ActionResult.retryable("transient"); }
             return ActionResult.completed(action.id());
