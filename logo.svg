@@ -1,178 +1,159 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Background Gradient -->
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="#1c0a35" />
-      <stop offset="60%" stop-color="#0b0314" />
-      <stop offset="100%" stop-color="#020005" />
-    </radialGradient>
-    
-    <!-- Gold Gradient for metal parts -->
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFE07D" />
-      <stop offset="30%" stop-color="#F5B041" />
-      <stop offset="70%" stop-color="#C0392B" />
-      <stop offset="100%" stop-color="#D35400" />
-    </linearGradient>
-    
-    <!-- Metallic Gold Highlights -->
-    <linearGradient id="goldHighlight" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#F39C12" />
-      <stop offset="50%" stop-color="#FCD05F" />
-      <stop offset="100%" stop-color="#F39C12" />
-    </linearGradient>
-
-    <!-- Purple Nebula Glow -->
-    <radialGradient id="purpleGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#9b59b6" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#9b59b6" stop-opacity="0"/>
+    <radialGradient id="bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0%" stop-color="#1b1036"/>
+      <stop offset="55%" stop-color="#0a0816"/>
+      <stop offset="100%" stop-color="#03040a"/>
     </radialGradient>
 
-    <!-- Drop Shadow Filter -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff3b0"/>
+      <stop offset="35%" stop-color="#f7c948"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <linearGradient id="ember" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7f1d1d"/>
+      <stop offset="45%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+
+    <linearGradient id="void" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="hardGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="g1"/>
+      <feGaussianBlur stdDeviation="10" result="g2"/>
+      <feMerge>
+        <feMergeNode in="g2"/>
+        <feMergeNode in="g1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
 
   <style>
-    @keyframes rotate-cw {
+    @keyframes ringSpin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    @keyframes rotate-ccw {
+    @keyframes ringSpinReverse {
       from { transform: rotate(0deg); }
       to { transform: rotate(-360deg); }
     }
     @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.95; }
     }
-    @keyframes pulse-glow {
-      0%, 100% { filter: drop-shadow(0 0 4px #FCD05F); }
-      50% { filter: drop-shadow(0 0 15px #FCD05F); }
+    @keyframes shardFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
     }
-    @keyframes sparkle {
-      0%, 100% { opacity: 0.3; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.2); }
+    @keyframes emberFlicker {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
     }
-    
-    .anim-rotate-cw {
+
+    .spin {
       transform-origin: 256px 256px;
-      animation: rotate-cw 60s linear infinite;
+      animation: ringSpin 34s linear infinite;
     }
-    .anim-rotate-ccw {
+    .spin-reverse {
       transform-origin: 256px 256px;
-      animation: rotate-ccw 45s linear infinite;
+      animation: ringSpinReverse 26s linear infinite;
     }
-    .anim-orbit-1 {
-      transform-origin: 256px 256px;
-      animation: rotate-cw 20s linear infinite;
+    .pulse {
+      animation: pulse 5s ease-in-out infinite;
     }
-    .anim-orbit-2 {
-      transform-origin: 256px 256px;
-      animation: rotate-ccw 35s linear infinite;
+    .float-a {
+      animation: shardFloat 4.2s ease-in-out infinite;
     }
-    .anim-pulse {
-      animation: pulse 8s ease-in-out infinite;
+    .float-b {
+      animation: shardFloat 5.6s ease-in-out infinite;
     }
-    .anim-star-glow {
-      transform-origin: 256px 256px;
-      animation: pulse-glow 4s ease-in-out infinite;
-    }
-    .anim-sparkle-1 {
-      transform-origin: 140px 120px;
-      animation: sparkle 3s ease-in-out infinite;
-    }
-    .anim-sparkle-2 {
-      transform-origin: 360px 370px;
-      animation: sparkle 4s ease-in-out infinite;
+    .flicker {
+      animation: emberFlicker 2.6s ease-in-out infinite;
     }
   </style>
 
-  <!-- Background -->
-  <rect width="512" height="512" fill="url(#bgGrad)"/>
-  
-  <!-- Cosmic Dust / Nebula -->
-  <circle cx="256" cy="256" r="180" fill="url(#purpleGlow)" class="anim-pulse" filter="url(#glow)" />
-  
-  <!-- Starfield / Galaxy Stars -->
-  <g fill="#ffffff" opacity="0.8">
-    <circle cx="120" cy="150" r="1.5" />
-    <circle cx="380" cy="120" r="1" />
-    <circle cx="160" cy="380" r="2" />
-    <circle cx="340" cy="390" r="1.2" />
-    <circle cx="220" cy="80" r="1.5" />
-    <circle cx="280" cy="420" r="2" />
-    <circle cx="440" cy="240" r="1" />
-    <circle cx="70" cy="280" r="1.5" />
-  </g>
-  
-  <!-- Outer Constellation/Orbital Ring -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#goldHighlight)" stroke-width="1.5" opacity="0.3" stroke-dasharray="10 15" class="anim-rotate-cw" />
-  <circle cx="256" cy="256" r="175" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" class="anim-rotate-ccw" />
+  <rect width="512" height="512" fill="url(#bg)"/>
 
-  <!-- Constellation lines -->
-  <g stroke="#FCD05F" stroke-width="1" opacity="0.4" class="anim-rotate-cw">
-    <line x1="256" y1="120" x2="330" y2="180" />
-    <line x1="330" y1="180" x2="330" y2="280" />
-    <line x1="330" y1="280" x2="256" y2="392" />
-    <line x1="256" y1="392" x2="182" y2="280" />
-    <line x1="182" y1="280" x2="182" y2="180" />
-    <line x1="182" y1="180" x2="256" y2="120" />
+  <circle cx="256" cy="256" r="196" fill="url(#halo)" class="pulse"/>
+
+  <g opacity="0.9">
+    <circle cx="80" cy="104" r="2" fill="#fff"/>
+    <circle cx="138" cy="72" r="1.5" fill="#fde68a"/>
+    <circle cx="410" cy="92" r="2" fill="#fff"/>
+    <circle cx="444" cy="168" r="1.5" fill="#c4b5fd"/>
+    <circle cx="98" cy="362" r="2" fill="#38bdf8"/>
+    <circle cx="426" cy="382" r="2" fill="#fff"/>
+    <circle cx="186" cy="430" r="1.5" fill="#fca5a5"/>
+    <circle cx="334" cy="448" r="1.5" fill="#fde68a"/>
   </g>
 
-  <!-- Constellation Nodes (Stars) -->
-  <g fill="#fff" filter="url(#glow)" class="anim-rotate-cw">
-    <circle cx="256" cy="120" r="4" />
-    <circle cx="330" cy="180" r="3" />
-    <circle cx="330" cy="280" r="3.5" />
-    <circle cx="256" cy="392" r="4.5" />
-    <circle cx="182" cy="280" r="3" />
-    <circle cx="182" cy="180" r="3.5" />
+  <circle cx="256" cy="256" r="184" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-dasharray="8 16" opacity="0.45" class="spin"/>
+  <circle cx="256" cy="256" r="154" fill="none" stroke="url(#void)" stroke-width="2.6" opacity="0.52" class="spin-reverse"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="url(#gold)" stroke-width="4" opacity="0.92" filter="url(#softGlow)"/>
+
+  <g opacity="0.42" stroke="#f8d57e" stroke-width="1.2" class="spin">
+    <line x1="256" y1="104" x2="334" y2="166"/>
+    <line x1="334" y1="166" x2="350" y2="256"/>
+    <line x1="350" y1="256" x2="310" y2="356"/>
+    <line x1="310" y1="356" x2="256" y2="408"/>
+    <line x1="256" y1="408" x2="198" y2="360"/>
+    <line x1="198" y1="360" x2="162" y2="256"/>
+    <line x1="162" y1="256" x2="180" y2="166"/>
+    <line x1="180" y1="166" x2="256" y2="104"/>
   </g>
 
-  <!-- Inner Astrolabe Ring -->
-  <circle cx="256" cy="256" r="140" fill="none" stroke="url(#goldHighlight)" stroke-width="4" filter="url(#glow)" />
-  
-  <!-- Astrolabe Ticks -->
-  <g stroke="url(#goldHighlight)" stroke-width="2" opacity="0.7">
-    <line x1="256" y1="116" x2="256" y2="124" />
-    <line x1="256" y1="388" x2="256" y2="396" />
-    <line x1="116" y1="256" x2="124" y2="256" />
-    <line x1="388" y1="256" x2="396" y2="256" />
-    <line x1="157" y1="157" x2="163" y2="163" />
-    <line x1="355" y1="355" x2="349" y2="349" />
-    <line x1="157" y1="355" x2="163" y2="349" />
-    <line x1="355" y1="157" x2="349" y2="163" />
+  <g fill="url(#gold)" filter="url(#softGlow)" class="spin">
+    <circle cx="256" cy="104" r="4"/>
+    <circle cx="334" cy="166" r="3.5"/>
+    <circle cx="350" cy="256" r="4"/>
+    <circle cx="310" cy="356" r="3.5"/>
+    <circle cx="256" cy="408" r="4.5"/>
+    <circle cx="198" cy="360" r="3.5"/>
+    <circle cx="162" cy="256" r="4"/>
+    <circle cx="180" cy="166" r="3.5"/>
   </g>
 
-  <!-- Central Symbol: Elegant "O" Monogram & Galactic Compass -->
-  <g class="anim-star-glow">
-    <!-- Crescent Moon (Golden) -->
-    <path d="M 230,210 A 55,55 0 1,0 230,302 A 45,45 0 1,1 230,210 Z" fill="url(#goldHighlight)" />
-    
-    <!-- Central Star of the North (Compass Rose) -->
-    <path d="M 256,210 L 261,251 L 302,256 L 261,261 L 256,302 L 251,261 L 210,256 L 251,251 Z" fill="url(#goldHighlight)" />
-    <!-- Inner white core of the star -->
-    <path d="M 256,230 L 258,254 L 282,256 L 258,258 L 256,282 L 254,258 L 230,256 L 254,254 Z" fill="#ffffff" />
+  <g filter="url(#hardGlow)">
+    <path d="M256 138 L280 228 L374 256 L280 284 L256 374 L232 284 L138 256 L232 228 Z" fill="url(#gold)"/>
+    <path d="M256 176 L270 242 L336 256 L270 270 L256 336 L242 270 L176 256 L242 242 Z" fill="#fff7d6"/>
   </g>
 
-  <!-- Astrolabe Needle / Pointer -->
-  <line x1="256" y1="256" x2="320" y2="192" stroke="url(#goldGrad)" stroke-width="3" class="anim-rotate-ccw" filter="url(#glow)" />
-  <polygon points="320,192 312,197 317,205" fill="url(#goldHighlight)" class="anim-rotate-ccw" filter="url(#glow)" />
-
-  <!-- Orbiting Satellites / Planets -->
-  <g class="anim-orbit-1">
-    <circle cx="340" cy="180" r="6" fill="#FCD05F" filter="url(#glow)" />
-  </g>
-  <g class="anim-orbit-2">
-    <circle cx="160" cy="300" r="4" fill="#a29bfe" filter="url(#glow)" />
+  <g class="float-a">
+    <path d="M168 196 C188 166, 224 154, 250 164 C224 172, 208 192, 206 218 C202 246, 216 270, 242 286 C186 286, 144 240, 168 196 Z" fill="url(#ember)" opacity="0.95" filter="url(#softGlow)"/>
   </g>
 
-  <!-- Four Point Stars / Sparkles -->
-  <g fill="#ffffff" filter="url(#glow)">
-    <!-- Bottom Right Sparkle -->
-    <path d="M 360,360 Q 360,370 370,370 Q 360,370 360,380 Q 360,370 350,370 Q 360,370 360,360 Z" class="anim-sparkle-2" />
+  <g class="float-b">
+    <path d="M310 190 L350 154 L366 176 L336 206 L372 234 L354 254 L316 228 Z" fill="url(#void)" opacity="0.95" filter="url(#softGlow)"/>
+  </g>
+
+  <g class="flicker">
+    <path d="M258 208 C270 220, 278 234, 278 250 C278 272, 264 290, 256 302 C248 290, 234 272, 234 250 C234 234, 242 220, 254 208 C252 224, 258 232, 264 240 C270 232, 272 220, 258 208 Z" fill="url(#ember)" filter="url(#hardGlow)"/>
+  </g>
+
+  <g filter="url(#softGlow)" opacity="0.85">
+    <path d="M116 332 Q128 340 116 348 Q104 340 116 332 Z" fill="#fff"/>
+    <path d="M394 132 Q406 140 394 148 Q382 140 394 132 Z" fill="#fde68a"/>
+    <path d="M388 368 Q400 376 388 384 Q376 376 388 368 Z" fill="#c4b5fd"/>
   </g>
 </svg>

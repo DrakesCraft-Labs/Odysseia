@@ -1,125 +1,327 @@
-# 🌌 Odysseia
+# Odysseia
 
 <p align="center">
-  <img src="logo.svg" width="200" alt="Odysseia Logo" />
+  <img src="logo.svg" width="240" alt="Odysseia Logo" />
 </p>
 
-**Odysseia** es un plugin nativo de alto rendimiento para servidores Spigot/Paper (diseñado para Purpur 1.21.1 / Java 21) que consolida y optimiza múltiples funcionalidades de personalización, automatización de eventos, reliquias y moderación creativa en un único núcleo endurecido. 
-
-Consolida y reemplaza 5 scripts antiguos de `Skript` y hereda la lógica de webhooks del plugin `DrakesLabPresence` de forma asíncrona y segura.
-
----
-
-## 🚀 Características Principales
-
-### 👑 1. Ciclo de Prefijos del Propietario (Owner Cycle)
-* **Reemplaza:** `owner_titles_cycle.sk`
-* **Hardening:** Elimina el spam de comandos de consola de LuckPerms (`lp group setprefix`) que inundaba los registros de auditoría y base de datos.
-* **Integración PAPI & TAB:** Expone placeholders dinámicos en memoria (`%odysseia_owner_prefix%`, `%odysseia_owner_prefix_odiseo%`, `%odysseia_owner_prefix_penelope%`) ideales para integrarse con el plugin **TAB** o chatters visuales. Alterna silenciosamente entre los prefijos configurados cada 30 minutos sólo si el respectivo propietario está online.
-
-### 🛡️ 2. Efectos de Armadura de Rangos (Kits VIP)
-* **Reemplaza:** `rank_armor_effects.sk`
-* **Efectividad:** Un scheduler liviano en Java revisa los sets de armadura equipados. Si un jugador viste un conjunto completo de Diamante o Netherite y posee el permiso de kit VIP de **EssentialsX**, le otorga una serie de efectos de pociones personalizables.
-* **Limpieza Visual:** Las pociones se aplican como efectos ambientales, **ocultando totalmente las partículas y el icono en pantalla** para no saturar el HUD del jugador.
-
-### 🥔 3. Reliquia "Papa de Mar"
-* **Reemplaza:** `papa_de_mar.sk`
-* **Lógica:** Implementa el consumo de la histórica patata cocida con nombre personalizado (`✦ Papa de mar ✦`). Restaura hambre y saturación configuradas de forma secreta (sin lore invasivo) y emite partículas de brillo.
-* **Reparto Automático:** Entrega automáticamente el ítem con `Curse of Vanishing` a todos los jugadores online en un intervalo definido.
-
-### ⚔️ 4. Invocador de Leñador Loco
-* **Reemplaza:** `lenador_loco.sk`
-* **Jefe Silencioso:** Ejecuta de forma segura e interna la invocación del jefe de **LevelledMobs** mediante comandos de consola internos (`lm summon 1 vindicator <level> atPlayer <player>`) restringiendo el nivel entre 140 y 180.
-* **Mantenimiento:** Un scheduler dedicado detecta cualquier entidad llamada `"Leñador Loco"` y refresca sus estados de Resistencia II, Regeneración II, Fuerza I y Velocidad I de forma silenciosa cada 5 segundos.
-
-### 💬 5. ChatGames Automatizado
-* **Reemplaza:** `chatgames_random_interval.sk`
-* **Funcionamiento:** Planifica el inicio de juegos de chat (`chatgames start`) en un intervalo aleatorio (ej. 15-30 minutos) de forma completamente interna, evitando scripts repetitivos y comprobando siempre que haya al menos un jugador online para no desperdiciar recursos.
-
-### 👻 6. Vanish Creativo (Desvanecimiento Staff)
-* **Comando:** `/vanish` (alias `/v`)
-* **Estética Premium:** Al desvanecerse o aparecer, el moderador genera una **doble hélice de partículas en espiral** (`PORTAL` y `DRAGON_BREATH`) acompañadas de una bocanada de humo (`CLOUD`), una mini-explosión y efectos de sonido de ilusionista.
-* **Higiene de Chat:** Silencia completamente los mensajes de entrada (`PlayerJoinEvent`) y salida (`PlayerQuitEvent`) de los miembros de staff invisibles, ocultándolos de la lista de tabulación y evitando que los usuarios detecten su presencia al reconectarse en vanish.
-
-### ⚡ 7. Moderación Creativa
-* **Sanciones Inmersivas:** Al sancionar (Baneo o Kick) a un jugador en tiempo real, el plugin intercepta el evento de desconexión y genera un **rayo visual y silencioso (trueno estético)** junto con una explosión amortiguada y humo denso en la última ubicación del infractor.
-* **Monitoreo en Discord:** Envía reportes interactivos por webhook a un canal de Discord específico de moderación incluyendo detalles de la sanción, razón, IP del usuario (en login) y moderador.
-
-### 📡 8. Latidos de Presencia y Eventos (DrakesLabPresence)
-* **Presencia Asíncrona:** Envía latidos de estado (`Heartbeat`) del servidor cada 30 minutos a Discord de forma asíncrona sin congelar el hilo principal del juego.
-* **Eventos del Servidor:** Monitorea entradas, salidas, muertes y logros.
-* **Filtrado Avanzado:** A diferencia del plugin anterior, **ignora recetas y avances internos**, publicando únicamente logros con interfaz de visualización real para el jugador. Además, tiene en cuenta el estado de `/vanish` de los moderadores para no revelar sus movimientos en Discord.
+<p align="center">
+  <strong>Núcleo mítico de DrakesCraft para Purpur/Paper 1.21.x</strong><br>
+  Bosses, reliquias, tienda, presencia, moderación visual y utilidades premium en un solo plugin.
+</p>
 
 ---
 
-## 🛠️ Integraciones y Dependencias
+## Qué es hoy Odysseia
 
-El plugin se acopla como dependencia suave (`softdepend`) a:
-* 🟢 **PlaceholderAPI (PAPI):** Necesario para renderizar los placeholders de ciclo de prefijos.
-* 🟢 **LuckPerms:** Utilizado para comprobar grupos y permisos.
-* 🟢 **EssentialsX:** Utilizado para comprobar los permisos de kits VIP.
-* 🟢 **TAB:** Integra los placeholders visuales para mostrar dinámicamente los rangos de los dueños en la lista de jugadores y el chat.
+**Odysseia** ya no es solamente un reemplazo elegante de un puñado de scripts viejos.
+Hoy es el plugin central que sostiene buena parte de la identidad de **DrakesCraft**:
+
+- jefes míticos multi-fase con drops legendarios
+- reliquias activas con habilidades reales en combate
+- integración de tienda con delivery automático y anuncios sincronizados
+- presencia y logs hacia Discord por webhook
+- vanish y moderación con estética propia
+- ciclos visuales de dueños y placeholders
+- utilidades survival personalizadas como `Papa de Mar`, `Leñador Loco` y `ChatGames`
+- contención de abuso de ítems `SFMaster`
+
+El objetivo del proyecto es simple: que el servidor se sienta como una experiencia propia, no como una suma de plugins desconectados.
 
 ---
 
-## ⚙️ Configuración (`config.yml`)
+## Stack objetivo
 
-El archivo de configuración permite personalizar al máximo el comportamiento del plugin:
+- **Servidor:** Purpur / Paper 1.21.x
+- **Java:** 21
+- **Build:** Maven
+- **Dependencias suaves:** PlaceholderAPI, LuckPerms, Essentials
+
+---
+
+## Módulos principales
+
+### 1. Panteón de bosses
+
+Odysseia implementa un sistema completo de bosses míticos con barra, fases, skills, drops y anuncios:
+
+- Thor
+- Ares
+- Hades
+- Poseidón
+- Zeus
+- Loki
+- Odin
+- Kratos
+- Heimdall
+- Hidra
+- Cerbero
+- Artemisa
+- Tifón
+- Prometeo
+
+Además mantiene compatibilidad con jefes previos como `Circe`, `Polifemo` y `Dios Corrupto`.
+
+#### Capacidades del sistema
+
+- spawn manual por comando
+- invocadores únicos por boss
+- anuncios globales con anti-spam
+- soporte de spawn natural configurable
+- bossbars y seguimiento de jugadores cercanos
+- skills especializadas por entidad
+- drops manuales garantizados al morir
+- webhooks de spawn y kill a Discord
+
+### 2. Reliquias y armas míticas
+
+Los drops de bosses no son decorativos. `BossItemListener` implementa comportamiento real para reliquias como:
+
+- `Mjolnir`
+- `Filo de Ares`
+- `Escudo Espartano`
+- `Guadaña de Hades`
+- `Tridente de Poseidón`
+- `Maza de Zeus`
+- `Daga de Loki`
+- `Cetro de Loki`
+- `Lanza de Odin`
+- `Casco de Odin`
+- `Espadas del Caos`
+- `Hacha Leviatán`
+- `Gjallarhorn`
+- `Alas del Bifröst`
+- `Colmillo de la Hidra`
+- `Escama de la Hidra`
+- `Piel de Cerbero`
+- `Arco Lunar de Artemisa`
+- `Garra de Tifón`
+- `Coraza del Padre Monstruo`
+- `Llama Eterna de Prometeo`
+
+Incluye efectos como:
+
+- rayos y tormentas
+- tsunamis y knockback en área
+- veneno y wither
+- invisibilidad parcial de Loki
+- escarcha y retorno rúnico del Hacha Leviatán
+- sincronización dual de las Espadas del Caos
+- tirones, fuego, cadenas visuales y partículas
+
+### 3. Tienda y entregas
+
+Odysseia incluye un `StoreManager` para delivery automático contra backend externo:
+
+- consulta compras pendientes
+- ejecuta comandos de entrega en hilo principal
+- confirma transacciones al backend
+- dispara anuncio global y webhook de felicitación
+- soporta comando manual `/odysseiaannounce <nick> <producto...>` para Tebex
+
+Esto permite que el flujo de tienda quede unificado entre:
+
+- backend web
+- plugin del servidor
+- chat in-game
+- sonido global
+- Discord
+
+### 4. Presencia y eventos Discord
+
+`PresenceEventListener` y utilidades relacionadas cubren:
+
+- startup y shutdown del servidor
+- join y quit
+- muertes
+- avances reales del jugador
+- heartbeat periódico
+
+Todo con rate-limit y entrega asíncrona endurecida.
+
+### 5. Moderación visual y vanish
+
+Odysseia mantiene una capa de moderación estilizada:
+
+- `/vanish` con partículas y sonido
+- ocultación de staff invisible
+- silenciamiento visual en entradas y salidas
+- eventos de kick / ban reportados a Discord
+- efectos visuales de castigo in-world
+
+### 6. Utilidades survival personalizadas
+
+El plugin también concentra piezas históricas del servidor:
+
+- `Papa de Mar`
+- `Leñador Loco`
+- `ChatGames` programado
+- ciclo de prefijos del owner
+- placeholders para integración visual
+- efectos de armadura por rango
+
+### 7. Control de abuso SFMaster
+
+`SFMasterWatcherListener` marca ítems generados por cheat y bloquea abuso en:
+
+- drop al suelo
+- venta por subasta
+- movimiento y colocación de ciertos ítems
+- persistencia y rastreo de bloques ligados al modo SFMaster
+
+No es un sistema cosmético: es una barrera para evitar que el acceso temporal a Slimefun Cheat rompa la economía.
+
+---
+
+## Comandos principales
+
+### Administración
+
+- `/boss spawn <tipo>`
+- `/boss give <jugador> <tipo>`
+- `/vanish`
+- `/lenador [nivel]`
+- `/papademar`
+
+### Tienda / anuncios
+
+- `/odysseiaannounce <nick> <producto...>`
+
+---
+
+## Integraciones
+
+### PlaceholderAPI
+
+Expone placeholders para el ciclo visual de dueños:
+
+- `%odysseia_owner_prefix%`
+- `%odysseia_owner_prefix_odiseo%`
+- `%odysseia_owner_prefix_penelope%`
+
+### LuckPerms
+
+Usado para:
+
+- detección de grupos y permisos
+- rangos temporales de tienda
+- chequeo de presencia de dueños
+
+### Essentials
+
+Usado para:
+
+- permisos de kits VIP
+- coherencia con perks y economía del servidor
+
+---
+
+## Configuración importante
+
+Las áreas de configuración más relevantes están en `src/main/resources/config.yml`.
+
+### Bloques clave
+
+- `discord`
+- `owner-cycle`
+- `armor-effects`
+- `papa-de-mar`
+- `chatgames`
+- `store`
+- `natural-spawn`
+- `kits`
+
+### Ejemplos de uso real
+
+#### Tienda
 
 ```yaml
-# Habilitar envio de eventos a Discord
-discord:
+store:
   enabled: true
-  webhook-url: "URL_DEL_WEBHOOK"
-  webhook-moderation-url: "URL_DEL_WEBHOOK_MODERACION"
+  poll-interval-seconds: 60
+  announcement-webhook-url: "https://discord.com/api/webhooks/..."
+```
 
-# Ciclo de Prefijos del Propietario (Owner)
+#### Spawn natural de bosses
+
+```yaml
+natural-spawn:
+  enabled: false
+  interval-seconds: 1800
+  chance: 0.25
+  max-active: 2
+```
+
+#### Owner cycle
+
+```yaml
 owner-cycle:
   enabled: true
   interval-minutes: 30
-  odiseo:
-    prefix-a: "&8✠ &6&lᴏᴅɪsᴇᴏ &8✦ &6&o"
-    prefix-b: "&8✠ &4&lᴅᴜᴇñᴏ &8✦ &4"
-  penelope:
-    prefix-a: "&d✦ &d&lᴘᴇɴᴇʟᴏᴘᴇ &8✦ &d"
-    prefix-b: "&d✦ &d&l... &8✦ &d"
-
-# Efectos de Armadura de Rangos
-armor-effects:
-  refresh-interval-seconds: 90
-  effect-duration-seconds: 180
-  # Niveles de pocion para Hercules, Hestia, Hermes, Hefesto, Artemisa, Afrodita, Zeus...
-  
-# Reliquias Personalizadas
-papa-de-mar:
-  food-restored: 5
-  saturation-restored: 8.4
-  delivery-interval-minutes: 15
-
-# ChatGames Scheduler
-chatgames:
-  min-interval: 15
-  max-interval: 30
-
-# Presencia y Eventos (DrakesLabPresence)
-presence:
-  enabled: true
-  server-label: "DrakesCraft"
-  heartbeat-minutes: 30
-  startup-delay-seconds: 60
-  events:
-    server-startup: true
-    server-shutdown: true
-    player-join: true
-    player-quit: true
-    player-death: true
-    advancement: true
-    rate-limit-per-minute: 12
 ```
 
 ---
 
-## 🛡️ Hardening & Seguridad HTTP
-* **Protección SSRF:** El gestor de webhooks bloquea peticiones dirigidas a rangos de IP privadas o locales (`127.0.0.1`, `localhost`, `10.x.x.x`, `192.168.x.x`, `172.16.x.x` a `172.31.x.x`) para evitar ataques de falsificación de peticiones del lado del servidor.
-* **Control de Hilos:** Todas las llamadas HTTP se ejecutan de manera completamente asíncrona usando el `HttpClient` de JDK 11, evitando la ralentización de los ticks del servidor.
-* **Retry-After Inteligente:** Si Discord devuelve un código de estado `429 (Too Many Requests)`, el plugin calcula el tiempo de espera. Si la espera supera los 15 segundos, el mensaje se descarta automáticamente para evitar acumular llamadas colgadas que saturen la memoria.
+## Seguridad y hardening
+
+Odysseia ya trae varias decisiones defensivas:
+
+- webhooks enviados fuera del hilo principal
+- validación estricta de URL HTTPS permitidas
+- manejo de `429` y `Retry-After`
+- descarte de entregas duplicadas en vuelo
+- anti-spam de anuncios globales de bosses
+- limpieza segura de entidades y bossbars
+- control de ítems temporales o visuales para evitar exploits
+
+No intenta ser un framework genérico. Está endurecido para el flujo operativo real de DrakesCraft.
+
+---
+
+## Build
+
+```bash
+mvn clean package
+```
+
+El jar final queda en:
+
+```text
+target/Odysseia-1.0.0-SNAPSHOT.jar
+```
+
+---
+
+## Despliegue típico
+
+```bash
+cp target/Odysseia-1.0.0-SNAPSHOT.jar /ruta/al/servidor/plugins/Odysseia.jar
+```
+
+En DrakesCraft se despliega sobre el `plugins/Odysseia.jar` del servidor principal y toma la configuración persistida desde su carpeta de datos.
+
+---
+
+## Documentación adicional
+
+- `EXPANSION_II_BOSSES.md`
+- `EXPANSION_III_BOSSES.md`
+
+Esos documentos sirven como bitácora de crecimiento del sistema mítico, pero el estado más real y actual del plugin vive en:
+
+- `src/main/java/...`
+- `src/main/resources/config.yml`
+- este `README`
+
+---
+
+## Filosofía del proyecto
+
+Odysseia existe para que DrakesCraft tenga:
+
+- una capa de fantasía coherente
+- un endgame con identidad
+- una tienda integrada sin parches frágiles
+- menos Skript improvisado
+- más control técnico y menos ruido operativo
+
+Si el servidor se siente como un mundo propio y no como un collage de automatizaciones, entonces el plugin está haciendo bien su trabajo.
