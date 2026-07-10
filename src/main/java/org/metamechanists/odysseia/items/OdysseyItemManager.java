@@ -565,4 +565,25 @@ public final class OdysseyItemManager {
         }
         return item;
     }
+
+    public static ItemStack createBossSummoner(String bossId) {
+        String capitalized = bossId.substring(0, 1).toUpperCase() + bossId.substring(1).toLowerCase();
+        ItemStack item = createBaseItem(
+                Material.FIRE_CHARGE,
+                "&d&l⚡ Invocador de " + capitalized,
+                "summoner_" + bossId.toLowerCase(),
+                "&8▸ Invocador de Jefe Mítico",
+                "&7Haz clic derecho en el suelo para invocar",
+                "&7al jefe ancestral &b" + capitalized.toUpperCase() + "&7.",
+                "",
+                "&d&l¡ATENCIÓN! &7Su ira sacudirá el servidor."
+        );
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            NamespacedKey summonKey = new NamespacedKey(Odysseia.getInstance(), "boss_summoner");
+            meta.getPersistentDataContainer().set(summonKey, PersistentDataType.STRING, bossId.toLowerCase());
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
 }

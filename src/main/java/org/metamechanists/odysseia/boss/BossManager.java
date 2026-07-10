@@ -49,6 +49,7 @@ public class BossManager implements Listener {
     private final Odysseia plugin;
     private final Map<UUID, OdysseyBoss> activeBosses = new ConcurrentHashMap<>();
     private final java.util.Set<UUID> naturalBosses = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final Map<String, Long> lastSpawnAnnouncements = new ConcurrentHashMap<>();
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -67,9 +68,12 @@ public class BossManager implements Listener {
     private void startTasks() {
         // Update BossBars and Pathfinding every 1 second (20 ticks)
         updateTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            for (OdysseyBoss boss : activeBosses.values()) {
-                if (boss.getEntity() == null || boss.getEntity().isDead() || !boss.getEntity().isValid()) {
-                    removeBoss(boss.getEntity().getUniqueId(), null);
+            for (Map.Entry<UUID, OdysseyBoss> entry : activeBosses.entrySet()) {
+                UUID bossId = entry.getKey();
+                OdysseyBoss boss = entry.getValue();
+                LivingEntity entity = boss.getEntity();
+                if (entity == null || entity.isDead() || !entity.isValid()) {
+                    removeBoss(bossId, null);
                     continue;
                 }
                 boss.updateBossBar();
@@ -256,11 +260,31 @@ public class BossManager implements Listener {
     }
 
     private void broadcastSpawn(OdysseyBoss boss) {
-        String msg = ChatColor.translateAlternateColorCodes('&',
-                "&c&l[MÍTICO] &f¡El jefe ancestral " + boss.getDisplayName() + " &fha aparecido en el mundo!");
-        Bukkit.broadcastMessage(msg);
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.5f);
+        String bossName = boss.getDisplayName();
+        long now = System.currentTimeMillis();
+        long lastAnnounce = lastSpawnAnnouncements.getOrDefault(bossName, 0L);
+
+        if (now - lastAnnounce > 10000L) { // Cooldown de 10 segundos por tipo de jefe
+            lastSpawnAnnouncements.put(bossName, now);
+            String msg = ChatColor.translateAlternateColorCodes('&',
+                    "&c&l[MÍTICO] &f¡El jefe ancestral " + bossName + " &fha aparecido en el mundo!");
+            Bukkit.broadcastMessage(msg);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.5f);
+            }
+        } else {
+            // Notificación local (radio de 40 bloques) para evitar el spam global pero mantener informados a los cercanos
+            String msg = ChatColor.translateAlternateColorCodes('&',
+                    "&c&l[MÍTICO] &f¡El jefe ancestral " + bossName + " &fha aparecido cerca!");
+            Location loc = boss.getEntity().getLocation();
+            if (loc.getWorld() != null) {
+                for (Player p : loc.getWorld().getPlayers()) {
+                    if (p.getLocation().distanceSquared(loc) < 1600.0) { // 40 bloques de radio (40*40 = 1600)
+                        p.sendMessage(msg);
+                        p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 0.5f);
+                    }
+                }
+            }
         }
     }
 
@@ -318,6 +342,43 @@ public class BossManager implements Listener {
             } else {
                 // Update boss bar instantly on damage
                 Bukkit.getScheduler().runTaskLater(plugin, boss::updateBossBar, 1L);
+            }
+        }
+    }
+
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGH, ignoreCancelled = true)
+    public void onBossCombat(org.bukkit.event.entity.EntityDamageByEntityEvent event) {
+        org.bukkit.entity.Entity damager = event.getDamager();
+        org.bukkit.entity.Entity victim = event.getEntity();
+
+        // Determinar el jugador atacante (físico o con proyectiles)
+        Player attackerPlayer = null;
+        if (damager instanceof Player p) {
+            attackerPlayer = p;
+        } else if (damager instanceof org.bukkit.entity.Projectile proj && proj.getShooter() instanceof Player p) {
+            attackerPlayer = p;
+        }
+
+        // Caso A: Jugador VIP ataca a un Jefe Mítico -> Inflige +25% de daño
+        if (activeBosses.containsKey(victim.getUniqueId()) && attackerPlayer != null) {
+            if (attackerPlayer.hasPermission("odysseia.boss.vip_advantage")) {
+                event.setDamage(event.getDamage() * 1.25);
+                // Partículas críticas de poder celestial
+                victim.getWorld().spawnParticle(org.bukkit.Particle.CRIT, victim.getLocation().add(0, 1, 0), 10, 0.2, 0.4, 0.2, 0.1);
+            }
+            return;
+        }
+
+        // Caso B: Jefe Mítico ataca a un Jugador VIP -> Recibe -20% de daño
+        if (victim instanceof Player player && player.hasPermission("odysseia.boss.vip_advantage")) {
+            org.bukkit.entity.Entity directDamager = damager;
+            if (damager instanceof org.bukkit.entity.Projectile proj && proj.getShooter() instanceof org.bukkit.entity.Entity shooter) {
+                directDamager = shooter;
+            }
+            if (activeBosses.containsKey(directDamager.getUniqueId())) {
+                event.setDamage(event.getDamage() * 0.80);
+                // Efecto de escudo dorado al recibir el golpe del boss
+                player.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 8, 0.2, 0.3, 0.2, 0.05);
             }
         }
     }

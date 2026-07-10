@@ -167,20 +167,13 @@ public final class StoreManager {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), formatted);
             }
 
-            // Anuncio en el chat local
-            String chatAnnounce = config.getString("store.chat-announcement", "");
-            if (chatAnnounce != null && !chatAnnounce.isBlank()) {
-                String msg = ChatColor.translateAlternateColorCodes('&', chatAnnounce
-                        .replace("{player}", nick)
-                        .replace("{product}", productName));
-                Bukkit.broadcastMessage(msg);
-            }
+            // Disparar anuncio en chat, sonido global y webhook de Discord
+            announcePurchase(plugin, nick, productName);
 
-            // Confirmar transacción asincrónicamente y enviar webhook de Discord
+            // Confirmar transacción asincrónicamente
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     confirmPurchase(txnId);
-                    sendDiscordNotification(nick, productName);
                 } finally {
                     inFlightTransactions.remove(txnId);
                 }
@@ -223,16 +216,36 @@ public final class StoreManager {
         }
     }
 
-    private void sendDiscordNotification(String nick, String productName) {
-        announcePurchase(plugin, nick, productName);
-    }
-
     /**
-     * Dispara el webhook público de felicitaciones de compra.
+     * Dispara el anuncio público de Discord, el anuncio en chat in-game y el sonido global.
      * Estático para poder invocarse desde un comando (entregas vía Tebex) sin depender del hilo de polling.
      */
     public static void announcePurchase(Odysseia plugin, String nick, String productName) {
         FileConfiguration config = plugin.getConfig();
+
+        // 1. Anuncio en el chat local
+        String chatAnnounce = config.getString("store.chat-announcement", "");
+        if (chatAnnounce != null && !chatAnnounce.isBlank()) {
+            String msg = ChatColor.translateAlternateColorCodes('&', chatAnnounce
+                    .replace("{player}", nick)
+                    .replace("{product}", productName));
+            Bukkit.broadcastMessage(msg);
+        }
+
+        // 2. Reproducir sonido global si está activado
+        if (config.getBoolean("store.global-sound.enabled", true)) {
+            String soundName = config.getString("store.global-sound.sound", "UI_TOAST_CHALLENGE_COMPLETE");
+            try {
+                org.bukkit.Sound sound = org.bukkit.Sound.valueOf(soundName.toUpperCase());
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.playSound(p.getLocation(), sound, 1.0f, 1.0f);
+                }
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("[Store] Sonido global de tienda inválido: " + soundName);
+            }
+        }
+
+        // 3. Webhook de Discord
         String webhookUrl = config.getString("store.announcement-webhook-url", "");
         String discordAnnounce = config.getString("store.discord-announcement", "");
 

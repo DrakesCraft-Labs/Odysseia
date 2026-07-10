@@ -259,11 +259,15 @@ store:
   # Frecuencia de verificación en segundos
   poll-interval-seconds: 60
   # Webhook para anunciar compras en Discord de forma pública
-  announcement-webhook-url: "REPLACE_ME"
+  announcement-webhook-url: "https://discord.com/api/webhooks/1514654807271542894/Z7Gxa2DhgBPc3bYEpj_g2QUhfVIdgngsCyTgHGCHXvhF1_0QCwdyf0nQPve2norn1qEG"
   # Mensaje de felicitaciones en el chat in-game (Soporta códigos de color '&')
   chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
   # Mensaje del webhook de Discord
   discord-announcement: "🎉 **¡Felicidades {player} ha comprado {product} en el servidor! ¡Gracias por mantener el servidor vivo!** 🎉"
+  # Sonido global emitido en el servidor ante compras
+  global-sound:
+    enabled: true
+    sound: "UI_TOAST_CHALLENGE_COMPLETE"
   
   # Comandos a ejecutar por cada producto de la tienda
   # {player} se reemplazará por el nick exacto del jugador
@@ -399,3 +403,789 @@ natural-spawn:
   worlds: []
   # Jefes elegibles (vacío = todos). Ej: [thor, hidra, cerbero, tifon]
   bosses: []
+
+# ─────────────────────────────────────────────
+#  Sistema de Kits VIP e Integraciones (Slimefun)
+# ─────────────────────────────────────────────
+# Permite definir kits personalizados con cooldowns, comandos, dinero de Vault,
+# ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
+# Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).
+kits:
+  # ── Kit de Comida ──────────────────────────────
+  comida:
+    cooldown: "30m"
+    permission: "drakes.kit.comida"
+    money: 0
+    vanilla-items:
+      - material: COOKED_BEEF
+        amount: 32
+      - material: GOLDEN_CARROT
+        amount: 16
+      - material: BREAD
+        amount: 32
+      - material: COOKIE
+        amount: 16
+
+  # ── Kit VIP Hércules ───────────────────────────
+  hercules:
+    cooldown: "-1"
+    permission: "drakes.kit.hercules"
+    money: 35000
+    commands:
+      - "ps give viphercules {player} 1"
+    vanilla-items:
+      - material: DIAMOND_HELMET
+        amount: 1
+        name: "&6&lCasco de Hércules"
+        lore:
+          - "&7Protección de la fuerza bruta"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 9
+          unbreaking: 5
+          mending: 1
+        soulbound: true
+      - material: DIAMOND_CHESTPLATE
+        amount: 1
+        name: "&6&lPechera de Hércules"
+        lore:
+          - "&7Protección de la fuerza bruta"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 9
+          unbreaking: 5
+          mending: 1
+        soulbound: true
+      - material: DIAMOND_LEGGINGS
+        amount: 1
+        name: "&6&lPantalones de Hércules"
+        lore:
+          - "&7Protección de la fuerza bruta"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 9
+          unbreaking: 5
+          mending: 1
+        soulbound: true
+      - material: DIAMOND_BOOTS
+        amount: 1
+        name: "&6&lBotas de Hércules"
+        lore:
+          - "&7Protección de la fuerza bruta"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 9
+          unbreaking: 5
+          mending: 1
+          feather_falling: 8
+          depth_strider: 3
+        soulbound: true
+      - material: DIAMOND_SWORD
+        amount: 1
+        name: "&6&lEspada de Hércules"
+        lore:
+          - "&8✦ Filo devastador"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 12
+          looting: 5
+          fire_aspect: 2
+          unbreaking: 5
+          mending: 1
+        soulbound: true
+      - material: DIAMOND_PICKAXE
+        amount: 1
+        name: "&6&lPico de Hércules"
+        lore:
+          - "&7Poder minero de los gigantes"
+        enchantments:
+          efficiency: 10
+          fortune: 6
+          unbreaking: 5
+          mending: 1
+      - material: DIAMOND_AXE
+        amount: 1
+        name: "&6&lHacha de Hércules"
+        enchantments:
+          efficiency: 10
+          sharpness: 8
+          unbreaking: 5
+          mending: 1
+      - material: DIAMOND_SHOVEL
+        amount: 1
+        name: "&6&lPala de Hércules"
+        enchantments:
+          efficiency: 10
+          unbreaking: 5
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&6&lEscudo de Hércules"
+        enchantments:
+          unbreaking: 5
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 48
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 4
+      - material: ENDER_PEARL
+        amount: 8
+      - material: TOTEM_OF_UNDYING
+        amount: 1
+
+  # ── Kit VIP Hestia ─────────────────────────────
+  hestia:
+    cooldown: "-1"
+    permission: "drakes.kit.hestia"
+    money: 75000
+    commands:
+      - "ps give viphestia {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&e&lCasco de Hestia"
+        lore:
+          - "&7Protección del fuego del hogar"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 10
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&e&lPechera de Hestia"
+        lore:
+          - "&7Protección del fuego del hogar"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 10
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&e&lPantalones de Hestia"
+        lore:
+          - "&7Protección del fuego del hogar"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 10
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&e&lBotas de Hestia"
+        lore:
+          - "&7Protección del fuego del hogar"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 10
+          unbreaking: 6
+          mending: 1
+          feather_falling: 10
+          depth_strider: 3
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&e&lEspada de Hestia"
+        lore:
+          - "&8✦ Filo purificador"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 13
+          looting: 6
+          fire_aspect: 3
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&e&lPico de Hestia"
+        enchantments:
+          efficiency: 11
+          fortune: 7
+          unbreaking: 6
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&e&lHacha de Hestia"
+        enchantments:
+          efficiency: 11
+          sharpness: 9
+          unbreaking: 6
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&e&lPala de Hestia"
+        enchantments:
+          efficiency: 11
+          unbreaking: 6
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&e&lEscudo de Hestia"
+        enchantments:
+          unbreaking: 6
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 8
+      - material: ENDER_PEARL
+        amount: 16
+      - material: TOTEM_OF_UNDYING
+        amount: 2
+
+  # ── Kit VIP Hermes ─────────────────────────────
+  hermes:
+    cooldown: "-1"
+    permission: "drakes.kit.hermes"
+    money: 150000
+    commands:
+      - "ps give viphermes {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&b&lCasco de Hermes"
+        lore:
+          - "&7Protección de las sandalias aladas"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 11
+          unbreaking: 7
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&b&lPechera de Hermes"
+        lore:
+          - "&7Protección de las sandalias aladas"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 11
+          unbreaking: 7
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&b&lPantalones de Hermes"
+        lore:
+          - "&7Protección de las sandalias aladas"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 11
+          unbreaking: 7
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&b&lBotas de Hermes"
+        lore:
+          - "&7Protección de las sandalias aladas"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 11
+          unbreaking: 7
+          mending: 1
+          feather_falling: 12
+          depth_strider: 4
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&b&lEspada de Hermes"
+        lore:
+          - "&8✦ Filo veloz"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 14
+          looting: 7
+          fire_aspect: 3
+          unbreaking: 7
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&b&lPico de Hermes"
+        enchantments:
+          efficiency: 12
+          fortune: 8
+          unbreaking: 7
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&b&lHacha de Hermes"
+        enchantments:
+          efficiency: 12
+          sharpness: 10
+          unbreaking: 7
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&b&lPala de Hermes"
+        enchantments:
+          efficiency: 12
+          unbreaking: 7
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&b&lEscudo de Hermes"
+        enchantments:
+          unbreaking: 7
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 16
+      - material: ENDER_PEARL
+        amount: 16
+      - material: TOTEM_OF_UNDYING
+        amount: 3
+
+  # ── Kit VIP Hefesto ────────────────────────────
+  hefesto:
+    cooldown: "-1"
+    permission: "drakes.kit.hefesto"
+    money: 250000
+    commands:
+      - "ps give viphefesto {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&c&lCasco de Hefesto"
+        lore:
+          - "&7Protección de las forjas ardientes"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 12
+          unbreaking: 8
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&c&lPechera de Hefesto"
+        lore:
+          - "&7Protección de las forjas ardientes"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 12
+          unbreaking: 8
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&c&lPantalones de Hefesto"
+        lore:
+          - "&7Protección de las forjas ardientes"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 12
+          unbreaking: 8
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&c&lBotas de Hefesto"
+        lore:
+          - "&7Protección de las forjas ardientes"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 12
+          unbreaking: 8
+          mending: 1
+          feather_falling: 14
+          depth_strider: 4
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&c&lEspada de Hefesto"
+        lore:
+          - "&8✦ Filo ígneo"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 15
+          looting: 8
+          fire_aspect: 4
+          unbreaking: 8
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&c&lPico de Hefesto"
+        enchantments:
+          efficiency: 13
+          fortune: 9
+          unbreaking: 8
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&c&lHacha de Hefesto"
+        enchantments:
+          efficiency: 13
+          sharpness: 11
+          unbreaking: 8
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&c&lPala de Hefesto"
+        enchantments:
+          efficiency: 13
+          unbreaking: 8
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&c&lEscudo de Hefesto"
+        enchantments:
+          unbreaking: 8
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 24
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 4
+
+  # ── Kit VIP Artemisa ───────────────────────────
+  artemisa:
+    cooldown: "-1"
+    permission: "drakes.kit.artemisa"
+    money: 450000
+    commands:
+      - "ps give vipartemisa {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&2&lCasco de Artemisa"
+        lore:
+          - "&7Protección de la luna"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 13
+          unbreaking: 9
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&2&lPechera de Artemisa"
+        lore:
+          - "&7Protección de la luna"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 13
+          unbreaking: 9
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&2&lPantalones de Artemisa"
+        lore:
+          - "&7Protección de la luna"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 13
+          unbreaking: 9
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&2&lBotas de Artemisa"
+        lore:
+          - "&7Protección de la luna"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 13
+          unbreaking: 9
+          mending: 1
+          feather_falling: 16
+          depth_strider: 4
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&2&lEspada de Artemisa"
+        lore:
+          - "&8✦ Filo lunar"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 16
+          looting: 9
+          fire_aspect: 4
+          unbreaking: 9
+          mending: 1
+        soulbound: true
+      - material: BOW
+        amount: 1
+        name: "&2&lArco de la Caza Divina"
+        enchantments:
+          power: 10
+          punch: 3
+          flame: 2
+          infinity: 1
+          unbreaking: 10
+          mending: 1
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&2&lPico de Artemisa"
+        enchantments:
+          efficiency: 14
+          fortune: 10
+          unbreaking: 9
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&2&lHacha de Artemisa"
+        enchantments:
+          efficiency: 14
+          sharpness: 12
+          unbreaking: 9
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&2&lPala de Artemisa"
+        enchantments:
+          efficiency: 14
+          unbreaking: 9
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&2&lEscudo de Artemisa"
+        enchantments:
+          unbreaking: 9
+          mending: 1
+      - material: ARROW
+        amount: 64
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 32
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 5
+
+  # ── Kit VIP Afrodita ───────────────────────────
+  afrodita:
+    cooldown: "-1"
+    permission: "drakes.kit.afrodita"
+    money: 700000
+    commands:
+      - "ps give vipafrodita {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&d&lCasco de Afrodita"
+        lore:
+          - "&7Protección de la belleza"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 14
+          unbreaking: 10
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&d&lPechera de Afrodita"
+        lore:
+          - "&7Protección de la belleza"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 14
+          unbreaking: 10
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&d&lPantalones de Afrodita"
+        lore:
+          - "&7Protección de la belleza"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 14
+          unbreaking: 10
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&d&lBotas de Afrodita"
+        lore:
+          - "&7Protección de la belleza"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 14
+          unbreaking: 10
+          mending: 1
+          feather_falling: 18
+          depth_strider: 4
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&d&lEspada de Afrodita"
+        lore:
+          - "&8✦ Filo cautivador"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 17
+          looting: 10
+          fire_aspect: 5
+          unbreaking: 10
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&d&lPico de Afrodita"
+        enchantments:
+          efficiency: 15
+          fortune: 11
+          unbreaking: 10
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&d&lHacha de Afrodita"
+        enchantments:
+          efficiency: 15
+          sharpness: 13
+          unbreaking: 10
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&d&lPala de Afrodita"
+        enchantments:
+          efficiency: 15
+          unbreaking: 10
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&d&lEscudo de Afrodita"
+        enchantments:
+          unbreaking: 10
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 48
+      - material: ENDER_PEARL
+        amount: 48
+      - material: TOTEM_OF_UNDYING
+        amount: 6
+
+  # ── Kit VIP Zeus ───────────────────────────────
+  zeus:
+    cooldown: "-1"
+    permission: "drakes.kit.zeus"
+    money: 1500000
+    commands:
+      - "ps give vipzeus {player} 1"
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: "&4&lCasco de Zeus"
+        lore:
+          - "&7Protección del rey del Olimpo"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 15
+          unbreaking: 12
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: "&4&lPechera de Zeus"
+        lore:
+          - "&7Protección del rey del Olimpo"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 15
+          unbreaking: 12
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: "&4&lPantalones de Zeus"
+        lore:
+          - "&7Protección del rey del Olimpo"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 15
+          unbreaking: 12
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: "&4&lBotas de Zeus"
+        lore:
+          - "&7Protección del rey del Olimpo"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          protection: 15
+          unbreaking: 12
+          mending: 1
+          feather_falling: 20
+          depth_strider: 4
+        soulbound: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: "&4&lEspada de Zeus"
+        lore:
+          - "&8✦ Filo tormentoso (Rayo)"
+          - "&c[Vínculo Divino] Soulbound"
+        enchantments:
+          sharpness: 20
+          looting: 12
+          fire_aspect: 5
+          unbreaking: 12
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: "&4&lPico de Zeus"
+        enchantments:
+          efficiency: 18
+          fortune: 13
+          unbreaking: 12
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&4&lHacha de Zeus"
+        enchantments:
+          efficiency: 18
+          sharpness: 15
+          unbreaking: 12
+          mending: 1
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: "&4&lPala de Zeus"
+        enchantments:
+          efficiency: 18
+          unbreaking: 12
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&4&lEscudo de Zeus"
+        enchantments:
+          unbreaking: 12
+          mending: 1
+      - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 64
+      - material: ENDER_PEARL
+        amount: 64
+      - material: TOTEM_OF_UNDYING
+        amount: 8
+

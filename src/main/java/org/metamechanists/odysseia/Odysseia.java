@@ -14,7 +14,6 @@ import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
 import org.metamechanists.odysseia.listeners.ModerationListener;
 import org.metamechanists.odysseia.listeners.PresenceEventListener;
-import org.metamechanists.odysseia.listeners.StarterKitListener;
 import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
@@ -65,8 +64,8 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new StarterKitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this), this);
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -423,5 +422,9 @@ public final class Odysseia extends JavaPlugin {
                 + escapeJson(instanceId + " · " + serverLabel) + "\"}}]}";
         
         WebhookSender.sendSyncBestEffort(this, url, json);
+    }
+
+    public BossManager getBossManager() {
+        return this.bossManager;
     }
 }

@@ -1,5 +1,6 @@
 package org.metamechanists.odysseia.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,45 +32,95 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cEste comando solo puede ser ejecutado por jugadores."));
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&c&lUSO: &e/boss <spawn|give> ..."));
             return true;
         }
 
-        if (args.length < 2 || !args[0].equalsIgnoreCase("spawn")) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lUSO: &e/boss spawn <circe|polifemo|dios_corrupto|thor|ares|hades|poseidon|zeus|loki|odin|kratos|heimdall|hidra|cerbero|artemisa|tifon|prometeo>"));
+        String sub = args[0].toLowerCase();
+
+        // ── SUBCOMANDO: SPAWN ──
+        if (sub.equalsIgnoreCase("spawn")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cEste comando solo puede ser ejecutado por jugadores."));
+                return true;
+            }
+
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c&lUSO: &e/boss spawn <tipo>"));
+                return true;
+            }
+
+            String bossType = args[1].toLowerCase();
+            if (!isValidBossType(bossType)) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c&lERROR: &eEl jefe mítico '" + bossType + "' no existe."));
+                return true;
+            }
+
+            var spawned = bossManager.spawnBoss(bossType, player.getLocation());
+            if (spawned != null) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&a&l¡ÉXITO! &eHas invocado al jefe mítico " + spawned.getDisplayName() + " &een tu posición."));
+            } else {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cOcurrió un error al invocar al jefe."));
+            }
             return true;
         }
 
-        String bossType = args[1].toLowerCase();
-        boolean valid = bossType.equals("circe") || bossType.equals("polifemo")
-                || bossType.equals("dios_corrupto") || bossType.equals("dios-corrupto")
-                || bossType.equals("thor") || bossType.equals("ares")
-                || bossType.equals("hades") || bossType.equals("poseidon")
-                || bossType.equals("zeus") || bossType.equals("loki")
-                || bossType.equals("odin") || bossType.equals("kratos")
-                || bossType.equals("heimdall") || bossType.equals("hidra")
-                || bossType.equals("cerbero") || bossType.equals("artemisa")
-                || bossType.equals("tifon") || bossType.equals("tifón")
-                || bossType.equals("prometeo");
+        // ── SUBCOMANDO: GIVE (ENTREGAR INVOCADOR) ──
+        if (sub.equalsIgnoreCase("give")) {
+            if (args.length < 3) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c&lUSO: &e/boss give <jugador> <tipo>"));
+                return true;
+            }
 
-        if (!valid) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lERROR: &eEl jefe mítico '" + bossType
-                    + "' no existe. Usa: circe, polifemo, dios_corrupto, thor, ares, hades, poseidon, zeus, loki, odin, kratos, heimdall, hidra, cerbero, artemisa, tifon o prometeo."));
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null || !target.isOnline()) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c&lERROR: &eEl jugador '" + args[1] + "' no está conectado."));
+                return true;
+            }
+
+            String bossType = args[2].toLowerCase();
+            if (!isValidBossType(bossType)) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c&lERROR: &eEl jefe mítico '" + bossType + "' no existe."));
+                return true;
+            }
+
+            org.bukkit.inventory.ItemStack summoner = org.metamechanists.odysseia.items.OdysseyItemManager.createBossSummoner(bossType);
+            java.util.Map<Integer, org.bukkit.inventory.ItemStack> leftovers = target.getInventory().addItem(summoner);
+            for (org.bukkit.inventory.ItemStack drop : leftovers.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&a&l¡ÉXITO! &eEntregado Invocador de " + bossType.toUpperCase() + " a " + target.getName()));
+            target.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&d&l⚡ &e¡Has recibido un &dInvocador de " + bossType.toUpperCase() + "&e! Haz clic derecho para despertarlo."));
             return true;
         }
 
-        var spawned = bossManager.spawnBoss(bossType, player.getLocation());
-        if (spawned != null) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&a&l¡ÉXITO! &eHas invocado al jefe mítico " + spawned.getDisplayName() + " &een tu posición."));
-        } else {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cOcurrió un error al invocar al jefe."));
-        }
-
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&c&lUSO: &e/boss <spawn|give> ..."));
         return true;
+    }
+
+    private boolean isValidBossType(String type) {
+        return type.equals("circe") || type.equals("polifemo")
+                || type.equals("dios_corrupto") || type.equals("dios-corrupto")
+                || type.equals("thor") || type.equals("ares")
+                || type.equals("hades") || type.equals("poseidon")
+                || type.equals("zeus") || type.equals("loki")
+                || type.equals("odin") || type.equals("kratos")
+                || type.equals("heimdall") || type.equals("hidra")
+                || type.equals("cerbero") || type.equals("artemisa")
+                || type.equals("tifon") || type.equals("tifón")
+                || type.equals("prometeo");
     }
 
     @Override
@@ -80,22 +131,42 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 1) {
-            if ("spawn".startsWith(args[0].toLowerCase())) {
-                completions.add("spawn");
+            String input = args[0].toLowerCase();
+            if ("spawn".startsWith(input)) completions.add("spawn");
+            if ("give".startsWith(input)) completions.add("give");
+        } else if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("spawn")) {
+                String input = args[1].toLowerCase();
+                List<String> all = getBossList();
+                for (String b : all) {
+                    if (b.startsWith(input)) completions.add(b);
+                }
+            } else if (args[0].equalsIgnoreCase("give")) {
+                // Autocompletar jugadores conectados
+                String input = args[1].toLowerCase();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.getName().toLowerCase().startsWith(input)) {
+                        completions.add(p.getName());
+                    }
+                }
             }
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("spawn")) {
-            String input = args[1].toLowerCase();
-            List<String> all = List.of(
-                    "circe", "polifemo", "dios_corrupto",
-                    "thor", "ares", "hades", "poseidon", "zeus",
-                    "loki", "odin", "kratos",
-                    "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
-            );
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
+            String input = args[2].toLowerCase();
+            List<String> all = getBossList();
             for (String b : all) {
                 if (b.startsWith(input)) completions.add(b);
             }
         }
 
         return completions;
+    }
+
+    private List<String> getBossList() {
+        return List.of(
+                "circe", "polifemo", "dios_corrupto",
+                "thor", "ares", "hades", "poseidon", "zeus",
+                "loki", "odin", "kratos",
+                "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
+        );
     }
 }

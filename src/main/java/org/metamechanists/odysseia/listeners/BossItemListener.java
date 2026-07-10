@@ -3,6 +3,7 @@ package org.metamechanists.odysseia.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -17,7 +18,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -35,10 +41,13 @@ import java.util.UUID;
 public final class BossItemListener implements Listener {
 
     private final Odysseia plugin;
+    private final NamespacedKey kratosTempOffhandKey;
     private final Map<UUID, Long> scepterCooldowns = new HashMap<>();
+    private static final Map<UUID, ItemStack> savedOffhands = new HashMap<>();
 
     public BossItemListener(Odysseia plugin) {
         this.plugin = plugin;
+        this.kratosTempOffhandKey = new NamespacedKey(plugin, "kratos_temp_offhand");
 
         // Periodic check for Odin's Helmet every 2 seconds (40 ticks)
         Bukkit.getScheduler().runTaskTimer(plugin, this::checkOdinHelmet, 40L, 40L);
@@ -72,6 +81,9 @@ public final class BossItemListener implements Listener {
                 ItemMeta meta = item.getItemMeta();
                 String type = meta.getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
                 if (type != null) {
+                    if (type.equals("kratos_blade") && player.getHealth() < 12.0) {
+                        event.setDamage(event.getDamage() * 1.30);
+                    }
                     handleCustomMeleeHit(player, target, type);
                 }
             }
@@ -89,6 +101,16 @@ public final class BossItemListener implements Listener {
                     triggerTsunami(target.getLocation(), trident.getShooter() instanceof Entity s ? s : null);
                 }
             }
+        }
+
+        // 2.5 Projectile hit (Artemis Bow)
+        if (damagerEntity instanceof org.bukkit.entity.Arrow arrow && arrow.hasMetadata("artemis_arrow")) {
+            target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 200, 0, false, true));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 4, false, true));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, false, true));
+            Location tLoc = target.getLocation();
+            tLoc.getWorld().spawnParticle(Particle.SNOWFLAKE, tLoc.clone().add(0, 1, 0), 20, 0.3, 0.5, 0.3, 0.05);
+            tLoc.getWorld().playSound(tLoc, Sound.BLOCK_GLASS_BREAK, 1.0f, 0.7f);
         }
 
         // 3. Escudo Espartano de Ares — refleja el 20% del daño bloqueado al atacante
@@ -135,6 +157,73 @@ public final class BossItemListener implements Listener {
         return typeId.equals(type);
     }
 
+    private String getCustomItemType(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return null;
+        }
+        return item.getItemMeta().getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
+    }
+
+    private boolean isKratosBlade(ItemStack item) {
+        return "kratos_blade".equals(getCustomItemType(item));
+    }
+
+    private boolean isAir(ItemStack item) {
+        return item == null || item.getType().isAir();
+    }
+
+    private boolean isKratosTempOffhand(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return false;
+        }
+        return item.getItemMeta().getPersistentDataContainer().has(kratosTempOffhandKey, PersistentDataType.BYTE);
+    }
+
+    private void synchronizeKratosBlades(Player player) {
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
+        UUID playerId = player.getUniqueId();
+
+        if (isKratosBlade(mainHand)) {
+            if (isKratosBlade(offHand) && !isKratosTempOffhand(offHand)) {
+                return;
+            }
+
+            if (!savedOffhands.containsKey(playerId)) {
+                savedOffhands.put(playerId, isAir(offHand) ? null : offHand.clone());
+            }
+
+            if (!isKratosTempOffhand(offHand)) {
+                ItemStack visualClone = mainHand.clone();
+                ItemMeta cloneMeta = visualClone.getItemMeta();
+                if (cloneMeta != null) {
+                    cloneMeta.getPersistentDataContainer().set(kratosTempOffhandKey, PersistentDataType.BYTE, (byte) 1);
+                    visualClone.setItemMeta(cloneMeta);
+                }
+                player.getInventory().setItemInOffHand(visualClone);
+            }
+            return;
+        }
+
+        restoreKratosOffhand(player, false);
+    }
+
+    private void restoreKratosOffhand(Player player, boolean forceRestore) {
+        UUID playerId = player.getUniqueId();
+        ItemStack saved = savedOffhands.get(playerId);
+        if (saved == null && !savedOffhands.containsKey(playerId)) {
+            return;
+        }
+
+        ItemStack currentOffHand = player.getInventory().getItemInOffHand();
+        if (!forceRestore && !isKratosTempOffhand(currentOffHand)) {
+            return;
+        }
+
+        savedOffhands.remove(playerId);
+        player.getInventory().setItemInOffHand(isAir(saved) ? null : saved.clone());
+    }
+
     private void handleCustomMeleeHit(Player player, LivingEntity target, String itemType) {
         Location targetLoc = target.getLocation();
 
@@ -143,6 +232,11 @@ public final class BossItemListener implements Listener {
                 target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 80, 2, false, true));
                 targetLoc.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, targetLoc.add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
                 targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_WITCH_CELEBRATE, 0.8f, 1.2f);
+                // 20% probabilidad de volverse invisible por 3 segundos
+                if (Math.random() < 0.20) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0, false, false, true));
+                    player.sendMessage("§a§o[Loki] Te has desvanecido en las sombras...");
+                }
                 break;
 
             case "kratos_blade":
@@ -152,6 +246,20 @@ public final class BossItemListener implements Listener {
                 if (pull.lengthSquared() > 0.01) {
                     pull.normalize().multiply(0.8).setY(0.3);
                     target.setVelocity(pull);
+                }
+                // Dibujar línea de partículas de fuego (simula las cadenas de Kratos)
+                Location start = player.getEyeLocation().subtract(0, 0.3, 0);
+                Location end = target.getLocation().add(0, 1.0, 0);
+                Vector direction = end.toVector().subtract(start.toVector());
+                double distance = direction.length();
+                if (distance > 0.1) {
+                    direction.normalize();
+                    for (double d = 0; d < distance; d += 0.25) {
+                        Location point = start.clone().add(direction.clone().multiply(d));
+                        point.getWorld().spawnParticle(Particle.FLAME, point, 1, 0.0, 0.0, 0.0, 0.0);
+                        point.getWorld().spawnParticle(Particle.DUST, point, 1, 0.0, 0.0, 0.0,
+                                new Particle.DustOptions(org.bukkit.Color.fromRGB(200, 50, 0), 0.7f));
+                    }
                 }
                 targetLoc.getWorld().spawnParticle(Particle.FLAME, targetLoc.add(0, 1, 0), 20, 0.4, 0.4, 0.4, 0.1);
                 targetLoc.getWorld().playSound(targetLoc, Sound.ITEM_FIRECHARGE_USE, 0.8f, 0.9f);
@@ -198,6 +306,52 @@ public final class BossItemListener implements Listener {
                 targetLoc.getWorld().playSound(targetLoc, Sound.PARTICLE_SOUL_ESCAPE, 1.0f, 0.6f);
                 break;
             }
+
+            case "gjallarhorn": {
+                // Onda de choque sónica - fuerza de los 9 mundos
+                targetLoc.getWorld().playSound(targetLoc, Sound.EVENT_RAID_HORN, 1.2f, 1.5f);
+                targetLoc.getWorld().spawnParticle(Particle.SONIC_BOOM, targetLoc, 1);
+                for (Entity e : target.getNearbyEntities(4, 3, 4)) {
+                    if (e instanceof LivingEntity victim && !victim.equals(player)) {
+                        victim.damage(8.0, player);
+                        victim.setVelocity(victim.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.2).setY(0.4));
+                    }
+                }
+                break;
+            }
+
+            case "hydra_fang": {
+                // Veneno de Lerna
+                target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 4, false, true));
+                target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 4, false, true));
+                targetLoc.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, targetLoc, 20, 0.4, 0.4, 0.4, 0.05);
+                targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_SPIDER_DEATH, 0.8f, 0.5f);
+                break;
+            }
+
+            case "tifon_claw": {
+                // Furia Primordial - Erupción volcánica y daño porcentual
+                target.setFireTicks(120);
+                target.setVelocity(new Vector(0, 1.2, 0));
+                double eruptionDamage = target.getHealth() * 0.10;
+                target.damage(Math.max(4.0, eruptionDamage), player);
+                targetLoc.getWorld().spawnParticle(Particle.LAVA, targetLoc, 20, 0.3, 0.3, 0.3, 0.1);
+                targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.2f);
+                break;
+            }
+
+            case "prometeo_flame": {
+                // Chispa Divina - Incendio en área
+                for (Entity e : target.getNearbyEntities(4, 3, 4)) {
+                    if (e instanceof LivingEntity victim && !victim.equals(player)) {
+                        victim.setFireTicks(120);
+                        victim.damage(4.0, player);
+                    }
+                }
+                targetLoc.getWorld().spawnParticle(Particle.FLAME, targetLoc, 35, 1.5, 0.5, 1.5, 0.05);
+                targetLoc.getWorld().playSound(targetLoc, Sound.ITEM_FIRECHARGE_USE, 1.0f, 0.8f);
+                break;
+            }
         }
     }
 
@@ -230,6 +384,40 @@ public final class BossItemListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         ItemMeta meta = item.getItemMeta();
+        
+        // ── Invocador de Jefes Celestiales ──
+        NamespacedKey summonKey = new NamespacedKey(plugin, "boss_summoner");
+        String bossId = meta.getPersistentDataContainer().get(summonKey, PersistentDataType.STRING);
+        if (bossId != null) {
+            event.setCancelled(true);
+            
+            if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) {
+                return;
+            }
+
+            // Consumir el invocador (1 unidad)
+            if (item.getAmount() > 1) {
+                item.setAmount(item.getAmount() - 1);
+            } else {
+                player.getInventory().setItem(event.getHand(), null);
+            }
+
+            Location spawnLoc = event.getClickedBlock().getLocation().clone().add(0.5, 1.0, 0.5);
+            org.bukkit.World world = spawnLoc.getWorld();
+            
+            // Efectos celestiales de invocación
+            if (world != null) {
+                world.strikeLightningEffect(spawnLoc);
+                world.spawnParticle(Particle.EXPLOSION_EMITTER, spawnLoc, 5, 0.5, 0.5, 0.5, 0.1);
+                world.playSound(spawnLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.5f, 0.8f);
+                world.playSound(spawnLoc, Sound.ENTITY_WITHER_SPAWN, 1.5f, 0.5f);
+            }
+
+            // Invocar al jefe
+            plugin.getBossManager().spawnBoss(bossId, spawnLoc);
+            return;
+        }
+
         String type = meta.getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
 
         if ("loki_scepter".equals(type)) {
@@ -260,6 +448,56 @@ public final class BossItemListener implements Listener {
                 }
                 ball.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, ball.getLocation(), 3, 0.1, 0.1, 0.1, 0.02);
             }, 1L, 1L);
+        }
+
+        // ── Hacha Leviatán: Lanzamiento y Reclamación Rúnica ──
+        if ("leviathan_axe".equals(type)) {
+            event.setCancelled(true);
+
+            // Cooldown de 2 segundos para evitar spam de lanzamiento
+            long now = System.currentTimeMillis();
+            long lastUse = scepterCooldowns.getOrDefault(player.getUniqueId(), 0L);
+            if (now - lastUse < 2000L) {
+                return;
+            }
+            scepterCooldowns.put(player.getUniqueId(), now);
+
+            ItemStack axeItem = item.clone();
+            
+            // Remover temporalmente del inventario (simula lanzamiento)
+            if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
+                player.getInventory().setItemInMainHand(null);
+            } else {
+                player.getInventory().setItemInOffHand(null);
+            }
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1.0f, 0.5f);
+
+            // Disparar proyectil físico (bola de nieve pesada)
+            Snowball ball = player.launchProjectile(Snowball.class);
+            ball.setMetadata("kratos_axe", new FixedMetadataValue(plugin, true));
+
+            // Espiral de partículas de nieve siguiendo al proyectil
+            Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+                if (ball.isDead() || !ball.isValid()) {
+                    task.cancel();
+                    return;
+                }
+                ball.getWorld().spawnParticle(Particle.SNOWFLAKE, ball.getLocation(), 4, 0.1, 0.1, 0.1, 0.01);
+            }, 1L, 1L);
+
+            // Devolver automáticamente el hacha a la mano en 1 segundo (20 ticks)
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
+                        player.getInventory().setItemInMainHand(axeItem);
+                    } else {
+                        player.getInventory().setItemInOffHand(axeItem);
+                    }
+                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1.0f, 1.2f);
+                    player.getWorld().spawnParticle(Particle.SNOWFLAKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.05);
+                    player.sendMessage("§b§o[Leviatán] El hacha ha regresado a tu mano.");
+                }
+            }, 20L);
         }
     }
 
@@ -323,5 +561,79 @@ public final class BossItemListener implements Listener {
         kLoc.getWorld().spawnParticle(Particle.DUST, kLoc.clone().add(0, 1, 0), 15, 0.4, 0.6, 0.4,
                 new Particle.DustOptions(org.bukkit.Color.fromRGB(180, 0, 0), 1.5f));
         kLoc.getWorld().playSound(kLoc, Sound.ENTITY_WITHER_HURT, 0.5f, 1.4f);
+    }
+
+    @EventHandler
+    public void onBowShoot(org.bukkit.event.entity.EntityShootBowEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            ItemStack bow = event.getBow();
+            if (bow != null && bow.hasItemMeta()) {
+                String type = bow.getItemMeta().getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
+                if ("artemis_bow".equals(type)) {
+                    // Marcar la flecha
+                    event.getProjectile().setMetadata("artemis_arrow", new FixedMetadataValue(plugin, true));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Bukkit.getScheduler().runTask(plugin, () -> synchronizeKratosBlades(event.getPlayer()));
+    }
+
+    @EventHandler
+    public void onItemHeld(PlayerItemHeldEvent event) {
+        Bukkit.getScheduler().runTask(plugin, () -> synchronizeKratosBlades(event.getPlayer()));
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        if (event.getSlot() == 40 && isKratosTempOffhand(event.getCurrentItem())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(plugin, () -> synchronizeKratosBlades(player));
+    }
+
+    @EventHandler
+    public void onSwapHandItems(PlayerSwapHandItemsEvent event) {
+        if (isKratosBlade(event.getMainHandItem())
+                || isKratosBlade(event.getOffHandItem())
+                || isKratosTempOffhand(event.getOffHandItem())) {
+            event.setCancelled(true);
+            Bukkit.getScheduler().runTask(plugin, () -> synchronizeKratosBlades(event.getPlayer()));
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        restoreKratosOffhand(event.getPlayer(), true);
+    }
+
+    @EventHandler
+    public void onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        UUID playerId = player.getUniqueId();
+        if (!savedOffhands.containsKey(playerId)) {
+            return;
+        }
+
+        ItemStack originalOffHand = savedOffhands.remove(playerId);
+        event.getDrops().removeIf(this::isKratosTempOffhand);
+
+        if (event.getKeepInventory()) {
+            player.getInventory().setItemInOffHand(isAir(originalOffHand) ? null : originalOffHand.clone());
+            return;
+        }
+
+        if (!isAir(originalOffHand)) {
+            event.getDrops().add(originalOffHand.clone());
+        }
     }
 }
