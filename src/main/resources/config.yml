@@ -35,38 +35,38 @@ armor-effects:
   refresh-interval-seconds: 30
   effect-duration-seconds: 180
   
-  # Hercules (VIP 1) - requiere essentials.kits.hercules y full diamante
+  # Hercules (VIP 1) - requiere drakes.kit.hercules y full diamante
   hercules:
     speed: 1
     resistance: 1
     
-  # Hestia (VIP 2) - requiere essentials.kits.hestia y full diamante
+  # Hestia (VIP 2) - requiere drakes.kit.hestia y full diamante
   hestia:
     speed: 2
     health-boost: 1
     saturation: true
     
-  # Hermes (VIP 3) - requiere essentials.kits.hermes y full diamante
+  # Hermes (VIP 3) - requiere drakes.kit.hermes y full diamante
   hermes:
     speed: 4
     health-boost: 1
     saturation: true
     
-  # Hefesto (VIP 4) - requiere essentials.kits.hefesto y full netherite
+  # Hefesto (VIP 4) - requiere drakes.kit.hefesto y full netherite
   hefesto:
     speed: 2
     health-boost: 2
     fire-resistance: true
     saturation: true
     
-  # Artemisa (VIP 5) - requiere essentials.kits.artemisa y full netherite
+  # Artemisa (VIP 5) - requiere drakes.kit.artemisa y full netherite
   artemisa:
     speed: 3
     health-boost: 2
     strength: 1
     saturation: true
     
-  # Afrodita (VIP 6) - requiere essentials.kits.afrodita y full netherite
+  # Afrodita (VIP 6) - requiere drakes.kit.afrodita y full netherite
   afrodita:
     speed: 3
     health-boost: 3
@@ -74,7 +74,7 @@ armor-effects:
     regeneration: 1
     saturation: true
     
-  # Zeus (VIP 7) - requiere essentials.kits.zeus y full netherite
+  # Zeus (VIP 7) - requiere drakes.kit.zeus y full netherite
   zeus:
     speed: 4
     health-boost: 4
