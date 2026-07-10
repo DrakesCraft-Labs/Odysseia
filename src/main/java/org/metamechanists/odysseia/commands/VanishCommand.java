@@ -2,6 +2,7 @@ package org.metamechanists.odysseia.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,14 +19,18 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.Odysseia;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class VanishCommand implements CommandExecutor, Listener {
 
+    private static final String VANISH_PERMISSION = "odysseia.vanish";
+    private static final String SEE_PERMISSION = "odysseia.vanish.see";
+    private static final String VANISH_METADATA = "vanished";
+
     private final Odysseia plugin;
-    private final Set<UUID> vanishedPlayers = new HashSet<>();
+    private final Set<UUID> vanishedPlayers = ConcurrentHashMap.newKeySet();
 
     public VanishCommand(Odysseia plugin) {
         this.plugin = plugin;
@@ -43,41 +48,67 @@ public final class VanishCommand implements CommandExecutor, Listener {
         }
 
         Player player = (Player) sender;
-        if (!player.hasPermission("odysseia.vanish")) {
+        if (!player.hasPermission(VANISH_PERMISSION)) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cNo tienes permiso para desvanecerte."));
             return true;
         }
 
-        UUID uuid = player.getUniqueId();
-        if (vanishedPlayers.contains(uuid)) {
-            // Unvanish
-            vanishedPlayers.remove(uuid);
-            player.removeMetadata("vanished", plugin);
-            
-            // Show to all online players
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                p.showPlayer(plugin, player);
-            }
+        setVanished(player, !isVanished(player), true);
+        return true;
+    }
 
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &7desactivado. Ahora eres visible."));
-            playVanishEffects(player);
-        } else {
-            // Vanish
-            vanishedPlayers.add(uuid);
-            player.setMetadata("vanished", new FixedMetadataValue(plugin, true));
+    public void setVanished(Player player, boolean vanished, boolean playEffects) {
+        if (vanished) {
+            vanishedPlayers.add(player.getUniqueId());
+            player.setMetadata(VANISH_METADATA, new FixedMetadataValue(plugin, true));
 
-            // Hide from all online players (who don't have override permission)
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p != player && !p.hasPermission("odysseia.vanish.see")) {
-                    p.hidePlayer(plugin, player);
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                if (viewer.equals(player)) {
+                    continue;
+                }
+                if (!canSeeVanished(viewer)) {
+                    viewer.hidePlayer(plugin, player);
                 }
             }
 
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &2activado. Ahora eres invisible."));
-            playVanishEffects(player);
+            // Ajustes ligeros de estado para que el staff desaparezca de forma más consistente.
+            player.setSleepingIgnored(true);
+            player.setCanPickupItems(false);
+            player.setCollidable(false);
+            if (player.getGameMode() != GameMode.SPECTATOR) {
+                player.setFlying(player.isFlying() || player.getAllowFlight());
+            }
+
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &2activado&a. Quedaste oculto para jugadores sin permiso de staff."));
+        } else {
+            vanishedPlayers.remove(player.getUniqueId());
+            player.removeMetadata(VANISH_METADATA, plugin);
+
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                if (!viewer.equals(player)) {
+                    viewer.showPlayer(plugin, player);
+                }
+            }
+
+            player.setSleepingIgnored(false);
+            player.setCanPickupItems(true);
+            player.setCollidable(true);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &7desactivado&a. Volviste a ser visible."));
         }
 
-        return true;
+        if (playEffects) {
+            playVanishEffects(player);
+        }
+    }
+
+    public void revealAll() {
+        for (UUID uuid : vanishedPlayers) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null || !player.isOnline()) {
+                continue;
+            }
+            setVanished(player, false, false);
+        }
     }
 
     private void playVanishEffects(Player player) {
@@ -118,36 +149,43 @@ public final class VanishCommand implements CommandExecutor, Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player joining = e.getPlayer();
 
-        // 1. Hide all currently vanished players from the joining player
+        if (isVanished(joining)) {
+            e.joinMessage(null);
+            joining.setMetadata(VANISH_METADATA, new FixedMetadataValue(plugin, true));
+            joining.setSleepingIgnored(true);
+            joining.setCanPickupItems(false);
+            joining.setCollidable(false);
+        }
+
         for (UUID uuid : vanishedPlayers) {
             Player vanished = Bukkit.getPlayer(uuid);
-            if (vanished != null && vanished.isOnline() && !joining.hasPermission("odysseia.vanish.see")) {
+            if (vanished != null && vanished.isOnline() && !canSeeVanished(joining)) {
                 joining.hidePlayer(plugin, vanished);
             }
         }
 
-        // 2. If the joining player is supposed to be vanished (e.g. saved state or re-logged staff), vanish them
-        if (joining.hasPermission("odysseia.vanish") && vanishedPlayers.contains(joining.getUniqueId())) {
-            joining.setMetadata("vanished", new FixedMetadataValue(plugin, true));
-            e.joinMessage(null); // Silent join
-            
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p != joining && !p.hasPermission("odysseia.vanish.see")) {
-                    p.hidePlayer(plugin, joining);
+        if (isVanished(joining)) {
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                if (viewer.equals(joining)) {
+                    continue;
+                }
+                if (!canSeeVanished(viewer)) {
+                    viewer.hidePlayer(plugin, joining);
                 }
             }
-            joining.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aEntraste al servidor en modo &2Vanish&a."));
+            joining.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aEntraste al servidor manteniendo tu modo &2Vanish&a."));
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
         Player quitting = e.getPlayer();
-        if (vanishedPlayers.contains(quitting.getUniqueId())) {
-            e.quitMessage(null); // Silent quit
-            // Keep in memory or cleanup? Cleanup so that they don't leak memory, 
-            // but let's keep their UUID in the vanished set in case they relog within the same session.
-            // Actually, keep it so if they relog they are still vanished.
+        if (isVanished(quitting)) {
+            e.quitMessage(null);
         }
+    }
+
+    private boolean canSeeVanished(Player player) {
+        return player.hasPermission(SEE_PERMISSION) || player.hasPermission(VANISH_PERMISSION);
     }
 }

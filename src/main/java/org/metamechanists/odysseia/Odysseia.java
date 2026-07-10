@@ -89,6 +89,10 @@ public final class Odysseia extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (vanishCommand != null) {
+            vanishCommand.revealAll();
+        }
+
         // Send shutdown webhook synchronously
         sendShutdownWebhookSync();
 
