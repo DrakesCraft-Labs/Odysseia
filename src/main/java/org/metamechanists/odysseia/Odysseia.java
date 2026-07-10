@@ -81,11 +81,6 @@ public final class Odysseia extends JavaPlugin {
         // Start Tasks
         startSchedulers();
 
-        // Start StoreManager
-        if (getConfig().getBoolean("store.enabled", true)) {
-            org.metamechanists.odysseia.utils.StoreManager.start(this);
-        }
-
         // Send startup webhook
         sendStartupWebhook();
 
@@ -101,8 +96,6 @@ public final class Odysseia extends JavaPlugin {
         // Send shutdown webhook synchronously
         sendShutdownWebhookSync();
 
-        // Stop StoreManager
-        org.metamechanists.odysseia.utils.StoreManager.stop();
         if (purchaseEngine != null) purchaseEngine.close();
 
         // Shutdown BossManager

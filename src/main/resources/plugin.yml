@@ -8,6 +8,9 @@ softdepend:
   - PlaceholderAPI
   - LuckPerms
   - Essentials
+  - Vault
+  - ProtectionStones
+  - Slimefun
 
 commands:
   papademar:
@@ -34,3 +37,7 @@ commands:
     description: Motor transaccional de entregas de tienda.
     permission: odysseia.purchase.admin
     usage: /odysseiapurchase <deliver|status|pending|retry|history|validate|dry-run|refund|chargeback> ...
+permissions:
+  odysseia.purchase.admin:
+    description: Control total del motor de compras.
+    default: op

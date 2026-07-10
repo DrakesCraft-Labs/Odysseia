@@ -49,23 +49,23 @@ public final class ArmorEffectsListener implements Listener {
         Set<PotionEffect> effectsToApply = new HashSet<>();
 
         if (hasFullDiamond) {
-            if (player.hasPermission("essentials.kits.hermes")) {
+            if (player.hasPermission("drakes.kit.hermes")) {
                 addHermes(effectsToApply);
-            } else if (player.hasPermission("essentials.kits.hestia")) {
+            } else if (player.hasPermission("drakes.kit.hestia")) {
                 addHestia(effectsToApply);
-            } else if (player.hasPermission("essentials.kits.hercules")) {
+            } else if (player.hasPermission("drakes.kit.hercules")) {
                 addHercules(effectsToApply);
             }
         }
 
         if (hasFullNetherite) {
-            if (player.hasPermission("essentials.kits.zeus")) {
+            if (player.hasPermission("drakes.kit.zeus")) {
                 addZeus(effectsToApply);
-            } else if (player.hasPermission("essentials.kits.afrodita")) {
+            } else if (player.hasPermission("drakes.kit.afrodita")) {
                 addAfrodita(effectsToApply);
-            } else if (player.hasPermission("essentials.kits.artemisa")) {
+            } else if (player.hasPermission("drakes.kit.artemisa")) {
                 addArtemisa(effectsToApply);
-            } else if (player.hasPermission("essentials.kits.hefesto")) {
+            } else if (player.hasPermission("drakes.kit.hefesto")) {
                 addHefesto(effectsToApply);
             }
         }

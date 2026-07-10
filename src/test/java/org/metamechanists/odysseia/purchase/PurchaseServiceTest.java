@@ -1,0 +1,125 @@
+package org.metamechanists.odysseia.purchase;
+
+import org.junit.jupiter.api.*;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class PurchaseServiceTest {
+    private File directory;
+    private PurchaseRepository repository;
+    private FakeRuntime runtime;
+    private PurchaseService service;
+
+    @BeforeEach void setUp() throws Exception {
+        directory = Files.createTempDirectory("odysseia-purchase-test").toFile();
+        repository = new PurchaseRepository(new File(directory, "purchases.db"));
+        runtime = new FakeRuntime();
+        ProductDefinition product = new ProductDefinition("dragmas_saco", 1, "Saco", "economy", "test", "test", 1,
+                VerificationState.VERIFIED_PRODUCTION, List.of(), List.of(
+                new ProductAction("money", ActionType.ECONOMY, Map.of("amount", "50000"), false, RefundPolicy.MANUAL_REVIEW, true),
+                new ProductAction("kit", ActionType.KIT, Map.of("kit", "test"), true, RefundPolicy.MANUAL_REVIEW, true),
+                new ProductAction("announce", ActionType.ANNOUNCEMENT, Map.of(), false, RefundPolicy.NOT_REVOCABLE, true)));
+        service = new PurchaseService(new ProductCatalog(List.of(product)), repository, runtime);
+    }
+
+    @AfterEach void tearDown() throws Exception { repository.close(); delete(directory); }
+
+    @Test void sameTransactionIsIdempotentAndAnnouncementIsUnique() throws Exception {
+        runtime.online = true;
+        assertTrue(service.deliver("txn-1", "TestPlayer", "dragmas_saco", false, "test").success());
+        assertTrue(service.deliver("txn-1", "TestPlayer", "dragmas_saco", false, "test").success());
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-1").getFirst().state());
+    }
+
+    @Test void differentTransactionsCanPurchaseSameProduct() throws Exception {
+        runtime.online = true;
+        service.deliver("txn-1", "TestPlayer", "dragmas_saco", false, "test");
+        service.deliver("txn-2", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(2, runtime.calls(ActionType.ECONOMY));
+        assertEquals(2, service.status("txn-1").size() + service.status("txn-2").size());
+    }
+
+    @Test void offlineActionResumesOnlyWhatWasPending() throws Exception {
+        runtime.online = false;
+        service.deliver("txn-offline", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(0, runtime.calls(ActionType.KIT));
+        assertEquals(PurchaseState.WAITING_FOR_PLAYER, service.status("txn-offline").getFirst().state());
+        runtime.online = true;
+        service.resumePlayer("TestPlayer", "join");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
+    }
+
+    @Test void retryExecutesOnlyFailedAction() throws Exception {
+        runtime.online = true;
+        runtime.failKitOnce = true;
+        service.deliver("txn-retry", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(PurchaseState.FAILED_RETRYABLE, service.status("txn-retry").getFirst().state());
+        service.retry("txn-retry", "admin");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(2, runtime.calls(ActionType.KIT));
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-retry").getFirst().state());
+    }
+
+    @Test void concurrentDuplicateEventsStillDeliverOnce() throws Exception {
+        runtime.online = true;
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Future<?> first = executor.submit(() -> service.deliver("txn-race", "TestPlayer", "dragmas_saco", false, "test"));
+        Future<?> second = executor.submit(() -> service.deliver("txn-race", "TestPlayer", "dragmas_saco", false, "test"));
+        first.get(); second.get(); executor.shutdown();
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
+    }
+
+    @Test void financialEventIsIdempotentAndMarksManualActionsForReview() throws Exception {
+        runtime.online = true;
+        service.deliver("txn-refund", "TestPlayer", "dragmas_saco", false, "test");
+        assertTrue(service.financialEvent("txn-refund", "dragmas_saco", false, "admin").success());
+        assertTrue(service.financialEvent("txn-refund", "dragmas_saco", false, "admin").success());
+        assertEquals(PurchaseState.REFUNDED, service.status("txn-refund").getFirst().state());
+        assertTrue(repository.actions(service.status("txn-refund").getFirst().id()).stream().anyMatch(action -> action.state() == ActionState.FAILED_MANUAL_REVIEW));
+    }
+
+    @Test void invalidInputAndUnknownProductAreRejected() {
+        assertFalse(service.deliver("x", "bad name", "missing", false, "test").success());
+        assertFalse(service.deliver("txn", "TestPlayer", "missing", false, "test").success());
+    }
+
+    @Test void packagedCatalogHasAllAuditedProductsAndNoDuplicateTebexIds() {
+        ProductCatalog catalog = new ProductCatalog(new File("src/main/resources/purchases.yml"));
+        assertEquals(23, catalog.all().size());
+        assertTrue(catalog.validate().isEmpty());
+        assertEquals(VerificationState.PARTIALLY_VERIFIED, catalog.get("protection_481").verification());
+        assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
+    }
+
+    private static void delete(File file) {
+        File[] children = file.listFiles(); if (children != null) for (File child : children) delete(child); file.delete();
+    }
+
+    private static final class FakeRuntime implements PurchaseActionRuntime {
+        private final Map<ActionType, Integer> counts = new EnumMap<>(ActionType.class);
+        private boolean online;
+        private boolean failKitOnce;
+        @Override public UUID resolveUuid(String player) { return UUID.nameUUIDFromBytes(player.getBytes()); }
+        @Override public boolean isOnline(String player) { return online; }
+        @Override public ActionResult execute(ExecutionContext context, ProductAction action) {
+            counts.merge(action.type(), 1, Integer::sum);
+            if (action.requiresOnline() && !online) return ActionResult.waiting("offline");
+            if (action.type() == ActionType.KIT && failKitOnce) { failKitOnce = false; return ActionResult.retryable("transient"); }
+            return ActionResult.completed(action.id());
+        }
+        @Override public ActionResult revoke(ExecutionContext context, ProductAction action, String result) { return ActionResult.completed("revoked"); }
+        int calls(ActionType type) { return counts.getOrDefault(type, 0); }
+    }
+}
