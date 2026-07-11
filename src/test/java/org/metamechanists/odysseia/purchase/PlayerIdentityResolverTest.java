@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.UUID;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerIdentityResolverTest {
@@ -38,6 +39,14 @@ class PlayerIdentityResolverTest {
     @Test void migrationCreatesIdentityTables() throws Exception {
         repository.observeIdentity(UUID.randomUUID(), "KnownJava", "JAVA", "TEST", "HIGH");
         assertTrue(repository.findIdentityByCanonical("KnownJava").isPresent());
+    }
+
+    @Test void bedrockJoinFindsPendingPurchaseStoredWithoutPrefix() throws Exception {
+        UUID uuid = UUID.randomUUID(); resolver.observe(uuid, ".AngelicVr6991");
+        ProductDefinition product = new ProductDefinition("test", 1, "Test", "test", "test", "test", 1,
+                VerificationState.VERIFIED_PRODUCTION, List.of(), List.of());
+        repository.createOrLoad("TEBEX", "txn-bedrock", "AngelicVr6991", null, product, "test");
+        assertEquals("txn-bedrock", repository.findPendingForIdentity(uuid, ".AngelicVr6991").getFirst().transaction());
     }
 
     private static void delete(File file) { File[] children = file.listFiles(); if (children != null) for (File child : children) delete(child); file.delete(); }

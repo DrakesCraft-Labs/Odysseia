@@ -32,7 +32,10 @@ public final class PlayerIdentityResolver {
         if (exact.isPresent()) {
             if (!requested.startsWith(".")) {
                 List<PurchaseRepository.PlayerIdentity> bedrock = repository.findByAlias(requested, "BEDROCK_NORMALIZED");
-                if (bedrock.stream().anyMatch(candidate -> !candidate.uuid().equals(exact.get().uuid()))) return ambiguous("Coinciden identidades Java y Bedrock", bedrock);
+                if (bedrock.stream().anyMatch(candidate -> !candidate.uuid().equals(exact.get().uuid()))) {
+                    List<PurchaseRepository.PlayerIdentity> candidates = new ArrayList<>(bedrock); candidates.add(exact.get());
+                    return ambiguous("Coinciden identidades Java y Bedrock", candidates);
+                }
             }
             return IdentityResolution.resolved(exact.get(), "CANONICAL_EXACT");
         }

@@ -66,7 +66,13 @@ public final class PurchaseService {
     }
 
     public void resumePlayer(String player, String actor) {
-        try { for (PurchaseRepository.Delivery delivery : repository.findPendingForPlayer(player)) process(delivery, actor); }
+        try {
+            IdentityResolution identity = identities.resolve(player);
+            List<PurchaseRepository.Delivery> pending = identity.resolved()
+                    ? repository.findPendingForIdentity(identity.uuid(), identity.canonicalName())
+                    : repository.findPendingForPlayer(player);
+            for (PurchaseRepository.Delivery delivery : pending) process(delivery, actor);
+        }
         catch (Exception ignored) { }
     }
 

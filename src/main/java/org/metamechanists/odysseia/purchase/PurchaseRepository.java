@@ -100,6 +100,15 @@ public final class PurchaseRepository implements AutoCloseable {
         return deliveries("SELECT * FROM purchase_deliveries WHERE lower(player_name)=lower(?) AND state IN ('WAITING_FOR_PLAYER','PARTIALLY_DELIVERED','FAILED_RETRYABLE','RECEIVED','PROCESSING') ORDER BY id", player);
     }
 
+    public synchronized List<Delivery> findPendingForIdentity(UUID uuid, String canonicalName) throws SQLException {
+        String normalized = canonicalName.startsWith(".") ? canonicalName.substring(1) : canonicalName;
+        try (PreparedStatement query = connection.prepareStatement("SELECT * FROM purchase_deliveries WHERE (player_uuid=? OR lower(player_name) IN (lower(?),lower(?))) AND state IN ('WAITING_FOR_PLAYER','PARTIALLY_DELIVERED','FAILED_RETRYABLE','FAILED_MANUAL_REVIEW','RECEIVED','PROCESSING') ORDER BY id")) {
+            query.setString(1, uuid.toString()); query.setString(2, canonicalName); query.setString(3, normalized);
+            ResultSet rows = query.executeQuery(); List<Delivery> result = new ArrayList<>();
+            while (rows.next()) result.add(delivery(rows)); return result;
+        }
+    }
+
     public synchronized List<Delivery> pending() throws SQLException {
         return deliveries("SELECT * FROM purchase_deliveries WHERE state NOT IN ('COMPLETED','CANCELLED','REFUNDED','CHARGEBACK') ORDER BY received_at", null);
     }
