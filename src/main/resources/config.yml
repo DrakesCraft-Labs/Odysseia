@@ -445,6 +445,22 @@ sfmaster-policy:
     - "NETHERITE_BLOCK"
     - "ANCIENT_DEBRIS"
 
+chat-filter:
+  enabled: true
+  words:
+    - "ctm"
+    - "conchetumare"
+    - "conchatumare"
+    - "culiao"
+    - "hijo de puta"
+    - "hdp"
+    - "pelotudo"
+    - "puta madre"
+    - "mierda"
+    - "maricon"
+    - "negro de mierda"
+    - "mogolico"
+
 # Permite definir kits personalizados con cooldowns, comandos, dinero de Vault,
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).
