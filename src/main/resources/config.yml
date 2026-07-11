@@ -986,7 +986,6 @@ kits:
           flame: 2
           infinity: 1
           unbreaking: 10
-          mending: 1
       - material: NETHERITE_PICKAXE
         amount: 1
         name: "&2&lPico de Artemisa"
