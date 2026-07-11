@@ -43,6 +43,10 @@ commands:
   restart30:
     description: Reinicio seguro con guardado y respaldo de inventarios.
     permission: drakes.admin
+  odysseiapendingkit:
+    description: Encola un rango y kit para entrega online u offline.
+    permission: odysseia.purchase.admin
+    usage: /odysseiapendingkit <jugador> <kit>
 permissions:
   odysseia.purchase.admin:
     description: Control total del motor de compras.

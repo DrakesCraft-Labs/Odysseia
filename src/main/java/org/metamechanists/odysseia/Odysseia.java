@@ -55,9 +55,12 @@ public final class Odysseia extends JavaPlugin {
         this.purchaseEngine = new PurchaseEngine(this);
         getCommand("odysseiapurchase").setExecutor(new org.metamechanists.odysseia.commands.PurchaseCommand(purchaseEngine));
         org.metamechanists.odysseia.listeners.ServerAutomationListener automation = new org.metamechanists.odysseia.listeners.ServerAutomationListener(this);
+        org.metamechanists.odysseia.purchase.PendingKitService pendingKits = new org.metamechanists.odysseia.purchase.PendingKitService(this);
         getCommand("daily").setExecutor(new org.metamechanists.odysseia.commands.DailyCommand(automation));
         getCommand("restart30").setExecutor(new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
+        getCommand("odysseiapendingkit").setExecutor(pendingKits);
         Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
+        Bukkit.getPluginManager().registerEvents(pendingKits, this);
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
