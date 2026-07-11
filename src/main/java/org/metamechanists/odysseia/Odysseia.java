@@ -61,6 +61,15 @@ public final class Odysseia extends JavaPlugin {
         getCommand("restart30").setExecutor(new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
         getCommand("odysseiapendingkit").setExecutor(pendingKits);
         getCommand("drakeswarn").setExecutor(chatFilter);
+        org.metamechanists.odysseia.commands.KitGiveCommand kitGive = new org.metamechanists.odysseia.commands.KitGiveCommand(this);
+        getCommand("kitgive").setExecutor(kitGive);
+        getCommand("kitgive").setTabCompleter(kitGive);
+        java.util.List<String> kitErrors = kitGive.validateConfiguration();
+        if (kitErrors.isEmpty()) {
+            getLogger().info("[SUCCESS] Configuración de kits validada.");
+        } else {
+            kitErrors.forEach(error -> getLogger().severe("[Kits] " + error));
+        }
         Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
         Bukkit.getPluginManager().registerEvents(pendingKits, this);
         Bukkit.getPluginManager().registerEvents(chatFilter, this);

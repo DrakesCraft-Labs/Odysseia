@@ -51,7 +51,14 @@ commands:
     description: Gestiona advertencias del filtro de chat.
     aliases: [dwarn]
     permission: drakes.staff
+  kitgive:
+    description: Entrega solo los ítems de un kit para pruebas administrativas.
+    permission: odysseia.kitgive
+    usage: /kitgive <kit> o /kitgive <jugador> <kit>
 permissions:
   odysseia.purchase.admin:
     description: Control total del motor de compras.
+    default: op
+  odysseia.kitgive:
+    description: Permite probar kits sin entregar dinero, rango o protección.
     default: op

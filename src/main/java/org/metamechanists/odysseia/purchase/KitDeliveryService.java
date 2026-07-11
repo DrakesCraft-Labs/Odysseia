@@ -36,6 +36,39 @@ public final class KitDeliveryService {
         return ActionResult.completed("kit=" + kitName + ";items=" + items.size());
     }
 
+    /** Valida todas las entradas antes de permitir pruebas o entregas reales. */
+    public List<String> validateConfiguration() {
+        List<String> errors = new ArrayList<>();
+        ConfigurationSection kits = plugin.getConfig().getConfigurationSection("kits");
+        if (kits == null) return List.of("Falta la sección kits");
+        for (String kit : kits.getKeys(false)) {
+            ConfigurationSection section = kits.getConfigurationSection(kit);
+            if (section == null) continue;
+            int index = 0;
+            for (Map<?, ?> values : section.getMapList("vanilla-items")) {
+                index++;
+                String path = kit + ".vanilla-items[" + index + "]";
+                Material material = Material.matchMaterial(String.valueOf(values.get("material")));
+                if (material == null || !material.isItem()) {
+                    errors.add(path + ": material inválido");
+                    continue;
+                }
+                int amount = integer(values.get("amount"), 1);
+                if (amount < 1 || amount > 2304) errors.add(path + ": cantidad fuera de 1..2304");
+                Object enchantments = values.get("enchantments");
+                if (enchantments instanceof Map<?, ?> map) {
+                    for (Map.Entry<?, ?> entry : map.entrySet()) {
+                        Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(String.valueOf(entry.getKey()).toLowerCase(Locale.ROOT)));
+                        int level = integer(entry.getValue(), 0);
+                        if (enchantment == null) errors.add(path + ": encantamiento desconocido " + entry.getKey());
+                        if (level < 1 || level > 255) errors.add(path + ": nivel inválido para " + entry.getKey());
+                    }
+                }
+            }
+        }
+        return errors;
+    }
+
     private List<ItemStack> createItems(Map<?, ?> values, String transaction) {
         Material material = Material.matchMaterial(String.valueOf(values.get("material")));
         if (material == null) return null;
