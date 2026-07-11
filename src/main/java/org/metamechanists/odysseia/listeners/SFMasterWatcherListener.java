@@ -9,6 +9,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -37,6 +38,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Locale;
+import java.util.UUID;
+import java.lang.reflect.Method;
 
 public class SFMasterWatcherListener implements Listener {
 
@@ -52,13 +58,103 @@ public class SFMasterWatcherListener implements Listener {
     private final YamlConfiguration blocksConfig;
     private final Set<String> sfMasterBlocks = new HashSet<>();
     private final Map<String, Long> brokenSFMasterBlocks = new HashMap<>();
+    private final Map<UUID, Deque<Long>> claimHistory = new HashMap<>();
+    private final Set<String> blockedAddons;
+    private final Set<String> blockedIdPrefixes;
+    private final Set<String> blockedIdFragments;
+    private final Set<String> blockedMaterials;
+    private final int maxClaims;
+    private final long claimWindowMillis;
+    private final Method slimefunGetByItem;
+    private boolean reflectionWarningLogged;
 
     public SFMasterWatcherListener(Plugin plugin) {
         this.plugin = plugin;
         this.sfMasterKey = new NamespacedKey(plugin, "sfmaster_item");
         this.blocksFile = new File(plugin.getDataFolder(), "sfmaster_blocks.yml");
         this.blocksConfig = YamlConfiguration.loadConfiguration(blocksFile);
+        this.blockedAddons = normalizedConfigSet("sfmaster-policy.blocked-addons");
+        this.blockedIdPrefixes = normalizedConfigSet("sfmaster-policy.blocked-id-prefixes");
+        this.blockedIdFragments = normalizedConfigSet("sfmaster-policy.blocked-id-fragments");
+        this.blockedMaterials = normalizedConfigSet("sfmaster-policy.blocked-materials");
+        this.maxClaims = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.max-claims", 12));
+        this.claimWindowMillis = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.window-minutes", 60)) * 60_000L;
+        this.slimefunGetByItem = findSlimefunGetByItem();
         loadBlocks();
+    }
+
+    private Set<String> normalizedConfigSet(String path) {
+        Set<String> values = new HashSet<>();
+        for (String value : plugin.getConfig().getStringList(path)) {
+            values.add(value.toUpperCase(Locale.ROOT));
+        }
+        return values;
+    }
+
+    private Method findSlimefunGetByItem() {
+        try {
+            Class<?> slimefunItem = Class.forName("com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem");
+            return slimefunItem.getMethod("getByItem", ItemStack.class);
+        } catch (ReflectiveOperationException exception) {
+            plugin.getLogger().severe("No se pudo enlazar la API de Slimefun para proteger SFMaster: " + exception.getMessage());
+            return null;
+        }
+    }
+
+    private SfItemDescriptor describeSlimefunItem(ItemStack item) {
+        if (slimefunGetByItem == null || item == null) {
+            return null;
+        }
+
+        try {
+            Object slimefunItem = slimefunGetByItem.invoke(null, item);
+            if (slimefunItem == null) {
+                return null;
+            }
+            String id = String.valueOf(slimefunItem.getClass().getMethod("getId").invoke(slimefunItem));
+            Object addon = slimefunItem.getClass().getMethod("getAddon").invoke(slimefunItem);
+            String addonName = addon == null ? "" : String.valueOf(addon.getClass().getMethod("getName").invoke(addon));
+            return new SfItemDescriptor(id.toUpperCase(Locale.ROOT), addonName.toUpperCase(Locale.ROOT));
+        } catch (ReflectiveOperationException exception) {
+            if (!reflectionWarningLogged) {
+                reflectionWarningLogged = true;
+                plugin.getLogger().warning("No se pudo identificar un item de SFMaster: " + exception.getMessage());
+            }
+            return null;
+        }
+    }
+
+    private String blockedReason(ItemStack item) {
+        String material = item.getType().name();
+        if (blockedMaterials.contains(material) || item.getType().getMaxDurability() > 0) {
+            return "herramientas, armas, armaduras y materiales de alto valor estan bloqueados";
+        }
+
+        SfItemDescriptor descriptor = describeSlimefunItem(item);
+        if (descriptor == null) {
+            return "el item no pudo validarse de forma segura";
+        }
+        if (blockedAddons.stream().anyMatch(descriptor.addon()::contains)) {
+            return "ese addon esta bloqueado para SFMaster";
+        }
+        if (blockedIdPrefixes.stream().anyMatch(descriptor.id()::startsWith)
+                || blockedIdFragments.stream().anyMatch(descriptor.id()::contains)) {
+            return "ese tipo de item esta bloqueado para SFMaster";
+        }
+        return null;
+    }
+
+    private boolean consumeClaim(Player player) {
+        long now = System.currentTimeMillis();
+        Deque<Long> claims = claimHistory.computeIfAbsent(player.getUniqueId(), ignored -> new ArrayDeque<>());
+        while (!claims.isEmpty() && now - claims.peekFirst() >= claimWindowMillis) {
+            claims.removeFirst();
+        }
+        if (claims.size() >= maxClaims) {
+            return false;
+        }
+        claims.addLast(now);
+        return true;
     }
 
     private void loadBlocks() {
@@ -239,6 +335,12 @@ public class SFMasterWatcherListener implements Listener {
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         String msg = event.getMessage().toLowerCase();
+        if (isSfMasterActive(event.getPlayer())
+                && (msg.startsWith("/sf give") || msg.startsWith("/slimefun give"))) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§cSFMaster solo permite reclamar desde la Cheat Sheet controlada.");
+            return;
+        }
         if (msg.startsWith("/ah sell") || msg.startsWith("/ah sellbid") || msg.startsWith("/ahca sell") || msg.startsWith("/crazyauctions sell")) {
             Player player = event.getPlayer();
             ItemStack hand = player.getInventory().getItemInMainHand();
@@ -254,7 +356,7 @@ public class SFMasterWatcherListener implements Listener {
         event.getDrops().removeIf(item -> isSFMasterItem(item));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player
                 && isSfMasterActive(player)
@@ -264,6 +366,17 @@ public class SFMasterWatcherListener implements Listener {
                 && event.getCurrentItem() != null
                 && !event.isCancelled()) {
             ItemStack template = event.getCurrentItem().clone();
+            String reason = blockedReason(template);
+            if (reason != null) {
+                event.setCancelled(true);
+                player.sendMessage("§cNo puedes reclamar este item: " + reason + ".");
+                return;
+            }
+            if (!consumeClaim(player)) {
+                event.setCancelled(true);
+                player.sendMessage("§cLimite SFMaster alcanzado: " + maxClaims + " reclamaciones por ventana.");
+                return;
+            }
             Map<Integer, Integer> before = snapshotMatchingSlots(player, template);
             Bukkit.getScheduler().runTask(plugin, () -> markNewCheatItems(player, template, before));
         }
@@ -325,4 +438,6 @@ public class SFMasterWatcherListener implements Listener {
             }
         }
     }
+
+    private record SfItemDescriptor(String id, String addon) {}
 }

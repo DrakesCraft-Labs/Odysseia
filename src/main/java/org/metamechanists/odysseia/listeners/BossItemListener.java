@@ -36,6 +36,8 @@ import org.metamechanists.odysseia.items.OdysseyItemManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public final class BossItemListener implements Listener {
@@ -43,6 +45,7 @@ public final class BossItemListener implements Listener {
     private final Odysseia plugin;
     private final NamespacedKey kratosTempOffhandKey;
     private final Map<UUID, Long> scepterCooldowns = new HashMap<>();
+    private final Set<UUID> syntheticDamageTargets = new HashSet<>();
     private static final Map<UUID, ItemStack> savedOffhands = new HashMap<>();
 
     public BossItemListener(Odysseia plugin) {
@@ -73,6 +76,7 @@ public final class BossItemListener implements Listener {
         Entity targetEntity = event.getEntity();
 
         if (!(targetEntity instanceof LivingEntity target)) return;
+        if (syntheticDamageTargets.contains(target.getUniqueId())) return;
 
         // 1. Direct melee hit by player
         if (damagerEntity instanceof Player player) {
@@ -118,7 +122,7 @@ public final class BossItemListener implements Listener {
             if (damagerEntity instanceof LivingEntity attacker && !attacker.equals(blocker)) {
                 double reflected = event.getDamage() * 0.20;
                 if (reflected > 0) {
-                    attacker.damage(reflected, blocker);
+                    applySyntheticDamage(attacker, reflected, blocker);
                     Location aLoc = attacker.getLocation();
                     aLoc.getWorld().spawnParticle(Particle.CRIT, aLoc.clone().add(0, 1, 0), 12, 0.3, 0.5, 0.3, 0.1);
                     aLoc.getWorld().playSound(aLoc, Sound.ITEM_SHIELD_BLOCK, 1.0f, 0.7f);
@@ -313,7 +317,7 @@ public final class BossItemListener implements Listener {
                 targetLoc.getWorld().spawnParticle(Particle.SONIC_BOOM, targetLoc, 1);
                 for (Entity e : target.getNearbyEntities(4, 3, 4)) {
                     if (e instanceof LivingEntity victim && !victim.equals(player)) {
-                        victim.damage(8.0, player);
+                        applySyntheticDamage(victim, 8.0, player);
                         victim.setVelocity(victim.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(1.2).setY(0.4));
                     }
                 }
@@ -334,7 +338,7 @@ public final class BossItemListener implements Listener {
                 target.setFireTicks(120);
                 target.setVelocity(new Vector(0, 1.2, 0));
                 double eruptionDamage = target.getHealth() * 0.10;
-                target.damage(Math.max(4.0, eruptionDamage), player);
+                applySyntheticDamage(target, Math.max(4.0, eruptionDamage), player);
                 targetLoc.getWorld().spawnParticle(Particle.LAVA, targetLoc, 20, 0.3, 0.3, 0.3, 0.1);
                 targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.2f);
                 break;
@@ -345,7 +349,7 @@ public final class BossItemListener implements Listener {
                 for (Entity e : target.getNearbyEntities(4, 3, 4)) {
                     if (e instanceof LivingEntity victim && !victim.equals(player)) {
                         victim.setFireTicks(120);
-                        victim.damage(4.0, player);
+                        applySyntheticDamage(victim, 4.0, player);
                     }
                 }
                 targetLoc.getWorld().spawnParticle(Particle.FLAME, targetLoc, 35, 1.5, 0.5, 1.5, 0.05);
@@ -535,12 +539,27 @@ public final class BossItemListener implements Listener {
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 5, false, true));
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, false, true));
                     if (ball.getShooter() instanceof org.bukkit.entity.Entity shooter) {
-                        victim.damage(10.0, shooter);
+                        applySyntheticDamage(victim, 10.0, shooter);
                     } else {
-                        victim.damage(10.0);
+                        applySyntheticDamage(victim, 10.0, null);
                     }
                 }
             }
+        }
+    }
+
+    /** Applies secondary damage without recursively triggering custom weapon effects. */
+    private void applySyntheticDamage(LivingEntity target, double amount, Entity source) {
+        UUID targetId = target.getUniqueId();
+        syntheticDamageTargets.add(targetId);
+        try {
+            if (source == null) {
+                target.damage(amount);
+            } else {
+                target.damage(amount, source);
+            }
+        } finally {
+            syntheticDamageTargets.remove(targetId);
         }
     }
 

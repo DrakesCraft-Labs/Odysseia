@@ -407,6 +407,44 @@ natural-spawn:
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)
 # ─────────────────────────────────────────────
+sfmaster-policy:
+  max-claims: 12
+  window-minutes: 60
+  blocked-addons:
+    - "SUPREME"
+    - "INFINITYEXPANSION"
+  blocked-id-prefixes:
+    - "SUPREME_"
+    - "INFINITY_"
+  blocked-id-fragments:
+    - "_SWORD"
+    - "_PICKAXE"
+    - "_AXE"
+    - "_SHOVEL"
+    - "_HOE"
+    - "_HELMET"
+    - "_CHESTPLATE"
+    - "_LEGGINGS"
+    - "_BOOTS"
+    - "_ARMOR"
+    - "_BOW"
+    - "_CROSSBOW"
+    - "_TRIDENT"
+    - "_STAFF"
+    - "_HAMMER"
+    - "_DRILL"
+    - "_MULTITOOL"
+    - "_SHIELD"
+    - "_ELYTRA"
+  blocked-materials:
+    - "DIAMOND"
+    - "DIAMOND_BLOCK"
+    - "EMERALD"
+    - "EMERALD_BLOCK"
+    - "NETHERITE_INGOT"
+    - "NETHERITE_BLOCK"
+    - "ANCIENT_DEBRIS"
+
 # Permite definir kits personalizados con cooldowns, comandos, dinero de Vault,
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).

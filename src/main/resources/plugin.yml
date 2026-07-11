@@ -38,6 +38,11 @@ commands:
     description: Motor transaccional de entregas de tienda.
     permission: odysseia.purchase.admin
     usage: /odysseiapurchase <deliver|status|pending|retry|history|validate|dry-run|refund|chargeback> ...
+  daily:
+    description: Muestra la racha de recompensa diaria.
+  restart30:
+    description: Reinicio seguro con guardado y respaldo de inventarios.
+    permission: drakes.admin
 permissions:
   odysseia.purchase.admin:
     description: Control total del motor de compras.

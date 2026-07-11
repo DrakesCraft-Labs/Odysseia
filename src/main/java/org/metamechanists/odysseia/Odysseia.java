@@ -54,6 +54,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("odysseiaannounce").setExecutor(new org.metamechanists.odysseia.commands.StoreAnnounceCommand(this));
         this.purchaseEngine = new PurchaseEngine(this);
         getCommand("odysseiapurchase").setExecutor(new org.metamechanists.odysseia.commands.PurchaseCommand(purchaseEngine));
+        org.metamechanists.odysseia.listeners.ServerAutomationListener automation = new org.metamechanists.odysseia.listeners.ServerAutomationListener(this);
+        getCommand("daily").setExecutor(new org.metamechanists.odysseia.commands.DailyCommand(automation));
+        getCommand("restart30").setExecutor(new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
         Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
 
         // Initialize BossManager
@@ -71,6 +74,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this), this);
+        Bukkit.getPluginManager().registerEvents(automation, this);
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
