@@ -12,6 +12,7 @@ public final class PurchaseEngine implements Listener, AutoCloseable {
     private final Odysseia plugin;
     private PurchaseRepository repository;
     private PurchaseService service;
+    private PlayerIdentityResolver identities;
     private String startupError;
 
     public PurchaseEngine(Odysseia plugin) {
@@ -19,7 +20,8 @@ public final class PurchaseEngine implements Listener, AutoCloseable {
         try {
             ProductCatalog catalog = new ProductCatalog(plugin);
             repository = new PurchaseRepository(new File(plugin.getDataFolder(), "purchases.db"));
-            service = new PurchaseService(catalog, repository, new BukkitPurchaseRuntime(plugin));
+            identities = new PlayerIdentityResolver(repository);
+            service = new PurchaseService(catalog, repository, new BukkitPurchaseRuntime(plugin), identities);
             Bukkit.getScheduler().runTaskLater(plugin, () -> service.recover("SYSTEM_RECOVERY"), 40L);
             plugin.getLogger().info("[Purchase] Motor listo: " + catalog.all().size() + " productos, SQLite WAL.");
         } catch (Exception error) {
@@ -31,7 +33,11 @@ public final class PurchaseEngine implements Listener, AutoCloseable {
     public PurchaseService service() { return service; }
     public String startupError() { return startupError; }
     @EventHandler public void onJoin(PlayerJoinEvent event) {
-        if (service != null) Bukkit.getScheduler().runTaskLater(plugin, () -> service.resumePlayer(event.getPlayer().getName(), "PLAYER_JOIN"), 20L);
+        if (service != null) Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            try { identities.observe(event.getPlayer().getUniqueId(), event.getPlayer().getName()); }
+            catch (Exception error) { plugin.getLogger().warning("[Purchase] Identidad no registrada: " + error.getMessage()); }
+            service.resumePlayer(event.getPlayer().getName(), "PLAYER_JOIN");
+        }, 20L);
     }
     @Override public void close() {
         if (repository != null) try { repository.close(); } catch (Exception error) { plugin.getLogger().warning("[Purchase] Error cerrando SQLite: " + error.getMessage()); }

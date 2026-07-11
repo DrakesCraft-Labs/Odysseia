@@ -10,22 +10,30 @@ public final class PurchaseService {
     private final ProductCatalog catalog;
     private final PurchaseRepository repository;
     private final PurchaseActionRuntime runtime;
+    private final PlayerIdentityResolver identities;
     private final Set<Long> processing = ConcurrentHashMap.newKeySet();
 
     public PurchaseService(ProductCatalog catalog, PurchaseRepository repository, PurchaseActionRuntime runtime) {
-        this.catalog = catalog; this.repository = repository; this.runtime = runtime;
+        this(catalog, repository, runtime, PlayerIdentityResolver.legacy(runtime));
+    }
+
+    public PurchaseService(ProductCatalog catalog, PurchaseRepository repository, PurchaseActionRuntime runtime, PlayerIdentityResolver identities) {
+        this.catalog = catalog; this.repository = repository; this.runtime = runtime; this.identities = identities;
     }
 
     public Result deliver(String transaction, String player, String productId, boolean dryRun, String actor) {
         if (!validTransaction(transaction)) return Result.error("Transacción inválida.");
-        if (!player.matches("[A-Za-z0-9_]{3,16}")) return Result.error("Username inválido.");
         ProductDefinition product = catalog.get(productId);
         if (product == null) return Result.error("Producto inexistente: " + productId);
         if (dryRun) return Result.ok("DRY_RUN: " + product.id() + " -> " + product.actions().size() + " acciones; " + product.verification());
         try {
-            UUID uuid = runtime.resolveUuid(player);
-            if (uuid == null) return Result.error("UUID no resuelto para " + player);
-            PurchaseRepository.Delivery delivery = repository.createOrLoad(PROVIDER, transaction, player, uuid, product, actor);
+            IdentityResolution identity = identities.resolve(player);
+            PurchaseRepository.Delivery delivery = repository.createOrLoad(PROVIDER, transaction, identity.resolved() ? identity.canonicalName() : player, identity.uuid(), product, actor);
+            if (!identity.resolved()) {
+                repository.deliveryState(delivery.id(), PurchaseState.FAILED_MANUAL_REVIEW, identity.detail());
+                repository.audit(delivery.id(), actor, "IDENTITY_" + identity.status(), identity.detail());
+                return Result.error("Identidad en revisión: " + identity.detail());
+            }
             if (delivery.state() == PurchaseState.COMPLETED) return Result.ok("Idempotente: la compra ya estaba completada.");
             process(delivery, actor);
             PurchaseRepository.Delivery current = repository.find(PROVIDER, transaction, productId).orElseThrow();
@@ -72,8 +80,16 @@ public final class PurchaseService {
         try {
             ProductDefinition product = catalog.get(delivery.product());
             if (product == null) { repository.deliveryState(delivery.id(), PurchaseState.FAILED_MANUAL_REVIEW, "Producto eliminado del catálogo"); return; }
-            UUID uuid = delivery.uuid() == null ? runtime.resolveUuid(delivery.player()) : UUID.fromString(delivery.uuid());
-            ExecutionContext context = new ExecutionContext(delivery.id(), delivery.provider(), delivery.transaction(), delivery.player(), uuid, product, false, actor);
+            IdentityResolution resolution = delivery.uuid() == null ? identities.resolve(delivery.player()) : null;
+            if (resolution != null && !resolution.resolved()) {
+                repository.deliveryState(delivery.id(), PurchaseState.FAILED_MANUAL_REVIEW, resolution.detail());
+                repository.audit(delivery.id(), actor, "IDENTITY_" + resolution.status(), resolution.detail());
+                return;
+            }
+            if (resolution != null) repository.bindIdentity(delivery.id(), new PurchaseRepository.PlayerIdentity(resolution.uuid(), resolution.canonicalName(), resolution.platform(), resolution.confidence()), actor);
+            UUID uuid = delivery.uuid() == null ? resolution.uuid() : UUID.fromString(delivery.uuid());
+            String canonical = resolution == null ? delivery.player() : resolution.canonicalName();
+            ExecutionContext context = new ExecutionContext(delivery.id(), delivery.provider(), delivery.transaction(), canonical, uuid, product, false, actor);
             repository.deliveryState(delivery.id(), PurchaseState.PROCESSING, null);
             boolean waiting = false, retryable = false, manual = false;
             for (PurchaseRepository.ActionRecord record : repository.actionable(delivery.id())) {
@@ -171,6 +187,17 @@ public final class PurchaseService {
             int resumed = 0;
             for (PurchaseRepository.Delivery delivery : repository.pending()) { process(delivery, actor); resumed++; }
             return Result.ok("Reconciliación ejecutada sobre " + resumed + " entrega(s).");
+        } catch (Exception error) { return Result.error(error.getMessage()); }
+    }
+
+    public Result resolveIdentity(String transaction, UUID uuid, String actor) {
+        try {
+            PurchaseRepository.PlayerIdentity identity = repository.findIdentityByUuid(uuid).orElse(null);
+            if (identity == null) return Result.error("UUID no observado por el servidor.");
+            List<PurchaseRepository.Delivery> deliveries = repository.findByTransaction(transaction);
+            if (deliveries.isEmpty()) return Result.error("Transacción no encontrada.");
+            for (PurchaseRepository.Delivery delivery : deliveries) { repository.bindIdentity(delivery.id(), identity, actor); process(repository.find(delivery.provider(), delivery.transaction(), delivery.product()).orElseThrow(), actor); }
+            return Result.ok("Identidad vinculada y acciones pendientes reanudadas.");
         } catch (Exception error) { return Result.error(error.getMessage()); }
     }
 

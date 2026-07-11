@@ -10,7 +10,8 @@ import java.util.*;
 public final class PurchaseRepository implements AutoCloseable {
     private static final List<String> MIGRATIONS = List.of(
             "db/migration/V1__purchase_engine.sql",
-            "db/migration/V2__financial_events.sql");
+            "db/migration/V2__financial_events.sql",
+            "db/migration/V3__player_identities.sql");
     private final Connection connection;
 
     public PurchaseRepository(File database) throws SQLException, IOException {
@@ -107,6 +108,44 @@ public final class PurchaseRepository implements AutoCloseable {
         return deliveries("SELECT * FROM purchase_deliveries WHERE lower(player_name)=lower(?) ORDER BY received_at DESC LIMIT 50", player);
     }
 
+    public synchronized void observeIdentity(UUID uuid, String canonical, String platform, String source, String confidence) throws SQLException {
+        String now = now(); String normalized = canonical.startsWith(".") ? canonical.substring(1) : canonical;
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO player_identities(player_uuid,canonical_name,normalized_name,platform,bedrock_prefix,first_seen_at,last_seen_at,verification_source,confidence,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(player_uuid) DO UPDATE SET canonical_name=excluded.canonical_name,normalized_name=excluded.normalized_name,platform=excluded.platform,bedrock_prefix=excluded.bedrock_prefix,last_seen_at=excluded.last_seen_at,verification_source=excluded.verification_source,confidence=excluded.confidence,updated_at=excluded.updated_at")) {
+            statement.setString(1, uuid.toString()); statement.setString(2, canonical); statement.setString(3, normalized);
+            statement.setString(4, platform); statement.setInt(5, canonical.startsWith(".") ? 1 : 0);
+            statement.setString(6, now); statement.setString(7, now); statement.setString(8, source); statement.setString(9, confidence); statement.setString(10, now); statement.executeUpdate();
+        }
+    }
+
+    public synchronized void observeAlias(UUID uuid, String alias, String type, String confidence) throws SQLException {
+        String now = now();
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO player_identity_aliases(player_uuid,alias,alias_type,confidence,first_seen_at,last_seen_at) VALUES(?,?,?,?,?,?) ON CONFLICT(player_uuid,alias) DO UPDATE SET alias_type=excluded.alias_type,confidence=excluded.confidence,last_seen_at=excluded.last_seen_at")) {
+            statement.setString(1, uuid.toString()); statement.setString(2, alias); statement.setString(3, type); statement.setString(4, confidence); statement.setString(5, now); statement.setString(6, now); statement.executeUpdate();
+        }
+    }
+
+    public synchronized Optional<PlayerIdentity> findIdentityByCanonical(String name) throws SQLException { return identity("SELECT * FROM player_identities WHERE canonical_name=? COLLATE NOCASE", name); }
+    public synchronized Optional<PlayerIdentity> findIdentityByUuid(UUID uuid) throws SQLException { return identity("SELECT * FROM player_identities WHERE player_uuid=?", uuid.toString()); }
+    public synchronized List<PlayerIdentity> findByAlias(String alias) throws SQLException { return identities("SELECT DISTINCT i.* FROM player_identities i JOIN player_identity_aliases a ON a.player_uuid=i.player_uuid WHERE a.alias=? COLLATE NOCASE", alias, null); }
+    public synchronized List<PlayerIdentity> findByAlias(String alias, String type) throws SQLException { return identities("SELECT DISTINCT i.* FROM player_identities i JOIN player_identity_aliases a ON a.player_uuid=i.player_uuid WHERE a.alias=? COLLATE NOCASE AND a.alias_type=?", alias, type); }
+
+    public synchronized void bindIdentity(long deliveryId, PlayerIdentity identity, String actor) throws SQLException {
+        try (PreparedStatement update = connection.prepareStatement("UPDATE purchase_deliveries SET player_name=?,player_uuid=?,updated_at=? WHERE id=?")) {
+            update.setString(1, identity.canonicalName()); update.setString(2, identity.uuid().toString()); update.setString(3, now()); update.setLong(4, deliveryId); update.executeUpdate();
+        }
+        audit(deliveryId, actor, "IDENTITY_BOUND", identity.uuid() + ";" + identity.canonicalName());
+    }
+
+    private Optional<PlayerIdentity> identity(String sql, String value) throws SQLException {
+        List<PlayerIdentity> found = identities(sql, value, null); return found.isEmpty() ? Optional.empty() : Optional.of(found.getFirst());
+    }
+    private List<PlayerIdentity> identities(String sql, String first, String second) throws SQLException {
+        try (PreparedStatement query = connection.prepareStatement(sql)) {
+            query.setString(1, first); if (second != null) query.setString(2, second); ResultSet rows = query.executeQuery(); List<PlayerIdentity> result = new ArrayList<>();
+            while (rows.next()) result.add(new PlayerIdentity(UUID.fromString(rows.getString("player_uuid")), rows.getString("canonical_name"), rows.getString("platform"), rows.getString("confidence"))); return result;
+        }
+    }
+
     private List<Delivery> deliveries(String sql, String parameter) throws SQLException {
         try (PreparedStatement query = connection.prepareStatement(sql)) {
             if (parameter != null) query.setString(1, parameter);
@@ -187,4 +226,5 @@ public final class PurchaseRepository implements AutoCloseable {
     public record ActionRecord(long id, long deliveryId, String key, int position, ActionType type, ActionState state,
                                int attempts, boolean requiresOnline, RefundPolicy refundPolicy, boolean required,
                                String lastError, String result) {}
+    public record PlayerIdentity(UUID uuid, String canonicalName, String platform, String confidence) {}
 }
