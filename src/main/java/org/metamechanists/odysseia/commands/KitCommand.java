@@ -13,7 +13,6 @@ import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.purchase.ActionResult;
 import org.metamechanists.odysseia.purchase.KitDeliveryService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -40,7 +39,10 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length != 1) {
             player.sendMessage(color("&eUso: &f/kit <nombre>"));
-            player.sendMessage(color("&7Disponibles: &f" + String.join(", ", kitNames())));
+            List<String> availableKits = kitNames(player);
+            player.sendMessage(color(availableKits.isEmpty()
+                    ? "&7No tienes kits disponibles con tu rango actual."
+                    : "&7Disponibles: &f" + String.join(", ", availableKits)));
             return true;
         }
 
@@ -50,8 +52,8 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(color("&cEse kit no existe."));
             return true;
         }
-        String permission = section.getString("permission", "drakes.kit." + kit);
-        if (!player.hasPermission(permission)) {
+        String permission = section.getString("permission", "").trim();
+        if (permission.isEmpty() || !player.hasPermission(permission)) {
             player.sendMessage(color("&cNo tienes permiso para reclamar este kit."));
             return true;
         }
@@ -76,13 +78,23 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                  @NotNull String alias, @NotNull String[] args) {
         if (args.length != 1) return List.of();
+        if (!(sender instanceof Player player)) return List.of();
         String prefix = args[0].toLowerCase(Locale.ROOT);
-        return kitNames().stream().filter(name -> name.startsWith(prefix)).toList();
+        return kitNames(player).stream().filter(name -> name.startsWith(prefix)).toList();
     }
 
-    private List<String> kitNames() {
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("kits");
-        return section == null ? List.of() : new ArrayList<>(section.getKeys(false));
+    /** Solo revela kits cuyo permiso explícito el jugador ya posee por LuckPerms. */
+    private List<String> kitNames(Player player) {
+        ConfigurationSection kits = plugin.getConfig().getConfigurationSection("kits");
+        if (kits == null) return List.of();
+        return kits.getKeys(false).stream()
+                .filter(name -> {
+                    ConfigurationSection kit = kits.getConfigurationSection(name);
+                    String permission = kit == null ? "" : kit.getString("permission", "").trim();
+                    return !permission.isEmpty() && player.hasPermission(permission);
+                })
+                .sorted()
+                .toList();
     }
 
     private String color(String text) {

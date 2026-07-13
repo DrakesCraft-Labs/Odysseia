@@ -609,21 +609,6 @@ kits:
       - material: GOLDEN_CARROT
         amount: 16
 
-  # ── Kit de Comida ──────────────────────────────
-  comida:
-    cooldown: "30m"
-    permission: "drakes.kit.comida"
-    money: 0
-    vanilla-items:
-      - material: COOKED_BEEF
-        amount: 32
-      - material: GOLDEN_CARROT
-        amount: 16
-      - material: BREAD
-        amount: 32
-      - material: COOKIE
-        amount: 16
-
   # ── Kit VIP Hércules ───────────────────────────
   hercules:
     cooldown: "30d"
@@ -1385,4 +1370,3 @@ kits:
         amount: 64
       - material: TOTEM_OF_UNDYING
         amount: 8
-

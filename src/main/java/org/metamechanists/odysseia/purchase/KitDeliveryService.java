@@ -44,6 +44,8 @@ public final class KitDeliveryService {
         for (String kit : kits.getKeys(false)) {
             ConfigurationSection section = kits.getConfigurationSection(kit);
             if (section == null) continue;
+            String permission = section.getString("permission", "").trim();
+            if (permission.isEmpty()) errors.add(kit + ": falta permiso explícito de LuckPerms");
             int index = 0;
             for (Map<?, ?> values : section.getMapList("vanilla-items")) {
                 index++;
