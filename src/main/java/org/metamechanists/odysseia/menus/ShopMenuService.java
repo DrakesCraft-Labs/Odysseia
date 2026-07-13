@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.metamechanists.odysseia.Odysseia;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,8 +62,9 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
                 int slot = entry.getInt("slot", -1);
                 if (slot < 0 || slot >= inventory.getSize()) continue;
                 inventory.setItem(slot, item(entry, Material.CHEST));
-                List<String> commands = entry.getStringList("commands");
-                if (!commands.isEmpty()) actions.put(slot, String.join("\n", commands));
+                List<String> actionsForEntry = new ArrayList<>(entry.getStringList("commands"));
+                entry.getStringList("messages").forEach(message -> actionsForEntry.add("odysseia:message:" + message));
+                if (!actionsForEntry.isEmpty()) actions.put(slot, String.join("\n", actionsForEntry));
             }
         }
         pages.put(inventory, new Page(actions));
@@ -111,6 +113,8 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
                 openKits(player);
             } else if (command.startsWith("odysseia:claim:")) {
                 Bukkit.dispatchCommand(player, "kit " + command.substring("odysseia:claim:".length()));
+            } else if (command.startsWith("odysseia:message:")) {
+                player.sendMessage(color(command.substring("odysseia:message:".length())));
             } else if (!command.isBlank()) {
                 Bukkit.dispatchCommand(player, command.startsWith("/") ? command.substring(1) : command);
             }

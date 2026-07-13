@@ -485,33 +485,63 @@ protectionstones:
 native-menus:
   shop:
     enabled: true
-    title: "&8DrakesCraft &7| &bServicios"
-    rows: 3
+    title: "&6⚡ &lTienda &8· &fDrakesCraft &6⚡"
+    rows: 6
     entries:
-      kits:
-        slot: 10
-        material: CHEST
-        name: "&6&lKits de rango"
-        lore: ["&7Revisa y reclama tus kits.", "&eClic para abrir."]
-        commands: ["odysseia:open-kits"]
-      tienda:
-        slot: 12
-        material: EMERALD
-        name: "&a&lTienda de materiales"
-        lore: ["&7Compra o vende recursos.", "&eClic para abrir."]
-        commands: ["ultimateshop"]
       protecciones:
-        slot: 14
-        material: SHIELD
-        name: "&b&lProtecciones"
-        lore: ["&7Consulta las protecciones disponibles.", "&eClic para abrir."]
+        slot: 11
+        material: LODESTONE
+        name: "&f&lPolis &8· &7ProtectionStones"
+        lore: ["&7Compra bloques de protección.", "&8Desde Khora hasta Olimpo.", "", "&e➤ Clic &7abrir tienda de protecciones"]
         commands: ["tiendaprot"]
+      encantos:
+        slot: 13
+        material: ENCHANTING_TABLE
+        name: "&d&lEncantamientos"
+        lore: ["&7Menú de &fExcellentEnchants&7.", "&8Encantamientos únicos del servidor.", "", "&e➤ Clic &7abrir"]
+        commands: ["eenchants"]
       subastas:
-        slot: 16
-        material: GOLD_INGOT
+        slot: 15
+        material: SUNFLOWER
         name: "&e&lSubastas"
-        lore: ["&7Publica y compra de otros jugadores.", "&eClic para abrir."]
+        lore: ["&7Mercado de jugadores &fCrazyAuctions&7.", "&8Precio mínimo: &f₯500", "", "&e➤ Clic &7abrir (/ca)"]
         commands: ["ca"]
+      trabajos:
+        slot: 22
+        material: GOLDEN_PICKAXE
+        name: "&6&lTrabajos"
+        lore: ["&7Gana dinero con &fJobs Reborn&7.", "&8Hasta 3 trabajos simultáneos.", "", "&e➤ Clic &7· &f/jobs browse"]
+        commands: ["jobs browse"]
+      cofres:
+        slot: 29
+        material: CHEST
+        name: "&6&lCofre &8· &7ChestShop"
+        lore: ["&7Tienda física: cartel en cofre de madera.", "&8Formato: &f[ChestShop] &8· cantidad · precio · ítem"]
+        messages: ["&6DrakesCraft &8· &7Las tiendas de cofre están en el &fspawn&7. Sigue los hologramas &b/dh list"]
+      habilidades:
+        slot: 31
+        material: EXPERIENCE_BOTTLE
+        name: "&a&lHabilidades &8· &7AuraSkills"
+        lore: ["&7Sube de nivel en combate, minería y magia.", "", "&e➤ Clic &7· &f/skills"]
+        commands: ["skills"]
+      kits:
+        slot: 38
+        material: DIAMOND_CHESTPLATE
+        name: "&b&lKits VIP &8· &7Rangos de suscripción"
+        lore: ["&7Revisa y reclama tus kits mensuales.", "", "&e➤ Clic &7· &f/kitsvip"]
+        commands: ["odysseia:open-kits"]
+      materiales:
+        slot: 40
+        material: LIME_CONCRETE
+        name: "&a&lMateriales &8· &7Bloques & Decoración"
+        lore: ["&7Concreto, vidrio, terracota y más.", "&8Izq: &f8u &8| Der: &f64u", "", "&e➤ Clic &7abrir"]
+        commands: ["tiendamateriales"]
+      warps:
+        slot: 42
+        material: COMPASS
+        name: "&b&lWarps de Jugadores"
+        lore: ["&7Explora construcciones y tiendas de la comunidad.", "&8Crea tu propio warp con &f/pw create&8.", "", "&e➤ Clic &7· &f/pw"]
+        commands: ["pw"]
   kits:
     title: "&8DrakesCraft &7| &6Kits VIP"
     rows: 3
