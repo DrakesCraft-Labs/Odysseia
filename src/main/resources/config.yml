@@ -258,8 +258,8 @@ store:
   api-key: "REPLACE_ME_STORE_API_KEY"
   # Frecuencia de verificación en segundos
   poll-interval-seconds: 60
-  # Webhook para anunciar compras en Discord de forma pública
-  announcement-webhook-url: "https://discord.com/api/webhooks/1514654807271542894/Z7Gxa2DhgBPc3bYEpj_g2QUhfVIdgngsCyTgHGCHXvhF1_0QCwdyf0nQPve2norn1qEG"
+  # Compatibilidad con el flujo antiguo. Purchase Engine usa purchase-engine.announcements.
+  announcement-webhook-url: "REPLACE_ME_LEGACY_WEBHOOK"
   # Mensaje de felicitaciones en el chat in-game (Soporta códigos de color '&')
   chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
   # Mensaje del webhook de Discord
@@ -268,7 +268,7 @@ store:
   global-sound:
     enabled: true
     sound: "UI_TOAST_CHALLENGE_COMPLETE"
-  
+
   # Comandos a ejecutar por cada producto de la tienda
   # {player} se reemplazará por el nick exacto del jugador
   packages:
@@ -387,6 +387,20 @@ store:
 # ╚══════════════════════════════════════════════╝
 # Invoca jefes aleatorios cerca de jugadores cada cierto tiempo.
 # NO genera estructuras: solo aparece la entidad en la superficie.
+# ─────────────────────────────────────────────
+#  Purchase Engine: anuncios de compras confirmadas
+# ─────────────────────────────────────────────
+# Este endpoint es privado: el valor real vive solo en la configuración desplegada.
+purchase-engine:
+  announcements:
+    enabled: true
+    webhook-url: "REPLACE_ME_PURCHASE_WEBHOOK"
+    chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
+    discord-announcement: "🎉 **¡Felicidades {player} ha comprado {product} en el servidor! ¡Gracias por mantener el servidor vivo!** 🎉"
+    global-sound:
+      enabled: true
+      sound: "UI_TOAST_CHALLENGE_COMPLETE"
+
 natural-spawn:
   # Activar/desactivar el spawn natural automático
   enabled: false

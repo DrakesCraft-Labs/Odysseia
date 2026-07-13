@@ -71,6 +71,23 @@ class PurchaseServiceTest {
         assertEquals(PurchaseState.COMPLETED, service.status("txn-retry").getFirst().state());
     }
 
+    @Test void failedAnnouncementRemainsRecoverableWithoutRepeatingRewards() throws Exception {
+        runtime.online = true;
+        runtime.failAnnouncementOnce = true;
+        service.deliver("txn-announce-retry", "TestPlayer", "dragmas_saco", false, "test");
+
+        long deliveryId = service.status("txn-announce-retry").getFirst().id();
+        assertEquals(PurchaseState.FAILED_RETRYABLE, service.status("txn-announce-retry").getFirst().state());
+        assertEquals(ActionState.FAILED_RETRYABLE, repository.actions(deliveryId).stream()
+                .filter(action -> action.type() == ActionType.ANNOUNCEMENT).findFirst().orElseThrow().state());
+
+        service.retry("txn-announce-retry", "admin");
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(2, runtime.calls(ActionType.ANNOUNCEMENT));
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-announce-retry").getFirst().state());
+    }
+
     @Test void concurrentDuplicateEventsStillDeliverOnce() throws Exception {
         runtime.online = true;
         ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -170,6 +187,7 @@ class PurchaseServiceTest {
         private boolean online;
         private boolean failKitOnce;
         private boolean failEconomy;
+        private boolean failAnnouncementOnce;
         @Override public UUID resolveUuid(String player) { return UUID.nameUUIDFromBytes(player.getBytes()); }
         @Override public boolean isOnline(String player) { return online; }
         @Override public ActionResult execute(ExecutionContext context, ProductAction action) {
@@ -177,6 +195,7 @@ class PurchaseServiceTest {
             if (action.type() == ActionType.ECONOMY && failEconomy) return ActionResult.retryable("Vault unavailable");
             if (action.requiresOnline() && !online) return ActionResult.waiting("offline");
             if (action.type() == ActionType.KIT && failKitOnce) { failKitOnce = false; return ActionResult.retryable("transient"); }
+            if (action.type() == ActionType.ANNOUNCEMENT && failAnnouncementOnce) { failAnnouncementOnce = false; return ActionResult.retryable("webhook unavailable"); }
             return ActionResult.completed(action.id());
         }
         @Override public ActionResult revoke(ExecutionContext context, ProductAction action, String result) { return ActionResult.completed("revoked"); }

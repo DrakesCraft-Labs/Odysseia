@@ -116,11 +116,16 @@ public final class PurchaseService {
                 }
             }
             List<PurchaseRepository.ActionRecord> actions = repository.actions(delivery.id());
+            boolean incomplete = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && !Set.of(ActionState.COMPLETED, ActionState.SKIPPED).contains(a.state()));
+            if (!incomplete) {
+                completeAnnouncement(context, actions);
+                // The announcement can fail independently after all rewards were delivered.
+                // Reload action state so recovery can retry it without replaying rewards.
+                actions = repository.actions(delivery.id());
+            }
             waiting = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.WAITING_FOR_PLAYER);
             retryable = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_RETRYABLE);
             manual = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_MANUAL_REVIEW);
-            boolean incomplete = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && !Set.of(ActionState.COMPLETED, ActionState.SKIPPED).contains(a.state()));
-            if (!incomplete) completeAnnouncement(context, actions);
             PurchaseState state = manual ? PurchaseState.FAILED_MANUAL_REVIEW : retryable ? PurchaseState.FAILED_RETRYABLE : waiting ? PurchaseState.WAITING_FOR_PLAYER : incomplete ? PurchaseState.PARTIALLY_DELIVERED : PurchaseState.COMPLETED;
             repository.deliveryState(delivery.id(), state, null);
             repository.audit(delivery.id(), actor, "STATE_" + state, null);
@@ -131,9 +136,16 @@ public final class PurchaseService {
         for (PurchaseRepository.ActionRecord record : records) {
             if (record.type() != ActionType.ANNOUNCEMENT || record.state() == ActionState.COMPLETED) continue;
             ProductAction action = context.product().actions().stream().filter(candidate -> candidate.id().equals(record.key())).findFirst().orElseThrow();
-            if (!repository.markAnnouncementSent(context.deliveryId())) { repository.actionState(record.id(), ActionState.SKIPPED, "Anuncio ya emitido", null); continue; }
             ActionResult result = runtime.execute(context, action);
-            repository.actionState(record.id(), result.status() == ActionResult.Status.COMPLETED ? ActionState.COMPLETED : ActionState.SKIPPED, result.detail(), null);
+            if (result.status() != ActionResult.Status.COMPLETED) {
+                repository.actionState(record.id(), ActionState.FAILED_RETRYABLE, result.detail(), null);
+                continue;
+            }
+            if (!repository.markAnnouncementSent(context.deliveryId())) {
+                repository.actionState(record.id(), ActionState.SKIPPED, "Anuncio ya emitido", null);
+                continue;
+            }
+            repository.actionState(record.id(), ActionState.COMPLETED, result.detail(), null);
         }
     }
 

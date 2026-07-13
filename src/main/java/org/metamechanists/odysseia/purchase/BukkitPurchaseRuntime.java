@@ -45,7 +45,9 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
                 case PROTECTION_STONE -> protectionStone(context, action);
                 case WEAPON -> weapon(context, action);
                 case NOTIFICATION -> online(context, player -> { player.sendMessage(color(action.parameters().getOrDefault("message", "&aCompra entregada."))); return ActionResult.completed("notified"); });
-                case ANNOUNCEMENT -> { StoreManager.announcePurchase(plugin, context.player(), action.parameters().getOrDefault("product", context.product().name())); yield ActionResult.completed("announced"); }
+                case ANNOUNCEMENT -> StoreManager.announcePurchase(plugin, context.player(), action.parameters().getOrDefault("product", context.product().name()))
+                        ? ActionResult.completed("announcement queued")
+                        : ActionResult.retryable("Purchase announcement is not configured");
                 case MANUAL -> ActionResult.manual(action.parameters().getOrDefault("reason", "Revisión manual"));
                 case CONSOLE_COMMAND -> controlledCommand(context, action);
             };

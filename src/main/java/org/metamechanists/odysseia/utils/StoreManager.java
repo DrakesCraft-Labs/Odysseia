@@ -220,11 +220,25 @@ public final class StoreManager {
      * Dispara el anuncio público de Discord, el anuncio en chat in-game y el sonido global.
      * Estático para poder invocarse desde un comando (entregas vía Tebex) sin depender del hilo de polling.
      */
-    public static void announcePurchase(Odysseia plugin, String nick, String productName) {
+    public static boolean announcePurchase(Odysseia plugin, String nick, String productName) {
         FileConfiguration config = plugin.getConfig();
 
+        // Purchase Engine owns this endpoint. Generic Discord integrations must never
+        // receive commerce events because they have different retention and permissions.
+        if (!config.getBoolean("purchase-engine.announcements.enabled", false)) {
+            plugin.getLogger().warning("[Purchase] El anuncio de compra esta desactivado en purchase-engine.announcements.");
+            return false;
+        }
+
+        String webhookUrl = config.getString("purchase-engine.announcements.webhook-url", "");
+        if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.startsWith("REPLACE_ME")
+                || !WebhookSender.isDiscordWebhookUrl(webhookUrl) || !WebhookSender.isAllowedHttpsUrl(webhookUrl)) {
+            plugin.getLogger().warning("[Purchase] Webhook de compras invalido o no configurado; el anuncio queda pendiente de reintento.");
+            return false;
+        }
+
         // 1. Anuncio en el chat local
-        String chatAnnounce = config.getString("store.chat-announcement", "");
+        String chatAnnounce = config.getString("purchase-engine.announcements.chat-announcement", "");
         if (chatAnnounce != null && !chatAnnounce.isBlank()) {
             String msg = ChatColor.translateAlternateColorCodes('&', chatAnnounce
                     .replace("{player}", nick)
@@ -233,8 +247,8 @@ public final class StoreManager {
         }
 
         // 2. Reproducir sonido global si está activado
-        if (config.getBoolean("store.global-sound.enabled", true)) {
-            String soundName = config.getString("store.global-sound.sound", "UI_TOAST_CHALLENGE_COMPLETE");
+        if (config.getBoolean("purchase-engine.announcements.global-sound.enabled", true)) {
+            String soundName = config.getString("purchase-engine.announcements.global-sound.sound", "UI_TOAST_CHALLENGE_COMPLETE");
             try {
                 org.bukkit.Sound sound = org.bukkit.Sound.valueOf(soundName.toUpperCase());
                 for (Player p : Bukkit.getOnlinePlayers()) {
@@ -246,15 +260,11 @@ public final class StoreManager {
         }
 
         // 3. Webhook de Discord
-        String webhookUrl = config.getString("store.announcement-webhook-url", "");
-        String discordAnnounce = config.getString("store.discord-announcement", "");
-
-        if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.equals("REPLACE_ME") || !WebhookSender.isAllowedHttpsUrl(webhookUrl)) {
-            return;
-        }
+        String discordAnnounce = config.getString("purchase-engine.announcements.discord-announcement", "");
 
         if (discordAnnounce == null || discordAnnounce.isBlank()) {
-            return;
+            plugin.getLogger().warning("[Purchase] Falta purchase-engine.announcements.discord-announcement; el anuncio queda pendiente de reintento.");
+            return false;
         }
 
         String cleanText = discordAnnounce.replace("{player}", nick).replace("{product}", productName);
@@ -273,5 +283,7 @@ public final class StoreManager {
                 + "}]}";
 
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+        plugin.getLogger().info("[Purchase] Anuncio encolado para " + nick + " (" + productName + ").");
+        return true;
     }
 }
