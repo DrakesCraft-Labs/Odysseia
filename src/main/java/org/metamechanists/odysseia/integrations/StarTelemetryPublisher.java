@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public final class StarTelemetryPublisher {
     private void publish(String type, PurchaseEngine engine, String productId, String purchaseState) {
         if (!plugin.getConfig().getBoolean("star-monitor.enabled", false)) return;
         String endpoint = plugin.getConfig().getString("star-monitor.endpoint", "");
-        String secret = plugin.getConfig().getString("star-monitor.signing-secret", "");
+        String secret = resolveSecret();
         if (endpoint == null || endpoint.isBlank() || secret == null || secret.isBlank() || secret.equals("REPLACE_ME")) {
             plugin.getLogger().warning("[Star] Telemetría habilitada sin endpoint o secreto válido.");
             return;
@@ -84,6 +85,19 @@ public final class StarTelemetryPublisher {
         if (productId != null) json.append(",\"productId\":\"").append(escape(productId)).append("\"");
         if (purchaseState != null) json.append(",\"purchaseState\":\"").append(escape(purchaseState)).append("\"");
         return json.append('}').toString();
+    }
+
+    private String resolveSecret() {
+        String configured = plugin.getConfig().getString("star-monitor.signing-secret", "");
+        if (configured != null && !configured.isBlank() && !configured.equals("REPLACE_ME")) {
+            return configured;
+        }
+        String fileName = plugin.getConfig().getString("star-monitor.signing-secret-file", "star-monitor.secret");
+        try {
+            return Files.readString(plugin.getDataFolder().toPath().resolve(fileName)).trim();
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static String hmac(String secret, String value) throws Exception {

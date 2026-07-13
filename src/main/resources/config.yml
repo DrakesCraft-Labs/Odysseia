@@ -16,6 +16,8 @@ star-monitor:
   enabled: false
   endpoint: "https://web.drakescraft.cl/api/odysseia/events"
   signing-secret: "REPLACE_ME"
+  # Archivo privado dentro de plugins/Odysseia; no versionar ni copiar al repositorio.
+  signing-secret-file: "star-monitor.secret"
   heartbeat-interval-seconds: 60
 
 # ─────────────────────────────────────────────
