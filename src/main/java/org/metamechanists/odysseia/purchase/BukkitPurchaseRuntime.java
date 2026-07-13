@@ -141,15 +141,48 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
         return online(context, player -> {
             String key = action.parameters().get("alias");
             String alias = plugin.getConfig().getString("protectionstones.aliases." + key, key);
-            String amount = action.parameters().getOrDefault("amount", "1");
-            String template = plugin.getConfig().getString("protectionstones.give-command", "ps give {alias} {player} {amount}");
-            String command = template.replace("{alias}", alias).replace("{player}", player.getName()).replace("{amount}", amount);
-            if (!command.matches("ps give [A-Za-z0-9_-]+ [A-Za-z0-9_.-]+ [1-9][0-9]*")) {
-                return ActionResult.manual("Plantilla ProtectionStones inválida");
-            }
-            boolean accepted = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-            return accepted ? ActionResult.completed("alias=" + alias + ";amount=" + amount) : ActionResult.retryable("ProtectionStones rechazó el comando tipado");
+            int amount = Integer.parseInt(action.parameters().getOrDefault("amount", "1"));
+            if (amount < 1 || amount > 2304) return ActionResult.manual("Cantidad ProtectionStones inválida");
+            return giveProtectionStone(player, alias, amount);
         });
+    }
+
+    /**
+     * Usa la API real de ProtectionStones en vez de aceptar ciegamente un comando
+     * de consola. La reflexión mantiene el plugin opcional sin acoplar el JAR al
+     * classpath de compilación de Odysseia.
+     */
+    private ActionResult giveProtectionStone(Player player, String alias, int amount) {
+        try {
+            Class<?> protectionStones = Class.forName("dev.espi.protectionstones.ProtectionStones");
+            Object block = protectionStones.getMethod("getProtectBlockFromAlias", String.class).invoke(null, alias);
+            if (block == null) return ActionResult.manual("Alias ProtectionStones inexistente: " + alias);
+            ItemStack prototype = (ItemStack) block.getClass().getMethod("createItem").invoke(block);
+            if (prototype == null || prototype.getType().isAir()) return ActionResult.manual("ProtectionStones no creó un ítem para " + alias);
+            if (!hasInventoryCapacity(player, prototype, amount)) return ActionResult.waiting("Inventario sin espacio para ProtectionStone " + alias);
+
+            int remaining = amount;
+            while (remaining > 0) {
+                ItemStack item = prototype.clone();
+                int stack = Math.min(remaining, item.getMaxStackSize());
+                item.setAmount(stack);
+                if (!player.getInventory().addItem(item).isEmpty()) return ActionResult.retryable("Inventario cambió durante la entrega de " + alias);
+                remaining -= stack;
+            }
+            return ActionResult.completed("alias=" + alias + ";amount=" + amount);
+        } catch (ReflectiveOperationException error) {
+            return ActionResult.retryable("API ProtectionStones no disponible: " + error.getClass().getSimpleName());
+        }
+    }
+
+    private boolean hasInventoryCapacity(Player player, ItemStack prototype, int amount) {
+        int capacity = 0;
+        for (ItemStack slot : player.getInventory().getStorageContents()) {
+            if (slot == null || slot.getType().isAir()) capacity += prototype.getMaxStackSize();
+            else if (slot.isSimilar(prototype)) capacity += Math.max(0, slot.getMaxStackSize() - slot.getAmount());
+            if (capacity >= amount) return true;
+        }
+        return false;
     }
 
     private ActionResult weapon(ExecutionContext context, ProductAction action) {

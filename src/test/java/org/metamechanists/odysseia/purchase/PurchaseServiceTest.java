@@ -156,6 +156,8 @@ class PurchaseServiceTest {
         assertTrue(catalog.validate().isEmpty());
         assertEquals(VerificationState.PARTIALLY_VERIFIED, catalog.get("protection_481").verification());
         assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
+        assertEquals("viphermes", catalog.get("vip_hermes").actions().get(3).parameters().get("alias"));
+        assertEquals("vipzeus", catalog.get("vip_zeus").actions().get(3).parameters().get("alias"));
     }
 
     private static void delete(File file) {
