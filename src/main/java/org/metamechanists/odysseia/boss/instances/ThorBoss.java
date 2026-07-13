@@ -26,7 +26,7 @@ public class ThorBoss extends OdysseyBoss {
         super(entity, "thor", "§6§lThor §7§l- §6Dios del Trueno", 1000.0, BarColor.YELLOW, BarStyle.SEGMENTED_10);
 
         // Scale entity size to make it large
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(1.8);
         }

@@ -36,7 +36,7 @@ public class DiosCorruptoBoss extends OdysseyBoss {
         super(entity, "dios_corrupto", "§4§lDios Corrupto §7§l- §4El Caído", 2000.0, BarColor.PURPLE, BarStyle.SEGMENTED_20);
 
         // Scale entity size to make it look like a giant god (1.21+ attribute GENERIC_SCALE)
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(2.0);
         }

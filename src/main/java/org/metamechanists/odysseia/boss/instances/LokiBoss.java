@@ -32,7 +32,7 @@ public final class LokiBoss extends OdysseyBoss {
         super(entity, "loki", "§a§lLoki §7§l- §aDios del Engaño", 1200.0, BarColor.GREEN, BarStyle.SEGMENTED_20);
 
         // Scale entity size slightly larger (1.2)
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(1.2);
         }

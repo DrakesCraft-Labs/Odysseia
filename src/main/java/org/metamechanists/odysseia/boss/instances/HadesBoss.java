@@ -24,7 +24,7 @@ public class HadesBoss extends OdysseyBoss {
     public HadesBoss(LivingEntity entity) {
         super(entity, "hades", "§5§lHades §7§l- §5Dios del Inframundo", 1500.0, BarColor.PURPLE, BarStyle.SEGMENTED_12);
 
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(2.2);
         }

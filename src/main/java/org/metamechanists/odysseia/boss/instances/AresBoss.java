@@ -27,7 +27,7 @@ public class AresBoss extends OdysseyBoss {
     public AresBoss(LivingEntity entity) {
         super(entity, "ares", "§c§lAres §7§l- §cDios de la Guerra", 1200.0, BarColor.RED, BarStyle.SEGMENTED_12);
 
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(1.3);
         }

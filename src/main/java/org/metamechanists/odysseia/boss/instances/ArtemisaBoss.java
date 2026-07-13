@@ -30,9 +30,9 @@ public class ArtemisaBoss extends OdysseyBoss {
     public ArtemisaBoss(LivingEntity entity) {
         super(entity, "artemisa", "§9§l🏹 Artemisa §7§l- §9Diosa de la Caza", 600.0, BarColor.BLUE, BarStyle.SEGMENTED_10);
 
-        var scaleAttr = entity.getAttribute(Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(Attribute.SCALE);
         if (scaleAttr != null) scaleAttr.setBaseValue(1.4);
-        var spdAttr = entity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        var spdAttr = entity.getAttribute(Attribute.MOVEMENT_SPEED);
         if (spdAttr != null) spdAttr.setBaseValue(0.32);
 
         if (entity.getEquipment() != null) {
@@ -120,11 +120,11 @@ public class ArtemisaBoss extends OdysseyBoss {
             wolf.setCustomNameVisible(true);
             wolf.setAngry(true);
             wolf.setRemoveWhenFarAway(true);
-            var hp = wolf.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            var hp = wolf.getAttribute(Attribute.MAX_HEALTH);
             if (hp != null) { hp.setBaseValue(30.0); wolf.setHealth(30.0); }
             if (nearest != null) wolf.setTarget(nearest);
         }
-        center.getWorld().playSound(center, Sound.ENTITY_WOLF_HOWL, 1.2f, 1.0f);
+        center.getWorld().playSound(center, Sound.ENTITY_WOLF_GROWL, 1.2f, 1.0f);
     }
 
     /** Hace caer N flechas desde el cielo sobre posiciones aleatorias alrededor del punto. */

@@ -33,9 +33,9 @@ public class HeimdallBoss extends OdysseyBoss {
     public HeimdallBoss(LivingEntity entity) {
         super(entity, "heimdall", "§f§l🌈 Heimdall §7§l- §fGuardián del Bifröst", 800.0, BarColor.WHITE, BarStyle.SEGMENTED_10);
 
-        var scaleAttr = entity.getAttribute(Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(Attribute.SCALE);
         if (scaleAttr != null) scaleAttr.setBaseValue(1.5);
-        var dmgAttr = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        var dmgAttr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         if (dmgAttr != null) dmgAttr.setBaseValue(18.0);
 
         if (entity.getEquipment() != null) {

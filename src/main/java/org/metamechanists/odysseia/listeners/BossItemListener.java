@@ -301,7 +301,7 @@ public final class BossItemListener implements Listener {
             case "hades_scythe": {
                 // Drenaje de Alma — roba 3♥ (6 HP) y los suma a la salud del jugador
                 double maxHp = 20.0;
-                var maxAttr = player.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH);
+                var maxAttr = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
                 if (maxAttr != null) {
                     maxHp = maxAttr.getValue();
                 }

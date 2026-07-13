@@ -31,7 +31,7 @@ public class OdinBoss extends OdysseyBoss {
         super(entity, "odin", "§e§lOdín §7§l- §ePadre de Todo", 1800.0, BarColor.BLUE, BarStyle.SEGMENTED_20);
 
         // Scale entity size slightly larger (1.4)
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(1.4);
         }

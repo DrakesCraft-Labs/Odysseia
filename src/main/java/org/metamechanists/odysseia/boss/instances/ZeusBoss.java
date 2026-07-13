@@ -24,7 +24,7 @@ public class ZeusBoss extends OdysseyBoss {
     public ZeusBoss(LivingEntity entity) {
         super(entity, "zeus", "§e§lZeus §7§l- §eRey del Olimpo", 2000.0, BarColor.YELLOW, BarStyle.SEGMENTED_20);
 
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(2.5);
         }

@@ -24,7 +24,7 @@ public class PoseidonBoss extends OdysseyBoss {
     public PoseidonBoss(LivingEntity entity) {
         super(entity, "poseidon", "§9§lPoseidón §7§l- §9Dios del Océano", 1200.0, BarColor.BLUE, BarStyle.SEGMENTED_12);
 
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(2.0);
         }

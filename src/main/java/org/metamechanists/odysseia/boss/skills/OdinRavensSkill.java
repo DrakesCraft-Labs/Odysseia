@@ -30,11 +30,11 @@ public final class OdinRavensSkill implements BossSkill {
             raven.setTarget(target);
 
             // Scale raven properties (high speed, lower health)
-            var speedAttr = raven.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+            var speedAttr = raven.getAttribute(Attribute.MOVEMENT_SPEED);
             if (speedAttr != null) {
                 speedAttr.setBaseValue(0.4);
             }
-            var healthAttr = raven.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            var healthAttr = raven.getAttribute(Attribute.MAX_HEALTH);
             if (healthAttr != null) {
                 healthAttr.setBaseValue(15.0);
             }

@@ -30,11 +30,11 @@ public class CerberoBoss extends OdysseyBoss {
     public CerberoBoss(LivingEntity entity) {
         super(entity, "cerbero", "§5§l🐕 Cerbero §7§l- §5Guardián del Inframundo", 900.0, BarColor.PURPLE, BarStyle.SEGMENTED_10);
 
-        var scaleAttr = entity.getAttribute(Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(Attribute.SCALE);
         if (scaleAttr != null) scaleAttr.setBaseValue(1.7);
-        var dmgAttr = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        var dmgAttr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         if (dmgAttr != null) dmgAttr.setBaseValue(22.0);
-        var kbAttr = entity.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+        var kbAttr = entity.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
         if (kbAttr != null) kbAttr.setBaseValue(1.0);
     }
 
@@ -97,7 +97,7 @@ public class CerberoBoss extends OdysseyBoss {
             wolf.setCustomNameVisible(true);
             wolf.setAngry(true);
             wolf.setRemoveWhenFarAway(true);
-            var hp = wolf.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            var hp = wolf.getAttribute(Attribute.MAX_HEALTH);
             if (hp != null) { hp.setBaseValue(40.0); wolf.setHealth(40.0); }
             Player nearest = findNearestPlayer(20);
             if (nearest != null) wolf.setTarget(nearest);

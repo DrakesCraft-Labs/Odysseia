@@ -34,11 +34,11 @@ public class HidraBoss extends OdysseyBoss {
     public HidraBoss(LivingEntity entity) {
         super(entity, "hidra", "§a§l🐍 Hidra §7§l- §aSerpiente de Lerna", 1200.0, BarColor.GREEN, BarStyle.SEGMENTED_12);
 
-        var scaleAttr = entity.getAttribute(Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(Attribute.SCALE);
         if (scaleAttr != null) scaleAttr.setBaseValue(1.6);
-        var dmgAttr = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        var dmgAttr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         if (dmgAttr != null) dmgAttr.setBaseValue(25.0);
-        var kbAttr = entity.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+        var kbAttr = entity.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
         if (kbAttr != null) kbAttr.setBaseValue(1.0);
     }
 
@@ -89,10 +89,10 @@ public class HidraBoss extends OdysseyBoss {
         mini.setCustomName("§2§l🐍 Cabeza de Hidra");
         mini.setCustomNameVisible(true);
         mini.setRemoveWhenFarAway(false);
-        var hp = mini.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        var hp = mini.getAttribute(Attribute.MAX_HEALTH);
         if (hp != null) hp.setBaseValue(200.0);
         mini.setHealth(200.0);
-        var scale = mini.getAttribute(Attribute.GENERIC_SCALE);
+        var scale = mini.getAttribute(Attribute.SCALE);
         if (scale != null) scale.setBaseValue(0.8);
         miniHydras.add(mini.getUniqueId());
     }

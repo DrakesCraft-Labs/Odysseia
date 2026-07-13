@@ -41,7 +41,7 @@ public final class LokiClonesSkill implements BossSkill {
             clone.setTarget(target);
             
             // Set max health to 1.0
-            var healthAttr = clone.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            var healthAttr = clone.getAttribute(Attribute.MAX_HEALTH);
             if (healthAttr != null) {
                 healthAttr.setBaseValue(1.0);
             }

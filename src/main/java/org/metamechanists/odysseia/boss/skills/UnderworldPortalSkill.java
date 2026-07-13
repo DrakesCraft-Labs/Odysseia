@@ -36,7 +36,7 @@ public class UnderworldPortalSkill implements BossSkill {
             specter.setTarget(target);
             
             // Boost speed/attack slightly
-            var speedAttr = specter.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
+            var speedAttr = specter.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
             if (speedAttr != null) {
                 speedAttr.setBaseValue(0.4);
             }

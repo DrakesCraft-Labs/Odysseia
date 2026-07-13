@@ -32,7 +32,7 @@ public class KratosBoss extends OdysseyBoss {
         super(entity, "kratos", "§c§lKratos §7§l- §cEl Fantasma de Esparta", 2500.0, BarColor.RED, BarStyle.SEGMENTED_20);
 
         // Scale entity size to 2.5 times (attribute GENERIC_SCALE)
-        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.GENERIC_SCALE);
+        var scaleAttr = entity.getAttribute(org.bukkit.attribute.Attribute.SCALE);
         if (scaleAttr != null) {
             scaleAttr.setBaseValue(2.5);
         }

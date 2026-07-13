@@ -48,7 +48,7 @@ public abstract class OdysseyBoss {
         entity.setRemoveWhenFarAway(false);
 
         // Health attributes
-        var healthAttr = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        var healthAttr = entity.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttr != null) {
             healthAttr.setBaseValue(maxHealth);
         }

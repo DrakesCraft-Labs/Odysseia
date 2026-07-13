@@ -35,9 +35,9 @@ public class TifonBoss extends OdysseyBoss {
     public TifonBoss(LivingEntity entity) {
         super(entity, "tifon", "§4§l🌋 Tifón §7§l- §4Padre de los Monstruos", 2000.0, BarColor.RED, BarStyle.SEGMENTED_20);
 
-        var dmgAttr = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        var dmgAttr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         if (dmgAttr != null) dmgAttr.setBaseValue(35.0);
-        var kbAttr = entity.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+        var kbAttr = entity.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
         if (kbAttr != null) kbAttr.setBaseValue(1.0);
     }
 
