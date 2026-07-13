@@ -38,12 +38,21 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
             sender.sendMessage("Solo un jugador puede abrir la tienda.");
             return true;
         }
-        if (args.length > 0 && args[0].equalsIgnoreCase("kits")) {
+        if (opensKits(label, args)) {
             openKits(player);
         } else {
             openRoot(player);
         }
         return true;
+    }
+
+    /** Keeps the kit aliases independent from the generic commerce hub aliases. */
+    private boolean opensKits(String label, String[] args) {
+        String normalizedLabel = label.toLowerCase(Locale.ROOT);
+        return normalizedLabel.equals("kitsvip")
+                || normalizedLabel.equals("kits_vip")
+                || normalizedLabel.equals("kits-vip")
+                || (args.length > 0 && args[0].equalsIgnoreCase("kits"));
     }
 
     private void openRoot(Player player) {
@@ -81,8 +90,8 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
             String kit = kits.get(index).toLowerCase(Locale.ROOT);
             ConfigurationSection definition = plugin.getConfig().getConfigurationSection("kits." + kit);
             if (definition == null) continue;
-            String permission = definition.getString("permission", "drakes.kit." + kit);
-            boolean owned = player.hasPermission(permission);
+            String permission = definition.getString("permission", "").trim();
+            boolean owned = !permission.isEmpty() && player.hasPermission(permission);
             var state = plugin.getKitClaimService().state(player.getUniqueId(), kit, definition.getString("cooldown", "30d"));
             ConfigurationSection icon = menu.getConfigurationSection("icons." + kit);
             ItemStack item = item(icon, Material.DIAMOND_CHESTPLATE);
