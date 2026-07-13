@@ -1,4 +1,5 @@
 target/
+staging/
 *.class
 .idea/
 *.iml
