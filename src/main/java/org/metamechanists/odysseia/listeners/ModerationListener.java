@@ -1,8 +1,8 @@
 package org.metamechanists.odysseia.listeners;
 
+import java.util.Locale;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -15,8 +15,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
-import java.util.logging.Level;
-
+/** Reports actual moderation actions to the dedicated Discord channel. */
 public final class ModerationListener implements Listener {
 
     private final Odysseia plugin;
@@ -26,104 +25,89 @@ public final class ModerationListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onKick(PlayerKickEvent e) {
+    public void onKick(PlayerKickEvent event) {
         if (!plugin.getConfig().getBoolean("discord.enabled", true)) {
             return;
         }
 
-        Player player = e.getPlayer();
-        String reason = PlainTextComponentSerializer.plainText().serialize(e.reason());
-        PlayerKickEvent.Cause cause = e.getCause();
-
-        boolean isBan = (cause == PlayerKickEvent.Cause.BANNED);
-        String actionType = isBan ? "BANNED" : "KICKED";
-
-        // Creative visual/audio effects at player's location
-        Location loc = player.getLocation();
-        loc.getWorld().strikeLightningEffect(loc); // Silent visual lightning
-        loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f); // Muffled explosion
-        loc.getWorld().spawnParticle(Particle.EXPLOSION, loc.add(0, 1, 0), 10, 0.5, 0.5, 0.5, 0.1);
-
-        // Send to webhook
-        String webhookUrl = plugin.getConfig().getString("discord.webhook-moderation-url", "");
-        if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.equals("REPLACE_ME")) {
-            webhookUrl = plugin.getConfig().getString("discord.webhook-url", "");
+        Player player = event.getPlayer();
+        String reason = PlainTextComponentSerializer.plainText().serialize(event.reason());
+        if (isOperationalKick(reason)) {
+            return;
         }
 
-        if (webhookUrl != null && !webhookUrl.isBlank() && !webhookUrl.equals("REPLACE_ME")) {
-            String serverLabel = plugin.getConfig().getString("presence.server-label", "");
-            if (serverLabel == null || serverLabel.isBlank()) {
-                serverLabel = Bukkit.getServer().getName();
-            }
-
-            String title = isBan ? "Jugador Baneado" : "Jugador Expulsado";
-            int color = isBan ? 15105570 : 16750848; // Red for ban, Orange for kick
-
-            String jsonPayload = String.format(
-                "{\"username\":\"Odysseia Moderación\",\"embeds\":[{" +
-                "\"title\":\"%s\"," +
-                "\"description\":\"**%s** ha sido removido del servidor.\"," +
-                "\"color\":%d," +
-                "\"fields\":[" +
-                "{\"name\":\"Jugador\",\"value\":\"%s\",\"inline\":true}," +
-                "{\"name\":\"Acción\",\"value\":\"%s\",\"inline\":true}," +
-                "{\"name\":\"Razón\",\"value\":\"%s\",\"inline\":false}" +
-                "]," +
-                "\"footer\":{\"text\":\"%s\"}" +
-                "}]}",
-                Odysseia.escapeJson(title),
-                Odysseia.escapeJson(player.getName()),
-                color,
-                Odysseia.escapeJson(player.getName()),
-                actionType,
-                Odysseia.escapeJson(reason),
-                Odysseia.escapeJson(serverLabel)
-            );
-
-            WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+        boolean isBan = event.getCause() == PlayerKickEvent.Cause.BANNED;
+        String webhookUrl = moderationWebhook();
+        if (webhookUrl == null) {
+            return;
         }
+
+        // Keep the in-game feedback for real sanctions, never for maintenance kicks.
+        Location location = player.getLocation();
+        location.getWorld().strikeLightningEffect(location);
+        location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+        location.getWorld().spawnParticle(Particle.EXPLOSION, location.add(0, 1, 0), 10, 0.5, 0.5, 0.5, 0.1);
+
+        String serverLabel = serverLabel();
+        String title = isBan ? "Sanción aplicada · Baneo" : "Sanción aplicada · Expulsión";
+        int color = isBan ? 15105570 : 16750848;
+        String action = isBan ? "BANEADO" : "EXPULSADO";
+        String jsonPayload = String.format(
+                "{\"username\":\"Odysseia Moderación\",\"embeds\":[{"
+                        + "\"title\":\"%s\",\"description\":\"Se registró una acción de moderación en DrakesCraft.\","
+                        + "\"color\":%d,\"fields\":["
+                        + "{\"name\":\"Jugador\",\"value\":\"`%s`\",\"inline\":true},"
+                        + "{\"name\":\"Acción\",\"value\":\"%s\",\"inline\":true},"
+                        + "{\"name\":\"Motivo\",\"value\":\"%s\",\"inline\":false}],"
+                        + "\"footer\":{\"text\":\"%s\"}}]}",
+                Odysseia.escapeJson(title), color, Odysseia.escapeJson(player.getName()), action,
+                Odysseia.escapeJson(reason), Odysseia.escapeJson(serverLabel));
+        WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onLogin(PlayerLoginEvent e) {
-        if (!plugin.getConfig().getBoolean("discord.enabled", true)) {
+    public void onLogin(PlayerLoginEvent event) {
+        if (!plugin.getConfig().getBoolean("discord.enabled", true)
+                || event.getResult() != PlayerLoginEvent.Result.KICK_BANNED) {
             return;
         }
 
-        if (e.getResult() == PlayerLoginEvent.Result.KICK_BANNED) {
-            String webhookUrl = plugin.getConfig().getString("discord.webhook-moderation-url", "");
-            if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.equals("REPLACE_ME")) {
-                webhookUrl = plugin.getConfig().getString("discord.webhook-url", "");
-            }
-
-            if (webhookUrl != null && !webhookUrl.isBlank() && !webhookUrl.equals("REPLACE_ME")) {
-                String serverLabel = plugin.getConfig().getString("presence.server-label", "");
-                if (serverLabel == null || serverLabel.isBlank()) {
-                    serverLabel = Bukkit.getServer().getName();
-                }
-
-                String reason = e.getKickMessage();
-                String jsonPayload = String.format(
-                    "{\"username\":\"Odysseia Moderación\",\"embeds\":[{" +
-                    "\"title\":\"Intento de Entrada (Baneado)\"," +
-                    "\"description\":\"El jugador baneado **%s** intentó conectarse.\"," +
-                    "\"color\":15158332," + // Dark Red
-                    "\"fields\":[" +
-                    "{\"name\":\"Jugador\",\"value\":\"%s\",\"inline\":true}," +
-                    "{\"name\":\"IP\",\"value\":\"%s\",\"inline\":true}," +
-                    "{\"name\":\"Mensaje de Kick\",\"value\":\"%s\",\"inline\":false}" +
-                    "]," +
-                    "\"footer\":{\"text\":\"%s\"}" +
-                    "}]}",
-                    Odysseia.escapeJson(e.getPlayer().getName()),
-                    Odysseia.escapeJson(e.getPlayer().getName()),
-                    Odysseia.escapeJson(e.getAddress().getHostAddress()),
-                    Odysseia.escapeJson(reason),
-                    Odysseia.escapeJson(serverLabel)
-                );
-
-                WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
-            }
+        String webhookUrl = moderationWebhook();
+        if (webhookUrl == null) {
+            return;
         }
+
+        String jsonPayload = String.format(
+                "{\"username\":\"Odysseia Moderación\",\"embeds\":[{"
+                        + "\"title\":\"Acceso bloqueado · Jugador baneado\","
+                        + "\"description\":\"Un jugador baneado intentó conectarse a DrakesCraft.\","
+                        + "\"color\":15158332,\"fields\":["
+                        + "{\"name\":\"Jugador\",\"value\":\"`%s`\",\"inline\":true},"
+                        + "{\"name\":\"Mensaje de bloqueo\",\"value\":\"%s\",\"inline\":false}],"
+                        + "\"footer\":{\"text\":\"%s\"}}]}",
+                Odysseia.escapeJson(event.getPlayer().getName()),
+                Odysseia.escapeJson(event.getKickMessage()), Odysseia.escapeJson(serverLabel()));
+        WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+    }
+
+    private String moderationWebhook() {
+        String url = plugin.getConfig().getString("discord.webhook-moderation-url", "");
+        if (url == null || url.isBlank() || url.startsWith("REPLACE_ME")
+                || !WebhookSender.isDiscordWebhookUrl(url) || !WebhookSender.isAllowedHttpsUrl(url)) {
+            plugin.getLogger().warning("[Moderation] Webhook de moderación inválido o no configurado.");
+            return null;
+        }
+        return url;
+    }
+
+    private String serverLabel() {
+        String label = plugin.getConfig().getString("presence.server-label", "");
+        return label == null || label.isBlank() ? Bukkit.getServer().getName() : label;
+    }
+
+    private boolean isOperationalKick(String reason) {
+        String normalized = reason == null ? "" : reason.toLowerCase(Locale.ROOT);
+        return normalized.contains("reinicio") || normalized.contains("restarting")
+                || normalized.contains("maintenance") || normalized.contains("mantenimiento");
     }
 }

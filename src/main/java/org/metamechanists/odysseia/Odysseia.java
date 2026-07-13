@@ -302,14 +302,15 @@ public final class Odysseia extends JavaPlugin {
     }
 
     private void startHeartbeatScheduler() {
-        if (!getConfig().getBoolean("presence.enabled", true)) {
+        if (!getConfig().getBoolean("presence.enabled", true)
+                || !getConfig().getBoolean("presence.heartbeat.enabled", false)) {
             return;
         }
         String url = getConfig().getString("discord.webhook-url", "");
         if (url == null || url.isBlank() || url.equals("REPLACE_ME") || !WebhookSender.isAllowedHttpsUrl(url)) {
             return;
         }
-        int minutes = Math.max(15, getConfig().getInt("presence.heartbeat-minutes", 15));
+        int minutes = Math.max(15, getConfig().getInt("presence.heartbeat.interval-minutes", 15));
         long periodTicks = minutes * 60L * 20L;
         long delayTicks = Math.max(20L, getConfig().getInt("presence.startup-delay-seconds", 60) * 20L);
 

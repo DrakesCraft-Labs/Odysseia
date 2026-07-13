@@ -5,9 +5,10 @@
 # Habilitar envio de eventos a Discord
 discord:
   enabled: true
-  # Pegar aqui la URL completa del webhook de Discord
+  # Canal de actualizaciones: solo estado operativo y eventos relevantes del servidor.
   webhook-url: "REPLACE_ME"
-  # Webhook secundario opcional para eventos de moderacion (ban/kick)
+  # Canal de moderación: baneos, expulsiones reales y accesos bloqueados.
+  # Nunca hace fallback al canal de actualizaciones.
   webhook-moderation-url: "REPLACE_ME"
 
 # ─────────────────────────────────────────────
@@ -233,18 +234,20 @@ presence:
   enabled: true
   # Identificador legible en mensajes (opcional, por defecto el del servidor)
   server-label: ""
-  # Intervalo de latido en minutos (minimo 15)
-  heartbeat-minutes: 15
+  # Los heartbeats no se publican en Actualizaciones: Star Monitor es la fuente operativa.
+  heartbeat:
+    enabled: false
+    interval-minutes: 15
   # Segundos de espera tras reload/arranque antes del primer POST
   startup-delay-seconds: 60
   # Eventos especificos a enviar
   events:
     server-startup: true
     server-shutdown: true
-    player-join: true
-    player-quit: true
-    player-death: true
-    advancement: true
+    player-join: false
+    player-quit: false
+    player-death: false
+    advancement: false
     rate-limit-per-minute: 12
 
 # ─────────────────────────────────────────────
