@@ -158,6 +158,7 @@ class PurchaseServiceTest {
         assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
         assertEquals("viphermes", catalog.get("vip_hermes").actions().get(3).parameters().get("alias"));
         assertEquals("vipzeus", catalog.get("vip_zeus").actions().get(3).parameters().get("alias"));
+        assertEquals("viphefesto", catalog.get("protection_177").actions().getFirst().parameters().get("alias"));
     }
 
     private static void delete(File file) {
