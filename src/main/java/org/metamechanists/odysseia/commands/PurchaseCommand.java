@@ -19,7 +19,7 @@ public final class PurchaseCommand implements CommandExecutor {
         if (args.length == 0) return usage(sender, label);
         try {
             return switch (args[0].toLowerCase()) {
-                case "deliver" -> args.length == 4 ? result(sender, service.deliver(args[1], args[2], args[3], false, sender.getName())) : usage(sender, label);
+                case "deliver" -> args.length == 4 ? deliver(sender, service, args) : usage(sender, label);
                 case "dry-run" -> args.length == 3 ? result(sender, service.deliver("dry-run:" + System.nanoTime(), args[1], args[2], true, sender.getName())) : usage(sender, label);
                 case "retry" -> args.length == 2 ? result(sender, service.retry(args[1], sender.getName())) : usage(sender, label);
                 case "retry-action" -> args.length == 3 ? result(sender, service.retryAction(args[1], Long.parseLong(args[2]), sender.getName())) : usage(sender, label);
@@ -41,7 +41,26 @@ public final class PurchaseCommand implements CommandExecutor {
         if (deliveries.isEmpty()) return message(sender, true, "Sin resultados.");
         deliveries.forEach(item -> sender.sendMessage(item.transaction() + " | " + item.player() + " | " + item.product() + " | " + item.state())); return true;
     }
+
+    /**
+     * Tebex Bukkit has historically dispatched the three delivery arguments in a
+     * different order. Normalize at the command boundary so the purchase engine
+     * always receives transaction, player and stable product id in that order.
+     */
+    private boolean deliver(CommandSender sender, PurchaseService service, String[] args) {
+        DeliveryArguments delivery = DeliveryArguments.from(service.catalog(), args[1], args[2], args[3]);
+        return result(sender, service.deliver(delivery.transaction(), delivery.player(), delivery.productId(), false, sender.getName()));
+    }
+
+    static record DeliveryArguments(String transaction, String player, String productId) {
+        static DeliveryArguments from(ProductCatalog catalog, String first, String second, String third) {
+            if (catalog.get(third) != null) return new DeliveryArguments(first, second, third);
+            if (catalog.get(second) != null) return new DeliveryArguments(third, first, second);
+            throw new IllegalArgumentException("Producto inexistente: se esperaba un product_id Tebex conocido.");
+        }
+    }
+
     private boolean result(CommandSender sender, PurchaseService.Result result) { return message(sender, result.success(), result.message()); }
     private boolean message(CommandSender sender, boolean ok, String value) { sender.sendMessage((ok ? ChatColor.GREEN : ChatColor.RED) + value); return true; }
-    private boolean usage(CommandSender sender, String label) { sender.sendMessage(ChatColor.YELLOW + "/" + label + " deliver <transaction> <username> <product_id> | dry-run <username> <product_id> | status|pending|history|retry|retry-action|refund|chargeback|validate|catalog|reconcile"); return true; }
+    private boolean usage(CommandSender sender, String label) { sender.sendMessage(ChatColor.YELLOW + "/" + label + " deliver <transaction> <username> <product_id> (Tebex legado: <username> <product_id> <transaction>) | dry-run <username> <product_id> | status|pending|history|retry|retry-action|refund|chargeback|validate|catalog|reconcile"); return true; }
 }
