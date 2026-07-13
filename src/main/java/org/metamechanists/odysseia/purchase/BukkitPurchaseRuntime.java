@@ -24,7 +24,14 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
     private final KitDeliveryService kits;
 
     public BukkitPurchaseRuntime(Odysseia plugin) { this.plugin = plugin; this.kits = new KitDeliveryService(plugin); }
-    @Override public UUID resolveUuid(String player) { return Bukkit.getOfflinePlayer(player).getUniqueId(); }
+    /**
+     * Compatibilidad legacy cerrada: nunca crea una identidad offline por nombre.
+     * La ruta productiva usa PlayerIdentityResolver y sus identidades observadas.
+     */
+    @Override public UUID resolveUuid(String player) {
+        Player target = Bukkit.getPlayerExact(player);
+        return target != null && target.isOnline() ? target.getUniqueId() : null;
+    }
     @Override public boolean isOnline(String player) { Player target = Bukkit.getPlayerExact(player); return target != null && target.isOnline(); }
 
     @Override public ActionResult execute(ExecutionContext context, ProductAction action) {
