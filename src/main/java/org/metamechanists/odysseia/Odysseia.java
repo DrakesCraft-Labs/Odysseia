@@ -10,6 +10,7 @@ import org.metamechanists.odysseia.commands.PapaDeMarCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
 import org.metamechanists.odysseia.commands.BossCommand;
 import org.metamechanists.odysseia.boss.BossManager;
+import org.metamechanists.odysseia.kits.KitClaimService;
 import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
 import org.metamechanists.odysseia.listeners.ModerationListener;
@@ -31,6 +32,7 @@ public final class Odysseia extends JavaPlugin {
 
     private VanishCommand vanishCommand;
     private BossManager bossManager;
+    private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
     private int chatGamesCountdown = 0;
@@ -45,6 +47,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Load or create instance ID
         this.instanceId = loadOrCreateInstanceId();
+        this.kitClaimService = new KitClaimService(this);
 
         // Register commands
         this.vanishCommand = new VanishCommand(this);
@@ -67,6 +70,8 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.commands.KitCommand kitCommand = new org.metamechanists.odysseia.commands.KitCommand(this);
         getCommand("kit").setExecutor(kitCommand);
         getCommand("kit").setTabCompleter(kitCommand);
+        org.metamechanists.odysseia.menus.ShopMenuService shopMenu = new org.metamechanists.odysseia.menus.ShopMenuService(this);
+        getCommand("drakestienda").setExecutor(shopMenu);
         java.util.List<String> kitErrors = kitGive.validateConfiguration();
         if (kitErrors.isEmpty()) {
             getLogger().info("[SUCCESS] Configuración de kits validada.");
@@ -76,6 +81,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
         Bukkit.getPluginManager().registerEvents(pendingKits, this);
         Bukkit.getPluginManager().registerEvents(chatFilter, this);
+        Bukkit.getPluginManager().registerEvents(shopMenu, this);
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
@@ -107,6 +113,10 @@ public final class Odysseia extends JavaPlugin {
         sendStartupWebhook();
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " habilitado correctamente.");
+    }
+
+    public KitClaimService getKitClaimService() {
+        return kitClaimService;
     }
 
     @Override

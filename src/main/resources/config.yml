@@ -461,6 +461,71 @@ chat-filter:
     - "negro de mierda"
     - "mogolico"
 
+# ─────────────────────────────────────────────
+#  Tienda nativa y ProtectionStones
+# ─────────────────────────────────────────────
+# El catálogo usa las claves lógicas de aliases. Solo esta sección conoce
+# los aliases reales de ProtectionStones y su sintaxis de entrega.
+protectionstones:
+  give-command: "ps give {alias} {player} {amount}"
+  aliases:
+    starter: novato
+    hercules: viphercules
+    hestia: viphestia
+    hermes: viphermes
+    hefesto: viphefesto
+    artemisa: vipartemisa
+    afrodita: vipafrodita
+    zeus: vipzeus
+    protection_177: viphefesto
+    protection_481: vipzeus
+
+# Hub configurable que sustituye los comandos de navegación de DeluxeMenus.
+# Cada destino se despacha como jugador; no se elevan permisos desde el menú.
+native-menus:
+  shop:
+    enabled: true
+    title: "&8DrakesCraft &7| &bServicios"
+    rows: 3
+    entries:
+      kits:
+        slot: 10
+        material: CHEST
+        name: "&6&lKits de rango"
+        lore: ["&7Revisa y reclama tus kits.", "&eClic para abrir."]
+        commands: ["odysseia:open-kits"]
+      tienda:
+        slot: 12
+        material: EMERALD
+        name: "&a&lTienda de materiales"
+        lore: ["&7Compra o vende recursos.", "&eClic para abrir."]
+        commands: ["ultimateshop"]
+      protecciones:
+        slot: 14
+        material: SHIELD
+        name: "&b&lProtecciones"
+        lore: ["&7Consulta las protecciones disponibles.", "&eClic para abrir."]
+        commands: ["tiendaprot"]
+      subastas:
+        slot: 16
+        material: GOLD_INGOT
+        name: "&e&lSubastas"
+        lore: ["&7Publica y compra de otros jugadores.", "&eClic para abrir."]
+        commands: ["ca"]
+  kits:
+    title: "&8DrakesCraft &7| &6Kits VIP"
+    rows: 3
+    order: [hercules, hestia, hermes, hefesto, artemisa, afrodita, zeus, oldschool]
+    icons:
+      hercules: {material: DIAMOND_CHESTPLATE, name: "&6&lHércules"}
+      hestia: {material: DIAMOND_CHESTPLATE, name: "&c&lHestia"}
+      hermes: {material: DIAMOND_BOOTS, name: "&b&lHermes"}
+      hefesto: {material: NETHERITE_CHESTPLATE, name: "&6&lHefesto"}
+      artemisa: {material: BOW, name: "&a&lArtemisa"}
+      afrodita: {material: GOLDEN_APPLE, name: "&d&lAfrodita"}
+      zeus: {material: NETHERITE_SWORD, name: "&e&lZeus"}
+      oldschool: {material: BOOK, name: "&7&lOldschool"}
+
 # Permite definir kits personalizados con cooldowns, comandos, dinero de Vault,
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).

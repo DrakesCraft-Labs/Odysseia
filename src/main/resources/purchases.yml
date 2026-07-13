@@ -15,7 +15,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hercules, duration: 30d, hierarchy: "1"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "35000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hercules}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphercules, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: hercules, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hércules entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hércules"}}
   vip_hestia:
@@ -31,7 +31,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hestia, duration: 30d, hierarchy: "2"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "75000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hestia}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphestia, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: hestia, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hestia entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hestia"}}
   vip_hermes:
@@ -47,7 +47,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hermes, duration: 30d, hierarchy: "3"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "150000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hermes}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphermes, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: hermes, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hermes entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hermes"}}
   vip_hefesto:
@@ -63,7 +63,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hefesto, duration: 30d, hierarchy: "4"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "250000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hefesto}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphefesto, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: hefesto, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Hefesto entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Hefesto"}}
   vip_artemisa:
@@ -79,7 +79,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: artemisa, duration: 30d, hierarchy: "5"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "450000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: artemisa}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipartemisa, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: artemisa, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Artemisa entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Artemisa"}}
   vip_afrodita:
@@ -95,7 +95,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: afrodita, duration: 30d, hierarchy: "6"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "700000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: afrodita}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipafrodita, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: afrodita, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Afrodita entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Afrodita"}}
   vip_zeus:
@@ -111,7 +111,7 @@ products:
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: zeus, duration: 30d, hierarchy: "7"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "1500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: zeus}}
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipzeus, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: zeus, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Zeus entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Zeus"}}
 
@@ -210,7 +210,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [ProtectionStones]
     actions:
-      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphefesto, amount: "1"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: protection_177, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 177x177 entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Protección 177x177"}}
   protection_481:

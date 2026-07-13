@@ -12,28 +12,23 @@ import org.jetbrains.annotations.Nullable;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.purchase.ActionResult;
 import org.metamechanists.odysseia.purchase.KitDeliveryService;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.metamechanists.odysseia.kits.KitClaimService;
 
 /** Punto único de reclamación pública para kits configurados por Odysseia. */
 public final class KitCommand implements CommandExecutor, TabCompleter {
     private final Odysseia plugin;
     private final KitDeliveryService delivery;
-    private final File claimsFile;
-    private final FileConfiguration claims;
+    private final KitClaimService claims;
 
     public KitCommand(Odysseia plugin) {
         this.plugin = plugin;
         this.delivery = new KitDeliveryService(plugin);
-        this.claimsFile = new File(plugin.getDataFolder(), "kit-claims.yml");
-        this.claims = YamlConfiguration.loadConfiguration(claimsFile);
+        this.claims = plugin.getKitClaimService();
     }
 
     @Override
@@ -61,12 +56,9 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        long cooldown = parseCooldown(section.getString("cooldown", "30d"));
-        String claimKey = player.getUniqueId() + "." + kit;
-        long lastClaim = claims.getLong(claimKey, 0L);
-        long remaining = cooldown < 0 ? (lastClaim > 0 ? 1L : 0L) : lastClaim + cooldown - System.currentTimeMillis();
-        if (remaining > 0) {
-            player.sendMessage(color("&eEste kit ya fue reclamado. Disponible en &f" + formatRemaining(remaining)));
+        KitClaimService.ClaimState state = claims.state(player.getUniqueId(), kit, section.getString("cooldown", "30d"));
+        if (!state.available()) {
+            player.sendMessage(color("&eEste kit ya fue reclamado. Disponible en &f" + state.remainingText()));
             return true;
         }
 
@@ -75,8 +67,7 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(color("&cNo se pudo entregar: &f" + result.detail()));
             return true;
         }
-        claims.set(claimKey, System.currentTimeMillis());
-        saveClaims();
+        claims.record(player.getUniqueId(), kit);
         player.sendMessage(color("&aKit &f" + kit + " &aentregado. Podrás reclamarlo nuevamente en 30 días."));
         return true;
     }
@@ -94,37 +85,7 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
         return section == null ? List.of() : new ArrayList<>(section.getKeys(false));
     }
 
-    private long parseCooldown(String value) {
-        if (value == null || value.equals("-1")) return -1L;
-        try {
-            long amount = Long.parseLong(value.substring(0, value.length() - 1));
-            return switch (value.charAt(value.length() - 1)) {
-                case 'm' -> amount * 60_000L;
-                case 'h' -> amount * 3_600_000L;
-                case 'd' -> amount * 86_400_000L;
-                default -> 30L * 86_400_000L;
-            };
-        } catch (RuntimeException ignored) {
-            return 30L * 86_400_000L;
-        }
-    }
-
-    private String formatRemaining(long millis) {
-        long days = millis / 86_400_000L;
-        long hours = (millis % 86_400_000L) / 3_600_000L;
-        long minutes = (millis % 3_600_000L) / 60_000L;
-        return days + "d " + hours + "h " + minutes + "m";
-    }
-
     private String color(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
-    }
-
-    private void saveClaims() {
-        try {
-            claims.save(claimsFile);
-        } catch (IOException error) {
-            plugin.getLogger().severe("[Kits] No se pudo guardar kit-claims.yml: " + error.getMessage());
-        }
     }
 }

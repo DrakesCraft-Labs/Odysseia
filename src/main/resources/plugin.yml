@@ -60,6 +60,10 @@ commands:
     aliases: [kits]
     permission: odysseia.kit.use
     usage: /kit <nombre>
+  drakestienda:
+    description: Abre el hub nativo de comercio de DrakesCraft.
+    aliases: [tienda, menu, shop, mercado, kitsvip, kits_vip]
+    usage: /tienda [kits]
 permissions:
   odysseia.purchase.admin:
     description: Control total del motor de compras.

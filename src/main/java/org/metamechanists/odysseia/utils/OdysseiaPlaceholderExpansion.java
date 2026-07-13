@@ -5,6 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.Odysseia;
+import org.metamechanists.odysseia.kits.KitClaimService;
 
 /**
  * Provides PlaceholderAPI integration for Odysseia.
@@ -40,6 +41,24 @@ public final class OdysseiaPlaceholderExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
+        if (player != null && params.toLowerCase().startsWith("kit_")) {
+            String[] parts = params.split("_", 3);
+            if (parts.length == 3) {
+                String type = parts[1].toLowerCase();
+                String kit = parts[2].toLowerCase();
+                var section = plugin.getConfig().getConfigurationSection("kits." + kit);
+                if (section == null) return "no";
+                Player online = player.getPlayer();
+                boolean owned = online != null && online.hasPermission(section.getString("permission", "drakes.kit." + kit));
+                KitClaimService.ClaimState state = plugin.getKitClaimService().state(player.getUniqueId(), kit, section.getString("cooldown", "30d"));
+                return switch (type) {
+                    case "owned" -> owned ? "yes" : "no";
+                    case "available" -> owned && state.available() ? "yes" : "no";
+                    case "remaining" -> owned ? state.remainingText() : "";
+                    default -> null;
+                };
+            }
+        }
         if (params.equalsIgnoreCase("owner_prefix_odiseo")) {
             return plugin.getCurrentOdiseoPrefix();
         }

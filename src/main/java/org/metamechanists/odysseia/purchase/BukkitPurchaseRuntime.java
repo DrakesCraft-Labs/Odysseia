@@ -132,8 +132,15 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
     private ActionResult protectionStone(ExecutionContext context, ProductAction action) {
         if (!Bukkit.getPluginManager().isPluginEnabled("ProtectionStones")) return ActionResult.retryable("ProtectionStones no disponible");
         return online(context, player -> {
-            String alias = action.parameters().get("alias"); String amount = action.parameters().getOrDefault("amount", "1");
-            boolean accepted = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ps give " + alias + " " + player.getName() + " " + amount);
+            String key = action.parameters().get("alias");
+            String alias = plugin.getConfig().getString("protectionstones.aliases." + key, key);
+            String amount = action.parameters().getOrDefault("amount", "1");
+            String template = plugin.getConfig().getString("protectionstones.give-command", "ps give {alias} {player} {amount}");
+            String command = template.replace("{alias}", alias).replace("{player}", player.getName()).replace("{amount}", amount);
+            if (!command.matches("ps give [A-Za-z0-9_-]+ [A-Za-z0-9_.-]+ [1-9][0-9]*")) {
+                return ActionResult.manual("Plantilla ProtectionStones inválida");
+            }
+            boolean accepted = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
             return accepted ? ActionResult.completed("alias=" + alias + ";amount=" + amount) : ActionResult.retryable("ProtectionStones rechazó el comando tipado");
         });
     }
