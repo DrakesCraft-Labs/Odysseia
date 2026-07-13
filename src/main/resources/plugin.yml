@@ -55,6 +55,11 @@ commands:
     description: Entrega solo los ítems de un kit para pruebas administrativas.
     permission: odysseia.kitgive
     usage: /kitgive <kit> o /kitgive <jugador> <kit>
+  kit:
+    description: Reclama un kit mensual configurado por Odysseia.
+    aliases: [kits]
+    permission: odysseia.kit.use
+    usage: /kit <nombre>
 permissions:
   odysseia.purchase.admin:
     description: Control total del motor de compras.
@@ -62,3 +67,6 @@ permissions:
   odysseia.kitgive:
     description: Permite probar kits sin entregar dinero, rango o protección.
     default: op
+  odysseia.kit.use:
+    description: Permite consultar y reclamar kits configurados por Odysseia.
+    default: true

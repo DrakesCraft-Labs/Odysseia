@@ -64,6 +64,9 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.commands.KitGiveCommand kitGive = new org.metamechanists.odysseia.commands.KitGiveCommand(this);
         getCommand("kitgive").setExecutor(kitGive);
         getCommand("kitgive").setTabCompleter(kitGive);
+        org.metamechanists.odysseia.commands.KitCommand kitCommand = new org.metamechanists.odysseia.commands.KitCommand(this);
+        getCommand("kit").setExecutor(kitCommand);
+        getCommand("kit").setTabCompleter(kitCommand);
         java.util.List<String> kitErrors = kitGive.validateConfiguration();
         if (kitErrors.isEmpty()) {
             getLogger().info("[SUCCESS] Configuración de kits validada.");

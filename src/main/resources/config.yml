@@ -465,6 +465,55 @@ chat-filter:
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).
 kits:
+  # ── Kit de reconocimiento Oldschool ────────────
+  oldschool:
+    cooldown: "30d"
+    permission: "drakes.kit.oldschool"
+    money: 0
+    vanilla-items:
+      - material: IRON_HELMET
+        amount: 1
+        name: "&8[&72022&8] &7Casco Oldschool"
+        enchantments:
+          protection: 3
+          unbreaking: 2
+      - material: IRON_CHESTPLATE
+        amount: 1
+        name: "&8[&72022&8] &7Peto Oldschool"
+        enchantments:
+          protection: 3
+          unbreaking: 2
+      - material: IRON_LEGGINGS
+        amount: 1
+        name: "&8[&72022&8] &7Grebas Oldschool"
+        enchantments:
+          protection: 3
+          unbreaking: 2
+      - material: IRON_BOOTS
+        amount: 1
+        name: "&8[&72022&8] &7Botas Oldschool"
+        enchantments:
+          protection: 3
+          unbreaking: 2
+          feather_falling: 2
+      - material: IRON_SWORD
+        amount: 1
+        enchantments:
+          sharpness: 2
+          unbreaking: 2
+      - material: IRON_PICKAXE
+        amount: 1
+        enchantments:
+          efficiency: 3
+          unbreaking: 2
+          fortune: 1
+      - material: COOKED_BEEF
+        amount: 32
+      - material: BREAD
+        amount: 24
+      - material: GOLDEN_CARROT
+        amount: 16
+
   # ── Kit de Comida ──────────────────────────────
   comida:
     cooldown: "30m"
@@ -482,7 +531,7 @@ kits:
 
   # ── Kit VIP Hércules ───────────────────────────
   hercules:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.hercules"
     money: 35000
     commands:
@@ -591,7 +640,7 @@ kits:
 
   # ── Kit VIP Hestia ─────────────────────────────
   hestia:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.hestia"
     money: 75000
     commands:
@@ -698,7 +747,7 @@ kits:
 
   # ── Kit VIP Hermes ─────────────────────────────
   hermes:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.hermes"
     money: 150000
     commands:
@@ -805,7 +854,7 @@ kits:
 
   # ── Kit VIP Hefesto ────────────────────────────
   hefesto:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.hefesto"
     money: 250000
     commands:
@@ -912,7 +961,7 @@ kits:
 
   # ── Kit VIP Artemisa ───────────────────────────
   artemisa:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.artemisa"
     money: 450000
     commands:
@@ -1030,7 +1079,7 @@ kits:
 
   # ── Kit VIP Afrodita ───────────────────────────
   afrodita:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.afrodita"
     money: 700000
     commands:
@@ -1137,7 +1186,7 @@ kits:
 
   # ── Kit VIP Zeus ───────────────────────────────
   zeus:
-    cooldown: "-1"
+    cooldown: "30d"
     permission: "drakes.kit.zeus"
     money: 1500000
     commands:
