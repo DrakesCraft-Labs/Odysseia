@@ -3,6 +3,7 @@ package org.metamechanists.odysseia.purchase;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /** Coordina entregas, reintentos y eventos financieros sin duplicar acciones. */
 public final class PurchaseService {
@@ -12,6 +13,7 @@ public final class PurchaseService {
     private final PurchaseActionRuntime runtime;
     private final PlayerIdentityResolver identities;
     private final Set<Long> processing = ConcurrentHashMap.newKeySet();
+    private volatile Consumer<Telemetry> telemetry = ignored -> { };
 
     public PurchaseService(ProductCatalog catalog, PurchaseRepository repository, PurchaseActionRuntime runtime) {
         this(catalog, repository, runtime, PlayerIdentityResolver.legacy(runtime));
@@ -19,6 +21,11 @@ public final class PurchaseService {
 
     public PurchaseService(ProductCatalog catalog, PurchaseRepository repository, PurchaseActionRuntime runtime, PlayerIdentityResolver identities) {
         this.catalog = catalog; this.repository = repository; this.runtime = runtime; this.identities = identities;
+    }
+
+    /** Telemetry is best-effort and never participates in a purchase transaction. */
+    public void setTelemetry(Consumer<Telemetry> telemetry) {
+        this.telemetry = telemetry == null ? ignored -> { } : telemetry;
     }
 
     public Result deliver(String transaction, String player, String productId, boolean dryRun, String actor) {
@@ -129,6 +136,7 @@ public final class PurchaseService {
             PurchaseState state = manual ? PurchaseState.FAILED_MANUAL_REVIEW : retryable ? PurchaseState.FAILED_RETRYABLE : waiting ? PurchaseState.WAITING_FOR_PLAYER : incomplete ? PurchaseState.PARTIALLY_DELIVERED : PurchaseState.COMPLETED;
             repository.deliveryState(delivery.id(), state, null);
             repository.audit(delivery.id(), actor, "STATE_" + state, null);
+            emitTelemetry(product.id(), state);
         } finally { processing.remove(delivery.id()); }
     }
 
@@ -173,6 +181,7 @@ public final class PurchaseService {
             }
             repository.deliveryState(delivery.id(), chargeback ? PurchaseState.CHARGEBACK : PurchaseState.REFUNDED, null);
             repository.audit(delivery.id(), actor, type, "Política de revocación aplicada");
+            emitTelemetry(product.id(), chargeback ? PurchaseState.CHARGEBACK : PurchaseState.REFUNDED);
             return Result.ok(type + " registrado.");
         } catch (Exception error) { return Result.error(error.getMessage()); }
     }
@@ -220,5 +229,10 @@ public final class PurchaseService {
     }
 
     private boolean validTransaction(String value) { return value != null && value.matches("[A-Za-z0-9._:-]{3,128}"); }
+    private void emitTelemetry(String productId, PurchaseState state) {
+        try { telemetry.accept(new Telemetry(productId, state)); }
+        catch (Exception ignored) { /* Observability must never affect delivery. */ }
+    }
+    public record Telemetry(String productId, PurchaseState state) { }
     public record Result(boolean success, String message) { public static Result ok(String value){return new Result(true,value);} public static Result error(String value){return new Result(false,value);} }
 }

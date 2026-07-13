@@ -18,6 +18,7 @@ import org.metamechanists.odysseia.listeners.PresenceEventListener;
 import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
+import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
 
 import java.time.DayOfWeek;
 import java.time.ZoneId;
@@ -37,6 +38,7 @@ public final class Odysseia extends JavaPlugin {
     private String instanceId = "";
     private int chatGamesCountdown = 0;
     private PurchaseEngine purchaseEngine;
+    private StarTelemetryPublisher starTelemetry;
 
     @Override
     public void onEnable() {
@@ -56,6 +58,8 @@ public final class Odysseia extends JavaPlugin {
         getCommand("lenador").setExecutor(new LenadorCommand(this));
         getCommand("odysseiaannounce").setExecutor(new org.metamechanists.odysseia.commands.StoreAnnounceCommand(this));
         this.purchaseEngine = new PurchaseEngine(this);
+        this.starTelemetry = new StarTelemetryPublisher(this);
+        this.purchaseEngine.setTelemetry(telemetry -> starTelemetry.publishPurchase(purchaseEngine, telemetry));
         getCommand("odysseiapurchase").setExecutor(new org.metamechanists.odysseia.commands.PurchaseCommand(purchaseEngine));
         org.metamechanists.odysseia.listeners.ServerAutomationListener automation = new org.metamechanists.odysseia.listeners.ServerAutomationListener(this);
         org.metamechanists.odysseia.purchase.PendingKitService pendingKits = new org.metamechanists.odysseia.purchase.PendingKitService(this);
@@ -108,6 +112,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Start Tasks
         startSchedulers();
+        startStarTelemetry();
 
         // Send startup webhook
         sendStartupWebhook();
@@ -117,6 +122,10 @@ public final class Odysseia extends JavaPlugin {
 
     public KitClaimService getKitClaimService() {
         return kitClaimService;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 
     @Override
@@ -191,6 +200,15 @@ public final class Odysseia extends JavaPlugin {
         startPapaDeMarDeliveryScheduler();
         startHeartbeatScheduler();
         startRestartScheduler();
+    }
+
+    private void startStarTelemetry() {
+        if (starTelemetry == null || !getConfig().getBoolean("star-monitor.enabled", false)) {
+            return;
+        }
+        int intervalSeconds = Math.max(30, getConfig().getInt("star-monitor.heartbeat-interval-seconds", 60));
+        Bukkit.getScheduler().runTaskLater(this, () -> starTelemetry.publishStartup(purchaseEngine), 40L);
+        Bukkit.getScheduler().runTaskTimer(this, () -> starTelemetry.publishHeartbeat(purchaseEngine), intervalSeconds * 20L, intervalSeconds * 20L);
     }
 
     private void startOwnerCycleScheduler() {

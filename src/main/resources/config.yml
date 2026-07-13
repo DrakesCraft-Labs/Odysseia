@@ -11,6 +11,13 @@ discord:
   # Nunca hace fallback al canal de actualizaciones.
   webhook-moderation-url: "REPLACE_ME"
 
+# Telemetría operativa hacia Star. No interviene en compras ni almacena datos de jugadores.
+star-monitor:
+  enabled: false
+  endpoint: "https://web.drakescraft.cl/api/odysseia/events"
+  signing-secret: "REPLACE_ME"
+  heartbeat-interval-seconds: 60
+
 # ─────────────────────────────────────────────
 #  Ciclo de Prefijos del Propietario (Owner)
 # ─────────────────────────────────────────────

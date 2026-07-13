@@ -6,6 +6,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.metamechanists.odysseia.Odysseia;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 /** Ciclo de vida Bukkit del motor; la lógica transaccional vive en PurchaseService. */
 public final class PurchaseEngine implements Listener, AutoCloseable {
@@ -32,6 +33,11 @@ public final class PurchaseEngine implements Listener, AutoCloseable {
 
     public PurchaseService service() { return service; }
     public String startupError() { return startupError; }
+    public boolean isReady() { return service != null && startupError == null; }
+    public int catalogProductCount() { return service == null ? 0 : service.catalog().all().size(); }
+    public void setTelemetry(Consumer<PurchaseService.Telemetry> telemetry) {
+        if (service != null) service.setTelemetry(telemetry);
+    }
     @EventHandler public void onJoin(PlayerJoinEvent event) {
         if (service != null) Bukkit.getScheduler().runTaskLater(plugin, () -> {
             try { identities.observe(event.getPlayer().getUniqueId(), event.getPlayer().getName()); }
