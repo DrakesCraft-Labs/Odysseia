@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
+import org.metamechanists.odysseia.commands.ReloadCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
 import org.metamechanists.odysseia.commands.BossCommand;
 import org.metamechanists.odysseia.boss.BossManager;
@@ -56,6 +57,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("boss").setExecutor(bossCmd);
         getCommand("boss").setTabCompleter(bossCmd);
 
+        // Register /odysseia reload
+        getCommand("odysseia").setExecutor(new ReloadCommand(this));
+
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         Bukkit.getPluginManager().registerEvents(bossManager, this);
@@ -63,6 +67,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(), this);
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
