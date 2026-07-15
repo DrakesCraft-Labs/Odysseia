@@ -64,13 +64,13 @@ public final class BossItemListener implements Listener {
                 String type = meta.getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
                 if ("odin_helmet".equals(type)) {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 100, 0, true, false, false));
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 1, true, false, false));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 2, true, false, false));
                 }
             }
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         Entity damagerEntity = event.getDamager();
         Entity targetEntity = event.getEntity();
@@ -270,9 +270,32 @@ public final class BossItemListener implements Listener {
                 break;
 
             case "leviathan_axe":
-                target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 4, false, true));
+                target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 4, false, true));
+                target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 80, 2, false, true));
                 targetLoc.getWorld().spawnParticle(Particle.SNOWFLAKE, targetLoc.add(0, 1, 0), 20, 0.4, 0.4, 0.4, 0.05);
                 targetLoc.getWorld().playSound(targetLoc, Sound.BLOCK_GLASS_BREAK, 0.8f, 0.5f);
+                break;
+
+            case "polifemo_club": {
+                targetLoc.getWorld().spawnParticle(Particle.BLOCK, targetLoc, 35, 1.5, 0.2, 1.5, 0.1,
+                        org.bukkit.Bukkit.createBlockData(org.bukkit.Material.COBBLESTONE));
+                targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 0.7f);
+                for (Entity nearby : target.getNearbyEntities(3.5, 2.0, 3.5)) {
+                    if (nearby instanceof LivingEntity victim && !victim.equals(player)) {
+                        Vector push = victim.getLocation().toVector().subtract(targetLoc.toVector());
+                        if (push.lengthSquared() > 0.01) {
+                            victim.setVelocity(push.normalize().multiply(0.9).setY(0.35));
+                        }
+                    }
+                }
+                break;
+            }
+
+            case "corrupted_god_blade":
+                target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 80, 3, false, true));
+                target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 80, 1, false, true));
+                targetLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, targetLoc.add(0, 1, 0), 24, 0.3, 0.5, 0.3, 0.03);
+                targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_WITHER_HURT, 0.8f, 0.7f);
                 break;
 
             case "odin_spear":
@@ -364,7 +387,10 @@ public final class BossItemListener implements Listener {
         Projectile proj = event.getEntity();
         if (proj instanceof Trident trident && trident.getShooter() instanceof Player player) {
             // Propaga el typeId del tridente custom (mano o secundaria) al proyectil lanzado
-            String type = tridentType(player.getInventory().getItemInMainHand());
+            String type = tridentType(trident.getItemStack());
+            if (type == null) {
+                type = tridentType(player.getInventory().getItemInMainHand());
+            }
             if (type == null) {
                 type = tridentType(player.getInventory().getItemInOffHand());
             }
@@ -379,7 +405,7 @@ public final class BossItemListener implements Listener {
         return item.getItemMeta().getPersistentDataContainer().get(OdysseyItemManager.ITEM_KEY, PersistentDataType.STRING);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
@@ -503,9 +529,33 @@ public final class BossItemListener implements Listener {
                 }
             }, 20L);
         }
+
+        if ("circe_staff".equals(type) && tryUseCooldown(player, 10_000L, "&dTransmutación")) {
+            Location center = player.getLocation();
+            for (Entity nearby : player.getNearbyEntities(5, 3, 5)) {
+                if (nearby instanceof LivingEntity victim && !victim.equals(player)) {
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 1, false, true));
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 1, false, true));
+                }
+            }
+            center.getWorld().spawnParticle(Particle.WITCH, center.add(0, 1, 0), 70, 2.5, 1.0, 2.5, 0.1);
+            center.getWorld().playSound(center, Sound.ENTITY_WITCH_CELEBRATE, 1.0f, 0.8f);
+        }
+
+        if ("prometeo_flame".equals(type) && tryUseCooldown(player, 12_000L, "&6Chispa Divina")) {
+            Location center = player.getLocation();
+            for (Entity nearby : player.getNearbyEntities(5, 3, 5)) {
+                if (nearby instanceof LivingEntity victim && !victim.equals(player)) {
+                    victim.setFireTicks(Math.max(victim.getFireTicks(), 100));
+                    applySyntheticDamage(victim, 4.0, player);
+                }
+            }
+            center.getWorld().spawnParticle(Particle.FLAME, center.add(0, 1, 0), 80, 2.5, 1.0, 2.5, 0.05);
+            center.getWorld().playSound(center, Sound.ITEM_FIRECHARGE_USE, 1.1f, 0.8f);
+        }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onProjectileHit(ProjectileHitEvent event) {
         Projectile proj = event.getEntity();
 
@@ -561,6 +611,20 @@ public final class BossItemListener implements Listener {
         } finally {
             syntheticDamageTargets.remove(targetId);
         }
+    }
+
+    /** Comparte un cooldown por jugador entre poderes activables para evitar spam de tareas y partículas. */
+    private boolean tryUseCooldown(Player player, long cooldownMillis, String abilityName) {
+        long now = System.currentTimeMillis();
+        long lastUse = scepterCooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long remaining = cooldownMillis - (now - lastUse);
+        if (remaining > 0L) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&c[COOLDOWN] &e" + abilityName + " estará lista en &c" + String.format("%.1f", remaining / 1000.0) + "s&e."));
+            return false;
+        }
+        scepterCooldowns.put(player.getUniqueId(), now);
+        return true;
     }
 
     @EventHandler

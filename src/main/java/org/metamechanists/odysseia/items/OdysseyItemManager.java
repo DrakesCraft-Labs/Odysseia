@@ -325,12 +325,13 @@ public final class OdysseyItemManager {
                 "&9&lTSUNAMI &r&7— Al impactar arrojado, lanza una",
                 "&7ola que empuja a todos los enemigos cercanos.",
                 "",
-                "&b&lRIPTIDE V — IMPALING X — LOYALTY V"
+                "&b&lLOYALTY V — IMPALING X — UNBREAKING X"
         );
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.addEnchant(Enchantment.IMPALING, 10, true);
-            meta.addEnchant(Enchantment.RIPTIDE, 5, true);
+            // Riptide impide lanzar el tridente y bloqueaba el tsunami.
+            meta.addEnchant(Enchantment.LOYALTY, 5, true);
             meta.addEnchant(Enchantment.UNBREAKING, 10, true);
             meta.addEnchant(Enchantment.MENDING, 1, true);
             item.setItemMeta(meta);
@@ -420,7 +421,7 @@ public final class OdysseyItemManager {
                 "&8▸ Arma Mítica de la Hidra de Lerna",
                 "&7Destila el veneno eterno de Lerna.",
                 "",
-                "&2&lVENENO DE LERNA &r&7— Fire Aspect III",
+                "&2&lVENENO DE LERNA &r&7— Veneno V y Wither V",
                 "",
                 "&6&lSHARPNESS XV — LOOTING VIII");
         ItemMeta meta = item.getItemMeta();
@@ -554,8 +555,8 @@ public final class OdysseyItemManager {
                 "&8▸ Reliquia Mítica de Prometeo",
                 "&7El fuego robado a los dioses para los mortales.",
                 "",
-                "&e&lCHISPA DIVINA &r&7— Reliquia legendaria",
-                "&7que arde por toda la eternidad.");
+                "&e&lCHISPA DIVINA &r&7— Click derecho: quema",
+                "&7a los enemigos cercanos durante 5 segundos.");
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.addEnchant(Enchantment.FIRE_ASPECT, 5, true);
@@ -564,6 +565,98 @@ public final class OdysseyItemManager {
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    // ─── JEFES FUNDACIONALES ────────────────────────────────────────────────
+
+    public static ItemStack createCirceStaff() {
+        ItemStack item = createBaseItem(Material.BLAZE_ROD,
+                "&d&l✦ Bastón de Circe",
+                "circe_staff",
+                "&8▸ Reliquia Mítica de Circe",
+                "&7Canaliza la alquimia prohibida de Eea.",
+                "",
+                "&d&lTRANSMUTACIÓN &r&7— Click derecho: debilita",
+                "&7y envenena a los enemigos cercanos.");
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.UNBREAKING, 10, true);
+            meta.addEnchant(Enchantment.MENDING, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public static ItemStack createPolifemoClub() {
+        ItemStack item = createBaseItem(Material.MACE,
+                "&7&l✦ Garrote de Polifemo",
+                "polifemo_club",
+                "&8▸ Arma Mítica de Polifemo",
+                "&7Tallado de la roca de la cueva del cíclope.",
+                "",
+                "&7&lTERREMOTO &r&7— Al golpear, sacude y repele",
+                "&7a los enemigos cercanos al objetivo.");
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.SHARPNESS, 9, true);
+            meta.addEnchant(Enchantment.KNOCKBACK, 4, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 10, true);
+            meta.addEnchant(Enchantment.MENDING, 1, true);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public static ItemStack createCorruptedGodBlade() {
+        ItemStack item = createBaseItem(Material.NETHERITE_SWORD,
+                "&5&l✦ Filo del Dios Corrupto",
+                "corrupted_god_blade",
+                "&8▸ Arma Mítica del Dios Corrupto",
+                "&7Una espada rota por el poder del Olimpo caído.",
+                "",
+                "&5&lCORRUPCIÓN &r&7— Al golpear, inflige Wither IV",
+                "&7y debilita al objetivo durante 4 segundos.");
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.SHARPNESS, 11, true);
+            meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 10, true);
+            meta.addEnchant(Enchantment.MENDING, 1, true);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    /** Construye un drop por su identificador lógico de config.yml. */
+    public static ItemStack createBossDrop(String itemId) {
+        return switch (itemId.toLowerCase(java.util.Locale.ROOT)) {
+            case "circe_staff" -> createCirceStaff();
+            case "polifemo_club" -> createPolifemoClub();
+            case "corrupted_god_blade" -> createCorruptedGodBlade();
+            case "mjolnir" -> createMjolnir();
+            case "ares_blade" -> createAresBlade();
+            case "ares_shield" -> createAresShield();
+            case "hades_scythe" -> createHadesScythe();
+            case "poseidon_trident" -> createPoseidonTrident();
+            case "zeus_mace" -> createZeusMace();
+            case "loki_dagger" -> createLokiDagger();
+            case "loki_scepter" -> createLokiScepter();
+            case "odin_spear" -> createOdinSpear();
+            case "odin_helmet" -> createOdinHelmet();
+            case "kratos_blade" -> createKratosBlade();
+            case "leviathan_axe" -> createLeviathanAxe();
+            case "gjallarhorn" -> createGjallarhorn();
+            case "bifrost_wings" -> createBifrostWings();
+            case "hydra_fang" -> createHydraFang();
+            case "hydra_scale" -> createHydraScale();
+            case "cerbero_hide" -> createCerberoHide();
+            case "artemis_bow" -> createArtemisBow();
+            case "tifon_claw" -> createTifonClaw();
+            case "tifon_chest" -> createTifonChestplate();
+            case "prometeo_flame" -> createPrometeoFlame();
+            default -> null;
+        };
     }
 
     public static ItemStack createBossSummoner(String bossId) {

@@ -471,6 +471,78 @@ natural-spawn:
   bosses: []
 
 # ─────────────────────────────────────────────
+#  Recompensas de jefes míticos
+# ─────────────────────────────────────────────
+# Cada drop se sortea una vez por muerte y se entrega a un participante
+# ponderado por daño. Los valores son probabilidades entre 0.0 y 1.0.
+boss-loot:
+  enabled: true
+  experience: 750
+  contributors:
+    # Daño mínimo y porcentaje mínimo del daño total para entrar al sorteo.
+    minimum-damage: 25.0
+    minimum-share: 0.02
+  bosses:
+    circe:
+      drops:
+        circe_staff: 0.12
+    polifemo:
+      drops:
+        polifemo_club: 0.12
+    dios_corrupto:
+      drops:
+        corrupted_god_blade: 0.10
+    thor:
+      drops:
+        mjolnir: 0.10
+    ares:
+      drops:
+        ares_blade: 0.10
+        ares_shield: 0.08
+    hades:
+      drops:
+        hades_scythe: 0.10
+    poseidon:
+      drops:
+        poseidon_trident: 0.10
+    zeus:
+      drops:
+        zeus_mace: 0.10
+    loki:
+      drops:
+        loki_dagger: 0.10
+        loki_scepter: 0.08
+    odin:
+      drops:
+        odin_spear: 0.10
+        odin_helmet: 0.08
+    kratos:
+      drops:
+        kratos_blade: 0.10
+        leviathan_axe: 0.08
+    heimdall:
+      drops:
+        gjallarhorn: 0.10
+        bifrost_wings: 0.07
+    hidra:
+      drops:
+        hydra_fang: 0.10
+        hydra_scale: 0.08
+    cerbero:
+      drops:
+        cerbero_hide: 0.10
+    artemisa:
+      drops:
+        artemis_bow: 0.10
+    tifon:
+      drops:
+        tifon_claw: 0.10
+        tifon_chest: 0.08
+    prometeo:
+      drops:
+        prometeo_flame: 0.10
+
+# ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)
 # ─────────────────────────────────────────────
 sfmaster-policy:

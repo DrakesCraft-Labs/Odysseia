@@ -19,6 +19,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.configuration.ConfigurationSection;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.instances.CirceBoss;
 import org.metamechanists.odysseia.boss.instances.PolifemoBoss;
@@ -41,6 +42,10 @@ import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,6 +55,8 @@ public class BossManager implements Listener {
     private final Map<UUID, OdysseyBoss> activeBosses = new ConcurrentHashMap<>();
     private final java.util.Set<UUID> naturalBosses = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<String, Long> lastSpawnAnnouncements = new ConcurrentHashMap<>();
+    /** Daño efectivo aportado por jugador a cada boss, usado para repartir el loot. */
+    private final Map<UUID, Map<UUID, Double>> bossContributions = new ConcurrentHashMap<>();
     // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private BukkitTask updateTask;
@@ -90,7 +97,12 @@ public class BossManager implements Listener {
         // Execute skills every 5 seconds (100 ticks)
         skillTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             for (OdysseyBoss boss : activeBosses.values()) {
-                boss.executeSkillsRotation();
+                try {
+                    boss.executeSkillsRotation();
+                } catch (RuntimeException ex) {
+                    plugin.getLogger().warning("[Bosses] Habilidad de " + boss.getId() + " cancelada: " + ex.getMessage());
+                    plugin.getLogger().fine("[Bosses] Detalle de la habilidad fallida: " + ex);
+                }
             }
         }, 100L, 100L);
 
@@ -231,6 +243,7 @@ public class BossManager implements Listener {
     public void removeBoss(UUID uuid, Player killer) {
         OdysseyBoss boss = activeBosses.remove(uuid);
         naturalBosses.remove(uuid);
+        bossContributions.remove(uuid);
         if (boss != null) {
             boss.cleanup();
             if (killer != null) {
@@ -374,6 +387,9 @@ public class BossManager implements Listener {
                 // Partículas críticas de poder celestial
                 victim.getWorld().spawnParticle(org.bukkit.Particle.CRIT, victim.getLocation().add(0, 1, 0), 10, 0.2, 0.4, 0.2, 0.1);
             }
+            bossContributions
+                    .computeIfAbsent(victim.getUniqueId(), ignored -> new ConcurrentHashMap<>())
+                    .merge(attackerPlayer.getUniqueId(), Math.max(0.0, event.getFinalDamage()), Double::sum);
             return;
         }
 
@@ -397,21 +413,15 @@ public class BossManager implements Listener {
         if (activeBosses.containsKey(entity.getUniqueId())) {
             OdysseyBoss boss = activeBosses.get(entity.getUniqueId());
             Player killer = entity.getKiller();
+            Map<UUID, Double> contributions = new HashMap<>(bossContributions.getOrDefault(entity.getUniqueId(), Map.of()));
             removeBoss(entity.getUniqueId(), killer);
-            
-            // Custom drops / rewards — se sueltan manualmente en el suelo para
-            // garantizar que nunca se pierdan (otros plugins pueden limpiar getDrops()).
+
             event.getDrops().clear();
             if (boss != null) {
-                Location dropLocation = entity.getLocation();
-                for (org.bukkit.inventory.ItemStack drop : createCustomDrops(boss.getId())) {
-                    if (drop != null && dropLocation.getWorld() != null) {
-                        dropLocation.getWorld().dropItemNaturally(dropLocation, drop);
-                    }
-                }
+                distributeCustomDrops(boss.getId(), entity.getLocation(), killer, contributions);
             }
 
-            event.setDroppedExp(5000); // 5000 XP
+            event.setDroppedExp(Math.max(0, plugin.getConfig().getInt("boss-loot.experience", 750)));
             
             Location loc = entity.getLocation();
             loc.getWorld().playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
@@ -419,74 +429,75 @@ public class BossManager implements Listener {
     }
 
 
-    private java.util.List<org.bukkit.inventory.ItemStack> createCustomDrops(String bossId) {
-        java.util.List<org.bukkit.inventory.ItemStack> drops = new java.util.ArrayList<>();
-        switch (bossId.toLowerCase()) {
-            case "thor": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createMjolnir());
-                break;
+    /** Sortea cada drop una vez y lo entrega al participante ponderado por daño. */
+    private void distributeCustomDrops(String bossId, Location dropLocation, Player killer, Map<UUID, Double> contributions) {
+        if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
+            return;
+        }
+
+        List<Player> recipients = findEligibleRecipients(killer, contributions);
+        if (recipients.isEmpty()) {
+            return;
+        }
+
+        ConfigurationSection drops = plugin.getConfig().getConfigurationSection("boss-loot.bosses." + bossId.toLowerCase() + ".drops");
+        if (drops == null) {
+            plugin.getLogger().warning("[Bosses] Sin tabla de loot configurada para " + bossId + ".");
+            return;
+        }
+
+        for (String itemId : drops.getKeys(false)) {
+            double chance = Math.clamp(drops.getDouble(itemId, 0.0), 0.0, 1.0);
+            if (ThreadLocalRandom.current().nextDouble() > chance) {
+                continue;
             }
-            case "ares": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createAresBlade());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createAresShield());
-                break;
+
+            org.bukkit.inventory.ItemStack item = org.metamechanists.odysseia.items.OdysseyItemManager.createBossDrop(itemId);
+            if (item == null) {
+                plugin.getLogger().warning("[Bosses] Drop desconocido en config: " + itemId);
+                continue;
             }
-            case "hades": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHadesScythe());
-                break;
+
+            Player recipient = pickRecipient(recipients, contributions);
+            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
+            if (!overflow.isEmpty() && dropLocation.getWorld() != null) {
+                overflow.values().forEach(leftover -> dropLocation.getWorld().dropItemNaturally(dropLocation, leftover));
             }
-            case "poseidon": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createPoseidonTrident());
-                break;
-            }
-            case "zeus": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createZeusMace());
-                break;
-            }
-            case "loki": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiDagger());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLokiScepter());
-                break;
-            }
-            case "odin": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinSpear());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createOdinHelmet());
-                break;
-            }
-            case "kratos": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createKratosBlade());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createLeviathanAxe());
-                break;
-            }
-            case "heimdall": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createGjallarhorn());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createBifrostWings());
-                break;
-            }
-            case "hidra": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHydraFang());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createHydraScale());
-                break;
-            }
-            case "cerbero": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createCerberoHide());
-                break;
-            }
-            case "artemisa": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createArtemisBow());
-                break;
-            }
-            case "tifon": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createTifonClaw());
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createTifonChestplate());
-                break;
-            }
-            case "prometeo": {
-                drops.add(org.metamechanists.odysseia.items.OdysseyItemManager.createPrometeoFlame());
-                break;
+            recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
+        }
+    }
+
+    private List<Player> findEligibleRecipients(Player killer, Map<UUID, Double> contributions) {
+        double totalDamage = contributions.values().stream().mapToDouble(Double::doubleValue).sum();
+        double minDamage = Math.max(0.0, plugin.getConfig().getDouble("boss-loot.contributors.minimum-damage", 25.0));
+        double minShare = Math.clamp(plugin.getConfig().getDouble("boss-loot.contributors.minimum-share", 0.02), 0.0, 1.0);
+        List<Player> recipients = new ArrayList<>();
+        for (Map.Entry<UUID, Double> entry : contributions.entrySet()) {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null && player.isOnline() && entry.getValue() >= minDamage
+                    && (totalDamage <= 0.0 || entry.getValue() / totalDamage >= minShare)) {
+                recipients.add(player);
             }
         }
-        return drops;
+        if (recipients.isEmpty() && killer != null && killer.isOnline()) {
+            recipients.add(killer);
+        }
+        return recipients;
+    }
+
+    private Player pickRecipient(List<Player> recipients, Map<UUID, Double> contributions) {
+        double totalWeight = recipients.stream()
+                .mapToDouble(player -> Math.max(1.0, contributions.getOrDefault(player.getUniqueId(), 0.0)))
+                .sum();
+        double roll = ThreadLocalRandom.current().nextDouble(totalWeight);
+        for (Player player : recipients) {
+            roll -= Math.max(1.0, contributions.getOrDefault(player.getUniqueId(), 0.0));
+            if (roll <= 0.0) {
+                return player;
+            }
+        }
+        return recipients.get(recipients.size() - 1);
     }
 
     @EventHandler
