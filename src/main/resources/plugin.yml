@@ -1,9 +1,9 @@
 name: Odysseia
-version: 1.0.0
+version: 1.1.0
 main: org.metamechanists.odysseia.Odysseia
 api-version: 1.21
-description: Plugin de personalizacion, gestion silenciosa y moderacion creativa para DrakesCraft.
-authors: [JackStar, Antigravity]
+description: Suite principal de sistemas, tienda, kits, eventos y administracion de DrakesCraft.
+authors: [JackStar]
 softdepend:
   - PlaceholderAPI
   - LuckPerms
