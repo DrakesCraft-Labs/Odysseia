@@ -30,6 +30,10 @@ commands:
     description: Comando administrativo para gestionar jefes míticos.
     permission: odysseia.boss.admin
     usage: /boss spawn <circe|polifemo>
+  odysseia:
+    description: Comando principal de administración de Odysseia.
+    permission: odysseia.reload
+    usage: /odysseia <reload|status>
   odysseiaannounce:
     description: Dispara el anuncio público de Discord de una compra entregada (uso desde Tebex).
     permission: odysseia.store.announce
@@ -65,6 +69,9 @@ commands:
     aliases: [tienda, menu, shop, mercado, kitsvip, kits_vip, kits-vip]
     usage: /tienda [kits]
 permissions:
+  odysseia.reload:
+    description: Permite recargar config.yml, purchases.yml y servicios runtime.
+    default: op
   odysseia.purchase.admin:
     description: Control total del motor de compras.
     default: op

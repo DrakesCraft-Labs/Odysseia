@@ -4,9 +4,12 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
+import org.metamechanists.odysseia.commands.ReloadCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
 import org.metamechanists.odysseia.commands.BossCommand;
 import org.metamechanists.odysseia.boss.BossManager;
@@ -24,6 +27,9 @@ import java.time.DayOfWeek;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 
 public final class Odysseia extends JavaPlugin {
@@ -39,6 +45,7 @@ public final class Odysseia extends JavaPlugin {
     private int chatGamesCountdown = 0;
     private PurchaseEngine purchaseEngine;
     private StarTelemetryPublisher starTelemetry;
+    private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -56,6 +63,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("vanish").setExecutor(vanishCommand);
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
+        ReloadCommand reloadCommand = new ReloadCommand(this);
+        getCommand("odysseia").setExecutor(reloadCommand);
+        getCommand("odysseia").setTabCompleter(reloadCommand);
         getCommand("odysseiaannounce").setExecutor(new org.metamechanists.odysseia.commands.StoreAnnounceCommand(this));
         this.purchaseEngine = new PurchaseEngine(this);
         this.starTelemetry = new StarTelemetryPublisher(this);
@@ -126,6 +136,39 @@ public final class Odysseia extends JavaPlugin {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public int getPurchaseEngineProductCount() {
+        return purchaseEngine == null ? 0 : purchaseEngine.catalogProductCount();
+    }
+
+    public List<String> reloadRuntime() {
+        List<String> errors = new ArrayList<>();
+        reloadConfig();
+        cancelRuntimeTasks();
+
+        if (purchaseEngine != null) {
+            HandlerList.unregisterAll(purchaseEngine);
+            purchaseEngine.close();
+        }
+        this.purchaseEngine = new PurchaseEngine(this);
+        if (starTelemetry == null) {
+            this.starTelemetry = new StarTelemetryPublisher(this);
+        }
+        this.purchaseEngine.setTelemetry(telemetry -> starTelemetry.publishPurchase(purchaseEngine, telemetry));
+        getCommand("odysseiapurchase").setExecutor(new org.metamechanists.odysseia.commands.PurchaseCommand(purchaseEngine));
+        Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
+        if (!purchaseEngine.isReady()) {
+            errors.add("purchase-engine: " + purchaseEngine.startupError());
+        }
+
+        org.metamechanists.odysseia.commands.KitGiveCommand validator = new org.metamechanists.odysseia.commands.KitGiveCommand(this);
+        errors.addAll(validator.validateConfiguration().stream().map(error -> "kits: " + error).toList());
+
+        startSchedulers();
+        startStarTelemetry();
+        getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, schedulers y purchase engine.");
+        return errors;
     }
 
     @Override
@@ -202,13 +245,26 @@ public final class Odysseia extends JavaPlugin {
         startRestartScheduler();
     }
 
+    private void trackRuntimeTask(BukkitTask task) {
+        runtimeTasks.add(task);
+    }
+
+    private void cancelRuntimeTasks() {
+        for (BukkitTask task : runtimeTasks) {
+            if (task != null) {
+                task.cancel();
+            }
+        }
+        runtimeTasks.clear();
+    }
+
     private void startStarTelemetry() {
         if (starTelemetry == null || !getConfig().getBoolean("star-monitor.enabled", false)) {
             return;
         }
         int intervalSeconds = Math.max(30, getConfig().getInt("star-monitor.heartbeat-interval-seconds", 60));
-        Bukkit.getScheduler().runTaskLater(this, () -> starTelemetry.publishStartup(purchaseEngine), 40L);
-        Bukkit.getScheduler().runTaskTimer(this, () -> starTelemetry.publishHeartbeat(purchaseEngine), intervalSeconds * 20L, intervalSeconds * 20L);
+        trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () -> starTelemetry.publishStartup(purchaseEngine), 40L));
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> starTelemetry.publishHeartbeat(purchaseEngine), intervalSeconds * 20L, intervalSeconds * 20L));
     }
 
     private void startOwnerCycleScheduler() {
@@ -217,11 +273,11 @@ public final class Odysseia extends JavaPlugin {
         }
         int intervalMinutes = getConfig().getInt("owner-cycle.interval-minutes", 30);
         long periodTicks = intervalMinutes * 60L * 20L;
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (isOwnerOnline()) {
                 ownerFlip = !ownerFlip;
             }
-        }, periodTicks, periodTicks);
+        }, periodTicks, periodTicks));
     }
 
     private boolean isOwnerOnline() {
@@ -244,7 +300,7 @@ public final class Odysseia extends JavaPlugin {
         }
         String command = getConfig().getString("chatgames.command", "chatgames force");
         chatGamesCountdown = getRandomChatGamesInterval();
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (Bukkit.getOnlinePlayers().isEmpty()) {
                 return;
             }
@@ -253,7 +309,7 @@ public final class Odysseia extends JavaPlugin {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
                 chatGamesCountdown = getRandomChatGamesInterval();
             }
-        }, 1200L, 1200L);
+        }, 1200L, 1200L));
     }
 
     private int getRandomChatGamesInterval() {
@@ -266,54 +322,113 @@ public final class Odysseia extends JavaPlugin {
     }
 
     private void startLenadorLocoScheduler() {
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+        if (!getConfig().getBoolean("lenador-loco.enabled", true)) {
+            return;
+        }
+        long intervalTicks = Math.max(1, getConfig().getLong("lenador-loco.check-interval-seconds", 5)) * 20L;
+        String targetName = getConfig().getString("lenador-loco.target-name", "Leñador Loco");
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (org.bukkit.World world : Bukkit.getWorlds()) {
                 for (org.bukkit.entity.LivingEntity entity : world.getLivingEntities()) {
                     String name = entity.getCustomName();
                     if (name != null) {
                         String stripped = ChatColor.stripColor(name);
-                        if (stripped.equalsIgnoreCase("Leñador Loco")) {
-                            // Apply effects for 12 seconds (240 ticks) without particles/icons
-                            entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE, 240, 1, true, false, false));
-                            entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.REGENERATION, 240, 1, true, false, false));
-                            entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.STRENGTH, 240, 0, true, false, false));
-                            entity.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.SPEED, 240, 0, true, false, false));
+                        if (stripped.equalsIgnoreCase(targetName)) {
+                            applyConfiguredLenadorEffects(entity);
                         }
                     }
                 }
             }
-        }, 100L, 100L); // Every 5 seconds (100 ticks)
+        }, intervalTicks, intervalTicks));
+    }
+
+    private void applyConfiguredLenadorEffects(org.bukkit.entity.LivingEntity entity) {
+        List<java.util.Map<?, ?>> effects = getConfig().getMapList("lenador-loco.effects");
+        if (effects.isEmpty()) {
+            effects = List.of(
+                    java.util.Map.of("type", "RESISTANCE", "duration-seconds", 12, "amplifier", 1),
+                    java.util.Map.of("type", "REGENERATION", "duration-seconds", 12, "amplifier", 1),
+                    java.util.Map.of("type", "STRENGTH", "duration-seconds", 12, "amplifier", 0),
+                    java.util.Map.of("type", "SPEED", "duration-seconds", 12, "amplifier", 0)
+            );
+        }
+        for (java.util.Map<?, ?> raw : effects) {
+            String typeName = text(raw.get("type"), "").toUpperCase(Locale.ROOT);
+            org.bukkit.potion.PotionEffectType type = org.bukkit.potion.PotionEffectType.getByName(typeName);
+            if (type == null) {
+                getLogger().warning("[Lenador] Efecto inválido en config: " + typeName);
+                continue;
+            }
+            int duration = Math.max(1, parseInt(raw.get("duration-seconds"), 12)) * 20;
+            int amplifier = Math.max(0, parseInt(raw.get("amplifier"), 0));
+            entity.addPotionEffect(new org.bukkit.potion.PotionEffect(type, duration, amplifier, true, false, false));
+        }
+    }
+
+    private int parseInt(Object value, int fallback) {
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
+    }
+
+    private String text(Object value, String fallback) {
+        return value == null ? fallback : String.valueOf(value);
     }
 
     private void startPapaDeMarDeliveryScheduler() {
-        int deliveryMinutes = getConfig().getInt("papa-de-mar.delivery-interval-minutes", 15);
+        if (!getConfig().getBoolean("papa-de-mar.delivery.enabled", true)) {
+            return;
+        }
+        int deliveryMinutes = getConfig().getInt("papa-de-mar.delivery.interval-minutes",
+                getConfig().getInt("papa-de-mar.delivery-interval-minutes", 15));
         long periodTicks = deliveryMinutes * 60L * 20L;
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
             if (Bukkit.getOnlinePlayers().isEmpty()) {
                 return;
             }
             org.bukkit.inventory.ItemStack potato = createPapaDeMarItem();
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.getInventory().addItem(potato);
-                p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eRecibiste la &6&l✦ Papa de mar ✦&e."));
+                p.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        getConfig().getString("papa-de-mar.delivery.message", "&eRecibiste la &6&l✦ Papa de mar ✦&e.")));
             }
-        }, periodTicks, periodTicks);
+        }, periodTicks, periodTicks));
     }
 
     public org.bukkit.inventory.ItemStack createPapaDeMarItem() {
-        org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(org.bukkit.Material.BAKED_POTATO);
+        String materialName = getConfig().getString("papa-de-mar.item.material", "BAKED_POTATO");
+        org.bukkit.Material material = org.bukkit.Material.matchMaterial(materialName == null ? "BAKED_POTATO" : materialName);
+        org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(material == null ? org.bukkit.Material.BAKED_POTATO : material);
         org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&l✦ Papa de mar ✦"));
-            java.util.List<String> lore = new java.util.ArrayList<>();
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Relicario legendario de Drakes."));
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Ha cruzado temporadas, guerras y treguas."));
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7A veces se canjeó por llaves ante aldeanos."));
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&7A veces fue comida, spam y pura leyenda."));
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&8Dicen que con esta papa terminó una guerra."));
-            lore.add(ChatColor.translateAlternateColorCodes('&', "&8Y que quien la porta carga historia en las manos."));
+            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',
+                    getConfig().getString("papa-de-mar.item.name", "&6&l✦ Papa de mar ✦")));
+            List<String> lore = getConfig().getStringList("papa-de-mar.item.lore").stream()
+                    .map(line -> ChatColor.translateAlternateColorCodes('&', line))
+                    .toList();
+            if (lore.isEmpty()) {
+                lore = List.of(
+                        ChatColor.translateAlternateColorCodes('&', "&7Relicario legendario de Drakes."),
+                        ChatColor.translateAlternateColorCodes('&', "&7Ha cruzado temporadas, guerras y treguas."),
+                        ChatColor.translateAlternateColorCodes('&', "&7A veces se canjeó por llaves ante aldeanos."),
+                        ChatColor.translateAlternateColorCodes('&', "&7A veces fue comida, spam y pura leyenda."),
+                        ChatColor.translateAlternateColorCodes('&', "&8Dicen que con esta papa terminó una guerra."),
+                        ChatColor.translateAlternateColorCodes('&', "&8Y que quien la porta carga historia en las manos.")
+                );
+            }
             meta.setLore(lore);
-            meta.addEnchant(org.bukkit.enchantments.Enchantment.VANISHING_CURSE, 1, true);
+            for (String raw : getConfig().getStringList("papa-de-mar.item.enchantments")) {
+                String[] parts = raw.split(":", 2);
+                org.bukkit.enchantments.Enchantment enchantment = org.bukkit.enchantments.Enchantment.getByName(parts[0].toUpperCase(Locale.ROOT));
+                if (enchantment == null) {
+                    getLogger().warning("[PapaDeMar] Encantamiento inválido en config: " + raw);
+                    continue;
+                }
+                int level = parts.length > 1 ? parseInt(parts[1], 1) : 1;
+                meta.addEnchant(enchantment, level, true);
+            }
             item.setItemMeta(meta);
         }
         return item;
@@ -332,7 +447,7 @@ public final class Odysseia extends JavaPlugin {
         long periodTicks = minutes * 60L * 20L;
         long delayTicks = Math.max(20L, getConfig().getInt("presence.startup-delay-seconds", 60) * 20L);
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {
                 String serverLabel = getConfig().getString("presence.server-label", "");
                 if (serverLabel == null || serverLabel.isBlank()) {
@@ -361,7 +476,7 @@ public final class Odysseia extends JavaPlugin {
             } catch (Exception e) {
                 getLogger().log(Level.WARNING, "Error al enviar latido a Discord", e);
             }
-        }, delayTicks, periodTicks);
+        }, delayTicks, periodTicks));
     }
 
     private void startRestartScheduler() {
@@ -413,8 +528,8 @@ public final class Odysseia extends JavaPlugin {
             long warnTicks = delayTicks - warnOffsets[i];
             if (warnTicks > 0) {
                 final String msg = ChatColor.translateAlternateColorCodes('&', warnMessages[i]);
-                Bukkit.getScheduler().runTaskLater(this, () ->
-                        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(msg)), warnTicks);
+                trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () ->
+                        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(msg)), warnTicks));
             }
         }
 
@@ -422,11 +537,11 @@ public final class Odysseia extends JavaPlugin {
         final int finalHour = hour;
         final int finalMin = minute;
         final ZoneId finalZone = zone;
-        Bukkit.getScheduler().runTaskLater(this, () -> {
+        trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () -> {
             getLogger().info("[Restart] Ejecutando reinicio semanal programado.");
             Bukkit.broadcastMessage(ChatColor.RED + "⚡ Reiniciando servidor ahora...");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
-        }, delayTicks);
+        }, delayTicks));
     }
 
     private void sendStartupWebhook() {

@@ -99,7 +99,26 @@ papa-de-mar:
   # Valores al consumir la Papa de mar
   food-restored: 1
   saturation-restored: 8.4
-  # Tiempo de entrega automatica a todos los jugadores (minutos)
+  # Item entregado por el scheduler y por /papademar.
+  item:
+    material: BAKED_POTATO
+    name: "&6&l✦ Papa de mar ✦"
+    lore:
+      - "&7Relicario legendario de Drakes."
+      - "&7Ha cruzado temporadas, guerras y treguas."
+      - "&7A veces se canjeó por llaves ante aldeanos."
+      - "&7A veces fue comida, spam y pura leyenda."
+      - "&8Dicen que con esta papa terminó una guerra."
+      - "&8Y que quien la porta carga historia en las manos."
+    # Formato: ENCHANTMENT:LEVEL. Dejar [] para no encantar.
+    enchantments:
+      - VANISHING_CURSE:1
+  delivery:
+    enabled: true
+    # Tiempo de entrega automática a todos los jugadores (minutos).
+    interval-minutes: 15
+    message: "&eRecibiste la &6&l✦ Papa de mar ✦&e."
+  # Compatibilidad con configs viejas; si existe delivery.interval-minutes se usa primero.
   delivery-interval-minutes: 15
 
 # ─────────────────────────────────────────────
@@ -235,6 +254,27 @@ chatgames:
   # Rango de tiempo aleatorio para lanzar un juego (minutos)
   min-interval: 15
   max-interval: 30
+
+# ─────────────────────────────────────────────
+#  Leñador Loco
+# ─────────────────────────────────────────────
+lenador-loco:
+  enabled: true
+  target-name: "Leñador Loco"
+  check-interval-seconds: 5
+  effects:
+    - type: RESISTANCE
+      duration-seconds: 12
+      amplifier: 1
+    - type: REGENERATION
+      duration-seconds: 12
+      amplifier: 1
+    - type: STRENGTH
+      duration-seconds: 12
+      amplifier: 0
+    - type: SPEED
+      duration-seconds: 12
+      amplifier: 0
 
 # ─────────────────────────────────────────────
 #  Presencia y Eventos (DrakesLabPresence)
