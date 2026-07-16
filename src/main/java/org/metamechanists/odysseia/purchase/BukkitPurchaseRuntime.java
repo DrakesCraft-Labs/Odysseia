@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.integrations.SlimefunGuideBridge;
+import org.metamechanists.odysseia.integrations.SFMasterPassExpiry;
 import org.metamechanists.odysseia.items.OdysseyItemManager;
 import org.metamechanists.odysseia.utils.StoreManager;
 
@@ -158,12 +159,12 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
 
     private ActionResult giveSfMasterGuide(Player player) {
         for (ItemStack item : player.getInventory().getContents()) {
-            if (slimefunGuide.isCheatGuide(item)) {
+            if (slimefunGuide.ownerOf(item).filter(player.getUniqueId()::equals).isPresent()) {
                 return ActionResult.completed("guide=already-present");
             }
         }
 
-        ItemStack guide = slimefunGuide.createCheatGuide();
+        ItemStack guide = slimefunGuide.createOwnedCheatGuide(player.getUniqueId(), SFMasterPassExpiry.forPlayer(plugin, player));
         if (guide == null) {
             return ActionResult.retryable("Guía Cheat de Slimefun no disponible");
         }

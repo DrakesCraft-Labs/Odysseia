@@ -1518,3 +1518,4 @@ fast-machines-protection:
 sfmaster-guide:
   enabled: true
   block-cheat-command: true
+  cleanup-interval-seconds: 30

@@ -114,6 +114,7 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
         Bukkit.getScheduler().runTask(this, sfMasterWatcher::deliverGuidesToOnlinePassHolders);
+        sfMasterWatcher.startGuideCleanup();
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(automation, this);
 

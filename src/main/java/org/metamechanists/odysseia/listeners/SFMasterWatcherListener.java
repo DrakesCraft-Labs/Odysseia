@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
@@ -26,12 +27,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.metamechanists.odysseia.integrations.SlimefunGuideBridge;
+import org.metamechanists.odysseia.integrations.SFMasterPassExpiry;
 
 import java.io.File;
 import java.io.IOException;
@@ -202,16 +205,18 @@ public class SFMasterWatcherListener implements Listener {
         Bukkit.getOnlinePlayers().forEach(this::ensureCheatGuide);
     }
 
+    /** Runs on the main thread and only touches inventories belonging to online players. */
+    public void startGuideCleanup() {
+        long seconds = Math.max(10L, plugin.getConfig().getLong("sfmaster-guide.cleanup-interval-seconds", 30L));
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> Bukkit.getOnlinePlayers().forEach(this::purgeExpiredGuides), seconds * 20L, seconds * 20L);
+    }
+
     private void ensureCheatGuide(Player player) {
-        if (!plugin.getConfig().getBoolean("sfmaster-guide.enabled", true) || !hasSfMasterAccess(player)) {
+        if (!plugin.getConfig().getBoolean("sfmaster-guide.enabled", true) || !isSfMasterActive(player)) {
             return;
         }
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (slimefunGuide.isCheatGuide(item)) {
-                return;
-            }
-        }
-        ItemStack guide = slimefunGuide.createCheatGuide();
+        if (hasOwnedGuide(player.getInventory(), player.getUniqueId()) || hasOwnedGuide(player.getEnderChest(), player.getUniqueId())) return;
+        ItemStack guide = slimefunGuide.createOwnedCheatGuide(player.getUniqueId(), SFMasterPassExpiry.forPlayer(plugin, player));
         if (guide == null) {
             return;
         }
@@ -219,6 +224,49 @@ public class SFMasterWatcherListener implements Listener {
         if (!leftovers.isEmpty()) {
             player.sendMessage("§eSFMaster activo, pero necesitas un espacio libre para recibir la guía Cheat.");
         }
+    }
+
+    private boolean hasOwnedGuide(Inventory inventory, UUID owner) {
+        for (ItemStack item : inventory.getContents()) {
+            if (slimefunGuide.ownerOf(item).filter(owner::equals).isPresent()) return true;
+        }
+        return false;
+    }
+
+    private void purgeExpiredGuides(Player player) {
+        boolean ownerLostPass = !isSfMasterActive(player);
+        purgeInventory(player.getInventory(), player.getUniqueId(), ownerLostPass, 0);
+        purgeInventory(player.getEnderChest(), player.getUniqueId(), ownerLostPass, 0);
+    }
+
+    /** Recursively removes only owned guides that are expired or whose owner lost the pass. */
+    private int purgeInventory(Inventory inventory, UUID onlineOwner, boolean ownerLostPass, int depth) {
+        if (inventory == null || depth > 4) return 0;
+        int removed = 0;
+        ItemStack[] contents = inventory.getContents();
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack item = contents[slot];
+            if (item == null || item.getType().isAir()) continue;
+            UUID owner = slimefunGuide.ownerOf(item).orElse(null);
+            if (owner != null && (slimefunGuide.isExpired(item) || (ownerLostPass && owner.equals(onlineOwner)))) {
+                inventory.setItem(slot, null);
+                removed++;
+                continue;
+            }
+            ItemMeta meta = item.getItemMeta();
+            if (meta instanceof BlockStateMeta stateMeta && stateMeta.getBlockState() instanceof ShulkerBox shulker) {
+                removed += purgeInventory(shulker.getInventory(), onlineOwner, ownerLostPass, depth + 1);
+                stateMeta.setBlockState(shulker);
+                item.setItemMeta(stateMeta);
+                inventory.setItem(slot, item);
+            }
+        }
+        return removed;
+    }
+
+    private void removeHeldGuide(Player player, PlayerInteractEvent event) {
+        if (event.getHand() == org.bukkit.inventory.EquipmentSlot.OFF_HAND) player.getInventory().setItemInOffHand(null);
+        else player.getInventory().setItemInMainHand(null);
     }
 
     private boolean isCheatGuideView(InventoryClickEvent event) {
@@ -394,16 +442,32 @@ public class SFMasterWatcherListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCheatGuideUse(PlayerInteractEvent event) {
-        if (!slimefunGuide.isCheatGuide(event.getItem()) || hasSfMasterAccess(event.getPlayer())) {
+        ItemStack guide = event.getItem();
+        if (!slimefunGuide.isCheatGuide(guide)) return;
+        Player player = event.getPlayer();
+        var owner = slimefunGuide.ownerOf(guide);
+        if (owner.isPresent()) {
+            event.setCancelled(true);
+            if (!owner.get().equals(player.getUniqueId()) || slimefunGuide.isExpired(guide) || !isSfMasterActive(player)) {
+                removeHeldGuide(player, event);
+                player.sendMessage("§cTu guía SFMaster venció o no te pertenece y fue eliminada.");
+                return;
+            }
+            slimefunGuide.openOwnedCheatGuide(player);
             return;
         }
-        event.setCancelled(true);
-        event.getPlayer().sendMessage("§cTu pase SFMaster expiró. Esta guía Cheat ya no se puede usar.");
+        if (!hasSfMasterAccess(player)) {
+            event.setCancelled(true);
+            player.sendMessage("§cTu pase SFMaster expiró. Esta guía Cheat ya no se puede usar.");
+        }
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTask(plugin, () -> ensureCheatGuide(event.getPlayer()));
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            purgeExpiredGuides(event.getPlayer());
+            ensureCheatGuide(event.getPlayer());
+        });
     }
 
     @EventHandler
@@ -413,6 +477,10 @@ public class SFMasterWatcherListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player) {
+            purgeInventory(event.getView().getTopInventory(), player.getUniqueId(), false, 0);
+            purgeExpiredGuides(player);
+        }
         if (event.getWhoClicked() instanceof Player player
                 && isSfMasterActive(player)
                 && isCheatGuideView(event)
