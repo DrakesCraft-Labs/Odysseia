@@ -39,6 +39,17 @@ class PurchaseServiceTest {
         assertEquals(PurchaseState.COMPLETED, service.status("txn-1").getFirst().state());
     }
 
+    @Test void tebexDeliveryExecutesRewardsAndQueuesItsAnnouncement() throws Exception {
+        runtime.online = true;
+
+        assertTrue(service.deliver("test-tebex-flow", "TestPlayer", "dragmas_saco", false, "CONSOLE_TEST").success());
+
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
+        assertEquals(PurchaseState.COMPLETED, service.status("test-tebex-flow").getFirst().state());
+    }
+
     @Test void differentTransactionsCanPurchaseSameProduct() throws Exception {
         runtime.online = true;
         service.deliver("txn-1", "TestPlayer", "dragmas_saco", false, "test");

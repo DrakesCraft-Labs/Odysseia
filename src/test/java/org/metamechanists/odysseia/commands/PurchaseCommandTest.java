@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PurchaseCommandTest {
     private final ProductCatalog catalog = new ProductCatalog(List.of(new ProductDefinition(
@@ -41,5 +43,14 @@ class PurchaseCommandTest {
     @Test void rejectsArgumentsWithoutAKnownProductId() {
         assertThrows(IllegalArgumentException.class, () -> PurchaseCommand.DeliveryArguments.from(
                 catalog, "tbx-transaction", "Mr_Em1lio", "unknown_product"));
+    }
+
+    @Test void testTransactionsAreDistinctAndCannotBeMistakenForTebexTransactions() {
+        String first = PurchaseCommand.testTransaction();
+        String second = PurchaseCommand.testTransaction();
+
+        assertTrue(first.startsWith("test-"));
+        assertTrue(second.startsWith("test-"));
+        assertNotEquals(first, second);
     }
 }

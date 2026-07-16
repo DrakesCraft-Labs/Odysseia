@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.purchase.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /** Consola administrativa y entrada única de Tebex. */
 public final class PurchaseCommand implements CommandExecutor {
@@ -20,6 +21,7 @@ public final class PurchaseCommand implements CommandExecutor {
         try {
             return switch (args[0].toLowerCase()) {
                 case "deliver" -> args.length == 4 ? deliver(sender, service, args) : usage(sender, label);
+                case "test" -> args.length == 3 ? test(sender, service, args) : usage(sender, label);
                 case "dry-run" -> args.length == 3 ? result(sender, service.deliver("dry-run:" + System.nanoTime(), args[1], args[2], true, sender.getName())) : usage(sender, label);
                 case "retry" -> args.length == 2 ? result(sender, service.retry(args[1], sender.getName())) : usage(sender, label);
                 case "retry-action" -> args.length == 3 ? result(sender, service.retryAction(args[1], Long.parseLong(args[2]), sender.getName())) : usage(sender, label);
@@ -52,6 +54,22 @@ public final class PurchaseCommand implements CommandExecutor {
         return result(sender, service.deliver(delivery.transaction(), delivery.player(), delivery.productId(), false, sender.getName()));
     }
 
+    /**
+     * Prueba operativa del mismo circuito que invoca Tebex: registra la compra,
+     * entrega las acciones del producto y encola su anuncio/webhook. Se limita a
+     * consola porque entrega recompensas reales y deja una auditoría distinguible.
+     */
+    private boolean test(CommandSender sender, PurchaseService service, String[] args) {
+        if (!(sender instanceof ConsoleCommandSender)) {
+            return message(sender, false, "La prueba de compra sólo puede ejecutarse desde consola.");
+        }
+        return result(sender, service.deliver(testTransaction(), args[1], args[2], false, "CONSOLE_TEST"));
+    }
+
+    static String testTransaction() {
+        return "test-" + UUID.randomUUID();
+    }
+
     static record DeliveryArguments(String transaction, String player, String productId) {
         static DeliveryArguments from(ProductCatalog catalog, String first, String second, String third) {
             if (catalog.get(third) != null) return new DeliveryArguments(first, second, third);
@@ -62,5 +80,5 @@ public final class PurchaseCommand implements CommandExecutor {
 
     private boolean result(CommandSender sender, PurchaseService.Result result) { return message(sender, result.success(), result.message()); }
     private boolean message(CommandSender sender, boolean ok, String value) { sender.sendMessage((ok ? ChatColor.GREEN : ChatColor.RED) + value); return true; }
-    private boolean usage(CommandSender sender, String label) { sender.sendMessage(ChatColor.YELLOW + "/" + label + " deliver <transaction> <username> <product_id> (Tebex legado: <username> <product_id> <transaction>) | dry-run <username> <product_id> | status|pending|history|retry|retry-action|refund|chargeback|validate|catalog|reconcile"); return true; }
+    private boolean usage(CommandSender sender, String label) { sender.sendMessage(ChatColor.YELLOW + "/" + label + " deliver <transaction> <username> <product_id> (Tebex legado: <username> <product_id> <transaction>) | test <username> <product_id> (sólo consola, entrega real) | dry-run <username> <product_id> | status|pending|history|retry|retry-action|refund|chargeback|validate|catalog|reconcile"); return true; }
 }
