@@ -1508,3 +1508,8 @@ kits:
         amount: 64
       - material: TOTEM_OF_UNDYING
         amount: 8
+# Seguridad de FastMachines: el addon no valida por sí mismo la región de la máquina.
+fast-machines-protection:
+  enabled: true
+  bypass-permission: odysseia.fastmachines.bypass
+  denied-message: "&cNo puedes usar las Fast Machines de otra protección."

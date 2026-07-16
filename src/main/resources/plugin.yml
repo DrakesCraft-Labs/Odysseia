@@ -81,3 +81,6 @@ permissions:
   odysseia.kit.use:
     description: Permite consultar y reclamar kits configurados por Odysseia.
     default: true
+  odysseia.fastmachines.bypass:
+    description: Permite usar Fast Machines dentro de protecciones ajenas.
+    default: op
