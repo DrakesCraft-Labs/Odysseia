@@ -21,6 +21,8 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +31,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.metamechanists.odysseia.integrations.SlimefunGuideBridge;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +69,7 @@ public class SFMasterWatcherListener implements Listener {
     private final int maxClaims;
     private final long claimWindowMillis;
     private final Method slimefunGetByItem;
+    private final SlimefunGuideBridge slimefunGuide;
     private boolean reflectionWarningLogged;
 
     public SFMasterWatcherListener(Plugin plugin) {
@@ -80,6 +84,7 @@ public class SFMasterWatcherListener implements Listener {
         this.maxClaims = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.max-claims", 12));
         this.claimWindowMillis = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.window-minutes", 60)) * 60_000L;
         this.slimefunGetByItem = findSlimefunGetByItem();
+        this.slimefunGuide = new SlimefunGuideBridge(plugin);
         loadBlocks();
     }
 
@@ -185,6 +190,35 @@ public class SFMasterWatcherListener implements Listener {
     private boolean isSfMasterActive(Player player) {
         return (player.hasPermission(SFMASTER_CHEAT_PERMISSION) || player.hasPermission(SFMASTER_ACTIVE_PERMISSION))
                 && !player.hasPermission(SFMASTER_BYPASS_PERMISSION);
+    }
+
+    private boolean hasSfMasterAccess(Player player) {
+        return player.hasPermission(SFMASTER_CHEAT_PERMISSION)
+                || player.hasPermission(SFMASTER_ACTIVE_PERMISSION)
+                || player.hasPermission("slimefun.cheat.items.bypass");
+    }
+
+    public void deliverGuidesToOnlinePassHolders() {
+        Bukkit.getOnlinePlayers().forEach(this::ensureCheatGuide);
+    }
+
+    private void ensureCheatGuide(Player player) {
+        if (!plugin.getConfig().getBoolean("sfmaster-guide.enabled", true) || !hasSfMasterAccess(player)) {
+            return;
+        }
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (slimefunGuide.isCheatGuide(item)) {
+                return;
+            }
+        }
+        ItemStack guide = slimefunGuide.createCheatGuide();
+        if (guide == null) {
+            return;
+        }
+        Map<Integer, ItemStack> leftovers = player.getInventory().addItem(guide);
+        if (!leftovers.isEmpty()) {
+            player.sendMessage("§eSFMaster activo, pero necesitas un espacio libre para recibir la guía Cheat.");
+        }
     }
 
     private boolean isCheatGuideView(InventoryClickEvent event) {
@@ -336,6 +370,13 @@ public class SFMasterWatcherListener implements Listener {
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         String msg = event.getMessage().toLowerCase();
         if (isSfMasterActive(event.getPlayer())
+                && plugin.getConfig().getBoolean("sfmaster-guide.block-cheat-command", true)
+                && (msg.equals("/sf cheat") || msg.equals("/slimefun cheat"))) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§eUsa la guía SFMaster que recibiste para abrir la Cheat Sheet.");
+            return;
+        }
+        if (isSfMasterActive(event.getPlayer())
                 && (msg.startsWith("/sf give") || msg.startsWith("/slimefun give"))) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cSFMaster solo permite reclamar desde la Cheat Sheet controlada.");
@@ -349,6 +390,20 @@ public class SFMasterWatcherListener implements Listener {
                 player.sendMessage("§cNo puedes vender ítems de SFMaster en la subasta.");
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCheatGuideUse(PlayerInteractEvent event) {
+        if (!slimefunGuide.isCheatGuide(event.getItem()) || hasSfMasterAccess(event.getPlayer())) {
+            return;
+        }
+        event.setCancelled(true);
+        event.getPlayer().sendMessage("§cTu pase SFMaster expiró. Esta guía Cheat ya no se puede usar.");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Bukkit.getScheduler().runTask(plugin, () -> ensureCheatGuide(event.getPlayer()));
     }
 
     @EventHandler

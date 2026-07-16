@@ -1513,3 +1513,8 @@ fast-machines-protection:
   enabled: true
   bypass-permission: odysseia.fastmachines.bypass
   denied-message: "&cNo puedes usar las Fast Machines de otra protección."
+
+# La compra SFMaster entrega la guía Cheat original y la vuelve inutilizable al expirar el pase.
+sfmaster-guide:
+  enabled: true
+  block-cheat-command: true

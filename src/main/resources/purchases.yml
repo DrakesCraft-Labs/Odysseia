@@ -287,6 +287,7 @@ products:
     dependencies: [LuckPerms, Slimefun]
     actions:
       - {id: pass, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 1h}}
+      - {id: guide, type: SFMASTER_GUIDE, requires-online: true, refund: NOT_REVOCABLE}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 1 hora activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase SFMaster 1 hora"}}
   sfmaster_24h:
@@ -300,5 +301,6 @@ products:
     dependencies: [LuckPerms, Slimefun]
     actions:
       - {id: pass, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 24h}}
+      - {id: guide, type: SFMASTER_GUIDE, requires-online: true, refund: NOT_REVOCABLE}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 24 horas activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase SFMaster 24 horas"}}

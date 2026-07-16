@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.metamechanists.odysseia.Odysseia;
+import org.metamechanists.odysseia.integrations.SlimefunGuideBridge;
 import org.metamechanists.odysseia.items.OdysseyItemManager;
 import org.metamechanists.odysseia.utils.StoreManager;
 
@@ -22,8 +23,13 @@ import java.util.*;
 public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
     private final Odysseia plugin;
     private final KitDeliveryService kits;
+    private final SlimefunGuideBridge slimefunGuide;
 
-    public BukkitPurchaseRuntime(Odysseia plugin) { this.plugin = plugin; this.kits = new KitDeliveryService(plugin); }
+    public BukkitPurchaseRuntime(Odysseia plugin) {
+        this.plugin = plugin;
+        this.kits = new KitDeliveryService(plugin);
+        this.slimefunGuide = new SlimefunGuideBridge(plugin);
+    }
     /**
      * Compatibilidad legacy cerrada: nunca crea una identidad offline por nombre.
      * La ruta productiva usa PlayerIdentityResolver y sus identidades observadas.
@@ -38,6 +44,7 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
         try {
             return switch (action.type()) {
                 case LUCKPERMS_TEMPORARY, SFMASTER_PASS -> temporaryGroup(context, action);
+                case SFMASTER_GUIDE -> online(context, this::giveSfMasterGuide);
                 case LUCKPERMS_PERMANENT -> permanentGroup(context, action);
                 case TEMPORARY_PERMISSION, AURA, POWER, COSMETIC -> permission(context, action);
                 case ECONOMY -> economy(context, action);
@@ -147,6 +154,23 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
             if (amount < 1 || amount > 2304) return ActionResult.manual("Cantidad ProtectionStones inválida");
             return giveProtectionStone(player, alias, amount);
         });
+    }
+
+    private ActionResult giveSfMasterGuide(Player player) {
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (slimefunGuide.isCheatGuide(item)) {
+                return ActionResult.completed("guide=already-present");
+            }
+        }
+
+        ItemStack guide = slimefunGuide.createCheatGuide();
+        if (guide == null) {
+            return ActionResult.retryable("Guía Cheat de Slimefun no disponible");
+        }
+        if (!player.getInventory().addItem(guide).isEmpty()) {
+            return ActionResult.waiting("Inventario sin espacio para la guía SFMaster");
+        }
+        return ActionResult.completed("guide=delivered");
     }
 
     /**
