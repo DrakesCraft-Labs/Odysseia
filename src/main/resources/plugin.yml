@@ -67,7 +67,9 @@ commands:
     usage: /kit <nombre>
   drakestienda:
     description: Abre el hub nativo de comercio de DrakesCraft.
-    aliases: [tienda, menu, shop, mercado, kitsvip, kits_vip, kits-vip]
+    # Los nombres publicos tienda/shop/mercado viven en commands.yml con namespace.
+    # Asi no pueden ser capturados por menus de terceros al cambiar el orden de carga.
+    aliases: [menu, kitsvip, kits_vip, kits-vip]
     usage: /tienda [kits]
 permissions:
   odysseia.reload:
