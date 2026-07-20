@@ -1545,6 +1545,14 @@ kits:
         amount: 64
       - material: TOTEM_OF_UNDYING
         amount: 8
+
+polis-baseline:
+  # Only default-only users become Polis; staff and permanent ranks remain unchanged.
+  enabled: true
+  default-group: default
+  base-group: polis
+  reconcile-interval-seconds: 60
+
 # Seguridad de FastMachines: el addon no valida por sí mismo la región de la máquina.
 fast-machines-protection:
   enabled: true

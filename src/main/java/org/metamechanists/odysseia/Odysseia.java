@@ -18,6 +18,7 @@ import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
 import org.metamechanists.odysseia.listeners.ModerationListener;
 import org.metamechanists.odysseia.listeners.PresenceEventListener;
+import org.metamechanists.odysseia.listeners.PolisBaselineListener;
 import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
@@ -45,6 +46,7 @@ public final class Odysseia extends JavaPlugin {
     private int chatGamesCountdown = 0;
     private PurchaseEngine purchaseEngine;
     private StarTelemetryPublisher starTelemetry;
+    private PolisBaselineListener polisBaseline;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -117,6 +119,8 @@ public final class Odysseia extends JavaPlugin {
         sfMasterWatcher.startGuideCleanup();
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(automation, this);
+        this.polisBaseline = new PolisBaselineListener(this);
+        Bukkit.getPluginManager().registerEvents(polisBaseline, this);
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -247,6 +251,15 @@ public final class Odysseia extends JavaPlugin {
         startPapaDeMarDeliveryScheduler();
         startHeartbeatScheduler();
         startRestartScheduler();
+        startPolisBaselineScheduler();
+    }
+
+    private void startPolisBaselineScheduler() {
+        if (polisBaseline == null || !getConfig().getBoolean("polis-baseline.enabled", true)) {
+            return;
+        }
+        long interval = Math.max(30L, getConfig().getLong("polis-baseline.reconcile-interval-seconds", 60));
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, polisBaseline::reconcileOnlinePlayers, 20L, interval * 20L));
     }
 
     private void trackRuntimeTask(BukkitTask task) {

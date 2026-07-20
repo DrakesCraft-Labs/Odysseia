@@ -12,6 +12,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hercules, duration: 30d, hierarchy: "1"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "35000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hercules}}
@@ -28,6 +29,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hestia, duration: 30d, hierarchy: "2"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "75000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hestia}}
@@ -44,6 +46,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hermes, duration: 30d, hierarchy: "3"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "150000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hermes}}
@@ -60,6 +63,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hefesto, duration: 30d, hierarchy: "4"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "250000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hefesto}}
@@ -76,6 +80,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: artemisa, duration: 30d, hierarchy: "5"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "450000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: artemisa}}
@@ -92,6 +97,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: afrodita, duration: 30d, hierarchy: "6"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "700000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: afrodita}}
@@ -108,6 +114,7 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
+      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: zeus, duration: 30d, hierarchy: "7"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "1500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: zeus}}
