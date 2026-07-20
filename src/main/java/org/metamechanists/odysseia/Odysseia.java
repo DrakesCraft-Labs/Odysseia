@@ -3,6 +3,8 @@ package org.metamechanists.odysseia;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +26,10 @@ import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
 import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,6 +37,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 
 public final class Odysseia extends JavaPlugin {
@@ -192,13 +199,40 @@ public final class Odysseia extends JavaPlugin {
 
     /** Persists newly introduced defaults while keeping every configured production value. */
     private void mergeDefaultConfig() {
-        try {
-            getConfig().options().copyDefaults(true);
-            saveConfig();
-        } catch (RuntimeException error) {
+        try (InputStream stream = getResource("config.yml")) {
+            if (stream == null) {
+                throw new IllegalStateException("El JAR no contiene config.yml");
+            }
+            YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(stream, StandardCharsets.UTF_8));
+            if (mergeMissingConfig(getConfig(), defaults)) {
+                saveConfig();
+            }
+        } catch (IOException | RuntimeException error) {
             getLogger().log(Level.SEVERE, "No se pudo ampliar config.yml con los valores por defecto", error);
-            throw error;
+            throw new IllegalStateException("No se pudo migrar config.yml", error);
         }
+    }
+
+    static boolean mergeMissingConfig(ConfigurationSection current, ConfigurationSection defaults) {
+        boolean changed = false;
+        Map<String, Object> currentValues = current.getValues(false);
+
+        for (String key : defaults.getKeys(false)) {
+            Object defaultValue = defaults.get(key);
+            if (defaultValue instanceof ConfigurationSection defaultSection) {
+                ConfigurationSection currentSection = current.getConfigurationSection(key);
+                if (currentSection == null) {
+                    currentSection = current.createSection(key);
+                    changed = true;
+                }
+                changed |= mergeMissingConfig(currentSection, defaultSection);
+            } else if (!currentValues.containsKey(key)) {
+                current.set(key, defaultValue);
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     @Override
