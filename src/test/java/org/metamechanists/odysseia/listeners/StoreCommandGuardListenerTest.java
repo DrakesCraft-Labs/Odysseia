@@ -10,6 +10,7 @@ class StoreCommandGuardListenerTest {
     void blocksLegacyStoreCommandsIncludingNamespacedVariants() {
         assertTrue(StoreCommandGuardListener.isLegacyStoreCommand("/shop"));
         assertTrue(StoreCommandGuardListener.isLegacyStoreCommand("/ultimateshop"));
+        assertTrue(StoreCommandGuardListener.isLegacyStoreCommand("/sfmercado"));
         assertTrue(StoreCommandGuardListener.isLegacyStoreCommand("/odysseia:drakestienda"));
         assertTrue(StoreCommandGuardListener.isLegacyStoreCommand("/tiendamateriales decoracion"));
     }

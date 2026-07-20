@@ -675,11 +675,17 @@ native-menus:
         lore: ["&7Revisa y reclama tus kits mensuales.", "", "&e➤ Clic &7· &f/kitsvip"]
         commands: ["odysseia:open-kits"]
       materiales:
-        slot: 40
+        slot: 39
         material: LIME_CONCRETE
         name: "&a&lMateriales &8· &7Bloques & Decoración"
         lore: ["&7Concreto, vidrio, terracota y más.", "&8Izq: &f8u &8| Der: &f64u", "", "&e➤ Clic &7abrir"]
         commands: ["ultimateshop"]
+      slimefun:
+        slot: 40
+        material: AMETHYST_SHARD
+        name: "&b&lMercado Slimefun &8· &7Dinámico"
+        lore: ["&7Lingotes, polvos y materiales permitidos.", "&8Precios actualizados cada 30 minutos.", "&8Clic: &f1u &8| Shift+Clic: &f64u", "", "&e➤ Clic &7abrir"]
+        commands: ["sfmercado"]
       warps:
         slot: 42
         material: COMPASS

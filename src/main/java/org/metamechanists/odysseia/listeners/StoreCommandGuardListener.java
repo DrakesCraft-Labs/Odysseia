@@ -14,7 +14,7 @@ public final class StoreCommandGuardListener implements Listener {
     private static final Set<String> LEGACY_STORE_COMMANDS = Set.of(
             "drakestienda", "shop", "mercado", "ushop", "tiendaitems",
             "tiendamateriales", "tmateriales", "tiendaprot", "menu",
-            "kitsvip", "kits_vip", "kits-vip", "ultimateshop"
+            "kitsvip", "kits_vip", "kits-vip", "ultimateshop", "sfmercado"
     );
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
