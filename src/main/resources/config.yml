@@ -11,6 +11,12 @@ discord:
   # Nunca hace fallback al canal de actualizaciones.
   webhook-moderation-url: "REPLACE_ME"
 
+# Integraciones opcionales. Odysseia sigue funcionando aunque el plugin externo no exista.
+integrations:
+  diosesdrakes:
+    boss-rewards:
+      enabled: true
+
 # Telemetría operativa hacia Star. No interviene en compras ni almacena datos de jugadores.
 star-monitor:
   enabled: false

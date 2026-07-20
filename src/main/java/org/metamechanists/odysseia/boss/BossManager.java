@@ -40,6 +40,7 @@ import org.metamechanists.odysseia.boss.instances.TifonBoss;
 import org.metamechanists.odysseia.boss.instances.PrometeoBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
+import org.metamechanists.odysseia.integrations.DiosesDrakesBossBridge;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ public class BossManager implements Listener {
     private final Map<UUID, Map<UUID, Double>> bossContributions = new ConcurrentHashMap<>();
     // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final DiosesDrakesBossBridge divineBossBridge;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -71,6 +73,7 @@ public class BossManager implements Listener {
 
     public BossManager(Odysseia plugin) {
         this.plugin = plugin;
+        this.divineBossBridge = new DiosesDrakesBossBridge(plugin);
         startTasks();
     }
 
@@ -414,11 +417,18 @@ public class BossManager implements Listener {
             OdysseyBoss boss = activeBosses.get(entity.getUniqueId());
             Player killer = entity.getKiller();
             Map<UUID, Double> contributions = new HashMap<>(bossContributions.getOrDefault(entity.getUniqueId(), Map.of()));
+            List<Player> participants = findEligibleRecipients(killer, contributions);
+            Player creditedKiller = resolveCreditedKiller(killer, participants, contributions);
             removeBoss(entity.getUniqueId(), killer);
 
             event.getDrops().clear();
             if (boss != null) {
-                distributeCustomDrops(boss.getId(), entity.getLocation(), killer, contributions);
+                distributeCustomDrops(boss.getId(), entity.getLocation(), participants, contributions);
+                divineBossBridge.rewardParticipants(entity.getUniqueId(), boss, participants, contributions);
+                if (creditedKiller != null && creditedKiller != killer) {
+                    broadcastDeath(boss, creditedKiller);
+                    sendDiscordWebhook(boss, false, creditedKiller);
+                }
             }
 
             event.setDroppedExp(Math.max(0, plugin.getConfig().getInt("boss-loot.experience", 750)));
@@ -430,12 +440,11 @@ public class BossManager implements Listener {
 
 
     /** Sortea cada drop una vez y lo entrega al participante ponderado por daño. */
-    private void distributeCustomDrops(String bossId, Location dropLocation, Player killer, Map<UUID, Double> contributions) {
+    private void distributeCustomDrops(String bossId, Location dropLocation, List<Player> recipients, Map<UUID, Double> contributions) {
         if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
             return;
         }
 
-        List<Player> recipients = findEligibleRecipients(killer, contributions);
         if (recipients.isEmpty()) {
             return;
         }
@@ -498,6 +507,16 @@ public class BossManager implements Listener {
             }
         }
         return recipients.get(recipients.size() - 1);
+    }
+
+    /** Uses the highest contributing online player when Minecraft has no direct killer. */
+    private Player resolveCreditedKiller(Player killer, List<Player> participants, Map<UUID, Double> contributions) {
+        if (killer != null && killer.isOnline()) {
+            return killer;
+        }
+        return participants.stream()
+                .max(java.util.Comparator.comparingDouble(player -> contributions.getOrDefault(player.getUniqueId(), 0.0D)))
+                .orElse(null);
     }
 
     @EventHandler
