@@ -32,6 +32,8 @@ public final class KitDeliveryService {
             items.addAll(stacks);
         }
         if (!fits(player.getInventory(), items)) return ActionResult.waiting("Inventario sin espacio suficiente");
+        ActionResult protection = deliverConfiguredProtection(player, section);
+        if (protection.status() != ActionResult.Status.COMPLETED) return protection;
         for (ItemStack item : items) player.getInventory().addItem(item);
         return ActionResult.completed("kit=" + kitName + ";items=" + items.size());
     }
@@ -101,6 +103,27 @@ public final class KitDeliveryService {
             stacks.add(stack);
         }
         return stacks;
+    }
+
+    /** Delivers only a configured ProtectionStones alias; arbitrary kit commands are never executed. */
+    private ActionResult deliverConfiguredProtection(Player player, ConfigurationSection section) {
+        String key = section.getString("protection-alias", "").trim();
+        if (key.isEmpty()) return ActionResult.completed("no protection");
+
+        String alias = plugin.getConfig().getString("protectionstones.aliases." + key, "").trim();
+        int amount = section.getInt("protection-amount", 1);
+        if (!key.matches("[A-Za-z0-9_-]+") || !alias.matches("[A-Za-z0-9_-]+") || amount < 1 || amount > 64) {
+            return ActionResult.manual("Configuración de ProtectionStone inválida para el kit");
+        }
+        if (!player.getName().matches("[A-Za-z0-9_.]{1,16}")) {
+            return ActionResult.manual("Nombre de jugador inválido para entregar la protección");
+        }
+
+        String command = "ps give " + alias + " " + player.getName() + " " + amount;
+        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)) {
+            return ActionResult.retryable("ProtectionStones rechazó la entrega de " + alias);
+        }
+        return ActionResult.completed("protection=" + alias);
     }
 
     private boolean containsTransaction(Player player, String transaction) {

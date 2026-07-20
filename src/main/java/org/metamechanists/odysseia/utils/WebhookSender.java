@@ -7,6 +7,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,9 +20,11 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class WebhookSender {
 
-    private static final HttpClient HTTP = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
+    private static final ThreadPoolExecutor HTTP_EXECUTOR = new ThreadPoolExecutor(
+            1, 2, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(64),
+            new ThreadPoolExecutor.DiscardPolicy());
+    private static final AtomicLong LAST_TRANSPORT_WARNING = new AtomicLong();
+    private static volatile HttpClient httpClient = newHttpClient();
 
     private WebhookSender() {}
 
@@ -83,9 +89,14 @@ public final class WebhookSender {
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bodyUtf8))
                     .build();
 
-            HTTP.sendAsync(req, HttpResponse.BodyHandlers.ofString()).whenComplete((resp, err) -> {
+            httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString()).whenComplete((resp, err) -> {
                 if (err != null) {
-                    plugin.getLogger().log(Level.WARNING, "[Odysseia] Discord webhook HTTP task failed: " + err.getMessage());
+                    if (isClosedSelector(err)) {
+                        // A previous native-thread failure can poison the JDK selector.
+                        // Replace it so future events recover after resources return.
+                        httpClient = newHttpClient();
+                    }
+                    warnTransportOnce(plugin, err);
                 } else {
                     int code = resp != null ? resp.statusCode() : -1;
                     if (code == 429) {
@@ -96,17 +107,7 @@ public final class WebhookSender {
                                 waitMs = (long) (Double.parseDouble(retryAfterHeader) * 1000) + 500;
                             } catch (NumberFormatException ignored) {}
                         }
-                        if (waitMs > 15000L) {
-                            plugin.getLogger().warning("[Odysseia] Discord 429 rate-limit too high (" + waitMs + " ms). Dropping webhook message to prevent thread lock.");
-                        } else {
-                            plugin.getLogger().warning("[Odysseia] Discord 429 rate-limit — retrying in " + waitMs + " ms");
-                            try {
-                                Thread.sleep(waitMs);
-                                sendAsync(plugin, url, jsonBody); // retry once
-                            } catch (InterruptedException ex) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
+                        plugin.getLogger().warning("[Odysseia] Discord 429 rate-limit (" + waitMs + " ms). Se descarta este aviso para no bloquear hilos.");
                     } else if (code < 200 || code >= 300) {
                         plugin.getLogger().warning("[Odysseia] Discord responded with HTTP " + code + " for webhook delivery.");
                     }
@@ -133,10 +134,39 @@ public final class WebhookSender {
                     .header("User-Agent", "Odysseia/1.0.0")
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bodyUtf8))
                     .build();
-            HTTP.send(req, HttpResponse.BodyHandlers.discarding());
+            httpClient.send(req, HttpResponse.BodyHandlers.discarding());
         } catch (Exception e) {
             plugin.getLogger().log(Level.FINE, "[Odysseia] Shutdown webhook not delivered: " + e.getMessage());
         }
+    }
+
+    private static HttpClient newHttpClient() {
+        return HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .executor(HTTP_EXECUTOR)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
+    }
+
+    private static boolean isClosedSelector(Throwable error) {
+        Throwable current = error;
+        while (current != null) {
+            String message = current.getMessage();
+            if (message != null && message.toLowerCase(Locale.ROOT).contains("selector manager closed")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static void warnTransportOnce(JavaPlugin plugin, Throwable error) {
+        long now = System.currentTimeMillis();
+        long previous = LAST_TRANSPORT_WARNING.get();
+        if (now - previous < 60_000L || !LAST_TRANSPORT_WARNING.compareAndSet(previous, now)) {
+            return;
+        }
+        plugin.getLogger().log(Level.WARNING, "[Odysseia] Discord webhook HTTP task failed: " + error.getMessage());
     }
 }
 

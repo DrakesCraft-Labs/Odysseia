@@ -70,7 +70,11 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         claims.record(player.getUniqueId(), kit);
-        player.sendMessage(color("&aKit &f" + kit + " &aentregado. Podrás reclamarlo nuevamente en 30 días."));
+        String cooldown = section.getString("cooldown", "30d");
+        String claimMessage = KitClaimService.parseDuration(cooldown) < 0L
+                ? "&aKit &f" + kit + " &aentregado. Es una reclamación única."
+                : "&aKit &f" + kit + " &aentregado. Podrás reclamarlo nuevamente en &f" + cooldown + "&a.";
+        player.sendMessage(color(claimMessage));
         return true;
     }
 
