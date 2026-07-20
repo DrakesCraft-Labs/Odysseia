@@ -13,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.metamechanists.odysseia.Odysseia;
+import org.metamechanists.odysseia.listeners.StoreCommandGuardListener;
 
 import java.util.Collections;
 import java.util.ArrayList;
@@ -125,7 +126,9 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
             } else if (command.startsWith("odysseia:message:")) {
                 player.sendMessage(color(command.substring("odysseia:message:".length())));
             } else if (!command.isBlank()) {
-                Bukkit.dispatchCommand(player, command.startsWith("/") ? command.substring(1) : command);
+                String dispatchedCommand = command.startsWith("/") ? command.substring(1) : command;
+                StoreCommandGuardListener.runInternal(player,
+                        () -> Bukkit.dispatchCommand(player, dispatchedCommand));
             }
         }
     }

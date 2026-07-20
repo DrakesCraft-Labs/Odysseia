@@ -55,6 +55,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Save default config
         saveDefaultConfig();
+        mergeDefaultConfig();
 
         // Load or create instance ID
         this.instanceId = loadOrCreateInstanceId();
@@ -162,6 +163,7 @@ public final class Odysseia extends JavaPlugin {
     public List<String> reloadRuntime() {
         List<String> errors = new ArrayList<>();
         reloadConfig();
+        mergeDefaultConfig();
         cancelRuntimeTasks();
 
         if (purchaseEngine != null) {
@@ -186,6 +188,17 @@ public final class Odysseia extends JavaPlugin {
         startStarTelemetry();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, schedulers y purchase engine.");
         return errors;
+    }
+
+    /** Persists newly introduced defaults while keeping every configured production value. */
+    private void mergeDefaultConfig() {
+        try {
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+        } catch (RuntimeException error) {
+            getLogger().log(Level.SEVERE, "No se pudo ampliar config.yml con los valores por defecto", error);
+            throw error;
+        }
     }
 
     @Override
