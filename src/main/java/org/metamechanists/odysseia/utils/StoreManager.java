@@ -6,6 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -19,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -249,12 +253,13 @@ public final class StoreManager {
         // 2. Reproducir sonido global si está activado
         if (config.getBoolean("purchase-engine.announcements.global-sound.enabled", true)) {
             String soundName = config.getString("purchase-engine.announcements.global-sound.sound", "UI_TOAST_CHALLENGE_COMPLETE");
-            try {
-                org.bukkit.Sound sound = org.bukkit.Sound.valueOf(soundName.toUpperCase());
+            NamespacedKey soundKey = NamespacedKey.fromString(soundName.toLowerCase(Locale.ROOT));
+            Sound sound = soundKey == null ? null : Registry.SOUNDS.get(soundKey);
+            if (sound != null) {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.playSound(p.getLocation(), sound, 1.0f, 1.0f);
                 }
-            } catch (IllegalArgumentException e) {
+            } else {
                 plugin.getLogger().warning("[Store] Sonido global de tienda inválido: " + soundName);
             }
         }
