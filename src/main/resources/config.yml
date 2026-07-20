@@ -624,7 +624,7 @@ protectionstones:
     protection_177: viphefesto
     protection_481: vipzeus
 
-# Hub configurable que sustituye los comandos de navegación de DeluxeMenus.
+# Hub único de comercio. Las categorías se navegan con clic, sin comandos extra.
 # Cada destino se despacha como jugador; no se elevan permisos desde el menú.
 native-menus:
   shop:
@@ -679,7 +679,7 @@ native-menus:
         material: LIME_CONCRETE
         name: "&a&lMateriales &8· &7Bloques & Decoración"
         lore: ["&7Concreto, vidrio, terracota y más.", "&8Izq: &f8u &8| Der: &f64u", "", "&e➤ Clic &7abrir"]
-        commands: ["tiendamateriales"]
+        commands: ["ultimateshop"]
       warps:
         slot: 42
         material: COMPASS
