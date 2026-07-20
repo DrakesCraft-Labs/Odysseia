@@ -788,9 +788,9 @@ kits:
   hercules:
     cooldown: "30d"
     permission: "drakes.kit.hercules"
+    protection-alias: hercules
+    protection-amount: 1
     money: 35000
-    commands:
-      - "ps give viphercules {player} 1"
     vanilla-items:
       - material: DIAMOND_HELMET
         amount: 1
@@ -897,9 +897,9 @@ kits:
   hestia:
     cooldown: "30d"
     permission: "drakes.kit.hestia"
+    protection-alias: hestia
+    protection-amount: 1
     money: 75000
-    commands:
-      - "ps give viphestia {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
@@ -1004,9 +1004,9 @@ kits:
   hermes:
     cooldown: "30d"
     permission: "drakes.kit.hermes"
+    protection-alias: hermes
+    protection-amount: 1
     money: 150000
-    commands:
-      - "ps give viphermes {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
@@ -1111,9 +1111,9 @@ kits:
   hefesto:
     cooldown: "30d"
     permission: "drakes.kit.hefesto"
+    protection-alias: hefesto
+    protection-amount: 1
     money: 250000
-    commands:
-      - "ps give viphefesto {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
@@ -1218,9 +1218,9 @@ kits:
   artemisa:
     cooldown: "30d"
     permission: "drakes.kit.artemisa"
+    protection-alias: artemisa
+    protection-amount: 1
     money: 450000
-    commands:
-      - "ps give vipartemisa {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
@@ -1336,9 +1336,9 @@ kits:
   afrodita:
     cooldown: "30d"
     permission: "drakes.kit.afrodita"
+    protection-alias: afrodita
+    protection-amount: 1
     money: 700000
-    commands:
-      - "ps give vipafrodita {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
@@ -1443,9 +1443,9 @@ kits:
   zeus:
     cooldown: "30d"
     permission: "drakes.kit.zeus"
+    protection-alias: zeus
+    protection-amount: 1
     money: 1500000
-    commands:
-      - "ps give vipzeus {player} 1"
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
