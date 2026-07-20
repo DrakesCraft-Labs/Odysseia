@@ -37,7 +37,17 @@ public final class StarTelemetryPublisher {
         publish("PURCHASE_STATE", engine, telemetry.productId(), telemetry.state().name());
     }
 
+    /** Reports only aggregate boss activity; player identities and rewards stay inside Minecraft. */
+    public void publishBossDefeat(PurchaseEngine engine, String bossId, int participantCount) {
+        publish("BOSS_DEFEATED", engine, null, null, bossId, Math.max(0, participantCount));
+    }
+
     private void publish(String type, PurchaseEngine engine, String productId, String purchaseState) {
+        publish(type, engine, productId, purchaseState, null, null);
+    }
+
+    private void publish(String type, PurchaseEngine engine, String productId, String purchaseState,
+                         String bossId, Integer participantCount) {
         if (!plugin.getConfig().getBoolean("star-monitor.enabled", false)) return;
         String endpoint = plugin.getConfig().getString("star-monitor.endpoint", "");
         String secret = resolveSecret();
@@ -45,7 +55,7 @@ public final class StarTelemetryPublisher {
             plugin.getLogger().warning("[Star] Telemetría habilitada sin endpoint o secreto válido.");
             return;
         }
-        String payload = payload(type, engine, productId, purchaseState);
+        String payload = payload(type, engine, productId, purchaseState, bossId, participantCount);
         long timestamp = System.currentTimeMillis();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> send(endpoint, secret, timestamp, payload));
     }
@@ -74,7 +84,8 @@ public final class StarTelemetryPublisher {
         }
     }
 
-    private String payload(String type, PurchaseEngine engine, String productId, String purchaseState) {
+    private String payload(String type, PurchaseEngine engine, String productId, String purchaseState,
+                           String bossId, Integer participantCount) {
         StringBuilder json = new StringBuilder("{")
                 .append("\"eventId\":\"").append(UUID.randomUUID()).append("\",")
                 .append("\"type\":\"").append(type).append("\",")
@@ -84,6 +95,8 @@ public final class StarTelemetryPublisher {
                 .append("\"sentAt\":").append(System.currentTimeMillis());
         if (productId != null) json.append(",\"productId\":\"").append(escape(productId)).append("\"");
         if (purchaseState != null) json.append(",\"purchaseState\":\"").append(escape(purchaseState)).append("\"");
+        if (bossId != null) json.append(",\"bossId\":\"").append(escape(bossId)).append("\"");
+        if (participantCount != null) json.append(",\"bossParticipants\":").append(participantCount);
         return json.append('}').toString();
     }
 

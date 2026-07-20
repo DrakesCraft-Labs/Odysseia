@@ -150,6 +150,14 @@ public final class Odysseia extends JavaPlugin {
         return purchaseEngine == null ? 0 : purchaseEngine.catalogProductCount();
     }
 
+    public PurchaseEngine getPurchaseEngine() {
+        return purchaseEngine;
+    }
+
+    public StarTelemetryPublisher getStarTelemetry() {
+        return starTelemetry;
+    }
+
     public List<String> reloadRuntime() {
         List<String> errors = new ArrayList<>();
         reloadConfig();

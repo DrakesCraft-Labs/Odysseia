@@ -425,6 +425,9 @@ public class BossManager implements Listener {
             if (boss != null) {
                 distributeCustomDrops(boss.getId(), entity.getLocation(), participants, contributions);
                 divineBossBridge.rewardParticipants(entity.getUniqueId(), boss, participants, contributions);
+                if (plugin.getStarTelemetry() != null && plugin.getPurchaseEngine() != null) {
+                    plugin.getStarTelemetry().publishBossDefeat(plugin.getPurchaseEngine(), boss.getId(), participants.size());
+                }
                 if (creditedKiller != null && creditedKiller != killer) {
                     broadcastDeath(boss, creditedKiller);
                     sendDiscordWebhook(boss, false, creditedKiller);
