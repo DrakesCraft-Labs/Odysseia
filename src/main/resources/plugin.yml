@@ -86,6 +86,9 @@ permissions:
   odysseia.kit.inicial:
     description: Permite reclamar una vez el kit inicial de DrakesCraft.
     default: true
+  odysseia.store.command-bypass:
+    description: Permite usar comandos internos de tienda para soporte y pruebas.
+    default: op
   odysseia.fastmachines.bypass:
     description: Permite usar Fast Machines dentro de protecciones ajenas.
     default: op
