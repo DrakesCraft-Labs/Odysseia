@@ -72,7 +72,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Register commands
         this.vanishCommand = new VanishCommand(this);
-        getCommand("vanish").setExecutor(vanishCommand);
+        getCommand("vani").setExecutor(vanishCommand);
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
         ReloadCommand reloadCommand = new ReloadCommand(this);
@@ -122,6 +122,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
+        vanishCommand.startReminder();
         Bukkit.getPluginManager().registerEvents(bossManager, this);
         Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);

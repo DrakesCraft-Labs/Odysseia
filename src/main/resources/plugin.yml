@@ -23,10 +23,10 @@ commands:
     description: Invoca al Leñador Loco de manera silenciosa.
     permission: staff.lumberjack.spawn
     usage: /lenador [nivel]
-  vanish:
+  vani:
     description: Desvanecimiento creativo para moderadores.
     permission: odysseia.vanish
-    aliases: [v]
+    aliases: [odysseiavanish]
   boss:
     description: Comando administrativo para gestionar jefes míticos.
     permission: odysseia.boss.admin

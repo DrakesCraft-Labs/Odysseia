@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.Odysseia;
 
@@ -31,6 +32,7 @@ public final class VanishCommand implements CommandExecutor, Listener {
 
     private final Odysseia plugin;
     private final Set<UUID> vanishedPlayers = ConcurrentHashMap.newKeySet();
+    private BukkitTask reminderTask;
 
     public VanishCommand(Odysseia plugin) {
         this.plugin = plugin;
@@ -38,6 +40,18 @@ public final class VanishCommand implements CommandExecutor, Listener {
 
     public boolean isVanished(Player player) {
         return vanishedPlayers.contains(player.getUniqueId());
+    }
+
+    /** Keeps an unobtrusive personal reminder visible while staff are hidden. */
+    public void startReminder() {
+        reminderTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            for (UUID uuid : vanishedPlayers) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null && player.isOnline()) {
+                    player.sendActionBar(vanishReminder());
+                }
+            }
+        }, 20L, 60L);
     }
 
     @Override
@@ -80,6 +94,7 @@ public final class VanishCommand implements CommandExecutor, Listener {
             }
 
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &2activado&a. Quedaste oculto para jugadores sin permiso de staff."));
+            player.sendActionBar(vanishReminder());
         } else {
             vanishedPlayers.remove(player.getUniqueId());
             player.removeMetadata(VANISH_METADATA, plugin);
@@ -93,6 +108,7 @@ public final class VanishCommand implements CommandExecutor, Listener {
             player.setSleepingIgnored(false);
             player.setCanPickupItems(true);
             player.setCollidable(true);
+            player.sendActionBar(net.kyori.adventure.text.Component.empty());
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aVanish &7desactivado&a. Volviste a ser visible."));
         }
 
@@ -102,6 +118,10 @@ public final class VanishCommand implements CommandExecutor, Listener {
     }
 
     public void revealAll() {
+        if (reminderTask != null) {
+            reminderTask.cancel();
+            reminderTask = null;
+        }
         for (UUID uuid : vanishedPlayers) {
             Player player = Bukkit.getPlayer(uuid);
             if (player == null || !player.isOnline()) {
@@ -118,6 +138,11 @@ public final class VanishCommand implements CommandExecutor, Listener {
             plugin.getLogger().warning("No se pudieron reproducir las particulas de vanish para "
                     + player.getName() + ": " + ex.getMessage());
         }
+    }
+
+    private net.kyori.adventure.text.Component vanishReminder() {
+        return net.kyori.adventure.text.Component.text("ESTAS EN VANISH ACTIVADO", net.kyori.adventure.text.format.NamedTextColor.GREEN)
+                .append(net.kyori.adventure.text.Component.text(" | Sigues oculto", net.kyori.adventure.text.format.NamedTextColor.GRAY));
     }
 
     private void spawnVanishEffects(Player player) {
