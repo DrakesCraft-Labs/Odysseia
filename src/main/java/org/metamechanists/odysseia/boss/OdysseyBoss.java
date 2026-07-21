@@ -35,6 +35,8 @@ public abstract class OdysseyBoss {
     // Sistema de fases y diálogos común a todos los jefes.
     protected int currentPhase = 1;
     private long lastDialogue = 0L;
+    private boolean rebirthConsumed;
+    private long rebirthInvulnerableUntil;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -246,6 +248,62 @@ public abstract class OdysseyBoss {
         var loc = entity.getLocation().add(0, 1, 0);
         loc.getWorld().spawnParticle(currentPhase >= 3 ? Particle.SOUL_FIRE_FLAME : Particle.FLAME,
                 loc, currentPhase * 2, 0.5, 0.8, 0.5, 0.01);
+    }
+
+    /** Gives selected bosses one cinematic second wind while keeping the final death authoritative. */
+    public boolean beginConfiguredRebirth() {
+        if (rebirthConsumed || entity == null || entity.isDead() || !isConfiguredForRebirth()) {
+            return false;
+        }
+
+        rebirthConsumed = true;
+        long seconds = Math.clamp(Odysseia.getInstance().getConfig().getLong(
+                "boss-balance.rebirth.invulnerability-seconds", 5L), 2L, 15L);
+        rebirthInvulnerableUntil = System.currentTimeMillis() + (seconds * 1000L);
+        double healthPercent = Math.clamp(Odysseia.getInstance().getConfig().getDouble(
+                "boss-balance.rebirth.health-percent", 0.55D), 0.20D, 0.80D);
+        entity.setHealth(maxHealth * healthPercent);
+        entity.setGlowing(true);
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20 * 60 * 10, 4, false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 10, 3, false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, (int) (seconds * 20L), 10, false, false, false));
+
+        Location location = entity.getLocation().add(0, 1, 0);
+        location.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, location, 180, 1.4, 2.2, 1.4, 0.12);
+        location.getWorld().spawnParticle(Particle.END_ROD, location, 100, 1.0, 1.8, 1.0, 0.08);
+        location.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, location, 80, 1.2, 2.0, 1.2, 0.06);
+        location.getWorld().playSound(location, Sound.ENTITY_WARDEN_EMERGE, 1.8f, 0.7f);
+        announceRebirth(seconds);
+        Bukkit.getScheduler().runTaskLater(Odysseia.getInstance(), () -> {
+            if (entity.isValid() && !entity.isDead()) {
+                entity.setGlowing(false);
+            }
+        }, seconds * 20L);
+        return true;
+    }
+
+    /** Event listeners use this instead of Bukkit invulnerability so every damage source is covered. */
+    public boolean isRebirthInvulnerable() {
+        return System.currentTimeMillis() < rebirthInvulnerableUntil;
+    }
+
+    private boolean isConfiguredForRebirth() {
+        return Odysseia.getInstance().getConfig().getStringList("boss-balance.rebirth.bosses").stream()
+                .anyMatch(configuredId -> configuredId.equalsIgnoreCase(id));
+    }
+
+    private void announceRebirth(long seconds) {
+        String message = ChatColor.translateAlternateColorCodes('&',
+                "&5&l✦ &d" + shortName() + " &frenace. &bInvulnerable por " + seconds + "s.");
+        double radius = Math.clamp(Odysseia.getInstance().getConfig().getDouble(
+                "boss-balance.dialogue-radius", 48.0D), 16.0D, 128.0D);
+        double radiusSquared = radius * radius;
+        for (Player player : entity.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(entity.getLocation()) <= radiusSquared) {
+                player.sendMessage(message);
+                player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1.2f, 0.7f);
+            }
+        }
     }
 
     public abstract void executeSkillsRotation();

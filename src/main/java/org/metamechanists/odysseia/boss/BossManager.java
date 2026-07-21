@@ -449,6 +449,11 @@ public class BossManager implements Listener {
                 // El golpe letal se consume: no hay muerte ni recompensas hasta la derrota real.
                 event.setCancelled(true);
                 prometeo.updateBossBar();
+            } else if (event.getFinalDamage() >= boss.getEntity().getHealth()
+                    && boss.beginConfiguredRebirth()) {
+                // Renacer común: conserva la misma entidad y evita cualquier recompensa prematura.
+                event.setCancelled(true);
+                boss.updateBossBar();
             } else if (boss instanceof DiosCorruptoBoss dios && dios.isShieldActive()) {
                 event.setCancelled(true);
                 dios.getEntity().getWorld().playSound(dios.getEntity().getLocation(), Sound.ENTITY_SHULKER_BULLET_HIT, 1.0f, 1.5f);
@@ -457,6 +462,10 @@ public class BossManager implements Listener {
                 // Fénix: invulnerable durante la resurrección
                 event.setCancelled(true);
                 prometeo.getEntity().getWorld().spawnParticle(org.bukkit.Particle.FLAME, prometeo.getEntity().getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.05);
+            } else if (boss.isRebirthInvulnerable()) {
+                event.setCancelled(true);
+                boss.getEntity().getWorld().spawnParticle(org.bukkit.Particle.END_ROD,
+                        boss.getEntity().getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.05);
             } else {
                 // Debounced bossbar update — sólo una tarea pendiente por boss a la vez
                 UUID bid = boss.getEntity().getUniqueId();

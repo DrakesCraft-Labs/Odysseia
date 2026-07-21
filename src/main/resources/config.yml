@@ -464,6 +464,11 @@ boss-balance:
     minimum-distance: 12.0
     flank-distance: 4.0
     cooldown-seconds: 7
+  rebirth:
+    # Renacen una vez al recibir daño letal. Prometeo conserva además su fénix propio.
+    bosses: [thor, ares, hades, zeus, odin, kratos, heimdall, hidra, cerbero, tifon]
+    health-percent: 0.55
+    invulnerability-seconds: 5
 
 #  Purchase Engine: anuncios de compras confirmadas
 # ─────────────────────────────────────────────
