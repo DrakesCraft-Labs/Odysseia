@@ -32,7 +32,9 @@ public class DivineShieldSkill implements BossSkill {
                 
                 // Draw a golden particle sphere or rings
                 currentLoc.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, currentLoc, 20, 0.6, 0.8, 0.6, 0.02);
-                currentLoc.getWorld().spawnParticle(Particle.INSTANT_EFFECT, currentLoc, 10, 0.5, 0.8, 0.5, 0.05);
+                // INSTANT_EFFECT maps to a data-bearing spell particle on 1.21.11.
+                // END_ROD keeps the shield readable without requiring particle data.
+                currentLoc.getWorld().spawnParticle(Particle.END_ROD, currentLoc, 10, 0.5, 0.8, 0.5, 0.05);
             }, delay);
         }
 
