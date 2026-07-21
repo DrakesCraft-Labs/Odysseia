@@ -2,6 +2,7 @@ package org.metamechanists.odysseia.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,8 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.Odysseia;
 
 /**
- * Ejecuta una cuenta regresiva segura con guardado completo de datos:
- * Jugadores, Slimefun, Mundos, Banco, DiosesDrakes y respaldos IRP antes del restart.
+ * Ejecuta una secuencia dinámica y amigable de reinicio seguro:
+ * Anuncios personalizados ("Jack anda aplicando mejoras", "Volvemos en ~3 minutos"),
+ * guardado completo de datos (NBT, IRP, Slimefun, sBank, mundos) y kick informativo.
  */
 public final class SafeRestartCommand implements CommandExecutor {
 
@@ -35,63 +37,79 @@ public final class SafeRestartCommand implements CommandExecutor {
         }
 
         running = true;
-        sender.sendMessage(ChatColor.GREEN + "⚡ Iniciando secuencia de reinicio seguro (30s)...");
+        
+        // Mensaje inicial global dinámico y amigable
+        Bukkit.broadcastMessage("");
+        Bukkit.broadcastMessage(ChatColor.RED + "🔨 " + ChatColor.GOLD + ChatColor.BOLD + "[DRAKESCRAFT MANTENIMIENTO]");
+        Bukkit.broadcastMessage(ChatColor.YELLOW + "Jack anda aplicando mejoras y mantenimiento en el servidor.");
+        Bukkit.broadcastMessage(ChatColor.GRAY + "Lamentamos los inconvenientes. El servidor volverá a estar disponible en aprox. " + ChatColor.AQUA + "3 minutos" + ChatColor.GRAY + ".");
+        Bukkit.broadcastMessage(ChatColor.RED + "⚠ Reinicio seguro programado en " + ChatColor.WHITE + "30 segundos" + ChatColor.RED + ".");
+        Bukkit.broadcastMessage("");
 
-        // Anuncios de cuenta regresiva de 30 segundos
+        // Tiempos de cuenta regresiva
         int[] countdownTimes = {30, 20, 15, 10, 5, 4, 3, 2, 1};
         for (int seconds : countdownTimes) {
             long delayTicks = (30L - seconds) * 20L;
             Bukkit.getScheduler().runTaskLater(plugin, () -> announce(seconds), delayTicks);
         }
 
-        // Ejecutar la secuencia de guardado final a los 30 segundos
+        // Secuencia de guardado y restart a los 30s
         Bukkit.getScheduler().runTaskLater(plugin, this::executeFullSaveAndRestart, 30L * 20L);
         return true;
     }
 
     private void announce(int seconds) {
-        Bukkit.broadcastMessage(ChatColor.RED + "⚠ Reinicio seguro en " + ChatColor.WHITE + seconds + " segundos" + ChatColor.RED + ".");
+        String msg = ChatColor.RED + "⚠ Reinicio en " + ChatColor.WHITE + seconds + "s" + ChatColor.RED + ". " + ChatColor.GRAY + "Guardando progreso... (Volvemos en ~3 min)";
+        Bukkit.broadcastMessage(msg);
+
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendTitle(ChatColor.DARK_RED + "⚠ REINICIO SEGURO", ChatColor.YELLOW + "Guardado e inicio en " + seconds + "s", 3, 20, 3);
+            player.sendTitle(ChatColor.DARK_RED + "⚠ REINICIO DE SERVIDOR", ChatColor.YELLOW + "En " + ChatColor.WHITE + seconds + "s" + ChatColor.YELLOW + " • Volvemos en ~3 min", 3, 20, 3);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, seconds <= 5 ? 1.8f : 1.2f);
         }
     }
 
     private void executeFullSaveAndRestart() {
-        Bukkit.broadcastMessage(ChatColor.GOLD + "💾 Guardando todos los datos, mundos e inventarios del servidor...");
+        Bukkit.broadcastMessage("");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "💾 " + ChatColor.BOLD + "GUARDANDO DATOS:" + ChatColor.YELLOW + " Inventarios, Slimefun, Bancos y Mundos...");
+        Bukkit.broadcastMessage("");
 
-        // 1. Guardar datos de jugadores online (NBT e inventarios)
+        // 1. Guardar inventarios e NBT de jugadores
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
                 player.saveData();
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "irp forcebackup " + player.getName());
             } catch (Exception ex) {
-                plugin.getLogger().warning("No se pudo guardar datos/IRP para " + player.getName() + ": " + ex.getMessage());
+                plugin.getLogger().warning("No se pudo respaldar jugador " + player.getName() + ": " + ex.getMessage());
             }
         }
         Bukkit.savePlayers();
 
-        // 2. Guardar Slimefun, Banco y plugins dependientes
+        // 2. Guardar Slimefun, Bancos y plugins
         executeConsoleCommand("sf save");
         executeConsoleCommand("slimefun save");
         executeConsoleCommand("sbank save");
 
-        // 3. Guardado completo de chunks y mundos Bukkit/Paper
+        // 3. Flush de mundos y chunks
         executeConsoleCommand("save-all flush");
 
-        // 4. Desconectar a los jugadores de forma segura con mensaje informativo
+        // 4. Desconexión amistosa e informativa
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            String kickScreen = ChatColor.RED + "" + ChatColor.BOLD + "✦ DRAKESCRAFT - MANTENIMIENTO SEGURO ✦\n\n"
+                    + ChatColor.YELLOW + "🔨 Jack está aplicando mejoras y actualizaciones en el servidor.\n"
+                    + ChatColor.GREEN + "✔ Tus inventarios, construcciones y progreso han sido guardados.\n\n"
+                    + ChatColor.AQUA + "⏱ El servidor volverá a estar disponible en aproximadamente 3 minutos.\n"
+                    + ChatColor.GRAY + "¡Lamentamos los inconvenientes y agradecemos tu paciencia!";
+
             for (Player player : Bukkit.getOnlinePlayers()) {
-                player.kickPlayer(ChatColor.RED + "⚠ Servidor reiniciándose de forma segura.\n"
-                        + ChatColor.YELLOW + "Tus datos han sido guardados correctamente.\n"
-                        + ChatColor.GREEN + "¡Vuelve a conectarte en 1 minuto!");
+                player.kickPlayer(kickScreen);
             }
 
-            // 5. Segundo flush y ejecución de comando restart
+            // 5. Enviar restart final a la consola
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 executeConsoleCommand("save-all flush");
-                plugin.getLogger().info("⚡ Guardado final completado. Enviando señal /restart...");
+                plugin.getLogger().info("⚡ Guardado completado. Enviando comando restart...");
                 executeConsoleCommand("restart");
-            }, 40L); // 2 segundos para vaciar I/O de red y disco
+            }, 40L);
 
         }, 20L);
     }
@@ -100,7 +118,6 @@ public final class SafeRestartCommand implements CommandExecutor {
         try {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         } catch (Exception ignored) {
-            // Si algún comando no existe en la consola, continuar sin romper la secuencia
         }
     }
 }
