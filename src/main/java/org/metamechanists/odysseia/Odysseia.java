@@ -25,6 +25,7 @@ import org.metamechanists.odysseia.utils.OdysseiaPlaceholderExpansion;
 import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
 import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
+import org.metamechanists.odysseia.events.BloodMoonManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,7 @@ public final class Odysseia extends JavaPlugin {
     private PurchaseEngine purchaseEngine;
     private StarTelemetryPublisher starTelemetry;
     private PolisBaselineListener polisBaseline;
+    private BloodMoonManager bloodMoonManager;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -115,10 +117,13 @@ public final class Odysseia extends JavaPlugin {
         getCommand("boss").setTabCompleter(bossCmd);
         getCommand("spawnallbosses").setExecutor(bossCmd);
         getCommand("spawnallbosses").setTabCompleter(bossCmd);
+        this.bloodMoonManager = new BloodMoonManager(this);
+        getCommand("bloodmoon").setExecutor(new org.metamechanists.odysseia.commands.BloodMoonCommand(bloodMoonManager));
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         Bukkit.getPluginManager().registerEvents(bossManager, this);
+        Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
@@ -132,6 +137,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(automation, this);
         this.polisBaseline = new PolisBaselineListener(this);
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
+        bloodMoonManager.start();
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -251,6 +257,9 @@ public final class Odysseia extends JavaPlugin {
         // Shutdown BossManager
         if (bossManager != null) {
             bossManager.shutdown();
+        }
+        if (bloodMoonManager != null) {
+            bloodMoonManager.shutdown();
         }
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");

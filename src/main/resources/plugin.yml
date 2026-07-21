@@ -35,6 +35,10 @@ commands:
     description: Invoca todos los jefes míticos alrededor del administrador.
     permission: odysseia.boss.admin
     usage: /spawnallbosses
+  bloodmoon:
+    description: Gestiona la Luna de Sangre de Odysseia.
+    permission: odysseia.bloodmoon.admin
+    usage: /bloodmoon <start|stop|status>
   odysseia:
     description: Comando principal de administración de Odysseia.
     permission: odysseia.reload
@@ -95,4 +99,7 @@ permissions:
     default: op
   odysseia.fastmachines.bypass:
     description: Permite usar Fast Machines dentro de protecciones ajenas.
+    default: op
+  odysseia.bloodmoon.admin:
+    description: Permite iniciar o detener la Luna de Sangre.
     default: op

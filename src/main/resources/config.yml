@@ -501,6 +501,50 @@ natural-spawn:
   bosses: []
 
 # ─────────────────────────────────────────────
+#  Luna de Sangre: hordas controladas de Odysseia
+# ─────────────────────────────────────────────
+# Los zombies de este evento sólo rompen los bloques listados y JAMÁS dentro de
+# ProtectionStones. Si la API de protecciones falla, la rotura queda desactivada.
+blood-moon:
+  enabled: true
+  chance: 0.18
+  worlds: [world]
+  waves: 3
+  wave-interval-seconds: 45
+  zombies-per-player: 5
+  max-zombies-per-wave: 18
+  final-boss:
+    enabled: true
+    id: dios_corrupto
+  zombie-block-breaking:
+    enabled: true
+    # Sin cofres, máquinas, estaciones ni bloques de Slimefun: sólo terreno blando.
+    allowed-materials:
+      - DIRT
+      - COARSE_DIRT
+      - ROOTED_DIRT
+      - GRASS_BLOCK
+      - SAND
+      - RED_SAND
+      - GRAVEL
+      - CLAY
+      - SNOW
+      - OAK_LEAVES
+      - SPRUCE_LEAVES
+      - BIRCH_LEAVES
+      - JUNGLE_LEAVES
+      - ACACIA_LEAVES
+      - DARK_OAK_LEAVES
+      - MANGROVE_LEAVES
+      - CHERRY_LEAVES
+      - AZALEA_LEAVES
+      - FLOWERING_AZALEA_LEAVES
+  slimefun-loot:
+    # Un sólo drop aleatorio por zombie, con probabilidad baja.
+    chance: 0.10
+    item-ids: [IRON_DUST, COPPER_DUST, GOLD_DUST, ZINC_DUST, ALUMINUM_DUST]
+
+# ─────────────────────────────────────────────
 #  Recompensas de jefes míticos
 # ─────────────────────────────────────────────
 # Cada drop se sortea una vez por muerte y se entrega a un participante
