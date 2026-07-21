@@ -160,7 +160,8 @@ public class HorrorNightScheduler implements Listener {
         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 1, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 120, 1, false, false));
 
-        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation().add(0, 2, 0), 80, 2, 2, 2, 0.1);
+        // DRAGON_BREATH en 1.21.11 requiere Float como extra data (velocidad de la partícula)
+        player.getWorld().spawnParticle(Particle.DRAGON_BREATH, player.getLocation().add(0, 2, 0), 80, 2.0, 2.0, 2.0, 0.1, 0.1f);
 
         if (isFinalStrike) {
             // En el 3er impacto de la noche, si se desea, invoca al Wither Storm cerca
