@@ -64,6 +64,21 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
         }
         Inventory inventory = Bukkit.createInventory(null, size(root.getInt("rows", 6)), color(root.getString("title", "&8Tienda")));
         Map<Integer, String> actions = new LinkedHashMap<>();
+
+        ItemStack filler = createGlassPane(Material.BLACK_STAINED_GLASS_PANE, " ");
+        ItemStack border = createGlassPane(Material.GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack accent = createGlassPane(Material.ORANGE_STAINED_GLASS_PANE, " ");
+
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if (i == 0 || i == 8 || i == 45 || i == 53) {
+                inventory.setItem(i, accent);
+            } else if (i < 9 || i >= 45 || i % 9 == 0 || i % 9 == 8) {
+                inventory.setItem(i, border);
+            } else {
+                inventory.setItem(i, filler);
+            }
+        }
+
         ConfigurationSection entries = root.getConfigurationSection("entries");
         if (entries != null) {
             for (String id : entries.getKeys(false)) {
@@ -150,7 +165,17 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
         return item;
     }
 
-    private int size(int rows) {
+    private ItemStack createGlassPane(Material material, String name) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private static int size(int rows) {
         return Math.max(1, Math.min(6, rows)) * 9;
     }
 

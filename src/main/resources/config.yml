@@ -697,69 +697,104 @@ protectionstones:
 native-menus:
   shop:
     enabled: true
-    title: "&6⚡ &lTienda &8· &fDrakesCraft &6⚡"
+    title: "&6⚡ &lMercado &8· &fDrakesCraft &6⚡"
     rows: 6
     entries:
+      # --- FILA 1: MERCADO Y COMERCIO ---
       protecciones:
-        slot: 11
+        slot: 10
         material: LODESTONE
-        name: "&f&lPolis &8· &7ProtectionStones"
-        lore: ["&7Compra bloques de protección.", "&8Desde Khora hasta Olimpo.", "", "&e➤ Clic &7abrir tienda de protecciones"]
+        name: "&f&lPolis &8· &7Protecciones"
+        lore:
+          - "&7Bloques de claim para tu territorio."
+          - "&8Desde Khora hasta Olimpo."
+          - ""
+          - "&e➤ Clic para abrir &f/tiendaprot"
         commands: ["tiendaprot"]
-      encantos:
-        slot: 13
-        material: ENCHANTING_TABLE
-        name: "&d&lEncantamientos"
-        lore: ["&7Menú de &fExcellentEnchants&7.", "&8Encantamientos únicos del servidor.", "", "&e➤ Clic &7abrir"]
-        commands: ["eenchants"]
       subastas:
-        slot: 15
+        slot: 12
         material: SUNFLOWER
-        name: "&e&lSubastas"
-        lore: ["&7Mercado de jugadores &fCrazyAuctions&7.", "&8Precio mínimo: &f₯500", "", "&e➤ Clic &7abrir (/ca)"]
+        name: "&e&lSubastas de Jugadores"
+        lore:
+          - "&7Mercado global de la comunidad."
+          - "&8Vende y compra ítems a otros usuarios."
+          - ""
+          - "&e➤ Clic para abrir &f/ca"
         commands: ["ca"]
-      trabajos:
-        slot: 22
-        material: GOLDEN_PICKAXE
-        name: "&6&lTrabajos"
-        lore: ["&7Gana dinero con &fJobs Reborn&7.", "&8Hasta 3 trabajos simultáneos.", "", "&e➤ Clic &7· &f/jobs browse"]
-        commands: ["jobs browse"]
-      cofres:
-        slot: 29
-        material: CHEST
-        name: "&6&lCofre &8· &7ChestShop"
-        lore: ["&7Tienda física: cartel en cofre de madera.", "&8Formato: &f[ChestShop] &8· cantidad · precio · ítem"]
-        messages: ["&6DrakesCraft &8· &7Las tiendas de cofre están en el &fspawn&7. Sigue los hologramas &b/dh list"]
-      habilidades:
-        slot: 31
-        material: EXPERIENCE_BOTTLE
-        name: "&a&lHabilidades &8· &7AuraSkills"
-        lore: ["&7Sube de nivel en combate, minería y magia.", "", "&e➤ Clic &7· &f/skills"]
-        commands: ["skills"]
-      kits:
-        slot: 38
-        material: DIAMOND_CHESTPLATE
-        name: "&b&lKits VIP &8· &7Rangos de suscripción"
-        lore: ["&7Revisa y reclama tus kits mensuales.", "", "&e➤ Clic &7· &f/kitsvip"]
-        commands: ["odysseia:open-kits"]
-      materiales:
-        slot: 39
-        material: LIME_CONCRETE
-        name: "&a&lMateriales &8· &7Bloques & Decoración"
-        lore: ["&7Concreto, vidrio, terracota y más.", "&8Izq: &f8u &8| Der: &f64u", "", "&e➤ Clic &7abrir"]
-        commands: ["ultimateshop"]
       slimefun:
-        slot: 40
+        slot: 14
         material: AMETHYST_SHARD
-        name: "&b&lMercado Slimefun &8· &7Dinámico"
-        lore: ["&7Lingotes, polvos y materiales permitidos.", "&8Precios actualizados cada 30 minutos.", "&8Clic: &f1u &8| Shift+Clic: &f64u", "", "&e➤ Clic &7abrir"]
+        name: "&b&lMercado Slimefun"
+        lore:
+          - "&7Mercado de precios dinámicos."
+          - "&8Lingotes, polvos y recursos."
+          - ""
+          - "&e➤ Clic para abrir &f/sfmercado"
         commands: ["sfmercado"]
       warps:
-        slot: 42
+        slot: 16
         material: COMPASS
-        name: "&b&lWarps de Jugadores"
-        lore: ["&7Explora construcciones y tiendas de la comunidad.", "&8Crea tu propio warp con &f/pw create&8.", "", "&e➤ Clic &7· &f/pw"]
+        name: "&a&lPlayer Warps"
+        lore:
+          - "&7Explora tiendas y bases públicas."
+          - "&8Crea tu propio punto de venta."
+          - ""
+          - "&e➤ Clic para abrir &f/pw"
         commands: ["pw"]
+
+      # --- FILA 2: PROGRESO Y RECURSOS ---
+      materiales:
+        slot: 28
+        material: LIME_CONCRETE
+        name: "&a&lBloques y Construcción"
+        lore:
+          - "&7Materiales decorativos y construcción."
+          - "&8Concreto, terracota, cristal y madera."
+          - ""
+          - "&e➤ Clic para abrir &f/ultimateshop"
+        commands: ["ultimateshop"]
+      trabajos:
+        slot: 30
+        material: GOLDEN_PICKAXE
+        name: "&6&lTrabajos &8· &7Jobs"
+        lore:
+          - "&7Gana Dragmas trabajando en el servidor."
+          - "&8Elige hasta 3 empleos simultáneos."
+          - ""
+          - "&e➤ Clic para abrir &f/jobs browse"
+        commands: ["jobs browse"]
+      habilidades:
+        slot: 32
+        material: EXPERIENCE_BOTTLE
+        name: "&c&lHabilidades &8· &7AuraSkills"
+        lore:
+          - "&7Sube estadísticas de minería y combate."
+          - "&8Aumenta tu vida y fuerza pasiva."
+          - ""
+          - "&e➤ Clic para abrir &f/skills"
+        commands: ["skills"]
+      encantos:
+        slot: 34
+        material: ENCHANTING_TABLE
+        name: "&d&lEncantamientos Únicos"
+        lore:
+          - "&7Encantamientos especiales del servidor."
+          - "&8Desbloquea habilidades en tu equipo."
+          - ""
+          - "&e➤ Clic para abrir &f/eenchants"
+        commands: ["eenchants"]
+
+      # --- FILA 3: SUSCRIPCIONES Y VIP ---
+      kits:
+        slot: 49
+        material: DIAMOND_CHESTPLATE
+        name: "&b&lKits & Rangos VIP"
+        lore:
+          - "&7Revisa y reclama tus kits periódicos."
+          - "&8Beneficios de rangos y donantes."
+          - ""
+          - "&e➤ Clic para abrir &f/kitsvip"
+        commands: ["odysseia:open-kits"]
   kits:
     title: "&8DrakesCraft &7| &6Kits VIP"
     rows: 3
