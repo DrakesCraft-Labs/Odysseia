@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 450" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e102d" />
+    </linearGradient>
+
+    <!-- Title Gradient -->
+    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8d66d" />
+      <stop offset="33%" stop-color="#a855f7" />
+      <stop offset="66%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+
+    <!-- Card Glow Gradients -->
+    <linearGradient id="dragon-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(168, 85, 247, 0.25)" />
+      <stop offset="100%" stop-color="rgba(168, 85, 247, 0.05)" />
+    </linearGradient>
+    <linearGradient id="boss-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(239, 68, 68, 0.25)" />
+      <stop offset="100%" stop-color="rgba(239, 68, 68, 0.05)" />
+    </linearGradient>
+    <linearGradient id="terror-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(56, 189, 248, 0.25)" />
+      <stop offset="100%" stop-color="rgba(56, 189, 248, 0.05)" />
+    </linearGradient>
+    <linearGradient id="staff-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(74, 222, 128, 0.25)" />
+      <stop offset="100%" stop-color="rgba(74, 222, 128, 0.05)" />
+    </linearGradient>
+
+    <!-- Glow Filters -->
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+
+    <!-- Styles & Animations -->
+    <style>
+      @keyframes pulseGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.6)); }
+        50% { filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.8)); }
+      }
+      @keyframes floatCard {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes particleFloat {
+        0% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+        50% { opacity: 0.8; }
+        100% { transform: translateY(-40px) rotate(180deg); opacity: 0.1; }
+      }
+      @keyframes shimmerBorder {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 1000; }
+      }
+
+      .animated-title {
+        font-family: 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-weight: 900;
+        letter-spacing: 4px;
+        animation: pulseGlow 4s ease-in-out infinite;
+      }
+      .subtitle-text {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        font-weight: 500;
+        letter-spacing: 2px;
+      }
+      .card-box {
+        transition: all 0.4s ease;
+      }
+      .card-1 { animation: floatCard 5s ease-in-out infinite; }
+      .card-2 { animation: floatCard 5.5s ease-in-out infinite 0.5s; }
+      .card-3 { animation: floatCard 6s ease-in-out infinite 1s; }
+      .card-4 { animation: floatCard 6.5s ease-in-out infinite 1.5s; }
+
+      .particle-1 { animation: particleFloat 7s ease-in-out infinite; }
+      .particle-2 { animation: particleFloat 9s ease-in-out infinite 2s; }
+      .particle-3 { animation: particleFloat 8s ease-in-out infinite 4s; }
+
+      .card-border {
+        stroke-dasharray: 12 8;
+        animation: shimmerBorder 30s linear infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1200" height="450" rx="24" fill="url(#bg-grad)" />
+  
+  <!-- Outer Animated Border -->
+  <rect x="8" y="8" width="1184" height="434" rx="18" fill="none" stroke="url(#title-grad)" stroke-width="2.5" opacity="0.7" class="card-border" />
+
+  <!-- Ambient Glow Particles -->
+  <circle cx="150" cy="100" r="180" fill="#a855f7" opacity="0.12" filter="url(#neon-glow)" class="particle-1" />
+  <circle cx="1050" cy="350" r="220" fill="#38bdf8" opacity="0.1" filter="url(#neon-glow)" class="particle-2" />
+  <circle cx="600" cy="220" r="160" fill="#f8d66d" opacity="0.08" filter="url(#neon-glow)" class="particle-3" />
+
+  <!-- Main Banner Header -->
+  <g text-anchor="middle" filter="url(#soft-shadow)">
+    <!-- Version Tag -->
+    <rect x="525" y="32" width="150" height="28" rx="14" fill="rgba(168, 85, 247, 0.2)" stroke="#a855f7" stroke-width="1.2" />
+    <text x="600" y="51" fill="#e9d5ff" font-family="'Inter', sans-serif" font-size="13" font-weight="700" letter-spacing="1">ODYSSEIA v1.1.0</text>
+
+    <!-- Main Title -->
+    <text x="600" y="115" fill="url(#title-grad)" font-size="56" class="animated-title">ODYSSEIA</text>
+    
+    <!-- Subtitle -->
+    <text x="600" y="152" fill="#94a3b8" font-size="16" class="subtitle-text">EL NÚCLEO MÍTICO &amp; TERROR NOCTURNO PARA DRAKESCRAFT</text>
+  </g>
+
+  <!-- Feature Cards Grid (4 Columns Horizontal Layout) -->
+
+  <!-- CARD 1: MONTURAS DRACÓNICAS -->
+  <g transform="translate(45, 190)" class="card-1" filter="url(#soft-shadow)">
+    <rect width="255" height="210" rx="16" fill="url(#dragon-card)" stroke="#a855f7" stroke-width="1.5" opacity="0.9" />
+    <circle cx="127" cy="45" r="26" fill="rgba(168, 85, 247, 0.25)" />
+    <text x="127" y="53" text-anchor="middle" font-size="26">🐉</text>
+    <text x="127" y="100" text-anchor="middle" fill="#f3e8ff" font-family="'Montserrat', sans-serif" font-size="17" font-weight="800">Monturas Dracónicas</text>
+    <text x="127" y="128" text-anchor="middle" fill="#cbd5e1" font-family="'Inter', sans-serif" font-size="12">Vuelo WASD en 3D libre</text>
+    <text x="127" y="148" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Velocidad 1x - 20x (/dragon speed)</text>
+    <text x="127" y="168" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Alientos: Rayos, Árboles, Fuego</text>
+    <rect x="67" y="180" width="120" height="20" rx="10" fill="rgba(168, 85, 247, 0.3)" />
+    <text x="127" y="194" text-anchor="middle" fill="#c084fc" font-family="'Inter', sans-serif" font-size="10" font-weight="700">JACKSTAR &amp; KIKA</text>
+  </g>
+
+  <!-- CARD 2: WITHER STORM & BOSSES -->
+  <g transform="translate(325, 190)" class="card-2" filter="url(#soft-shadow)">
+    <rect width="255" height="210" rx="16" fill="url(#boss-card)" stroke="#ef4444" stroke-width="1.5" opacity="0.9" />
+    <circle cx="127" cy="45" r="26" fill="rgba(239, 68, 68, 0.25)" />
+    <text x="127" y="53" text-anchor="middle" font-size="26">🌩️</text>
+    <text x="127" y="100" text-anchor="middle" fill="#ffe4e6" font-family="'Montserrat', sans-serif" font-size="17" font-weight="800">Bosses Míticos</text>
+    <text x="127" y="128" text-anchor="middle" fill="#cbd5e1" font-family="'Inter', sans-serif" font-size="12">Wither Storm Story Mode</text>
+    <text x="127" y="148" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Dragón Ancestral (3500 HP)</text>
+    <text x="127" y="168" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Botín Protegido por UUID</text>
+    <rect x="67" y="180" width="120" height="20" rx="10" fill="rgba(239, 68, 68, 0.3)" />
+    <text x="127" y="194" text-anchor="middle" fill="#f87171" font-family="'Inter', sans-serif" font-size="10" font-weight="700">0% DAÑO DE CLAIMS</text>
+  </g>
+
+  <!-- CARD 3: TERROR NOCTURNO & NIEBLA -->
+  <g transform="translate(605, 190)" class="card-3" filter="url(#soft-shadow)">
+    <rect width="255" height="210" rx="16" fill="url(#terror-card)" stroke="#38bdf8" stroke-width="1.5" opacity="0.9" />
+    <circle cx="127" cy="45" r="26" fill="rgba(56, 189, 248, 0.25)" />
+    <text x="127" y="53" text-anchor="middle" font-size="26">👁️</text>
+    <text x="127" y="100" text-anchor="middle" fill="#e0f2fe" font-family="'Montserrat', sans-serif" font-size="17" font-weight="800">Terror &amp; Niebla</text>
+    <text x="127" y="128" text-anchor="middle" fill="#cbd5e1" font-family="'Inter', sans-serif" font-size="12">Scheduler 1 vez al día Minecraft</text>
+    <text x="127" y="148" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Screamers, Espectros, Susurros</text>
+    <text x="127" y="168" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Comando Niebla (/niebla on/off)</text>
+    <rect x="67" y="180" width="120" height="20" rx="10" fill="rgba(56, 189, 248, 0.3)" />
+    <text x="127" y="194" text-anchor="middle" fill="#38bdf8" font-family="'Inter', sans-serif" font-size="10" font-weight="700">ATMÓSFERA ULTRA 1-2 CHUNKS</text>
+  </g>
+
+  <!-- CARD 4: STAFF SUITE & INTEGRACIÓN -->
+  <g transform="translate(885, 190)" class="card-4" filter="url(#soft-shadow)">
+    <rect width="255" height="210" rx="16" fill="url(#staff-card)" stroke="#4ade80" stroke-width="1.5" opacity="0.9" />
+    <circle cx="127" cy="45" r="26" fill="rgba(74, 222, 128, 0.25)" />
+    <text x="127" y="53" text-anchor="middle" font-size="26">🛡️</text>
+    <text x="127" y="100" text-anchor="middle" fill="#dcfce7" font-family="'Montserrat', sans-serif" font-size="17" font-weight="800">Staff &amp; Economía</text>
+    <text x="127" y="128" text-anchor="middle" fill="#cbd5e1" font-family="'Inter', sans-serif" font-size="12">Suite /troll (FakeOP, Anvil, Screamer)</text>
+    <text x="127" y="148" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Comando /vani inteligente</text>
+    <text x="127" y="168" text-anchor="middle" fill="#94a3b8" font-family="'Inter', sans-serif" font-size="11">Slimefun &amp; ProtectionStones</text>
+    <rect x="67" y="180" width="120" height="20" rx="10" fill="rgba(74, 222, 128, 0.3)" />
+    <text x="127" y="194" text-anchor="middle" fill="#4ade80" font-family="'Inter', sans-serif" font-size="10" font-weight="700">STAFF &amp; PROTECTION</text>
+  </g>
+</svg>

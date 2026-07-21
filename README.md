@@ -1,7 +1,7 @@
 # Odysseia v1.1.0
 
 <p align="center">
-  <img src="odysseia_architecture_horizontal.svg" width="100%" alt="Odysseia Architecture Diagram" />
+  <img src="odysseia_banner.svg" width="100%" alt="Odysseia Animated Banner" />
 </p>
 
 <p align="center">
