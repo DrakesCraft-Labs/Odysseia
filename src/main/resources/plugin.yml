@@ -30,7 +30,11 @@ commands:
   boss:
     description: Comando administrativo para gestionar jefes míticos.
     permission: odysseia.boss.admin
-    usage: /boss spawn <circe|polifemo>
+    usage: /boss <spawn|spawnall|give> ...
+  spawnallbosses:
+    description: Invoca todos los jefes míticos alrededor del administrador.
+    permission: odysseia.boss.admin
+    usage: /spawnallbosses
   odysseia:
     description: Comando principal de administración de Odysseia.
     permission: odysseia.reload

@@ -2,6 +2,8 @@ package org.metamechanists.odysseia.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,13 +34,21 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (command.getName().equalsIgnoreCase("spawnallbosses")) {
+            return spawnAllBosses(sender);
+        }
+
         if (args.length == 0) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lUSO: &e/boss <spawn|give> ..."));
+                    "&c&lUSO: &e/boss <spawn|spawnall|give> ..."));
             return true;
         }
 
         String sub = args[0].toLowerCase();
+
+        if (sub.equals("spawnall")) {
+            return spawnAllBosses(sender);
+        }
 
         // ── SUBCOMANDO: SPAWN ──
         if (sub.equalsIgnoreCase("spawn")) {
@@ -106,7 +116,39 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         }
 
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&c&lUSO: &e/boss <spawn|give> ..."));
+                "&c&lUSO: &e/boss <spawn|spawnall|give> ..."));
+        return true;
+    }
+
+    /** Invoca todos los jefes en un anillo para evitar entidades superpuestas. */
+    private boolean spawnAllBosses(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&cEste comando solo puede ser ejecutado por jugadores."));
+            return true;
+        }
+
+        List<String> bosses = getBossList();
+        World world = player.getWorld();
+        Location origin = player.getLocation();
+        int spawned = 0;
+        double radius = 48.0;
+
+        for (int index = 0; index < bosses.size(); index++) {
+            double angle = Math.PI * 2.0 * index / bosses.size();
+            int x = origin.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
+            int z = origin.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
+            int y = world.getHighestBlockYAt(x, z);
+            Location spawnLocation = new Location(world, x + 0.5, y + 1.0, z + 0.5);
+
+            if (bossManager.spawnBoss(bosses.get(index), spawnLocation) != null) {
+                spawned++;
+            }
+        }
+
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6&l[MÍTICO] &eInvocados &f" + spawned + "&e de &f" + bosses.size()
+                        + "&e jefes en un anillo de &f48 bloques&e."));
         return true;
     }
 
@@ -133,6 +175,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             String input = args[0].toLowerCase();
             if ("spawn".startsWith(input)) completions.add("spawn");
+            if ("spawnall".startsWith(input)) completions.add("spawnall");
             if ("give".startsWith(input)) completions.add("give");
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("spawn")) {

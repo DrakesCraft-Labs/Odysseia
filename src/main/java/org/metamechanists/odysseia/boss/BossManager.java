@@ -463,7 +463,7 @@ public class BossManager implements Listener {
 
             event.getDrops().clear();
             if (boss != null) {
-                distributeCustomDrops(boss.getId(), entity.getLocation(), participants, contributions);
+                distributeCustomDrops(boss.getId(), entity.getLocation(), creditedKiller, participants, contributions);
                 divineBossBridge.rewardParticipants(entity.getUniqueId(), boss, participants, contributions);
                 if (plugin.getStarTelemetry() != null && plugin.getPurchaseEngine() != null) {
                     plugin.getStarTelemetry().publishBossDefeat(plugin.getPurchaseEngine(), boss.getId(), participants.size());
@@ -482,13 +482,14 @@ public class BossManager implements Listener {
     }
 
 
-    /** Sortea cada drop una vez y lo entrega al participante ponderado por daño. */
-    private void distributeCustomDrops(String bossId, Location dropLocation, List<Player> recipients, Map<UUID, Double> contributions) {
+    /** Sortea cada drop una vez y lo entrega al vencedor acreditado. */
+    private void distributeCustomDrops(String bossId, Location dropLocation, Player creditedKiller,
+                                       List<Player> recipients, Map<UUID, Double> contributions) {
         if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
             return;
         }
 
-        if (recipients.isEmpty()) {
+        if (creditedKiller == null && recipients.isEmpty()) {
             return;
         }
 
@@ -510,7 +511,9 @@ public class BossManager implements Listener {
                 continue;
             }
 
-            Player recipient = pickRecipient(recipients, contributions);
+            Player recipient = creditedKiller != null && creditedKiller.isOnline()
+                    ? creditedKiller
+                    : pickRecipient(recipients, contributions);
             Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
             if (!overflow.isEmpty() && dropLocation.getWorld() != null) {
                 overflow.values().forEach(leftover -> dropLocation.getWorld().dropItemNaturally(dropLocation, leftover));

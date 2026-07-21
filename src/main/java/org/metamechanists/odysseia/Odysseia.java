@@ -113,6 +113,8 @@ public final class Odysseia extends JavaPlugin {
         BossCommand bossCmd = new BossCommand(this, bossManager);
         getCommand("boss").setExecutor(bossCmd);
         getCommand("boss").setTabCompleter(bossCmd);
+        getCommand("spawnallbosses").setExecutor(bossCmd);
+        getCommand("spawnallbosses").setTabCompleter(bossCmd);
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);

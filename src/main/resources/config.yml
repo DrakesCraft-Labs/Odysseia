@@ -503,62 +503,62 @@ boss-loot:
   bosses:
     circe:
       drops:
-        circe_staff: 0.12
+        circe_staff: 0.50
     polifemo:
       drops:
-        polifemo_club: 0.12
+        polifemo_club: 0.50
     dios_corrupto:
       drops:
-        corrupted_god_blade: 0.10
+        corrupted_god_blade: 0.50
     thor:
       drops:
-        mjolnir: 0.10
+        mjolnir: 0.50
     ares:
       drops:
-        ares_blade: 0.10
-        ares_shield: 0.08
+        ares_blade: 0.50
+        ares_shield: 0.50
     hades:
       drops:
-        hades_scythe: 0.10
+        hades_scythe: 0.50
     poseidon:
       drops:
-        poseidon_trident: 0.10
+        poseidon_trident: 0.50
     zeus:
       drops:
-        zeus_mace: 0.10
+        zeus_mace: 0.50
     loki:
       drops:
-        loki_dagger: 0.10
-        loki_scepter: 0.08
+        loki_dagger: 0.50
+        loki_scepter: 0.50
     odin:
       drops:
-        odin_spear: 0.10
-        odin_helmet: 0.08
+        odin_spear: 0.50
+        odin_helmet: 0.50
     kratos:
       drops:
-        kratos_blade: 0.10
-        leviathan_axe: 0.08
+        kratos_blade: 0.50
+        leviathan_axe: 0.50
     heimdall:
       drops:
-        gjallarhorn: 0.10
-        bifrost_wings: 0.07
+        gjallarhorn: 0.50
+        bifrost_wings: 0.50
     hidra:
       drops:
-        hydra_fang: 0.10
-        hydra_scale: 0.08
+        hydra_fang: 0.50
+        hydra_scale: 0.50
     cerbero:
       drops:
-        cerbero_hide: 0.10
+        cerbero_hide: 0.50
     artemisa:
       drops:
-        artemis_bow: 0.10
+        artemis_bow: 0.50
     tifon:
       drops:
-        tifon_claw: 0.10
-        tifon_chest: 0.08
+        tifon_claw: 0.50
+        tifon_chest: 0.50
     prometeo:
       drops:
-        prometeo_flame: 0.10
+        prometeo_flame: 0.50
 
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)
