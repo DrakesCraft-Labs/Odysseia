@@ -40,7 +40,12 @@ public abstract class OdysseyBoss {
         this.entity = entity;
         this.id = id;
         this.displayName = displayName;
-        this.maxHealth = maxHealth;
+        double healthMultiplier = Math.clamp(
+            Odysseia.getInstance().getConfig().getDouble("boss-balance.health-multiplier", 1.60D),
+            1.0D,
+            10.0D
+        );
+        this.maxHealth = maxHealth * healthMultiplier;
 
         // Configure entity properties
         entity.setCustomName(displayName);
@@ -165,7 +170,7 @@ public abstract class OdysseyBoss {
         return n.replaceAll("[^\\p{L} ]", "").trim();
     }
 
-    /** Hace que el jefe "hable" en el chat, con cooldown global para no spamear. */
+    /** Hace que el jefe hable únicamente a los jugadores que participan cerca. */
     public void speak(String frase) {
         long now = System.currentTimeMillis();
         if (now - lastDialogue < 18000) {
@@ -173,8 +178,15 @@ public abstract class OdysseyBoss {
         }
 
         lastDialogue = now;
-        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&6&l✦&8] &e" + shortName() + "&7: &f\"" + frase + "\""));
+        String message = ChatColor.translateAlternateColorCodes('&',
+            "&8[&6&l✦&8] &e" + shortName() + "&7: &f\"" + frase + "\"");
+        double radius = Math.clamp(Odysseia.getInstance().getConfig().getDouble("boss-balance.dialogue-radius", 48.0D), 16.0D, 128.0D);
+        double radiusSquared = radius * radius;
+        for (Player player : entity.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(entity.getLocation()) <= radiusSquared) {
+                player.sendMessage(message);
+            }
+        }
     }
 
     /** Detecta cruces de 66% y 33% de vida y dispara la fase correspondiente. */
@@ -203,10 +215,10 @@ public abstract class OdysseyBoss {
             return;
         }
 
-        int amplifier = phase - 1; // fase 2 -> II, fase 3 -> III
+        int amplifier = phase; // fase 2 -> III, fase 3 -> IV
         int duration = 20 * 60 * 20; // 20 minutos, suficiente para el combate sin usar Integer.MAX_VALUE.
         entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, amplifier, false, false, false));
-        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, Math.max(0, amplifier - 1), false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, amplifier, false, false, false));
         if (phase == 3) {
             entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 4, false, false, false));
         }

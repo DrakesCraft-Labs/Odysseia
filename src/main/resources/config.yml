@@ -446,6 +446,18 @@ store:
 # Invoca jefes aleatorios cerca de jugadores cada cierto tiempo.
 # NO genera estructuras: solo aparece la entidad en la superficie.
 # ─────────────────────────────────────────────
+boss-balance:
+  # Escala común para todos los jefes, incluidos ataques especiales y proyectiles.
+  health-multiplier: 1.60
+  damage-multiplier: 1.50
+  movement-speed-multiplier: 1.30
+  knockback-resistance: 0.85
+  follow-range: 64.0
+  # 60 ticks = 3 segundos. Las skills internas mantienen sus propios cooldowns.
+  skill-interval-ticks: 60
+  announcement-radius: 64.0
+  dialogue-radius: 48.0
+
 #  Purchase Engine: anuncios de compras confirmadas
 # ─────────────────────────────────────────────
 # Este endpoint es privado: el valor real vive solo en la configuración desplegada.

@@ -97,7 +97,8 @@ public class BossManager implements Listener {
             }
         }, 20L, 20L);
 
-        // Execute skills every 5 seconds (100 ticks)
+        // Los jefes presionan al grupo con rotaciones frecuentes sin ejecutar IA cada tick.
+        long skillPeriod = Math.clamp(plugin.getConfig().getLong("boss-balance.skill-interval-ticks", 60L), 40L, 200L);
         skillTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             for (OdysseyBoss boss : activeBosses.values()) {
                 try {
@@ -107,7 +108,7 @@ public class BossManager implements Listener {
                     plugin.getLogger().fine("[Bosses] Detalle de la habilidad fallida: " + ex);
                 }
             }
-        }, 100L, 100L);
+        }, skillPeriod, skillPeriod);
 
         startNaturalSpawnTask();
     }
@@ -237,10 +238,32 @@ public class BossManager implements Listener {
             return null;
         }
 
+        applyCombatBalance(boss);
         activeBosses.put(entity.getUniqueId(), boss);
         broadcastSpawn(boss);
         sendDiscordWebhook(boss, true, null);
         return boss;
+    }
+
+    /** Aplica estadísticas comunes después de que cada clase haya definido su entidad base. */
+    private void applyCombatBalance(OdysseyBoss boss) {
+        LivingEntity entity = boss.getEntity();
+        double speedMultiplier = Math.clamp(plugin.getConfig().getDouble("boss-balance.movement-speed-multiplier", 1.30D), 1.0D, 3.0D);
+        double knockbackResistance = Math.clamp(plugin.getConfig().getDouble("boss-balance.knockback-resistance", 0.85D), 0.0D, 1.0D);
+        double followRange = Math.clamp(plugin.getConfig().getDouble("boss-balance.follow-range", 64.0D), 16.0D, 128.0D);
+
+        var movement = entity.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
+        if (movement != null) {
+            movement.setBaseValue(movement.getBaseValue() * speedMultiplier);
+        }
+        var knockback = entity.getAttribute(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE);
+        if (knockback != null) {
+            knockback.setBaseValue(Math.max(knockback.getBaseValue(), knockbackResistance));
+        }
+        var range = entity.getAttribute(org.bukkit.attribute.Attribute.FOLLOW_RANGE);
+        if (range != null) {
+            range.setBaseValue(Math.max(range.getBaseValue(), followRange));
+        }
     }
 
     public void removeBoss(UUID uuid, Player killer) {
@@ -248,11 +271,11 @@ public class BossManager implements Listener {
         naturalBosses.remove(uuid);
         bossContributions.remove(uuid);
         if (boss != null) {
-            boss.cleanup();
             if (killer != null) {
                 broadcastDeath(boss, killer);
                 sendDiscordWebhook(boss, false, killer);
             }
+            boss.cleanup();
         }
     }
 
@@ -285,31 +308,34 @@ public class BossManager implements Listener {
         if (now - lastAnnounce > 10000L) { // Cooldown de 10 segundos por tipo de jefe
             lastSpawnAnnouncements.put(bossName, now);
             String msg = ChatColor.translateAlternateColorCodes('&',
-                    "&c&l[MÍTICO] &f¡El jefe ancestral " + bossName + " &fha aparecido en el mundo!");
-            Bukkit.broadcastMessage(msg);
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.5f);
-            }
+                    "&c&l[MÍTICO] &f¡El jefe ancestral " + bossName + " &fha aparecido cerca!");
+            notifyNearby(boss.getEntity().getLocation(), msg, 1.0f);
         } else {
-            // Notificación local (radio de 40 bloques) para evitar el spam global pero mantener informados a los cercanos
             String msg = ChatColor.translateAlternateColorCodes('&',
                     "&c&l[MÍTICO] &f¡El jefe ancestral " + bossName + " &fha aparecido cerca!");
-            Location loc = boss.getEntity().getLocation();
-            if (loc.getWorld() != null) {
-                for (Player p : loc.getWorld().getPlayers()) {
-                    if (p.getLocation().distanceSquared(loc) < 1600.0) { // 40 bloques de radio (40*40 = 1600)
-                        p.sendMessage(msg);
-                        p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.8f, 0.5f);
-                    }
-                }
-            }
+            notifyNearby(boss.getEntity().getLocation(), msg, 0.8f);
         }
     }
 
     private void broadcastDeath(OdysseyBoss boss, Player killer) {
         String msg = ChatColor.translateAlternateColorCodes('&',
                 "&c&l[MÍTICO] &f¡El jefe " + boss.getDisplayName() + " &fha sido derrotado por &a" + killer.getName() + "&f!");
-        Bukkit.broadcastMessage(msg);
+        notifyNearby(boss.getEntity().getLocation(), msg, 0.7f);
+    }
+
+    /** Los eventos de combate no deben contaminar el chat global. */
+    private void notifyNearby(Location location, String message, float volume) {
+        if (location.getWorld() == null) {
+            return;
+        }
+        double radius = Math.clamp(plugin.getConfig().getDouble("boss-balance.announcement-radius", 64.0D), 16.0D, 128.0D);
+        double radiusSquared = radius * radius;
+        for (Player player : location.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(location) <= radiusSquared) {
+                player.sendMessage(message);
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, volume, 0.5f);
+            }
+        }
     }
 
     private void sendDiscordWebhook(OdysseyBoss boss, boolean isSpawn, Player killer) {
@@ -396,18 +422,26 @@ public class BossManager implements Listener {
             return;
         }
 
-        // Caso B: Jefe Mítico ataca a un Jugador VIP -> Recibe -20% de daño
-        if (victim instanceof Player player && player.hasPermission("odysseia.boss.vip_advantage")) {
-            org.bukkit.entity.Entity directDamager = damager;
-            if (damager instanceof org.bukkit.entity.Projectile proj && proj.getShooter() instanceof org.bukkit.entity.Entity shooter) {
-                directDamager = shooter;
-            }
-            if (activeBosses.containsKey(directDamager.getUniqueId())) {
+        // Caso B: el multiplicador cubre golpes físicos, proyectiles y habilidades con entity.damage(..., boss).
+        OdysseyBoss attackingBoss = resolveBossDamager(damager);
+        if (victim instanceof Player player && attackingBoss != null) {
+            double damageMultiplier = Math.clamp(plugin.getConfig().getDouble("boss-balance.damage-multiplier", 1.50D), 1.0D, 5.0D);
+            event.setDamage(event.getDamage() * damageMultiplier);
+            if (player.hasPermission("odysseia.boss.vip_advantage")) {
                 event.setDamage(event.getDamage() * 0.80);
                 // Efecto de escudo dorado al recibir el golpe del boss
                 player.getWorld().spawnParticle(org.bukkit.Particle.ELECTRIC_SPARK, player.getLocation().add(0, 1, 0), 8, 0.2, 0.3, 0.2, 0.05);
             }
         }
+    }
+
+    private OdysseyBoss resolveBossDamager(org.bukkit.entity.Entity damager) {
+        org.bukkit.entity.Entity source = damager;
+        if (damager instanceof org.bukkit.entity.Projectile projectile
+                && projectile.getShooter() instanceof org.bukkit.entity.Entity shooter) {
+            source = shooter;
+        }
+        return activeBosses.get(source.getUniqueId());
     }
 
     @EventHandler
