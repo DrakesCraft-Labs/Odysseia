@@ -1,327 +1,89 @@
-# Odysseia
+# Odysseia v1.1.0
 
 <p align="center">
-  <img src="logo.svg" width="240" alt="Odysseia Logo" />
+  <img src="odysseia_architecture_horizontal.svg" width="100%" alt="Odysseia Architecture Diagram" />
 </p>
 
 <p align="center">
-  <strong>Núcleo mítico de DrakesCraft para Purpur/Paper 1.21.x</strong><br>
-  Bosses, reliquias, tienda, presencia, moderación visual y utilidades premium en un solo plugin.
+  <strong>Núcleo Mítico, Terror Nocturno y Gestión de Producción para Purpur/Paper 1.21.x</strong><br>
+  Bosses Míticos, Monturas Dracónicas, Niebla de Terror, Trolleos de Staff, Economía Slimefun y Protección de Claims.
 </p>
 
 ---
 
-## Qué es hoy Odysseia
+## 🌟 Visión del Proyecto
 
-**Odysseia** ya no es solamente un reemplazo elegante de un puñado de scripts viejos.
-Hoy es el plugin central que sostiene buena parte de la identidad de **DrakesCraft**:
+**Odysseia** es la suite central que sostiene la experiencia de supervivencia, fantasía y administración en **DrakesCraft**. Unifica en una plataforma de alto rendimiento:
 
-- jefes míticos multi-fase con drops legendarios
-- reliquias activas con habilidades reales en combate
-- integración de tienda con delivery automático y anuncios sincronizados
-- presencia y logs hacia Discord por webhook
-- vanish y moderación con estética propia
-- ciclos visuales de dueños y placeholders
-- utilidades survival personalizadas como `Papa de Mar`, `Leñador Loco` y `ChatGames`
-- contención de abuso de ítems `SFMaster`
-
-El objetivo del proyecto es simple: que el servidor se sienta como una experiencia propia, no como una suma de plugins desconectados.
+- ⚔️ **Panteón Mítico (17+ Bosses)**: Bosses multi-fase con habilidades complejas, drops legendarios protegidos con *Paper Item Ownership Lock* (`setOwner`) y recompensas de **5,000 XP**.
+- 🐉 **Monturas Dracónicas Personalizadas**: Pilotaje 3D fluido de dragones para el Owner (**JackStar6677**) y el Dragón Esmeralda Cute para **Kika**.
+- 🌫️ **Niebla Ultra Densa de Terror & Screamers**: Niebla de renderizado ultra densa (~1-2 bloques de visión) activable vía `/niebla` y eventos nocturnos aleatorios (**1 vez por día de Minecraft**).
+- 🛡️ **Protección de Terreno Total**: Cancelación de eventos `EntityChangeBlockEvent` para garantizar **0% de daño a construcciones o parcelas en ProtectionStones**.
+- 🎭 **Suite de Trolleos Inofensivos para Staff (`/troll`)**: Herramientas divertidas y seguras para moderadores (Fake OP, Fake Crash, Screamers, Anvil caída, Creeper siseante).
+- 👻 **Vanish Avanzado (`/vani`)**: Modo invisible con control individual o por objetivos, ráfagas de partículas de portal y sonidos estéticos.
+- 🛒 **Integración de Comercio & Slimefun**: Conexión con `DrakesSlimeMarket`, filtrado de ítems "Heavy/Endgame" y soporte de Dusts/Ingots.
 
 ---
 
-## Stack objetivo
+## 🏛️ Arquitectura Horizontal
 
-- **Servidor:** Purpur / Paper 1.21.x
-- **Java:** 21
-- **Build:** Maven
-- **Dependencias suaves:** PlaceholderAPI, LuckPerms, Essentials
-
----
-
-## Módulos principales
-
-### 1. Panteón de bosses
-
-Odysseia implementa un sistema completo de bosses míticos con barra, fases, skills, drops y anuncios:
-
-- Thor
-- Ares
-- Hades
-- Poseidón
-- Zeus
-- Loki
-- Odin
-- Kratos
-- Heimdall
-- Hidra
-- Cerbero
-- Artemisa
-- Tifón
-- Prometeo
-
-Además mantiene compatibilidad con jefes previos como `Circe`, `Polifemo` y `Dios Corrupto`.
-
-#### Capacidades del sistema
-
-- spawn manual por comando
-- invocadores únicos por boss
-- anuncios globales con anti-spam
-- soporte de spawn natural configurable
-- bossbars y seguimiento de jugadores cercanos
-- skills especializadas por entidad
-- drops manuales garantizados al morir
-- webhooks de spawn y kill a Discord
-
-### 2. Reliquias y armas míticas
-
-Los drops de bosses no son decorativos. `BossItemListener` implementa comportamiento real para reliquias como:
-
-- `Mjolnir`
-- `Filo de Ares`
-- `Escudo Espartano`
-- `Guadaña de Hades`
-- `Tridente de Poseidón`
-- `Maza de Zeus`
-- `Daga de Loki`
-- `Cetro de Loki`
-- `Lanza de Odin`
-- `Casco de Odin`
-- `Espadas del Caos`
-- `Hacha Leviatán`
-- `Gjallarhorn`
-- `Alas del Bifröst`
-- `Colmillo de la Hidra`
-- `Escama de la Hidra`
-- `Piel de Cerbero`
-- `Arco Lunar de Artemisa`
-- `Garra de Tifón`
-- `Coraza del Padre Monstruo`
-- `Llama Eterna de Prometeo`
-
-Incluye efectos como:
-
-- rayos y tormentas
-- tsunamis y knockback en área
-- veneno y wither
-- invisibilidad parcial de Loki
-- escarcha y retorno rúnico del Hacha Leviatán
-- sincronización dual de las Espadas del Caos
-- tirones, fuego, cadenas visuales y partículas
-
-### 3. Tienda y entregas
-
-Odysseia incluye un `StoreManager` para delivery automático contra backend externo:
-
-- consulta compras pendientes
-- ejecuta comandos de entrega en hilo principal
-- confirma transacciones al backend
-- dispara anuncio global y webhook de felicitación
-- soporta comando manual `/odysseiaannounce <nick> <producto...>` para Tebex
-
-Esto permite que el flujo de tienda quede unificado entre:
-
-- backend web
-- plugin del servidor
-- chat in-game
-- sonido global
-- Discord
-
-### 4. Presencia y eventos Discord
-
-`PresenceEventListener` y utilidades relacionadas cubren:
-
-- startup y shutdown del servidor
-- join y quit
-- muertes
-- avances reales del jugador
-- heartbeat periódico
-
-Todo con rate-limit y entrega asíncrona endurecida.
-
-### 5. Moderación visual y vanish
-
-Odysseia mantiene una capa de moderación estilizada:
-
-- `/vanish` con partículas y sonido
-- ocultación de staff invisible
-- silenciamiento visual en entradas y salidas
-- eventos de kick / ban reportados a Discord
-- efectos visuales de castigo in-world
-
-### 6. Utilidades survival personalizadas
-
-El plugin también concentra piezas históricas del servidor:
-
-- `Papa de Mar`
-- `Leñador Loco`
-- `ChatGames` programado
-- ciclo de prefijos del owner
-- placeholders para integración visual
-- efectos de armadura por rango
-
-### 7. Control de abuso SFMaster
-
-`SFMasterWatcherListener` marca ítems generados por cheat y bloquea abuso en:
-
-- drop al suelo
-- venta por subasta
-- movimiento y colocación de ciertos ítems
-- persistencia y rastreo de bloques ligados al modo SFMaster
-
-No es un sistema cosmético: es una barrera para evitar que el acceso temporal a Slimefun Cheat rompa la economía.
-
----
-
-## Comandos principales
-
-### Administración
-
-- `/boss spawn <tipo>`
-- `/boss give <jugador> <tipo>`
-- `/vanish`
-- `/lenador [nivel]`
-- `/papademar`
-
-### Tienda / anuncios
-
-- `/odysseiaannounce <nick> <producto...>`
-
----
-
-## Integraciones
-
-### PlaceholderAPI
-
-Expone placeholders para el ciclo visual de dueños:
-
-- `%odysseia_owner_prefix%`
-- `%odysseia_owner_prefix_odiseo%`
-- `%odysseia_owner_prefix_penelope%`
-
-### LuckPerms
-
-Usado para:
-
-- detección de grupos y permisos
-- rangos temporales de tienda
-- chequeo de presencia de dueños
-
-### Essentials
-
-Usado para:
-
-- permisos de kits VIP
-- coherencia con perks y economía del servidor
-
----
-
-## Configuración importante
-
-Las áreas de configuración más relevantes están en `src/main/resources/config.yml`.
-
-### Bloques clave
-
-- `discord`
-- `owner-cycle`
-- `armor-effects`
-- `papa-de-mar`
-- `chatgames`
-- `store`
-- `natural-spawn`
-- `kits`
-
-### Ejemplos de uso real
-
-#### Tienda
-
-```yaml
-store:
-  enabled: true
-  poll-interval-seconds: 60
-  announcement-webhook-url: "https://discord.com/api/webhooks/..."
 ```
-
-#### Spawn natural de bosses
-
-```yaml
-natural-spawn:
-  enabled: false
-  interval-seconds: 1800
-  chance: 0.25
-  max-active: 2
-```
-
-#### Owner cycle
-
-```yaml
-owner-cycle:
-  enabled: true
-  interval-minutes: 30
++--------------------------+    +--------------------------+    +--------------------------+    +--------------------------+
+|    1. ADMIN & STAFF HUB  |    |    2. JEFES & RELIQUIAS  |    |    3. EVENTOS DE TERROR  |    |  4. INTEGRACIÓN SERVIDOR |
++--------------------------+    +--------------------------+    +--------------------------+    +--------------------------+
+| • Monturas Dracónicas    | -> | • Panteón Mítico (17+)   | -> | • HorrorNightScheduler   | -> | • ProtectionStones Check |
+| • Vanish & Target Control|    | • Wither Storm (Story)   |    | • Niebla Ultra Densa     |    | • DrakesSlimeMarket      |
+| • Staff Troll Suite      |    | • Dragón Ancestral       |    | • Screamers & Ghost      |    | • DiosesDrakes Bridge    |
+| • Tienda & Auto-Kits     |    | • Loot Anti-Robo & XP    |    | • Luna de Sangre System  |    | • LuckPerms & PAPI       |
++--------------------------+    +--------------------------+    +--------------------------+    +--------------------------+
 ```
 
 ---
 
-## Seguridad y hardening
+## 📜 Comandos & Permisos (LuckPerms)
 
-Odysseia ya trae varias decisiones defensivas:
+### 👑 Comandos de Creador y Staff
 
-- webhooks enviados fuera del hilo principal
-- validación estricta de URL HTTPS permitidas
-- manejo de `429` y `Retry-After`
-- descarte de entregas duplicadas en vuelo
-- anti-spam de anuncios globales de bosses
-- limpieza segura de entidades y bossbars
-- control de ítems temporales o visuales para evitar exploits
-
-No intenta ser un framework genérico. Está endurecido para el flujo operativo real de DrakesCraft.
+| Comando | Aliases | Permiso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `/mountdragon` | `/dragon`, `/dragonmontar` | `odysseia.dragon.owner` / `odysseia.dragon.kika` | Invoca y pilota el Dragón del End personalizado. |
+| `/niebla <on\|off\|toggle> [jugador\|all]` | `/horrorfog`, `/fog` | `odysseia.horrorfog` | Activa o desactiva la niebla ultra densa de terror. |
+| `/troll <subcomando> <jugador>` | N/A | `odysseia.troll` | Ejecuta trolleos inofensivos (`screamer`, `fakeop`, `fakecrash`, `voidfall`, `anvil`, `creeper`, `spiders`, `lightning`). |
+| `/vani [on\|off\|toggle] [jugador]` | `/vanish` | `odysseia.vanish` | Entra o saca a un jugador del modo Vanish invisible. |
+| `/boss <spawn\|give>` | N/A | `odysseia.boss.admin` | Gestión y spawn de jefes míticos. |
+| `/bloodmoon <start\|stop\|status>` | N/A | `odysseia.bloodmoon.admin` | Control del evento Luna de Sangre. |
+| `/restart30` | N/A | `drakes.admin` | Reinicio seguro con avisos in-game y guardado de inventarios. |
 
 ---
 
-## Build
+## 🐉 Sistema de Dragones
+
+### 1. Dragón Supremo (JackStar6677)
+- **Talla**: Escala `1.4` (Colosal e Imponente).
+- **Efectos**: Rastro continuo de fuego azul (`SOUL_FIRE_FLAME`), partículas dracónicas (`DRAGON_BREATH`), varas del End (`END_ROD`) y chispas de fuegos artificiales.
+- **Ataques**:
+  - **Clic Izquierdo**: Dispara Bolas de Fuego Dracónicas (`DragonFireball`).
+  - **Shift + Clic Izquierdo**: Dispara un Rayo de la Tormenta (`lightning`) en la ubicación objetivo.
+
+### 2. Dragón Esmeralda Cute (Kika)
+- **Talla**: Escala `0.65` (Adorable y Compacto).
+- **Efectos**: Rastro de estrellitas de la suerte (`HAPPY_VILLAGER`), hojas verdes (`COMPOSTER`) y brillo mágico.
+- **Ataques**:
+  - **Clic Izquierdo**: Ráfaga mágica de fuegos artificiales y destellos verdes.
+
+---
+
+## 🛠️ Compilación & Despliegue
+
+### Requisitos
+- **Java**: 21
+- **Motor**: Purpur / Paper 1.21.x
+- **Build Tool**: Maven 3.x
+
+### Comando de Compilación
 
 ```bash
-mvn clean package
+mvn clean package -DskipTests
 ```
 
-El jar final queda en:
-
-```text
-target/Odysseia-1.0.0-SNAPSHOT.jar
-```
-
----
-
-## Despliegue típico
-
-```bash
-cp target/Odysseia-1.0.0-SNAPSHOT.jar /ruta/al/servidor/plugins/Odysseia.jar
-```
-
-En DrakesCraft se despliega sobre el `plugins/Odysseia.jar` del servidor principal y toma la configuración persistida desde su carpeta de datos.
-
----
-
-## Documentación adicional
-
-- `EXPANSION_II_BOSSES.md`
-- `EXPANSION_III_BOSSES.md`
-
-Esos documentos sirven como bitácora de crecimiento del sistema mítico, pero el estado más real y actual del plugin vive en:
-
-- `src/main/java/...`
-- `src/main/resources/config.yml`
-- este `README`
-
----
-
-## Filosofía del proyecto
-
-Odysseia existe para que DrakesCraft tenga:
-
-- una capa de fantasía coherente
-- un endgame con identidad
-- una tienda integrada sin parches frágiles
-- menos Skript improvisado
-- más control técnico y menos ruido operativo
-
-Si el servidor se siente como un mundo propio y no como un collage de automatizaciones, entonces el plugin está haciendo bien su trabajo.
+El ejecutable compilado se ubica en `target/Odysseia-1.1.0-SNAPSHOT.jar` y se despliega directamente en `Y:\plugins\Odysseia.jar`.

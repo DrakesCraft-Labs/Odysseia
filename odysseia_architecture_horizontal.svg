@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0c14" />
+      <stop offset="100%" stop-color="#141828" />
+    </linearGradient>
+
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#4c1d95" />
+    </linearGradient>
+
+    <linearGradient id="bossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#7f1d1d" />
+    </linearGradient>
+
+    <linearGradient id="terrorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+
+    <linearGradient id="ecoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="480" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="2"/>
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#334155" stroke-width="0.5" opacity="0.3"/>
+  </pattern>
+  <rect width="1200" height="480" rx="16" fill="url(#grid)"/>
+
+  <!-- Title Banner -->
+  <text x="600" y="45" font-family="'Outfit', 'Inter', sans-serif" font-weight="900" font-size="26" fill="#f8fafc" text-anchor="middle" letter-spacing="2">
+    ARQUITECTURA SISTÉMICA DE ODYSSEIA v1.1.0
+  </text>
+  <text x="600" y="70" font-family="'Inter', sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">
+    Plataforma Mítica, Terror Nocturno, Monturas Dracónicas y Ecosistema de Producción
+  </text>
+
+  <!-- Connector Lines -->
+  <path d="M 280 230 L 330 230" stroke="#a855f7" stroke-width="3" stroke-dasharray="6,6"/>
+  <path d="M 570 230 L 620 230" stroke="#f43f5e" stroke-width="3" stroke-dasharray="6,6"/>
+  <path d="M 860 230 L 910 230" stroke="#10b981" stroke-width="3" stroke-dasharray="6,6"/>
+
+  <!-- MODULE 1: CORE & STAFF HUB -->
+  <g transform="translate(40, 100)">
+    <rect width="240" height="320" rx="12" fill="#1e1b4b" stroke="#6366f1" stroke-width="2" filter="url(#glow)"/>
+    <rect width="240" height="42" rx="12" fill="url(#coreGrad)"/>
+    <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
+      1. ADMIN & STAFF HUB
+    </text>
+
+    <!-- Cards Inside -->
+    <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
+    <text x="25" y="78" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#c084fc">🐉 Monturas Dracónicas</text>
+    <text x="25" y="98" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">JackStar (Supreme) / Kika (Emerald)</text>
+
+    <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
+    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#818cf8">👻 Vanish & Target Control</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/vani [on|off|toggle] [jugador]</text>
+
+    <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
+    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#f43f5e">🎭 Staff Troll Suite</text>
+    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/troll (8 subcomandos inofensivos)</text>
+
+    <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#38bdf8">🛒 Tienda & Auto-Kits</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Delivery Tebex & Kits Mensuales</text>
+  </g>
+
+  <!-- MODULE 2: BOSSES & MYTHOLOGY -->
+  <g transform="translate(330, 100)">
+    <rect width="240" height="320" rx="12" fill="#450a0a" stroke="#ef4444" stroke-width="2" filter="url(#glow)"/>
+    <rect width="240" height="42" rx="12" fill="url(#bossGrad)"/>
+    <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
+      2. JEFES & RELIQUIAS
+    </text>
+
+    <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
+    <text x="25" y="78" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fca5a5">⚔️ Panteón Mítico (17+ Bosses)</text>
+    <text x="25" y="98" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Zeus, Kratos, Thor, Tifón, Prometeo</text>
+
+    <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
+    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#f87171">👁️ Wither Storm (StoryMode)</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Scale 3.0, Rayo Tractor, Screamer</text>
+
+    <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
+    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#f43f5e">🐉 Dragón Ancestral</text>
+    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Rugido, Ráfaga Fuego, Aliento Vacío</text>
+
+    <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fbbf24">🎁 Drops & Loot Anti-Robo</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Paper Item Lock setOwner & 5k XP</text>
+  </g>
+
+  <!-- MODULE 3: HORROR & ENVIRONMENT -->
+  <g transform="translate(620, 100)">
+    <rect width="240" height="320" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2" filter="url(#glow)"/>
+    <rect width="240" height="42" rx="12" fill="url(#terrorGrad)"/>
+    <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
+      3. EVENTOS DE TERROR
+    </text>
+
+    <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
+    <text x="25" y="78" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#6ee7b7">🌙 HorrorNightScheduler</text>
+    <text x="25" y="98" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">1 vez/día Minecraft en la Noche</text>
+
+    <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
+    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#a7f3d0">🌫️ Niebla Ultra Densa</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/niebla <on|off|toggle> [jugador]</text>
+
+    <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
+    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#34d399">😱 Screamers & Sombra Ghost</text>
+    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Maldición Guardian & Ecos Cueva</text>
+
+    <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#f87171">🩸 Luna de Sangre System</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Eventos Ambientales y BloodMoon</text>
+  </g>
+
+  <!-- MODULE 4: INTEGRATIONS & ECOSYSTEM -->
+  <g transform="translate(910, 100)">
+    <rect width="240" height="320" rx="12" fill="#78350f" stroke="#f59e0b" stroke-width="2" filter="url(#glow)"/>
+    <rect width="240" height="42" rx="12" fill="url(#ecoGrad)"/>
+    <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
+      4. INTEGRACIÓN & SERVIDOR
+    </text>
+
+    <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
+    <text x="25" y="78" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fde047">🛡️ ProtectionStones Check</text>
+    <text x="25" y="98" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">0% daño a terreno protegido</text>
+
+    <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
+    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fef08a">💎 DrakesSlimeMarket</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Dusts/Ingots OK & Heavy Blocked</text>
+
+    <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
+    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#facc15">⚡ DiosesDrakes Bridge</text>
+    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Favor Divino asíncrono y Cache</text>
+
+    <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#eab308">📊 LuckPerms & PAPI</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Permisos finos y Expansiones</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="600" y="455" font-family="'Inter', sans-serif" font-size="12" fill="#64748b" text-anchor="middle">
+    DrakesCraft Labs © 2026 — Purpur / Paper 1.21.11 Core Platform
+  </text>
+</svg>

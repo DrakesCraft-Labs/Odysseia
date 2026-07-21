@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class VanishCommand implements CommandExecutor, Listener {
+public final class VanishCommand implements CommandExecutor, org.bukkit.command.TabCompleter, Listener {
 
     private static final String VANISH_PERMISSION = "odysseia.vanish";
     private static final String SEE_PERMISSION = "odysseia.vanish.see";
@@ -56,19 +56,71 @@ public final class VanishCommand implements CommandExecutor, Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cEste comando solo puede ser ejecutado por un jugador."));
+        if (!sender.hasPermission(VANISH_PERMISSION) && !sender.hasPermission("drakes.staff")) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cNo tienes permiso para desvanecerte."));
             return true;
         }
 
-        Player player = (Player) sender;
-        if (!player.hasPermission(VANISH_PERMISSION)) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cNo tienes permiso para desvanecerte."));
+        Player target = null;
+        Boolean forceState = null;
+
+        if (args.length == 0) {
+            if (sender instanceof Player p) {
+                target = p;
+            } else {
+                sender.sendMessage(ChatColor.RED + "Especifica un jugador: /vani <on|off|toggle> <jugador>");
+                return true;
+            }
+        } else if (args.length == 1) {
+            String arg0 = args[0].toLowerCase(java.util.Locale.ROOT);
+            if (arg0.equals("on") || arg0.equals("enable") || arg0.equals("activar")) {
+                forceState = true;
+                if (sender instanceof Player p) target = p;
+            } else if (arg0.equals("off") || arg0.equals("disable") || arg0.equals("desactivar")) {
+                forceState = false;
+                if (sender instanceof Player p) target = p;
+            } else if (arg0.equals("toggle")) {
+                if (sender instanceof Player p) target = p;
+            } else {
+                target = Bukkit.getPlayer(args[0]);
+            }
+        } else {
+            String arg0 = args[0].toLowerCase(java.util.Locale.ROOT);
+            if (arg0.equals("on") || arg0.equals("enable") || arg0.equals("activar")) {
+                forceState = true;
+            } else if (arg0.equals("off") || arg0.equals("disable") || arg0.equals("desactivar")) {
+                forceState = false;
+            }
+            target = Bukkit.getPlayer(args[1]);
+        }
+
+        if (target == null) {
+            sender.sendMessage(ChatColor.RED + "Jugador objetivo no encontrado.");
             return true;
         }
 
-        setVanished(player, !isVanished(player), true);
+        boolean newState = forceState != null ? forceState : !isVanished(target);
+        setVanished(target, newState, true);
+
+        if (!sender.equals(target)) {
+            sender.sendMessage(ChatColor.GREEN + "Estado de Vanish de " + target.getName() + " cambiado a: " + (newState ? "ACTIVADO" : "DESACTIVADO"));
+        }
         return true;
+    }
+
+    @Override
+    public java.util.List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (args.length == 1) {
+            java.util.List<String> options = new java.util.ArrayList<>(java.util.List.of("on", "off", "toggle"));
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                options.add(p.getName());
+            }
+            return options.stream().filter(s -> s.toLowerCase(java.util.Locale.ROOT).startsWith(args[0].toLowerCase(java.util.Locale.ROOT))).toList();
+        } else if (args.length == 2) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                    .filter(s -> s.toLowerCase(java.util.Locale.ROOT).startsWith(args[1].toLowerCase(java.util.Locale.ROOT))).toList();
+        }
+        return java.util.List.of();
     }
 
     public void setVanished(Player player, boolean vanished, boolean playEffects) {

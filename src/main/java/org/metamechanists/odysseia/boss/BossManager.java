@@ -39,6 +39,9 @@ import org.metamechanists.odysseia.boss.instances.CerberoBoss;
 import org.metamechanists.odysseia.boss.instances.ArtemisaBoss;
 import org.metamechanists.odysseia.boss.instances.TifonBoss;
 import org.metamechanists.odysseia.boss.instances.PrometeoBoss;
+import org.metamechanists.odysseia.boss.instances.ColosoEndBoss;
+import org.metamechanists.odysseia.boss.instances.WitherStormBoss;
+import org.metamechanists.odysseia.boss.instances.DragonAncestralBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.integrations.DiosesDrakesBossBridge;
@@ -70,7 +73,7 @@ public class BossManager implements Listener {
     /** Jefes elegibles para spawn natural por defecto (si la config no especifica lista). */
     private static final java.util.List<String> DEFAULT_NATURAL_BOSSES = java.util.List.of(
             "thor", "ares", "hades", "poseidon", "zeus", "loki", "odin", "kratos",
-            "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
+            "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo", "coloso_end", "dragon_ancestral"
     );
 
     public BossManager(Odysseia plugin) {
@@ -237,6 +240,15 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("prometeo")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.BLAZE);
             boss = new PrometeoBoss(entity);
+        } else if (type.equalsIgnoreCase("coloso_end") || type.equalsIgnoreCase("coloso-end") || type.equalsIgnoreCase("coloso")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ENDERMAN);
+            boss = new ColosoEndBoss(entity);
+        } else if (type.equalsIgnoreCase("wither_storm") || type.equalsIgnoreCase("wither-storm") || type.equalsIgnoreCase("witherstorm")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.WITHER);
+            boss = new WitherStormBoss(entity);
+        } else if (type.equalsIgnoreCase("dragon_ancestral") || type.equalsIgnoreCase("dragon-ancestral") || type.equalsIgnoreCase("dragon")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ENDER_DRAGON);
+            boss = new DragonAncestralBoss(entity);
         } else {
             return null;
         }
@@ -551,7 +563,7 @@ public class BossManager implements Listener {
                 }
             }
 
-            event.setDroppedExp(Math.max(0, plugin.getConfig().getInt("boss-loot.experience", 750)));
+            event.setDroppedExp(Math.max(5000, plugin.getConfig().getInt("boss-loot.experience", 5000)));
             
             Location loc = entity.getLocation();
             loc.getWorld().playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
@@ -591,10 +603,14 @@ public class BossManager implements Listener {
             Player recipient = creditedKiller != null && creditedKiller.isOnline()
                     ? creditedKiller
                     : pickRecipient(recipients, contributions);
-            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
-            if (!overflow.isEmpty() && dropLocation.getWorld() != null) {
-                overflow.values().forEach(leftover -> dropLocation.getWorld().dropItemNaturally(dropLocation, leftover));
+            
+            // Garantizar el drop soltándolo en el suelo con protección anti-robo (Lock de Paper)
+            if (dropLocation.getWorld() != null) {
+                org.bukkit.entity.Item itemEntity = dropLocation.getWorld().dropItemNaturally(dropLocation, item.clone());
+                itemEntity.setOwner(recipient.getUniqueId());
             }
+
+            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
             recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
         }

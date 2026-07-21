@@ -47,7 +47,7 @@ public abstract class OdysseyBoss {
             1.0D,
             10.0D
         );
-        this.maxHealth = maxHealth * healthMultiplier;
+        this.maxHealth = Math.clamp(maxHealth * healthMultiplier, 10.0D, 4000.0D);
 
         // Configure entity properties
         entity.setCustomName(displayName);

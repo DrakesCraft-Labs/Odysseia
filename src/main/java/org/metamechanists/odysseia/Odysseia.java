@@ -56,6 +56,8 @@ public final class Odysseia extends JavaPlugin {
     private StarTelemetryPublisher starTelemetry;
     private PolisBaselineListener polisBaseline;
     private BloodMoonManager bloodMoonManager;
+    private org.metamechanists.odysseia.events.HorrorNightScheduler horrorNightScheduler;
+    private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -71,8 +73,13 @@ public final class Odysseia extends JavaPlugin {
         this.kitClaimService = new KitClaimService(this);
 
         // Register commands
-        this.vanishCommand = new VanishCommand(this);
+        VanishCommand vanishCommand = new VanishCommand(this);
         getCommand("vani").setExecutor(vanishCommand);
+        getCommand("vani").setTabCompleter(vanishCommand);
+
+        org.metamechanists.odysseia.commands.TrollCommand trollCmd = new org.metamechanists.odysseia.commands.TrollCommand(this);
+        getCommand("troll").setExecutor(trollCmd);
+        getCommand("troll").setTabCompleter(trollCmd);
         getCommand("papademar").setExecutor(new PapaDeMarCommand(this));
         getCommand("lenador").setExecutor(new LenadorCommand(this));
         ReloadCommand reloadCommand = new ReloadCommand(this);
@@ -119,6 +126,14 @@ public final class Odysseia extends JavaPlugin {
         getCommand("spawnallbosses").setTabCompleter(bossCmd);
         this.bloodMoonManager = new BloodMoonManager(this);
         getCommand("bloodmoon").setExecutor(new org.metamechanists.odysseia.commands.BloodMoonCommand(bloodMoonManager));
+        org.metamechanists.odysseia.commands.HorrorFogCommand fogCmd = new org.metamechanists.odysseia.commands.HorrorFogCommand(this);
+        getCommand("niebla").setExecutor(fogCmd);
+        getCommand("niebla").setTabCompleter(fogCmd);
+
+        this.dragonMountService = new org.metamechanists.odysseia.dragon.DragonMountService(this);
+        getCommand("mountdragon").setExecutor(dragonMountService);
+        getCommand("mountdragon").setTabCompleter(dragonMountService);
+        Bukkit.getPluginManager().registerEvents(dragonMountService, this);
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
@@ -138,6 +153,9 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(automation, this);
         this.polisBaseline = new PolisBaselineListener(this);
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
+        this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);
+        Bukkit.getPluginManager().registerEvents(horrorNightScheduler, this);
+        horrorNightScheduler.start();
         bloodMoonManager.start();
 
         // Register PlaceholderAPI expansion if present
@@ -261,6 +279,12 @@ public final class Odysseia extends JavaPlugin {
         }
         if (bloodMoonManager != null) {
             bloodMoonManager.shutdown();
+        }
+        if (horrorNightScheduler != null) {
+            horrorNightScheduler.shutdown();
+        }
+        if (dragonMountService != null) {
+            dragonMountService.shutdown();
         }
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");
