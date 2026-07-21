@@ -10,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -60,6 +61,7 @@ public class BossManager implements Listener {
     private final Map<UUID, Map<UUID, Double>> bossContributions = new ConcurrentHashMap<>();
     // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Long> lastMobility = new ConcurrentHashMap<>();
     private final DiosesDrakesBossBridge divineBossBridge;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
@@ -91,6 +93,7 @@ public class BossManager implements Listener {
                 boss.updateBossBar();
                 boss.checkPhases();
                 boss.tickAura();
+                pressureWithMobility(boss);
                 if (boss instanceof PolifemoBoss polifemo) {
                     polifemo.updatePathfinding();
                 }
@@ -266,10 +269,75 @@ public class BossManager implements Listener {
         }
     }
 
+    /** Repositions a boss beside a distant combatant without forcing chunk loads or clipping into blocks. */
+    private void pressureWithMobility(OdysseyBoss boss) {
+        if (!plugin.getConfig().getBoolean("boss-balance.mobility.enabled", true)) {
+            return;
+        }
+        LivingEntity entity = boss.getEntity();
+        double targetRange = Math.clamp(plugin.getConfig().getDouble(
+                "boss-balance.mobility.target-range", 56.0D), 16.0D, 96.0D);
+        Player target = boss.nearestCombatTarget(targetRange);
+        if (target == null || target.getWorld() != entity.getWorld()) {
+            return;
+        }
+
+        double minimumDistance = Math.clamp(plugin.getConfig().getDouble(
+                "boss-balance.mobility.minimum-distance", 12.0D), 4.0D, 32.0D);
+        if (entity.getLocation().distanceSquared(target.getLocation()) < minimumDistance * minimumDistance) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long configuredCooldown = Math.clamp(plugin.getConfig().getLong(
+                "boss-balance.mobility.cooldown-seconds", 7L), 3L, 30L) * 1000L;
+        long phaseCooldown = Math.max(2500L, configuredCooldown - ((long) (boss.getCurrentPhase() - 1) * 1500L));
+        if (now - lastMobility.getOrDefault(entity.getUniqueId(), 0L) < phaseCooldown) {
+            return;
+        }
+
+        Location destination = safeFlankLocation(entity.getLocation(), target.getLocation());
+        if (destination == null || !entity.teleport(destination)) {
+            return;
+        }
+        lastMobility.put(entity.getUniqueId(), now);
+        destination.getWorld().spawnParticle(org.bukkit.Particle.PORTAL, destination.clone().add(0, 1, 0),
+                36, 0.45, 0.7, 0.45, 0.08);
+        destination.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 1.1f,
+                boss.getCurrentPhase() >= 3 ? 0.65f : 0.85f);
+    }
+
+    /** Searches only the target's loaded chunk and returns an open, grounded flank. */
+    private Location safeFlankLocation(Location bossLocation, Location targetLocation) {
+        Vector direction = bossLocation.toVector().subtract(targetLocation.toVector()).setY(0);
+        if (direction.lengthSquared() < 0.01D) {
+            direction = targetLocation.getDirection().setY(0).multiply(-1);
+        }
+        direction.normalize();
+        double distance = Math.clamp(plugin.getConfig().getDouble(
+                "boss-balance.mobility.flank-distance", 4.0D), 2.0D, 8.0D);
+        for (double side : new double[] {0.0D, 1.0D, -1.0D}) {
+            Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).multiply(side * 2.0D);
+            Location candidate = targetLocation.clone().add(direction.clone().multiply(distance)).add(perpendicular);
+            candidate.setDirection(targetLocation.toVector().subtract(bossLocation.toVector()));
+            int chunkX = candidate.getBlockX() >> 4;
+            int chunkZ = candidate.getBlockZ() >> 4;
+            if (!candidate.getWorld().isChunkLoaded(chunkX, chunkZ)) {
+                continue;
+            }
+            if (candidate.getBlock().isPassable() && candidate.clone().add(0, 1, 0).getBlock().isPassable()
+                    && candidate.clone().add(0, -1, 0).getBlock().getType().isSolid()) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
     public void removeBoss(UUID uuid, Player killer) {
         OdysseyBoss boss = activeBosses.remove(uuid);
         naturalBosses.remove(uuid);
         bossContributions.remove(uuid);
+        lastMobility.remove(uuid);
         if (boss != null) {
             if (killer != null) {
                 broadcastDeath(boss, killer);

@@ -55,9 +55,9 @@ public abstract class OdysseyBoss {
         // Health attributes
         var healthAttr = entity.getAttribute(Attribute.MAX_HEALTH);
         if (healthAttr != null) {
-            healthAttr.setBaseValue(maxHealth);
+            healthAttr.setBaseValue(this.maxHealth);
         }
-        entity.setHealth(maxHealth);
+        entity.setHealth(this.maxHealth);
 
         // Tag the entity with persistent data
         NamespacedKey bossKey = new NamespacedKey(Odysseia.getInstance(), "boss_type");
@@ -125,6 +125,11 @@ public abstract class OdysseyBoss {
             }
         }
         return target;
+    }
+
+    /** Exposes the valid combat target without leaking spectators or dead players. */
+    public Player nearestCombatTarget(double radius) {
+        return findNearestPlayer(radius);
     }
 
     /** Jugador vivo más alejado dentro del radio, o null. */
@@ -215,12 +220,12 @@ public abstract class OdysseyBoss {
             return;
         }
 
-        int amplifier = phase; // fase 2 -> III, fase 3 -> IV
+        int amplifier = phase + 1; // fase 2 -> IV, fase 3 -> V
         int duration = 20 * 60 * 20; // 20 minutos, suficiente para el combate sin usar Integer.MAX_VALUE.
         entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, amplifier, false, false, false));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, amplifier, false, false, false));
         if (phase == 3) {
-            entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 4, false, false, false));
+            entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 80, 6, false, false, false));
         }
 
         var loc = entity.getLocation().add(0, 1, 0);

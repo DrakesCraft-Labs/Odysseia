@@ -448,15 +448,22 @@ store:
 # ─────────────────────────────────────────────
 boss-balance:
   # Escala común para todos los jefes, incluidos ataques especiales y proyectiles.
-  health-multiplier: 1.60
-  damage-multiplier: 1.50
-  movement-speed-multiplier: 1.30
-  knockback-resistance: 0.85
-  follow-range: 64.0
-  # 60 ticks = 3 segundos. Las skills internas mantienen sus propios cooldowns.
-  skill-interval-ticks: 60
+  health-multiplier: 2.25
+  damage-multiplier: 2.10
+  movement-speed-multiplier: 1.60
+  knockback-resistance: 0.95
+  follow-range: 72.0
+  # 40 ticks = 2 segundos. Las skills internas mantienen sus propios cooldowns.
+  skill-interval-ticks: 40
   announcement-radius: 64.0
   dialogue-radius: 48.0
+  mobility:
+    # Teletransporte táctico: sólo flanquea jugadores lejanos y nunca carga chunks.
+    enabled: true
+    target-range: 56.0
+    minimum-distance: 12.0
+    flank-distance: 4.0
+    cooldown-seconds: 7
 
 #  Purchase Engine: anuncios de compras confirmadas
 # ─────────────────────────────────────────────
