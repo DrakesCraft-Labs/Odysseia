@@ -92,6 +92,10 @@ commands:
     description: Herramientas de troll inofensivo para Staff.
     permission: odysseia.troll
     usage: /troll <subcomando> <jugador>
+  sellinv:
+    description: Vende rápidamente los recursos y materiales de tu inventario principal.
+    aliases: [venderinv, sellall]
+    usage: /sellinv
 permissions:
   odysseia.horrorfog:
     description: Permite activar o desactivar la niebla densa de terror.

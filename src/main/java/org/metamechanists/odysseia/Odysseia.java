@@ -95,6 +95,7 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.listeners.ChatFilterListener chatFilter = new org.metamechanists.odysseia.listeners.ChatFilterListener(this);
         getCommand("daily").setExecutor(new org.metamechanists.odysseia.commands.DailyCommand(automation));
         getCommand("restart30").setExecutor(new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
+        getCommand("sellinv").setExecutor(new org.metamechanists.odysseia.commands.SellInventoryCommand(this));
         getCommand("odysseiapendingkit").setExecutor(pendingKits);
         getCommand("drakeswarn").setExecutor(chatFilter);
         org.metamechanists.odysseia.commands.KitGiveCommand kitGive = new org.metamechanists.odysseia.commands.KitGiveCommand(this);
