@@ -24,7 +24,7 @@ import java.util.Random;
 
 /**
  * Prometeo — Titán del Fuego Robado. BLAZE 700 HP.
- * Mecánica Fénix: al 10% HP por primera vez resucita con 300 HP e invulnerabilidad breve.
+ * Mecánica Fénix: evita una muerte letal, renace una vez y vuelve en fase final.
  */
 public class PrometeoBoss extends OdysseyBoss {
 
@@ -50,8 +50,6 @@ public class PrometeoBoss extends OdysseyBoss {
     public void executeSkillsRotation() {
         if (entity == null || entity.isDead()) return;
 
-        checkPhoenix();
-
         Player target = findNearestPlayer(28);
         if (target == null) return;
 
@@ -63,19 +61,37 @@ public class PrometeoBoss extends OdysseyBoss {
         }
     }
 
-    /** Al 10% HP por primera vez: resurrección épica con 300 HP e invulnerabilidad 3s. */
-    private void checkPhoenix() {
-        if (!phoenixUsed && entity.getHealth() <= maxHealth * 0.10) {
-            phoenixUsed = true;
-            invulnerable = true;
-            entity.setHealth(Math.min(maxHealth, 300.0));
-            Location loc = entity.getLocation();
-            launchFirework(loc, Color.ORANGE);
-            launchFirework(loc, Color.RED);
-            loc.getWorld().spawnParticle(Particle.FLAME, loc.add(0, 1, 0), 120, 1.5, 2, 1.5, 0.2);
-            loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1.5f, 0.8f);
-            Bukkit.broadcastMessage("§e§l[PROMETEO] §6¡El Titán renace de sus cenizas como un Fénix!");
-            Bukkit.getScheduler().runTaskLater(Odysseia.getInstance(), () -> invulnerable = false, 60L);
+    /** Consume su única vida extra cuando un golpe sería letal. */
+    public boolean beginPhoenixRebirth() {
+        if (phoenixUsed || entity == null || entity.isDead()) {
+            return false;
+        }
+
+        phoenixUsed = true;
+        invulnerable = true;
+        entity.setHealth(maxHealth * 0.65D);
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20 * 60 * 10, 3, false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 60 * 10, 2, false, false, false));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 60 * 10, 1, false, false, false));
+
+        Location loc = entity.getLocation();
+        launchFirework(loc, Color.ORANGE);
+        launchFirework(loc, Color.RED);
+        loc.getWorld().spawnParticle(Particle.FLAME, loc.clone().add(0, 1, 0), 180, 1.8, 2.5, 1.8, 0.25);
+        loc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc.clone().add(0, 1, 0), 80, 1.2, 1.6, 1.2, 0.08);
+        loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1.5f, 0.8f);
+        speak("¡Las cenizas no son mi final! Ahora conoceréis el fuego eterno.");
+        Bukkit.getScheduler().runTaskLater(Odysseia.getInstance(), () -> invulnerable = false, 100L);
+        return true;
+    }
+
+    @Override
+    protected void onPhaseChange(int phase) {
+        super.onPhaseChange(phase);
+        if (phase == 2) {
+            speak("El fuego robado arderá en vuestra sangre.");
+        } else if (phase == 3) {
+            speak("Mi castigo sólo acaba de comenzar.");
         }
     }
 

@@ -359,7 +359,7 @@ public class BossManager implements Listener {
         WebhookSender.sendAsync(plugin, url, json);
     }
 
-    @EventHandler
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDamage(EntityDamageEvent event) {
         // Handle Loki clone hit
         if (event.getEntity() instanceof org.bukkit.entity.Illusioner illusioner) {
@@ -375,7 +375,13 @@ public class BossManager implements Listener {
 
         if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
             OdysseyBoss boss = activeBosses.get(event.getEntity().getUniqueId());
-            if (boss instanceof DiosCorruptoBoss dios && dios.isShieldActive()) {
+            if (boss instanceof PrometeoBoss prometeo
+                    && event.getFinalDamage() >= prometeo.getEntity().getHealth()
+                    && prometeo.beginPhoenixRebirth()) {
+                // El golpe letal se consume: no hay muerte ni recompensas hasta la derrota real.
+                event.setCancelled(true);
+                prometeo.updateBossBar();
+            } else if (boss instanceof DiosCorruptoBoss dios && dios.isShieldActive()) {
                 event.setCancelled(true);
                 dios.getEntity().getWorld().playSound(dios.getEntity().getLocation(), Sound.ENTITY_SHULKER_BULLET_HIT, 1.0f, 1.5f);
                 dios.getEntity().getWorld().spawnParticle(org.bukkit.Particle.REVERSE_PORTAL, dios.getEntity().getLocation().add(0, 1.5, 0), 15, 0.5, 0.5, 0.5, 0.05);
