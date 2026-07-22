@@ -96,6 +96,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("daily").setExecutor(new org.metamechanists.odysseia.commands.DailyCommand(automation));
         getCommand("restart30").setExecutor(new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
         getCommand("sellinv").setExecutor(new org.metamechanists.odysseia.commands.SellInventoryCommand(this));
+        org.metamechanists.odysseia.commands.OwnerAuraCommand ownerAura = new org.metamechanists.odysseia.commands.OwnerAuraCommand(this);
+        getCommand("auradueno").setExecutor(ownerAura);
+        getCommand("auradueno").setTabCompleter(ownerAura);
         getCommand("odysseiapendingkit").setExecutor(pendingKits);
         getCommand("drakeswarn").setExecutor(chatFilter);
         org.metamechanists.odysseia.commands.KitGiveCommand kitGive = new org.metamechanists.odysseia.commands.KitGiveCommand(this);

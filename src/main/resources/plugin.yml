@@ -56,6 +56,11 @@ commands:
   restart30:
     description: Reinicio seguro con guardado y respaldo de inventarios.
     permission: drakes.admin
+  auradueno:
+    description: Elimina absolutamente todas las entidades alrededor del ejecutor.
+    aliases: [auradueño]
+    permission: odysseia.owner.aura
+    usage: /auradueño <2|5|10|100>
   odysseiapendingkit:
     description: Encola un rango y kit para entrega online u offline.
     permission: odysseia.purchase.admin
@@ -132,4 +137,7 @@ permissions:
     default: op
   odysseia.bloodmoon.admin:
     description: Permite iniciar o detener la Luna de Sangre.
+    default: op
+  odysseia.owner.aura:
+    description: Permite usar el aura destructiva absoluta del dueño.
     default: op
