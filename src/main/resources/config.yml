@@ -27,6 +27,13 @@ star-monitor:
   heartbeat-interval-seconds: 60
 
 # ─────────────────────────────────────────────
+# Eventos de terror: desactivados mientras se estabiliza el rendimiento.
+# Cuando se activen, se limitan a mundos explícitos con jugadores presentes.
+horror-night:
+  enabled: false
+  worlds: [world]
+
+# ─────────────────────────────────────────────
 #  Ciclo de Prefijos del Propietario (Owner)
 # ─────────────────────────────────────────────
 owner-cycle:

@@ -17,8 +17,10 @@ import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.instances.WitherStormBoss;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +42,10 @@ public class HorrorNightScheduler implements Listener {
 
     public void start() {
         if (task != null) task.cancel();
+        if (!plugin.getConfig().getBoolean("horror-night.enabled", false)) {
+            plugin.getLogger().info("[HorrorNight] Desactivado por configuración.");
+            return;
+        }
 
         // Revisa cada 5 segundos (100 ticks) el estado del ciclo día/noche
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::checkNightCycle, 100L, 100L);
@@ -54,10 +60,14 @@ public class HorrorNightScheduler implements Listener {
     }
 
     private void checkNightCycle() {
-        if (Bukkit.getOnlinePlayers().isEmpty()) return;
+        if (!plugin.getConfig().getBoolean("horror-night.enabled", false) || Bukkit.getOnlinePlayers().isEmpty()) return;
+        Set<String> enabledWorlds = new HashSet<>(plugin.getConfig().getStringList("horror-night.worlds"));
 
         for (World world : Bukkit.getWorlds()) {
             if (world.getEnvironment() != World.Environment.NORMAL) continue;
+            if (!enabledWorlds.isEmpty() && !enabledWorlds.contains(world.getName())) continue;
+            if (world.getPlayers().stream().noneMatch(player -> player.isOnline() && !player.isDead()
+                    && player.getGameMode() != org.bukkit.GameMode.SPECTATOR)) continue;
 
             long time = world.getTime();
             long dayIndex = world.getFullTime() / 24000L;
@@ -92,6 +102,10 @@ public class HorrorNightScheduler implements Listener {
 
     /** Ejecuta un evento de terror aleatorio a un jugador conectado. */
     private void executeRandomHorrorStrike(World world, int strikeIndex) {
+        if (!plugin.getConfig().getBoolean("horror-night.enabled", false)
+                || world.getTime() < 13000L || world.getTime() > 22000L) {
+            return;
+        }
         List<Player> eligiblePlayers = new ArrayList<>();
         for (Player p : world.getPlayers()) {
             if (p.isOnline() && !p.isDead() && p.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
