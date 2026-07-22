@@ -84,10 +84,10 @@ commands:
     permission: odysseia.horrorfog
     usage: /niebla <on|off|toggle> [jugador|all]
   mountdragon:
-    description: Invoca y pilota el Dragón del End exclusivo de JackStar6677 y Kika.
+    description: Abre el selector y pilota los dragones privados de JackStar6677 y Kika.
     aliases: [dragon, dragonmontar]
     permission: odysseia.dragon.use
-    usage: /mountdragon
+    usage: /dragon [jack|kika|speed|aliento]
   troll:
     description: Herramientas de troll inofensivo para Staff.
     permission: odysseia.troll
