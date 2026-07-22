@@ -16,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.metamechanists.odysseia.Odysseia;
 
 import java.util.HashSet;
@@ -37,6 +39,7 @@ public abstract class OdysseyBoss {
     private long lastDialogue = 0L;
     private boolean rebirthConsumed;
     private long rebirthInvulnerableUntil;
+    private long phaseShieldUntil;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -230,6 +233,10 @@ public abstract class OdysseyBoss {
             entity.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 80, 6, false, false, false));
         }
 
+        long shieldTicks = Math.clamp(Odysseia.getInstance().getConfig().getLong(
+                "boss-balance.phase-shield-ticks", 32L), 0L, 100L);
+        phaseShieldUntil = System.currentTimeMillis() + shieldTicks * 50L;
+
         var loc = entity.getLocation().add(0, 1, 0);
         loc.getWorld().spawnParticle(Particle.FLAME, loc, 60, 1, 1.5, 1, 0.1);
         loc.getWorld().spawnParticle(Particle.LARGE_SMOKE, loc, 30, 1, 1, 1, 0.05);
@@ -248,6 +255,23 @@ public abstract class OdysseyBoss {
         var loc = entity.getLocation().add(0, 1, 0);
         loc.getWorld().spawnParticle(currentPhase >= 3 ? Particle.SOUL_FIRE_FLAME : Particle.FLAME,
                 loc, currentPhase * 2, 0.5, 0.8, 0.5, 0.01);
+    }
+
+    /** Shows a local action-bar telegraph without filling global chat. */
+    public void announceAttack(String attackName) {
+        Component message = Component.text("⚠ " + shortName() + ": " + attackName, NamedTextColor.GOLD);
+        double radius = Math.clamp(Odysseia.getInstance().getConfig().getDouble(
+                "boss-balance.dialogue-radius", 48.0D), 16.0D, 128.0D);
+        double radiusSquared = radius * radius;
+        for (Player player : entity.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(entity.getLocation()) <= radiusSquared) {
+                player.sendActionBar(message);
+            }
+        }
+    }
+
+    public boolean isPhaseShielded() {
+        return System.currentTimeMillis() < phaseShieldUntil;
     }
 
     /** Gives selected bosses one cinematic second wind while keeping the final death authoritative. */

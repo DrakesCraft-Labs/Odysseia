@@ -463,6 +463,14 @@ boss-balance:
   skill-interval-ticks: 40
   announcement-radius: 64.0
   dialogue-radius: 48.0
+  # Escudo cinematográfico breve al cruzar cada fase; bloquea golpes durante el telegraph.
+  phase-shield-ticks: 32
+  combat-director:
+    # Ataques comunes inspirados en encuentros por fases, limitados a una tarea pendiente por jefe.
+    enabled: true
+    target-range: 44.0
+    cooldown-seconds: 9
+    telegraph-ticks: 24
   mobility:
     # Teletransporte táctico: sólo flanquea jugadores lejanos y nunca carga chunks.
     enabled: true

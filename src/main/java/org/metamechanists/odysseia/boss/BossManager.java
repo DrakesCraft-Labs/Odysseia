@@ -43,6 +43,7 @@ import org.metamechanists.odysseia.boss.instances.ColosoEndBoss;
 import org.metamechanists.odysseia.boss.instances.WitherStormBoss;
 import org.metamechanists.odysseia.boss.instances.DragonAncestralBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
+import org.metamechanists.odysseia.boss.combat.BossCombatDirector;
 import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.integrations.DiosesDrakesBossBridge;
 
@@ -66,6 +67,7 @@ public class BossManager implements Listener {
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Long> lastMobility = new ConcurrentHashMap<>();
     private final DiosesDrakesBossBridge divineBossBridge;
+    private final BossCombatDirector combatDirector;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -79,6 +81,7 @@ public class BossManager implements Listener {
     public BossManager(Odysseia plugin) {
         this.plugin = plugin;
         this.divineBossBridge = new DiosesDrakesBossBridge(plugin);
+        this.combatDirector = new BossCombatDirector(plugin);
         startTasks();
     }
 
@@ -112,6 +115,12 @@ public class BossManager implements Listener {
                 } catch (RuntimeException ex) {
                     plugin.getLogger().warning("[Bosses] Habilidad de " + boss.getId() + " cancelada: " + ex.getMessage());
                     plugin.getLogger().fine("[Bosses] Detalle de la habilidad fallida: " + ex);
+                }
+                try {
+                    combatDirector.tick(boss);
+                } catch (RuntimeException ex) {
+                    plugin.getLogger().warning("[BossDirector] Rotación de " + boss.getId()
+                            + " cancelada: " + ex.getMessage());
                 }
             }
         }, skillPeriod, skillPeriod);
@@ -350,6 +359,7 @@ public class BossManager implements Listener {
         naturalBosses.remove(uuid);
         bossContributions.remove(uuid);
         lastMobility.remove(uuid);
+        combatDirector.cleanup(uuid);
         if (boss != null) {
             if (killer != null) {
                 broadcastDeath(boss, killer);
@@ -363,6 +373,7 @@ public class BossManager implements Listener {
         if (updateTask != null) updateTask.cancel();
         if (skillTask != null) skillTask.cancel();
         if (naturalSpawnTask != null) naturalSpawnTask.cancel();
+        combatDirector.shutdown();
 
         // Clean up active bosses
         for (OdysseyBoss boss : activeBosses.values()) {
@@ -455,7 +466,11 @@ public class BossManager implements Listener {
 
         if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
             OdysseyBoss boss = activeBosses.get(event.getEntity().getUniqueId());
-            if (boss instanceof PrometeoBoss prometeo
+            if (boss.isPhaseShielded()) {
+                event.setCancelled(true);
+                boss.getEntity().getWorld().spawnParticle(org.bukkit.Particle.ENCHANTED_HIT,
+                        boss.getEntity().getLocation().add(0, 1, 0), 8, 0.4, 0.7, 0.4, 0.03);
+            } else if (boss instanceof PrometeoBoss prometeo
                     && event.getFinalDamage() >= prometeo.getEntity().getHealth()
                     && prometeo.beginPhoenixRebirth()) {
                 // El golpe letal se consume: no hay muerte ni recompensas hasta la derrota real.

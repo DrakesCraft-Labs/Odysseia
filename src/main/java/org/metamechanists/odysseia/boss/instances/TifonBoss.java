@@ -70,7 +70,7 @@ public class TifonBoss extends OdysseyBoss {
             furyActive = true;
             entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false, false));
             entity.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 1, false, false, false));
-            Bukkit.broadcastMessage("§4§l[TIFÓN] §c¡El Padre de los Monstruos entra en furia total!");
+            speak("¡Mis cien cabezas despiertan en furia total!");
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_WITHER_SPAWN, 2.0f, 0.4f);
         }
         if (furyActive) {
@@ -156,7 +156,7 @@ public class TifonBoss extends OdysseyBoss {
 
     /** Apocalíptica: lluvia de roca volcánica en radio 15 durante 3s + fuego y daño. */
     private void volcanicEruption() {
-        Bukkit.broadcastMessage("§4§l[TIFÓN] §6¡ERUPCIÓN VOLCÁNICA! ¡Huid del área!");
+        announceAttack("Erupción volcánica");
         Location center = entity.getLocation();
         center.getWorld().playSound(center, Sound.ENTITY_WITHER_SPAWN, 2.0f, 0.3f);
         for (int tick = 0; tick < 6; tick++) {
