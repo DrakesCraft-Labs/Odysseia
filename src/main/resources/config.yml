@@ -27,10 +27,9 @@ star-monitor:
   heartbeat-interval-seconds: 60
 
 # ─────────────────────────────────────────────
-# Eventos de terror: desactivados mientras se estabiliza el rendimiento.
-# Cuando se activen, se limitan a mundos explícitos con jugadores presentes.
+# Eventos de terror limitados a mundos explícitos con jugadores presentes.
 horror-night:
-  enabled: false
+  enabled: true
   worlds: [world]
 
 # ─────────────────────────────────────────────
