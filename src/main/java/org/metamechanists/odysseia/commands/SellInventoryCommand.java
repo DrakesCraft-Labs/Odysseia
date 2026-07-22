@@ -74,21 +74,8 @@ public final class SellInventoryCommand implements CommandExecutor {
         sellPrices.put(Material.CRIMSON_STEM, 1.80);
         sellPrices.put(Material.WARPED_STEM, 1.80);
 
-        // Minerales y lingotes
-        sellPrices.put(Material.COAL, 1.00);
-        sellPrices.put(Material.CHARCOAL, 0.80);
-        sellPrices.put(Material.RAW_IRON, 3.00);
-        sellPrices.put(Material.IRON_INGOT, 4.00);
-        sellPrices.put(Material.RAW_GOLD, 5.00);
-        sellPrices.put(Material.GOLD_INGOT, 6.50);
-        sellPrices.put(Material.RAW_COPPER, 1.50);
-        sellPrices.put(Material.COPPER_INGOT, 2.00);
-        sellPrices.put(Material.REDSTONE, 1.00);
-        sellPrices.put(Material.LAPIS_LAZULI, 1.00);
-        sellPrices.put(Material.DIAMOND, 25.00);
-        sellPrices.put(Material.EMERALD, 15.00);
-        sellPrices.put(Material.NETHERITE_INGOT, 250.00);
-        sellPrices.put(Material.QUARTZ, 1.50);
+        // Minerales y lingotes quedan deliberadamente fuera: Slimefun permite
+        // automatizarlos y convertirlos en una fuente ilimitada de Dragmas.
 
         // Cultivos & agricultura
         sellPrices.put(Material.WHEAT, 1.00);
@@ -128,6 +115,11 @@ public final class SellInventoryCommand implements CommandExecutor {
         } catch (Throwable ignored) {
             return false;
         }
+    }
+
+    /** Visible para pruebas de regresión de la política económica. */
+    boolean isSellable(Material material) {
+        return sellPrices.containsKey(material);
     }
 
     @Override
