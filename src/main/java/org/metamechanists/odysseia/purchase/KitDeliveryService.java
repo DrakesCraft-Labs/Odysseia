@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.metamechanists.odysseia.Odysseia;
@@ -59,6 +60,10 @@ public final class KitDeliveryService {
                 }
                 int amount = integer(values.get("amount"), 1);
                 if (amount < 1 || amount > 2304) errors.add(path + ": cantidad fuera de 1..2304");
+                if (material == Material.WRITTEN_BOOK
+                        && !(values.get("pages") instanceof List<?> pages && !pages.isEmpty())) {
+                    errors.add(path + ": libro sin páginas");
+                }
                 Object enchantments = values.get("enchantments");
                 if (enchantments instanceof Map<?, ?> map) {
                     for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -84,6 +89,18 @@ public final class KitDeliveryService {
         if (name != null) meta.setDisplayName(color(String.valueOf(name)));
         Object loreValue = values.get("lore");
         if (loreValue instanceof List<?> lore) meta.setLore(lore.stream().map(value -> color(String.valueOf(value))).toList());
+        if (meta instanceof BookMeta bookMeta) {
+            bookMeta.setTitle(color(String.valueOf(values.containsKey("book-title")
+                    ? values.get("book-title") : "Guía de DrakesCraft")));
+            bookMeta.setAuthor(color(String.valueOf(values.containsKey("author")
+                    ? values.get("author") : "Staff DrakesCraft")));
+            Object pages = values.get("pages");
+            if (pages instanceof List<?> list) {
+                bookMeta.setPages(list.stream()
+                        .map(value -> color(String.valueOf(value).replace("\\n", "\n")))
+                        .toList());
+            }
+        }
         Object enchantments = values.get("enchantments");
         if (enchantments instanceof Map<?, ?> map) {
             for (Map.Entry<?, ?> entry : map.entrySet()) {

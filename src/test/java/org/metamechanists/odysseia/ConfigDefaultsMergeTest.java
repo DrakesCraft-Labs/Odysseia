@@ -3,10 +3,26 @@ package org.metamechanists.odysseia;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConfigDefaultsMergeTest {
+
+    @Test
+    void productionConfigContainsNativeAutomationAndWelcomeBook() throws Exception {
+        YamlConfiguration config = new YamlConfiguration();
+        config.load(new File("src/main/resources/config.yml"));
+
+        assertTrue(config.getBoolean("automation-guard.enabled"));
+        assertTrue(config.getBoolean("translation.enabled"));
+        assertEquals(6, config.getMapList("kits.inicial.vanilla-items").stream()
+                .filter(item -> "WRITTEN_BOOK".equals(item.get("material")))
+                .map(item -> ((java.util.List<?>) item.get("pages")).size())
+                .findFirst()
+                .orElse(0));
+    }
 
     @Test
     void fillsExplicitlyEmptySectionsWithoutReplacingProductionValues() throws Exception {

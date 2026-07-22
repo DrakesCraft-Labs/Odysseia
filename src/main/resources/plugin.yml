@@ -138,6 +138,9 @@ permissions:
   odysseia.bloodmoon.admin:
     description: Permite iniciar o detener la Luna de Sangre.
     default: op
+  odysseia.automation.bypass:
+    description: Excluye al staff de bloqueos AFK; los relojes del mundo siguen controlados.
+    default: op
   odysseia.owner.aura:
     description: Permite usar el aura destructiva absoluta del dueño.
     default: op

@@ -687,6 +687,27 @@ chat-filter:
     - "negro de mierda"
     - "mogolico"
 
+# Traducción automática por locale; reemplaza drakes_translation.dsc.
+translation:
+  enabled: true
+  join-delay-ticks: 60
+
+# Guardia de automatizaciones vanilla. No inspecciona clics ni bloquea autoclicker.
+automation-guard:
+  enabled: true
+  redstone:
+    enabled: true
+    # Los límites se aplican sólo si existe una estructura vanilla de reloj.
+    fast-window-seconds: 10
+    fast-pulse-limit: 12
+    long-window-seconds: 600
+    long-pulse-limit: 8
+  afk:
+    enabled: true
+    inactivity-seconds: 300
+    minimum-displacement: 4.0
+    notification-cooldown-seconds: 30
+
 # ─────────────────────────────────────────────
 #  Tienda nativa y ProtectionStones
 # ─────────────────────────────────────────────
@@ -863,6 +884,16 @@ kits:
         amount: 32
       - material: TORCH
         amount: 48
+      - material: WRITTEN_BOOK
+        book-title: "&6Guía de DrakesCraft"
+        author: "&eStaff DrakesCraft"
+        pages:
+          - "&6&lDrakesCraft\n&0Survival tecnológico para Java y Bedrock.\n\n&0Web: &9drakescraft.cl\n&0Servidor: &9mc.drakescraft.cl"
+          - "&6&lPrimeros pasos\n\n&0/spawn\n&0/sethome y /home\n&0/tpa y /tpaccept\n&0/rtp\n&0/kit inicial\n&0/tienda"
+          - "&6&lSlimefun\n\n&0/sf guide abre la guía.\n&0/sf search busca recetas.\n\n&4No abuses bugs, dupes ni mecanismos que dañen los TPS."
+          - "&6&lEconomía\n\n&0/bal y /pay\n&0/bank\n&0/tienda\n&0/ca para subastas\n&0/pwarp para comercios de jugadores."
+          - "&6&lProtecciones\n\n&0Coloca tu ProtectionStone.\n&0/ps add <jugador>\n&0/ps remove <jugador>\n&0/ps home\n&0/ps list"
+          - "&6&lAyuda\n\n&0Usa /discord para soporte y anuncios.\n&0Los rangos VIP duran 30 días.\n\n&2Gracias por jugar en DrakesCraft."
 
   # ── Kit de reconocimiento Oldschool ────────────
   oldschool:

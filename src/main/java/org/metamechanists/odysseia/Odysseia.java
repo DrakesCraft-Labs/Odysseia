@@ -58,6 +58,7 @@ public final class Odysseia extends JavaPlugin {
     private BloodMoonManager bloodMoonManager;
     private org.metamechanists.odysseia.events.HorrorNightScheduler horrorNightScheduler;
     private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
+    private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -155,6 +156,8 @@ public final class Odysseia extends JavaPlugin {
         sfMasterWatcher.startGuideCleanup();
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(automation, this);
+        this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
+        Bukkit.getPluginManager().registerEvents(automationGuard, this);
         this.polisBaseline = new PolisBaselineListener(this);
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
         this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);
@@ -289,6 +292,9 @@ public final class Odysseia extends JavaPlugin {
         }
         if (dragonMountService != null) {
             dragonMountService.shutdown();
+        }
+        if (automationGuard != null) {
+            automationGuard.shutdown();
         }
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");

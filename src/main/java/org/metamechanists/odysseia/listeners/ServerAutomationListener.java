@@ -86,6 +86,7 @@ public final class ServerAutomationListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        scheduleTranslation(player);
         String path = "players." + player.getUniqueId();
         long now = Instant.now().getEpochSecond();
         long last = rewards.getLong(path + ".last", 0L);
@@ -98,6 +99,26 @@ public final class ServerAutomationListener implements Listener {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "eco give " + player.getName() + " " + amount);
         player.sendTitle(color("&6&lRecompensa Diaria"), color("&eDía " + streak + " &7· &a+" + amount + " Dragmas"), 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1.2F);
+    }
+
+    /** Replaces the last active Denizen translation script after login settles. */
+    private void scheduleTranslation(Player player) {
+        if (!plugin.getConfig().getBoolean("translation.enabled", true)) return;
+        long delay = Math.clamp(plugin.getConfig().getLong("translation.join-delay-ticks", 60L), 20L, 200L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline() || Bukkit.getPluginCommand("wwct") == null) return;
+            try {
+                String locale = player.getLocale().toLowerCase(Locale.ROOT);
+                String language = locale.startsWith("pt") ? "pt" : locale.startsWith("en") ? "en" : "es";
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wwct " + player.getName() + " stop");
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wwct " + player.getName() + " None " + language);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wwctco " + player.getName());
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wwctci " + player.getName());
+            } catch (RuntimeException exception) {
+                plugin.getLogger().warning("[Translation] No se pudo configurar a " + player.getName()
+                        + ": " + exception.getMessage());
+            }
+        }, delay);
     }
 
     public void showDaily(Player player) {
