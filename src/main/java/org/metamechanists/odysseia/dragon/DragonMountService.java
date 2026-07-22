@@ -15,13 +15,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.DragonFireball;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Interaction;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -96,7 +101,7 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
                 && session.carrier().getPassengers().contains(player);
     }
 
-    /** Moves the invisible carrier and keeps the visual dragon detached from passenger physics. */
+    /** Moves the rider safely and lets the visual dragon follow with client-smooth motion. */
     private void updateFlight(Player player, FlightSession session) {
         Location current = session.carrier().getLocation();
         Vector direction = player.getEyeLocation().getDirection().normalize();
@@ -134,10 +139,36 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         }
         session.setLastSafe(target);
 
-        Location visual = target.clone();
-        visual.setYaw(target.getYaw() + 180F);
-        session.dragon().teleport(visual);
-        spawnTrail(session.variant(), visual);
+        syncVisualDragon(session, target, direction, speed);
+    }
+
+    /** Leads the visual model slightly so packet interpolation never leaves it behind. */
+    private void syncVisualDragon(FlightSession session, Location carrier, Vector direction, double speed) {
+        EnderDragon dragon = session.dragon();
+        Location desired = carrier.clone()
+                .add(direction.clone().multiply(DragonFlightPolicy.visualLeadDistance(speed)))
+                .subtract(0, 1.25, 0);
+        desired.setYaw(carrier.getYaw() + 180F);
+        desired.setPitch(carrier.getPitch() * 0.35F);
+
+        Location current = dragon.getLocation();
+        if (current.getWorld() != desired.getWorld()) {
+            dragon.teleport(desired);
+            dragon.setVelocity(new Vector());
+        } else {
+            Vector correction = desired.toVector().subtract(current.toVector());
+            if (DragonFlightPolicy.shouldSnapVisual(correction.lengthSquared())) {
+                dragon.teleport(desired);
+                dragon.setVelocity(new Vector());
+            } else {
+                dragon.setRotation(desired.getYaw(), desired.getPitch());
+                dragon.setVelocity(DragonFlightPolicy.visualVelocity(direction, speed, correction));
+            }
+        }
+        if (dragon.getPhase() != EnderDragon.Phase.HOVER) {
+            dragon.setPhase(EnderDragon.Phase.HOVER);
+        }
+        spawnTrail(session.variant(), desired);
     }
 
     private void spawnTrail(DragonVariant variant, Location location) {
@@ -310,7 +341,8 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         carrier.setPersistent(false);
 
         EnderDragon dragon = (EnderDragon) world.spawnEntity(origin, EntityType.ENDER_DRAGON);
-        dragon.setAI(false);
+        // AI keeps wing/body animation alive; movement and world interaction remain controlled here.
+        dragon.setAI(true);
         dragon.setInvulnerable(true);
         dragon.setSilent(true);
         dragon.setCollidable(false);
@@ -423,6 +455,28 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
     public void onQuit(PlayerQuitEvent event) {
         FlightSession session = activeFlights.remove(event.getPlayer().getUniqueId());
         if (session != null) cleanupFlight(event.getPlayer(), session);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onVisualDragonDamage(EntityDamageByEntityEvent event) {
+        if (isManagedDragon(event.getDamager())) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onVisualDragonExplode(EntityExplodeEvent event) {
+        if (isManagedDragon(event.getEntity())) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onVisualDragonChangeBlock(EntityChangeBlockEvent event) {
+        if (isManagedDragon(event.getEntity())) event.setCancelled(true);
+    }
+
+    private boolean isManagedDragon(Entity entity) {
+        Entity root = entity instanceof ComplexEntityPart part ? part.getParent() : entity;
+        UUID entityId = root.getUniqueId();
+        return activeFlights.values().stream()
+                .anyMatch(session -> session.dragon().getUniqueId().equals(entityId));
     }
 
     private void cleanupFlight(Player player, FlightSession session) {
