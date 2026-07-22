@@ -53,7 +53,8 @@ public class HorrorFogCommand implements CommandExecutor, TabCompleter {
 
                 // Spawn de partículas de humo denso y partículas de dragón alrededor de la cabeza
                 var head = player.getEyeLocation();
-                player.spawnParticle(Particle.DRAGON_BREATH, head, 6, 0.4, 0.4, 0.4, 0.01);
+                org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                        player, head, 6, 0.4, 0.4, 0.4, 0.01, 1.0f);
                 player.spawnParticle(Particle.LARGE_SMOKE, head, 8, 0.5, 0.5, 0.5, 0.02);
                 player.spawnParticle(Particle.SQUID_INK, head, 4, 0.3, 0.3, 0.3, 0.01);
             }

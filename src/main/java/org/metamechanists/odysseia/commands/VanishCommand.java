@@ -211,7 +211,8 @@ public final class VanishCommand implements CommandExecutor, org.bukkit.command.
             Location particleLoc2 = loc.clone().add(-x, y, -z);
             
             player.getWorld().spawnParticle(Particle.PORTAL, particleLoc1, 2, 0, 0, 0, 0);
-            player.getWorld().spawnParticle(Particle.DRAGON_BREATH, particleLoc2, 1, 0, 0, 0, 0, 1.0f);
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    player.getWorld(), particleLoc2, 1, 0, 0, 0, 0, 1.0f);
         }
 
         // Spawn explosion and cloud puff particles

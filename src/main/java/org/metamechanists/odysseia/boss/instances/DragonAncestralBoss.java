@@ -108,7 +108,8 @@ public class DragonAncestralBoss extends OdysseyBoss {
 
         for (double d = 1; d <= 25; d += 0.8) {
             Location point = eye.clone().add(dir.clone().multiply(d));
-            point.getWorld().spawnParticle(Particle.DRAGON_BREATH, point, 10, 0.4, 0.4, 0.4, 0.05);
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    point.getWorld(), point, 10, 0.4, 0.4, 0.4, 0.05, 1.0f);
             point.getWorld().spawnParticle(Particle.WITCH, point, 5, 0.3, 0.3, 0.3, 0.02);
 
             for (Player p : point.getWorld().getNearbyEntities(point, 2.0, 2.0, 2.0).stream()

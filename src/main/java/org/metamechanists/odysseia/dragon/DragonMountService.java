@@ -148,7 +148,8 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
             world.spawnParticle(Particle.COMPOSTER, location, 5, 0.5, 0.3, 0.5, 0.02);
         } else {
             world.spawnParticle(Particle.SOUL_FIRE_FLAME, location, 8, 0.8, 0.5, 0.8, 0.05);
-            world.spawnParticle(Particle.DRAGON_BREATH, location, 6, 0.8, 0.5, 0.8, 0.02);
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    world, location, 6, 0.8, 0.5, 0.8, 0.02, 1.0f);
             world.spawnParticle(Particle.END_ROD, location, 4, 0.5, 0.5, 0.5, 0.05);
         }
     }
@@ -367,7 +368,7 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
                 player.playSound(eye, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.5f, 1.4f);
             }
             case "hielo" -> particleBeam(eye, direction, Particle.SNOWFLAKE, 0.05);
-            case "vacío" -> particleBeam(eye, direction, Particle.DRAGON_BREATH, 0.02);
+            case "vacío" -> dragonBreathBeam(eye, direction);
             default -> {
                 DragonFireball fireball = (DragonFireball) eye.getWorld().spawnEntity(
                         eye.clone().add(direction.clone().multiply(1.8)), EntityType.DRAGON_FIREBALL);
@@ -398,6 +399,14 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         for (double distance = 1; distance <= 20; distance++) {
             Location point = eye.clone().add(direction.clone().multiply(distance));
             point.getWorld().spawnParticle(particle, point, 15, 0.4, 0.4, 0.4, extra);
+        }
+    }
+
+    private void dragonBreathBeam(Location eye, Vector direction) {
+        for (double distance = 1; distance <= 20; distance++) {
+            Location point = eye.clone().add(direction.clone().multiply(distance));
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    point.getWorld(), point, 15, 0.4, 0.4, 0.4, 0.02, 1.0f);
         }
     }
 

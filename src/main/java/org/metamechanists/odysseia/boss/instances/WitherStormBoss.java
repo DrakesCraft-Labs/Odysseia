@@ -88,7 +88,8 @@ public class WitherStormBoss extends OdysseyBoss {
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
             Location particleLoc = origin.clone().add(x, -i * 0.4, z);
-            particleLoc.getWorld().spawnParticle(Particle.DRAGON_BREATH, particleLoc, 3, 0.1, 0.1, 0.1, 0.02);
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    particleLoc.getWorld(), particleLoc, 3, 0.1, 0.1, 0.1, 0.02, 1.0f);
             particleLoc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, particleLoc, 2, 0.1, 0.1, 0.1, 0.05);
         }
     }

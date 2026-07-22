@@ -66,7 +66,8 @@ public class ColosoEndBoss extends OdysseyBoss {
     private void voidRift(Player target) {
         speak("El vacío reclama vuestra existencia.");
         Location center = entity.getLocation();
-        center.getWorld().spawnParticle(Particle.DRAGON_BREATH, center, 120, 3, 3, 3, 0.1);
+        org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                center.getWorld(), center, 120, 3, 3, 3, 0.1, 1.0f);
         center.getWorld().playSound(center, Sound.ENTITY_ENDER_DRAGON_GROWL, 1.5f, 0.5f);
 
         for (Player p : findPlayersInRange(20)) {

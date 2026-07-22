@@ -51,7 +51,8 @@ public class SoulShieldSkill implements BossSkill {
             // Audio-visuals
             loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.5f, 0.7f);
             loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_DEATH, 1.0f, 0.8f);
-            loc.getWorld().spawnParticle(org.bukkit.Particle.DRAGON_BREATH, loc.add(0, 1.5, 0), 100, 1.0, 1.0, 1.0, 0.1, 1.0f);
+            org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    loc.getWorld(), loc.add(0, 1.5, 0), 100, 1.0, 1.0, 1.0, 0.1, 1.0f);
 
             // Alert nearby players
             loc.getWorld().getNearbyEntities(loc, 25.0, 25.0, 25.0).forEach(e -> {
