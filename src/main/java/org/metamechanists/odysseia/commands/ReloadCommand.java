@@ -27,8 +27,22 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
                     + " &8| &7Instance: &f" + plugin.getInstanceId()));
             return true;
         }
+        if (args[0].equalsIgnoreCase("vipalerts")) {
+            if (!sender.hasPermission("odysseia.reload")) {
+                sender.sendMessage(color("&cNo tienes permiso."));
+                return true;
+            }
+            sender.sendMessage(color("&e[Odysseia] &7Generando y enviando reporte de caducidad VIP a Discord..."));
+            boolean ok = plugin.getVipExpiryAlertService() != null && plugin.getVipExpiryAlertService().sendVipExpiryReport();
+            if (ok) {
+                sender.sendMessage(color("&a[Odysseia] Reporte de caducidad VIP enviado exitosamente a Discord."));
+            } else {
+                sender.sendMessage(color("&c[Odysseia] No se pudo enviar el reporte. Verifica discord.webhook-url en config.yml."));
+            }
+            return true;
+        }
         if (!args[0].equalsIgnoreCase("reload")) {
-            sender.sendMessage(color("&eUso: &f/odysseia reload &7o &f/odysseia status"));
+            sender.sendMessage(color("&eUso: &f/odysseia reload &7| &f/odysseia status &7| &f/odysseia vipalerts"));
             return true;
         }
         if (!sender.hasPermission("odysseia.reload")) {
@@ -59,7 +73,7 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return List.of("reload", "status").stream()
+            return List.of("reload", "status", "vipalerts").stream()
                     .filter(value -> value.startsWith(args[0].toLowerCase()))
                     .toList();
         }

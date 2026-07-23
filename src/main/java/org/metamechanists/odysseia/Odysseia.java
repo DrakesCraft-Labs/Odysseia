@@ -59,6 +59,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.events.HorrorNightScheduler horrorNightScheduler;
     private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
     private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
+    private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -162,6 +163,8 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
         this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);
         Bukkit.getPluginManager().registerEvents(horrorNightScheduler, this);
+        this.vipExpiryAlertService = new org.metamechanists.odysseia.services.VipExpiryAlertService(this);
+        vipExpiryAlertService.startScheduler();
         horrorNightScheduler.start();
         bloodMoonManager.start();
 
@@ -718,6 +721,10 @@ public final class Odysseia extends JavaPlugin {
 
     public BloodMoonManager getBloodMoonManager() {
         return this.bloodMoonManager;
+    }
+
+    public org.metamechanists.odysseia.services.VipExpiryAlertService getVipExpiryAlertService() {
+        return vipExpiryAlertService;
     }
 
     public void registerDynamicCommand(String name, org.bukkit.command.CommandExecutor executor) {

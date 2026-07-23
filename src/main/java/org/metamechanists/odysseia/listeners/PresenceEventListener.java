@@ -29,7 +29,7 @@ public final class PresenceEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
         if (!plugin.getConfig().getBoolean("presence.enabled", true)
-                || !plugin.getConfig().getBoolean("presence.events.player-join", true)) {
+                || !plugin.getConfig().getBoolean("presence.events.player-join", false)) {
             return;
         }
 
@@ -60,7 +60,7 @@ public final class PresenceEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuit(PlayerQuitEvent event) {
         if (!plugin.getConfig().getBoolean("presence.enabled", true)
-                || !plugin.getConfig().getBoolean("presence.events.player-quit", true)) {
+                || !plugin.getConfig().getBoolean("presence.events.player-quit", false)) {
             return;
         }
 

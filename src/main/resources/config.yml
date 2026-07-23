@@ -312,6 +312,14 @@ presence:
     rate-limit-per-minute: 12
 
 # ─────────────────────────────────────────────
+#  Alertador Diario de Caducidad de Rangos VIP
+# ─────────────────────────────────────────────
+vipalerts:
+  enabled: true
+  # Umbral de días restantes para destacar advertencia [PRÓXIMO A VENCER]
+  warning-threshold-days: 3
+
+# ─────────────────────────────────────────────
 #  Entrega Automática de Tienda (StoreManager)
 # ─────────────────────────────────────────────
 store:
