@@ -13,6 +13,7 @@ softdepend:
   - Slimefun
   - DiosesDrakes
   - floodgate
+  - DiscordSRV
 
 commands:
   papademar:

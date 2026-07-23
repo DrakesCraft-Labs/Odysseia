@@ -60,6 +60,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
     private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
+    private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -168,6 +169,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(horrorNightScheduler, this);
         this.vipExpiryAlertService = new org.metamechanists.odysseia.services.VipExpiryAlertService(this);
         vipExpiryAlertService.startScheduler();
+        this.discordTranslationBridge = new org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService(this);
         horrorNightScheduler.start();
         bloodMoonManager.start();
 
@@ -233,6 +235,7 @@ public final class Odysseia extends JavaPlugin {
 
         startSchedulers();
         startStarTelemetry();
+        if (discordTranslationBridge != null) discordTranslationBridge.reload();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, schedulers y purchase engine.");
         return errors;
     }
@@ -277,6 +280,9 @@ public final class Odysseia extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (discordTranslationBridge != null) {
+            discordTranslationBridge.unregisterDiscordSRV();
+        }
         if (vanishCommand != null) {
             vanishCommand.revealAll();
         }
