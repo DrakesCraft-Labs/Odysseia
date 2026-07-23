@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JackStar6677-1/Odysseia/main/odysseia_banner.svg" width="100%" alt="Odysseia Animated Banner" />
+  <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/Odysseia/main/odysseia_banner.svg" alt="Odysseia Banner" width="920" />
 </p>
 
 # Odysseia Engine v1.1.0 🦀☕
