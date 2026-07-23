@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -72,7 +71,7 @@ public class HorrorNightScheduler implements Listener {
             long time = world.getTime();
             long dayIndex = world.getFullTime() / 24000L;
 
-            // Noche en Minecraft: entre tick 13000 y 23000
+            // Noche en Minecraft: entre tick 13000 y 22000
             if (time >= 13000 && time <= 22000) {
                 String worldKey = world.getName();
                 Long lastDay = lastNightProcessedPerWorld.get(worldKey);
@@ -179,12 +178,12 @@ public class HorrorNightScheduler implements Listener {
                 80, 2.0, 2.0, 2.0, 0.1, 0.1f);
 
         if (isFinalStrike) {
-            // En el 3er impacto de la noche, si se desea, invoca al Wither Storm cerca
+            // En el 3er impacto de la noche se intensifica el terror ambiental sin invocar la entidad del boss
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (player.isOnline() && !player.isDead()) {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&4&l👁️ EL WITHER STORM HA DESPERTADO CERCA DE TI."));
-                    plugin.getBossManager().spawnBoss("wither_storm", player.getLocation().add(15, 5, 15));
+                        "&4&l👁️ UNA SOMBRA ANCESTRAL HA PASADO CERCA DE TI..."));
+                    player.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 2.0f, 0.4f);
                 }
             }, 60L);
         }

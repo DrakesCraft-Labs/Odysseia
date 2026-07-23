@@ -162,6 +162,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
         this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);
         Bukkit.getPluginManager().registerEvents(horrorNightScheduler, this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.DiscordSRVCommandListener(this), this);
         horrorNightScheduler.start();
         bloodMoonManager.start();
 

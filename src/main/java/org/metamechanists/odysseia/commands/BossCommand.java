@@ -162,7 +162,10 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 || type.equals("heimdall") || type.equals("hidra")
                 || type.equals("cerbero") || type.equals("artemisa")
                 || type.equals("tifon") || type.equals("tifón")
-                || type.equals("prometeo");
+                || type.equals("prometeo")
+                || type.equals("coloso_end") || type.equals("coloso-end") || type.equals("coloso")
+                || type.equals("wither_storm") || type.equals("wither-storm") || type.equals("witherstorm") || type.equals("wither")
+                || type.equals("dragon_ancestral") || type.equals("dragon-ancestral") || type.equals("dragon");
     }
 
     @Override
@@ -209,7 +212,8 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 "circe", "polifemo", "dios_corrupto",
                 "thor", "ares", "hades", "poseidon", "zeus",
                 "loki", "odin", "kratos",
-                "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
+                "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo",
+                "coloso_end", "wither_storm", "dragon_ancestral"
         );
     }
 }

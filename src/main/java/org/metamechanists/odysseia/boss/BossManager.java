@@ -75,7 +75,7 @@ public class BossManager implements Listener {
     /** Jefes elegibles para spawn natural por defecto (si la config no especifica lista). */
     private static final java.util.List<String> DEFAULT_NATURAL_BOSSES = java.util.List.of(
             "thor", "ares", "hades", "poseidon", "zeus", "loki", "odin", "kratos",
-            "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo", "coloso_end", "dragon_ancestral"
+            "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo", "coloso_end"
     );
 
     public BossManager(Odysseia plugin) {
