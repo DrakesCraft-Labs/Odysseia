@@ -28,12 +28,14 @@ public final class KitClaimService {
         return remaining > 0L ? ClaimState.cooldown(remaining) : ClaimState.availableNow();
     }
 
-    public void record(UUID playerId, String kit) {
+    public boolean record(UUID playerId, String kit) {
         data.set(playerId + "." + kit, System.currentTimeMillis());
         try {
             data.save(file);
+            return true;
         } catch (IOException error) {
             plugin.getLogger().severe("[Kits] No se pudo guardar kit-claims.yml: " + error.getMessage());
+            return false;
         }
     }
 

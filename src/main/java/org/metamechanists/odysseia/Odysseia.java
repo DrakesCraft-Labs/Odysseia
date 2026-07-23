@@ -248,7 +248,9 @@ public final class Odysseia extends JavaPlugin {
             }
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
                     new InputStreamReader(stream, StandardCharsets.UTF_8));
-            if (mergeMissingConfig(getConfig(), defaults)) {
+            boolean changed = mergeMissingConfig(getConfig(), defaults);
+            changed |= migrateUnsafeLegacyDefaults(getConfig());
+            if (changed) {
                 saveConfig();
             }
         } catch (IOException | RuntimeException error) {
@@ -274,6 +276,41 @@ public final class Odysseia extends JavaPlugin {
                 current.set(key, defaultValue);
                 changed = true;
             }
+        }
+        return changed;
+    }
+
+    /**
+     * Removes superseded duplicate systems and upgrades only known unsafe
+     * defaults, preserving deliberate production tuning everywhere else.
+     */
+    static boolean migrateUnsafeLegacyDefaults(ConfigurationSection config) {
+        boolean changed = false;
+        if (config.contains("starter-kit.items") || config.contains("starter-kit.commands")) {
+            config.set("starter-kit.items", null);
+            config.set("starter-kit.commands", null);
+            changed = true;
+        }
+        if (config.getLong("starter-kit.delay-ticks", 400L) <= 100L) {
+            config.set("starter-kit.delay-ticks", 400L);
+            changed = true;
+        }
+        if (config.getLong("translation.join-delay-ticks", 400L) <= 60L) {
+            config.set("translation.join-delay-ticks", 400L);
+            changed = true;
+        }
+        if (config.getBoolean("discord-translator.translate-mc-to-discord", false)) {
+            config.set("discord-translator.translate-mc-to-discord", false);
+            changed = true;
+        }
+        if (config.getInt("automation-guard.redstone.fast-pulse-limit", 40) == 12) {
+            config.set("automation-guard.redstone.fast-pulse-limit", 40);
+            changed = true;
+        }
+        if (config.getInt("automation-guard.redstone.long-pulse-limit", 180) == 8) {
+            config.set("automation-guard.redstone.long-window-seconds", 120);
+            config.set("automation-guard.redstone.long-pulse-limit", 180);
+            changed = true;
         }
         return changed;
     }
