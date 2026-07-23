@@ -22,7 +22,8 @@ import java.util.regex.Pattern;
 
 /**
  * Servicio de Puente de Traducción Bidireccional entre DiscordSRV y Minecraft
- * utilizando la API de Star Translate (LibreTranslate en https://web.drakescraft.cl/api/translate).
+ * utilizando la API de Star Translate (LibreTranslate en https://web.drakescraft.cl/api/translate)
+ * y emisor de telemetría de Chat en Vivo hacia https://web.drakescraft.cl/api/chat/ingest.
  */
 @Log
 public class DiscordTranslationBridgeService {
@@ -170,11 +171,34 @@ public class DiscordTranslationBridgeService {
     }
 
     /**
+     * Publica el mensaje en tiempo real al feed de chat web en Star
+     */
+    public void postWebChatFeed(String author, String message, String source) {
+        if (author == null || message == null || message.trim().isEmpty()) return;
+        try {
+            String url = "https://web.drakescraft.cl/api/chat/ingest";
+            String jsonPayload = String.format("{\"author\":%s,\"message\":%s,\"source\":%s}",
+                    escapeJson(author), escapeJson(message), escapeJson(source));
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(3))
+                    .header("Content-Type", "application/json")
+                    .header("User-Agent", "Odysseia/1.1.0")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
      * Evento DiscordSRV: Mensaje recibido desde Discord hacia Minecraft
      */
     @Subscribe
     public void onDiscordMessageReceived(DiscordGuildMessageReceivedEvent event) {
-        if (!enabled || !translateDiscordToMc) {
+        if (!enabled) {
             return;
         }
 
@@ -189,6 +213,11 @@ public class DiscordTranslationBridgeService {
         }
 
         String authorName = event.getAuthor().getName();
+
+        // Transmitir al feed de chat de la web en tiempo real
+        postWebChatFeed(authorName, messageContent, "discord");
+
+        if (!translateDiscordToMc) return;
 
         // 1. Detectar idioma de origen
         detectLanguage(messageContent).thenAccept(detectedLang -> {
@@ -221,7 +250,7 @@ public class DiscordTranslationBridgeService {
      */
     @Subscribe
     public void onMinecraftMessageToDiscord(GameChatMessagePreProcessEvent event) {
-        if (!enabled || !translateMcToDiscord) {
+        if (!enabled) {
             return;
         }
 
@@ -229,6 +258,13 @@ public class DiscordTranslationBridgeService {
         if (messageContent == null || messageContent.trim().isEmpty()) {
             return;
         }
+
+        String playerName = event.getPlayer() != null ? event.getPlayer().getName() : "Jugador";
+
+        // Transmitir al feed de chat de la web en tiempo real
+        postWebChatFeed(playerName, messageContent, "minecraft");
+
+        if (!translateMcToDiscord) return;
 
         // 1. Detectar idioma del jugador de MC
         detectLanguage(messageContent).thenAccept(detectedLang -> {
