@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JackStar6677-1/Odysseia/main/odysseia_banner.svg" width="100%" alt="Odysseia Animated Banner" />
+</p>
+
 # Odysseia Engine v1.1.0 🦀☕
 
 <p align="center">
