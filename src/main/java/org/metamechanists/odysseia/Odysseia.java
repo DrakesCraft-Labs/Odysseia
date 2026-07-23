@@ -109,6 +109,9 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.commands.KitCommand kitCommand = new org.metamechanists.odysseia.commands.KitCommand(this);
         getCommand("kit").setExecutor(kitCommand);
         getCommand("kit").setTabCompleter(kitCommand);
+        org.metamechanists.odysseia.commands.EsteUsuarioEsViejoCommand esteViejo = new org.metamechanists.odysseia.commands.EsteUsuarioEsViejoCommand(this);
+        getCommand("esteusuarioesviejo").setExecutor(esteViejo);
+        getCommand("esteusuarioesviejo").setTabCompleter(esteViejo);
         org.metamechanists.odysseia.menus.ShopMenuService shopMenu = new org.metamechanists.odysseia.menus.ShopMenuService(this);
         getCommand("drakestienda").setExecutor(shopMenu);
         java.util.List<String> kitErrors = kitGive.validateConfiguration();

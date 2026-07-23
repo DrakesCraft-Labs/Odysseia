@@ -101,6 +101,11 @@ commands:
     description: Vende rápidamente los recursos y materiales de tu inventario principal.
     aliases: [venderinv, sellall]
     usage: /sellinv
+  esteusuarioesviejo:
+    description: Otorga el rango, permisos y kit legendario Oldschool (Veteranos 5+ Años) a un jugador.
+    permission: odysseia.admin.oldschool
+    aliases: [grantoldschool, viejodesde, oldschoolgive]
+    usage: /esteusuarioesviejo <jugador>
 permissions:
   odysseia.horrorfog:
     description: Permite activar o desactivar la niebla densa de terror.
