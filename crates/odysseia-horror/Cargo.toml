@@ -1,0 +1,11 @@
+[package]
+name = "odysseia-horror"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+odysseia-core = { path = "../odysseia-core" }
+rand.workspace = true
+serde.workspace = true

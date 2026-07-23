@@ -1,0 +1,23 @@
+[package]
+name = "odysseia-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "odysseia-server"
+path = "src/main.rs"
+
+[dependencies]
+odysseia-core = { path = "../odysseia-core" }
+odysseia-automation = { path = "../odysseia-automation" }
+odysseia-horror = { path = "../odysseia-horror" }
+odysseia-store = { path = "../odysseia-store" }
+odysseia-telemetry = { path = "../odysseia-telemetry" }
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

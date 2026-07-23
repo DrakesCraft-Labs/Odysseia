@@ -1,0 +1,16 @@
+[package]
+name = "odysseia-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+odysseia-core = { path = "../odysseia-core" }
+odysseia-automation = { path = "../odysseia-automation" }
+odysseia-horror = { path = "../odysseia-horror" }
+odysseia-telemetry = { path = "../odysseia-telemetry" }
+serde_json.workspace = true

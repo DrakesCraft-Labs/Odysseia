@@ -1,0 +1,11 @@
+[package]
+name = "odysseia-automation"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+odysseia-core = { path = "../odysseia-core" }
+serde.workspace = true
+thiserror.workspace = true
