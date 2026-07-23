@@ -64,7 +64,7 @@ public class DiscordTranslationBridgeService {
 
         this.apiKey = config.getString("discord-translator.api-key", "");
         this.translateDiscordToMc = config.getBoolean("discord-translator.translate-discord-to-mc", true);
-        this.translateMcToDiscord = config.getBoolean("discord-translator.translate-mc-to-discord", true);
+        this.translateMcToDiscord = config.getBoolean("discord-translator.translate-mc-to-discord", false);
         this.mcTargetLanguage = config.getString("discord-translator.mc-target-language", "es");
         this.discordTargetLanguage = config.getString("discord-translator.discord-target-language", "en");
 

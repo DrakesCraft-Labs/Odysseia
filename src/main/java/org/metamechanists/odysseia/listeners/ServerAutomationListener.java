@@ -22,6 +22,7 @@ import org.metamechanists.odysseia.Odysseia;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -87,6 +88,7 @@ public final class ServerAutomationListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         scheduleTranslation(player);
+        deliverStarterKitIfFirstJoin(player);
         String path = "players." + player.getUniqueId();
         long now = Instant.now().getEpochSecond();
         long last = rewards.getLong(path + ".last", 0L);
@@ -99,6 +101,101 @@ public final class ServerAutomationListener implements Listener {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "eco give " + player.getName() + " " + amount);
         player.sendTitle(color("&6&lRecompensa Diaria"), color("&eDía " + streak + " &7· &a+" + amount + " Dragmas"), 10, 70, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1.2F);
+    }
+
+    private void deliverStarterKitIfFirstJoin(Player player) {
+        if (!plugin.getConfig().getBoolean("starter-kit.enabled", true)) return;
+
+        NamespacedKey kitKey = new NamespacedKey(plugin, "received_starter_kit");
+        if (player.getPersistentDataContainer().has(kitKey, PersistentDataType.BYTE) && !player.isOp()) {
+            return; // Ya recibió el kit inicial
+        }
+
+        long delayTicks = Math.max(20L, plugin.getConfig().getLong("starter-kit.delay-ticks", 100L));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline()) return;
+
+            // Marcar como entregado
+            player.getPersistentDataContainer().set(kitKey, PersistentDataType.BYTE, (byte) 1);
+
+            // Mensaje de bienvenida
+            String msg = plugin.getConfig().getString("starter-kit.welcome-message", "");
+            if (msg != null && !msg.isBlank()) {
+                player.sendMessage(color(msg));
+            }
+
+            // Comandos en consola
+            List<String> commands = plugin.getConfig().getStringList("starter-kit.commands");
+            for (String cmd : commands) {
+                if (cmd != null && !cmd.isBlank()) {
+                    String formattedCmd = cmd.replace("{player}", player.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), formattedCmd);
+                }
+            }
+
+            // Entregar items configurados
+            List<java.util.Map<?, ?>> itemsConfig = plugin.getConfig().getMapList("starter-kit.items");
+            for (java.util.Map<?, ?> itemMap : itemsConfig) {
+                try {
+                    String matName = String.valueOf(itemMap.get("material")).toUpperCase(Locale.ROOT);
+                    org.bukkit.Material mat = org.bukkit.Material.matchMaterial(matName);
+                    if (mat == null) continue;
+
+                    int amount = 1;
+                    if (itemMap.containsKey("amount")) {
+                        amount = Integer.parseInt(String.valueOf(itemMap.get("amount")));
+                    }
+
+                    org.bukkit.inventory.ItemStack stack = new org.bukkit.inventory.ItemStack(mat, amount);
+                    org.bukkit.inventory.meta.ItemMeta meta = stack.getItemMeta();
+
+                    if (meta != null) {
+                        if (itemMap.containsKey("name")) {
+                            meta.setDisplayName(color(String.valueOf(itemMap.get("name"))));
+                        }
+                        if (itemMap.containsKey("lore")) {
+                            List<?> rawLore = (List<?>) itemMap.get("lore");
+                            List<String> formattedLore = new java.util.ArrayList<>();
+                            for (Object l : rawLore) {
+                                formattedLore.add(color(String.valueOf(l)));
+                            }
+                            meta.setLore(formattedLore);
+                        }
+
+                        if (itemMap.containsKey("enchantments")) {
+                            Object rawEnchants = itemMap.get("enchantments");
+                            if (rawEnchants instanceof java.util.Map<?, ?> enchMap) {
+                                for (java.util.Map.Entry<?, ?> entry : enchMap.entrySet()) {
+                                    String enchName = String.valueOf(entry.getKey()).toUpperCase(Locale.ROOT);
+                                    org.bukkit.enchantments.Enchantment ench = org.bukkit.enchantments.Enchantment.getByName(enchName);
+                                    if (ench == null) {
+                                        // Buscar por NamespacedKey
+                                        ench = org.bukkit.enchantments.Enchantment.getByKey(org.bukkit.NamespacedKey.minecraft(enchName.toLowerCase(Locale.ROOT)));
+                                    }
+                                    if (ench != null) {
+                                        int lvl = Integer.parseInt(String.valueOf(entry.getValue()));
+                                        meta.addEnchant(ench, lvl, true);
+                                    }
+                                }
+                            }
+                        }
+                        stack.setItemMeta(meta);
+                    }
+
+                    // Dar item al jugador
+                    java.util.Map<Integer, org.bukkit.inventory.ItemStack> leftovers = player.getInventory().addItem(stack);
+                    if (!leftovers.isEmpty()) {
+                        for (org.bukkit.inventory.ItemStack leftover : leftovers.values()) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                        }
+                    }
+                } catch (Exception ex) {
+                    plugin.getLogger().warning("[StarterKit] Error procesando item: " + ex.getMessage());
+                }
+            }
+
+            plugin.getLogger().info("[SUCCESS] Kit inicial entregado a " + player.getName());
+        }, delayTicks);
     }
 
     /** Configures the translator after login settles without disabling or taking ownership of Denizen. */
