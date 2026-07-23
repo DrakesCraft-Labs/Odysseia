@@ -1,10 +1,10 @@
-name: CI
+name: Odysseia Engine CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [ main, JAVA ]
   pull_request:
-    branches: [main]
+    branches: [ main, JAVA ]
   workflow_dispatch:
 
 concurrency:
@@ -15,29 +15,45 @@ permissions:
   contents: read
 
 jobs:
-  test-build:
-    name: Test y build
+  rust-workspace:
+    name: Build & Test Rust 2021 Workspace
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Java 21
-        uses: actions/setup-java@v5
+      - name: Set up Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Test Rust Workspace
+        run: cargo test --workspace
+
+      - name: Build Rust FFI Library
+        run: cargo build --release --workspace
+
+  java-build:
+    name: Build Java 21 FFM Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
 
-      - name: Ejecutar tests y empaquetar
+      - name: Build Maven Package
         run: mvn --batch-mode --no-transfer-progress clean verify
 
-      - name: Publicar JAR
-        uses: actions/upload-artifact@v7
+      - name: Upload Odysseia Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: Odysseia-${{ github.sha }}
+          name: Odysseia-Plugin
           path: target/Odysseia-*.jar
-          if-no-files-found: error
-          retention-days: 14
+          if-no-files-found: ignore
