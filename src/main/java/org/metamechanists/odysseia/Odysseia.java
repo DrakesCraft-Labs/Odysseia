@@ -26,15 +26,14 @@ import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
 import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
 import org.metamechanists.odysseia.events.BloodMoonManager;
+import org.metamechanists.odysseia.services.RestartSchedule;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.DayOfWeek;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -651,18 +650,10 @@ public final class Odysseia extends JavaPlugin {
         if (!getConfig().getBoolean("restart.enabled", false)) {
             return;
         }
-        String dayStr = getConfig().getString("restart.day", "MONDAY").toUpperCase();
+        String dayStr = getConfig().getString("restart.day", "DAILY");
         int hour = getConfig().getInt("restart.hour", 5);
         int minute = getConfig().getInt("restart.minute", 0);
         String timezone = getConfig().getString("restart.timezone", "America/Santiago");
-
-        DayOfWeek targetDay;
-        try {
-            targetDay = DayOfWeek.valueOf(dayStr);
-        } catch (IllegalArgumentException e) {
-            getLogger().warning("[Restart] Día inválido en config: " + dayStr + ". Usando MONDAY.");
-            targetDay = DayOfWeek.MONDAY;
-        }
 
         ZoneId zone;
         try {
@@ -673,10 +664,13 @@ public final class Odysseia extends JavaPlugin {
         }
 
         ZonedDateTime now = ZonedDateTime.now(zone);
-        ZonedDateTime next = now.with(TemporalAdjusters.nextOrSame(targetDay))
-                .withHour(hour).withMinute(minute).withSecond(0).withNano(0);
-        if (!next.isAfter(now)) {
-            next = next.with(TemporalAdjusters.next(targetDay));
+        ZonedDateTime next;
+        try {
+            next = RestartSchedule.next(now, dayStr, hour, minute);
+        } catch (IllegalArgumentException e) {
+            getLogger().warning("[Restart] Día inválido en config: " + dayStr + ". Usando DAILY.");
+            dayStr = "DAILY";
+            next = RestartSchedule.next(now, dayStr, hour, minute);
         }
 
         long delaySeconds = java.time.Duration.between(now, next).getSeconds();
@@ -701,14 +695,9 @@ public final class Odysseia extends JavaPlugin {
             }
         }
 
-        final DayOfWeek finalDay = targetDay;
-        final int finalHour = hour;
-        final int finalMin = minute;
-        final ZoneId finalZone = zone;
         trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () -> {
-            getLogger().info("[Restart] Ejecutando reinicio semanal programado.");
-            Bukkit.broadcastMessage(ChatColor.RED + "⚡ Reiniciando servidor ahora...");
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+            getLogger().info("[Restart] Iniciando guardado y cuenta regresiva programada.");
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart30");
         }, delayTicks));
     }
 

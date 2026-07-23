@@ -1,5 +1,5 @@
 name: Odysseia
-version: 1.1.1
+version: 1.1.2
 main: org.metamechanists.odysseia.Odysseia
 api-version: 1.21
 description: Suite principal de sistemas, tienda, kits, eventos y administracion de DrakesCraft.

@@ -210,6 +210,14 @@ presence:
     advancement: false
     rate-limit-per-minute: 12
 
+# Reinicio diario seguro con guardado y cuenta regresiva de /restart30.
+restart:
+  enabled: true
+  day: DAILY
+  hour: 5
+  minute: 0
+  timezone: "America/Santiago"
+
 # ─────────────────────────────────────────────
 #  Alertador Diario de Caducidad de Rangos VIP
 # ─────────────────────────────────────────────

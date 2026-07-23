@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/Odysseia/main/odysseia_banner.svg" width="100%" alt="Odysseia Animated Banner" />
 </p>
 
-# Odysseia Engine v1.1.1 🦀☕
+# Odysseia Engine v1.1.2 🦀☕
 
 <p align="center">
   <strong>Motor Mítico, Noche de Terror, Sistema de Bosses y Gestión para Purpur/Paper 1.21.11</strong><br>
