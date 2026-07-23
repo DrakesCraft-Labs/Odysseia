@@ -1799,3 +1799,24 @@ sfmaster-guide:
   enabled: true
   block-cheat-command: true
   cleanup-interval-seconds: 30
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Puente de Traducción Bidireccional Discord ↔ Minecraft (via Star LibreTranslate)
+# ─────────────────────────────────────────────────────────────────────────────
+discord-translator:
+  enabled: true
+  # URL base de la API de traducción en Star (sin trailing slash)
+  api-url: "https://web.drakescraft.cl/api/translate"
+  # API key de LibreTranslate configurada en Star
+  api-key: "REPLACE_ME"
+  # Secret HMAC para firmar peticiones al endpoint /api/chat/ingest de Star
+  # Debe coincidir con ODYSSEIA_INGEST_SECRET en el .env de Star
+  ingest-secret: "REPLACE_ME"
+  # Traducir mensajes de Discord al español en Minecraft
+  translate-discord-to-mc: true
+  # Traducir mensajes de Minecraft al inglés en Discord
+  translate-mc-to-discord: true
+  # Idioma al que se traducen los mensajes recibidos en Minecraft
+  mc-target-language: "es"
+  # Idioma al que se traducen los mensajes de MC para Discord
+  discord-target-language: "en"

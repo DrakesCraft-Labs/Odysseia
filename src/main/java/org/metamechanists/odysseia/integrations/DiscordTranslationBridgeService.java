@@ -24,6 +24,9 @@ import java.util.regex.Pattern;
  * Servicio de Puente de Traducción Bidireccional entre DiscordSRV y Minecraft
  * utilizando la API de Star Translate (LibreTranslate en https://web.drakescraft.cl/api/translate)
  * y emisor de telemetría de Chat en Vivo hacia https://web.drakescraft.cl/api/chat/ingest.
+ *
+ * Fix de timing: el registro con DiscordSRV se hace con 20 ticks de delay para asegurarse
+ * de que DiscordSRV haya completado su inicialización asíncrona antes de intentar suscribir.
  */
 @Log
 public class DiscordTranslationBridgeService {
@@ -39,7 +42,7 @@ public class DiscordTranslationBridgeService {
     private String mcTargetLanguage;
     private String discordTargetLanguage;
 
-    private boolean subscribed = false;
+    private volatile boolean subscribed = false;
 
     public DiscordTranslationBridgeService(Odysseia plugin) {
         this.plugin = plugin;
@@ -59,40 +62,47 @@ public class DiscordTranslationBridgeService {
             this.baseUrl = rawUrl.replaceAll("/+$", "") + "/translate";
         }
 
-        this.apiKey = config.getString("discord-translator.api-key", "d5a53de75eb935d9203fbb302554d18ecad29db08ca46e10b7aee04fea9791ed");
+        this.apiKey = config.getString("discord-translator.api-key", "");
         this.translateDiscordToMc = config.getBoolean("discord-translator.translate-discord-to-mc", true);
         this.translateMcToDiscord = config.getBoolean("discord-translator.translate-mc-to-discord", true);
         this.mcTargetLanguage = config.getString("discord-translator.mc-target-language", "es");
         this.discordTargetLanguage = config.getString("discord-translator.discord-target-language", "en");
 
-        if (enabled && Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
-            registerDiscordSRV();
+        if (enabled && !subscribed) {
+            // Delay de 20 ticks (1 seg) para garantizar que DiscordSRV terminó su init asíncrono
+            Bukkit.getScheduler().runTaskLater(plugin, this::registerDiscordSRV, 20L);
         }
     }
 
     public void registerDiscordSRV() {
-        if (!subscribed && Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
-            try {
-                DiscordSRV.api.subscribe(this);
-                subscribed = true;
-                log.info("[Odysseia] Puente de traducción bidireccional registrado exitosamente con DiscordSRV.");
-            } catch (Throwable t) {
-                log.warning("[Odysseia] No se pudo suscribir el servicio a DiscordSRV: " + t.getMessage());
-            }
+        if (subscribed) return;
+        if (!Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
+            log.warning("[Odysseia] DiscordSRV no está habilitado - puente de traducción deshabilitado.");
+            return;
+        }
+        try {
+            DiscordSRV.api.subscribe(this);
+            subscribed = true;
+            log.info("[Odysseia] ✅ Puente de traducción bidireccional registrado con DiscordSRV.");
+        } catch (Throwable t) {
+            log.warning("[Odysseia] No se pudo suscribir a DiscordSRV: " + t.getMessage());
         }
     }
 
     public void unregisterDiscordSRV() {
-        if (subscribed && Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
-            try {
+        if (!subscribed) return;
+        try {
+            if (Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
                 DiscordSRV.api.unsubscribe(this);
-                subscribed = false;
-                log.info("[Odysseia] Puente de traducción desuscrito de DiscordSRV.");
-            } catch (Throwable t) {
-                // Silenciar en apagado
             }
+            subscribed = false;
+            log.info("[Odysseia] Puente de traducción desuscrito de DiscordSRV.");
+        } catch (Throwable t) {
+            // Silenciar en apagado
         }
     }
+
+    // ─── Traducción ────────────────────────────────────────────────────────────
 
     /**
      * Detección de idioma a través del endpoint Star /detect
@@ -118,7 +128,7 @@ public class DiscordTranslationBridgeService {
                 .thenApply(response -> {
                     if (response.statusCode() == 200) {
                         String body = response.body();
-                        // Estructura esperada: [{"confidence":90,"language":"en"}]
+                        // Estructura: [{"confidence":90,"language":"en"}]
                         Pattern pattern = Pattern.compile("\"language\"\\s*:\\s*\"([^\"]+)\"");
                         Matcher matcher = pattern.matcher(body);
                         if (matcher.find()) {
@@ -127,7 +137,7 @@ public class DiscordTranslationBridgeService {
                     }
                     return "";
                 }).exceptionally(ex -> {
-                    log.fine("[Odysseia] Excepción al detectar idioma en Star Translate: " + ex.getMessage());
+                    log.fine("[Odysseia] Excepción detectando idioma: " + ex.getMessage());
                     return "";
                 });
     }
@@ -156,7 +166,7 @@ public class DiscordTranslationBridgeService {
                 .thenApply(response -> {
                     if (response.statusCode() == 200) {
                         String body = response.body();
-                        // Estructura esperada: {"translatedText":"..."}
+                        // Estructura: {"translatedText":"..."}
                         Pattern pattern = Pattern.compile("\"translatedText\"\\s*:\\s*\"([^\"]+)\"");
                         Matcher matcher = pattern.matcher(body);
                         if (matcher.find()) {
@@ -165,73 +175,84 @@ public class DiscordTranslationBridgeService {
                     }
                     return "";
                 }).exceptionally(ex -> {
-                    log.fine("[Odysseia] Excepción al traducir en Star Translate: " + ex.getMessage());
+                    log.fine("[Odysseia] Excepción traduciendo texto: " + ex.getMessage());
                     return "";
                 });
     }
 
-    /**
-     * Publica el mensaje en tiempo real al feed de chat web en Star
-     */
-    public void postWebChatFeed(String author, String message, String source) {
-        if (author == null || message == null || message.trim().isEmpty()) return;
-        try {
-            String url = "https://web.drakescraft.cl/api/chat/ingest";
-            String jsonPayload = String.format("{\"author\":%s,\"message\":%s,\"source\":%s}",
-                    escapeJson(author), escapeJson(message), escapeJson(source));
+    // ─── Live Chat Feed ────────────────────────────────────────────────────────
 
+    /**
+     * Publica el mensaje en el feed de chat web en Star usando la API key del translator.
+     * Payload: { player, message, rank, world, api_key }
+     */
+    public void postWebChatFeed(String playerName, String message, String rank, String world) {
+        if (apiKey == null || apiKey.isEmpty()) return;
+        if (playerName == null || message == null || message.trim().isEmpty()) return;
+
+        try {
+            String safeRank = rank != null ? rank : "JUGADOR";
+            String safeWorld = world != null ? world : "Olimpo";
+
+            String jsonBody = String.format(
+                    "{\"player\":%s,\"message\":%s,\"rank\":%s,\"world\":%s,\"api_key\":%s}",
+                    escapeJson(playerName),
+                    escapeJson(message),
+                    escapeJson(safeRank),
+                    escapeJson(safeWorld),
+                    escapeJson(apiKey)
+            );
+
+            String url = "https://web.drakescraft.cl/api/chat/ingest";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(3))
                     .header("Content-Type", "application/json")
                     .header("User-Agent", "Odysseia/1.1.0")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
-            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception ignored) {
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .exceptionally(ex -> {
+                        log.fine("[Odysseia] Error en chat feed ingest: " + ex.getMessage());
+                        return null;
+                    });
+        } catch (Exception ex) {
+            log.fine("[Odysseia] Error preparando chat feed ingest: " + ex.getMessage());
         }
     }
 
+    // ─── Eventos DiscordSRV ────────────────────────────────────────────────────
+
     /**
-     * Evento DiscordSRV: Mensaje recibido desde Discord hacia Minecraft
+     * Evento: Mensaje recibido desde Discord hacia Minecraft
      */
     @Subscribe
     public void onDiscordMessageReceived(DiscordGuildMessageReceivedEvent event) {
-        if (!enabled) {
-            return;
-        }
+        if (!enabled) return;
 
-        // Ignorar bots o webhooks
-        if (event.getAuthor() == null || event.getAuthor().isBot()) {
-            return;
-        }
+        // Ignorar bots
+        if (event.getAuthor() == null || event.getAuthor().isBot()) return;
 
         String messageContent = event.getMessage().getContentDisplay();
-        if (messageContent == null || messageContent.trim().isEmpty() || messageContent.startsWith("!")) {
-            return;
-        }
+        if (messageContent == null || messageContent.trim().isEmpty() || messageContent.startsWith("!")) return;
 
         String authorName = event.getAuthor().getName();
 
-        // Transmitir al feed de chat de la web en tiempo real
-        postWebChatFeed(authorName, messageContent, "discord");
+        // Feed de chat web (Discord → Web)
+        postWebChatFeed(authorName, messageContent, "Discord", "discord");
 
         if (!translateDiscordToMc) return;
 
-        // 1. Detectar idioma de origen
+        // Detectar idioma y traducir
         detectLanguage(messageContent).thenAccept(detectedLang -> {
             if (detectedLang.isEmpty() || detectedLang.equalsIgnoreCase(mcTargetLanguage)) {
-                return; // Ya está en el idioma destino de Minecraft (ej. español)
+                return; // Ya está en español (o no se pudo detectar)
             }
 
-            // 2. Traducir al idioma destino de MC
             translateText(messageContent, detectedLang, mcTargetLanguage).thenAccept(translatedText -> {
-                if (translatedText.isEmpty() || translatedText.equalsIgnoreCase(messageContent)) {
-                    return;
-                }
+                if (translatedText.isEmpty() || translatedText.equalsIgnoreCase(messageContent)) return;
 
-                // 3. Enviar mensaje formateado a los jugadores en Minecraft
                 String formattedNotice = ChatColor.translateAlternateColorCodes('&',
                         "&8[&bDiscord&8] &7" + authorName + "&f: " + messageContent +
                                 " &8(&eTraducido: &f" + translatedText + "&8)");
@@ -246,44 +267,54 @@ public class DiscordTranslationBridgeService {
     }
 
     /**
-     * Evento DiscordSRV: Mensaje enviado desde Minecraft hacia Discord
+     * Evento: Mensaje enviado desde Minecraft hacia Discord
      */
     @Subscribe
     public void onMinecraftMessageToDiscord(GameChatMessagePreProcessEvent event) {
-        if (!enabled) {
-            return;
-        }
+        if (!enabled) return;
 
         String messageContent = event.getMessage();
-        if (messageContent == null || messageContent.trim().isEmpty()) {
-            return;
+        if (messageContent == null || messageContent.trim().isEmpty()) return;
+
+        Player player = event.getPlayer();
+        String playerName = player != null ? player.getName() : "Jugador";
+
+        // Detectar rango del jugador
+        String rank = "JUGADOR";
+        if (player != null) {
+            try {
+                org.bukkit.scoreboard.Team team = player.getScoreboard().getEntryTeam(playerName);
+                if (team != null && !team.getName().isEmpty()) {
+                    rank = team.getName().toUpperCase();
+                }
+            } catch (Exception ignored) {
+            }
         }
 
-        String playerName = event.getPlayer() != null ? event.getPlayer().getName() : "Jugador";
+        // Detectar mundo
+        String world = player != null ? player.getWorld().getName() : "Olimpo";
 
-        // Transmitir al feed de chat de la web en tiempo real
-        postWebChatFeed(playerName, messageContent, "minecraft");
+        // Feed de chat web (MC → Web)
+        postWebChatFeed(playerName, messageContent, rank, world);
 
         if (!translateMcToDiscord) return;
 
-        // 1. Detectar idioma del jugador de MC
+        // Detectar idioma y enriquecer mensaje para Discord
         detectLanguage(messageContent).thenAccept(detectedLang -> {
             if (detectedLang.isEmpty() || detectedLang.equalsIgnoreCase(discordTargetLanguage)) {
-                return; // Ya está en el idioma objetivo de Discord (ej. inglés)
+                return; // Ya está en inglés (o no se pudo detectar)
             }
 
-            // 2. Traducir al idioma destino de Discord
             translateText(messageContent, detectedLang, discordTargetLanguage).thenAccept(translatedText -> {
-                if (translatedText.isEmpty() || translatedText.equalsIgnoreCase(messageContent)) {
-                    return;
-                }
+                if (translatedText.isEmpty() || translatedText.equalsIgnoreCase(messageContent)) return;
 
-                // 3. Enriquecer el mensaje que DiscordSRV enviará a Discord
+                // Enriquecer el mensaje que DiscordSRV enviará a Discord
                 String enrichedMessage = messageContent + " *(EN: " + translatedText + ")*";
                 event.setMessage(enrichedMessage);
             });
         });
     }
+
 
     private String escapeJson(String text) {
         if (text == null) return "\"\"";
