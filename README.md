@@ -72,5 +72,5 @@ MethodHandle isNatural = Linker.nativeLinker().downcallHandle(
 
 ---
 
-## 📜 Licencia
+## 📜 License
 MIT License © DrakesCraft Labs
