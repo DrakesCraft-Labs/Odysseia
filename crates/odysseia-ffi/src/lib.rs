@@ -1,5 +1,5 @@
-use odysseia_automation::RedstoneClockGuard;
-use odysseia_core::{BossType, ChatFilterEngine, ChatFilterRule, Vector3D};
+use odysseia_automation::{AutomationGuardConfig, ClockAction, RedstoneClockGuard};
+use odysseia_core::{BossType, ChatFilterEngine, ChatFilterRule, StaffTrollType, Vector3D};
 use odysseia_telemetry::ServerStatusReport;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -9,7 +9,7 @@ static REDSTONE_GUARD: OnceLock<RedstoneClockGuard> = OnceLock::new();
 static CHAT_FILTER: OnceLock<ChatFilterEngine> = OnceLock::new();
 
 fn get_redstone_guard() -> &'static RedstoneClockGuard {
-    REDSTONE_GUARD.get_or_init(|| RedstoneClockGuard::new(5))
+    REDSTONE_GUARD.get_or_init(|| RedstoneClockGuard::new(AutomationGuardConfig::default()))
 }
 
 fn get_chat_filter() -> &'static ChatFilterEngine {
@@ -43,11 +43,22 @@ pub extern "C" fn odysseia_check_boss_aura(
     if odysseia_core::is_in_boss_aura(boss, player, aura_radius) { 1 } else { 0 }
 }
 
-/// Registra el pulso de redstone y responde si viola el límite de velocidad.
+/// Evalúa el comportamiento de un reloj de redstone con la política de escalación de fix/automation-guard:
+/// Retorna: 0 (ALLOW), 1 (THROTTLE), 2 (BREAK).
 #[no_mangle]
-pub extern "C" fn odysseia_check_redstone_clock(x: i32, y: i32, z: i32, is_protected: i32) -> i32 {
+pub extern "C" fn odysseia_evaluate_clock(
+    x: i32,
+    y: i32,
+    z: i32,
+    is_clock_structure: i32,
+    is_protected_slimefun: i32,
+) -> i32 {
     let guard = get_redstone_guard();
-    if guard.record_and_check(x, y, z, is_protected != 0) { 1 } else { 0 }
+    match guard.evaluate_clock(x, y, z, is_clock_structure != 0, is_protected_slimefun != 0) {
+        ClockAction::Allow => 0,
+        ClockAction::Throttle => 1,
+        ClockAction::Break => 2,
+    }
 }
 
 /// Inspecciona un mensaje de chat para detectar palabras prohibidas.
@@ -64,6 +75,33 @@ pub extern "C" fn odysseia_chat_filter_inspect(msg_ptr: *const c_char) -> *mut c
         }
     }
     std::ptr::null_mut()
+}
+
+/// Ejecuta un troll de Staff y devuelve el mensaje de feedback formateado en C-String.
+#[no_mangle]
+pub extern "C" fn odysseia_execute_troll(
+    troll_type_id: i32,
+    target_ptr: *const c_char
+) -> *mut c_char {
+    if target_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let c_str = unsafe { CStr::from_ptr(target_ptr) };
+    let target = c_str.to_str().unwrap_or("Jugador");
+
+    let troll = match troll_type_id {
+        0 => StaffTrollType::FakeOp,
+        1 => StaffTrollType::FakeCrash,
+        2 => StaffTrollType::VoidFall,
+        3 => StaffTrollType::Anvil,
+        4 => StaffTrollType::Creeper,
+        5 => StaffTrollType::Spiders,
+        6 => StaffTrollType::Lightning,
+        _ => StaffTrollType::Screamer,
+    };
+
+    let msg = troll.get_feedback_message(target);
+    CString::new(msg).unwrap().into_raw()
 }
 
 /// Formatea la respuesta de estado para DiscordSRV en C-String.

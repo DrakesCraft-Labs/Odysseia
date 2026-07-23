@@ -1,0 +1,223 @@
+use serde::{Deserialize, Serialize};
+
+/// Definición de todas las Habilidades Míticas de los Bosses de Odysseia.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BossSkillType {
+    Earthquake,
+    GuardianSummon,
+    KratosAxeThrow,
+    KratosChains,
+    KratosRage,
+    LevitationFall,
+    LifeDrain,
+    LightningStorm,
+    LokiBlindness,
+    LokiClones,
+    MjolnirThrow,
+    OdinRavens,
+    OdinSkyLightning,
+    OdinSpearThrow,
+    OlympusSwords,
+    PoisonCloud,
+    Polymorph,
+    SoulShield,
+    SpartanSummon,
+    SpearCharge,
+    ThrowRock,
+    ThunderStrike,
+    Tsunami,
+    UnderworldPortal,
+    ZeusTeleport,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BossSkillSpec {
+    pub skill_type: BossSkillType,
+    pub cooldown_seconds: u32,
+    pub damage: f64,
+    pub radius: f64,
+    pub description: &'static str,
+}
+
+impl BossSkillType {
+    pub fn spec(&self) -> BossSkillSpec {
+        match self {
+            Self::Earthquake => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 15,
+                damage: 25.0,
+                radius: 12.0,
+                description: "Sacudida terrestre que derriba a los jugadores cercanos",
+            },
+            Self::GuardianSummon => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 40,
+                damage: 0.0,
+                radius: 15.0,
+                description: "Invoca espectros guardianes para defender al Boss",
+            },
+            Self::KratosAxeThrow => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 12,
+                damage: 35.0,
+                radius: 20.0,
+                description: "Lanzamiento devastador del Hacha Leviatán",
+            },
+            Self::KratosChains => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 18,
+                damage: 30.0,
+                radius: 15.0,
+                description: "Cadenas del Caos que atraen a las víctimas hacia el Boss",
+            },
+            Self::KratosRage => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 45,
+                damage: 50.0,
+                radius: 10.0,
+                description: "Furia Espartana: aumenta velocidad y daño al 200%",
+            },
+            Self::LevitationFall => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 25,
+                damage: 20.0,
+                radius: 8.0,
+                description: "Eleva a las víctimas y las deja caer desde gran altura",
+            },
+            Self::LifeDrain => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 20,
+                damage: 15.0,
+                radius: 10.0,
+                description: "Drena la salud de los jugadores para curar al Boss",
+            },
+            Self::LightningStorm => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 30,
+                damage: 40.0,
+                radius: 25.0,
+                description: "Tormenta de rayos continuos en un área masiva",
+            },
+            Self::LokiBlindness => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 15,
+                damage: 5.0,
+                radius: 12.0,
+                description: "Ceguera e ilusión de sombras en el campo de batalla",
+            },
+            Self::LokiClones => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 50,
+                damage: 0.0,
+                radius: 15.0,
+                description: "Crea clones de ilusión para confundir al enemigo",
+            },
+            Self::MjolnirThrow => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 14,
+                damage: 45.0,
+                radius: 18.0,
+                description: "Lanzamiento del Mjolnir con impacto de trueno",
+            },
+            Self::OdinRavens => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 22,
+                damage: 18.0,
+                radius: 15.0,
+                description: "Cuervos de Odín que persiguen a los atacantes",
+            },
+            Self::OdinSkyLightning => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 35,
+                damage: 60.0,
+                radius: 30.0,
+                description: "Rayo celestial supremo descargado desde el cielo",
+            },
+            Self::OdinSpearThrow => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 16,
+                damage: 38.0,
+                radius: 22.0,
+                description: "Lanza Gungnir atraviesa escudos y armaduras",
+            },
+            Self::OlympusSwords => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 28,
+                damage: 32.0,
+                radius: 14.0,
+                description: "Espadas flotantes del Olimpo caen sobre el objetivo",
+            },
+            Self::PoisonCloud => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 18,
+                damage: 12.0,
+                radius: 10.0,
+                description: "Nube de veneno tóxico persistente",
+            },
+            Self::Polymorph => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 40,
+                damage: 0.0,
+                radius: 6.0,
+                description: "Transforma temporalmente al jugador objetivo",
+            },
+            Self::SoulShield => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 35,
+                damage: 0.0,
+                radius: 5.0,
+                description: "Escudo de almas invulnerable durante 5 segundos",
+            },
+            Self::SpartanSummon => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 45,
+                damage: 0.0,
+                radius: 12.0,
+                description: "Invoca un pelotón de guerreros espartanos",
+            },
+            Self::SpearCharge => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 10,
+                damage: 28.0,
+                radius: 8.0,
+                description: "Embestida de lanza a alta velocidad",
+            },
+            Self::ThrowRock => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 12,
+                damage: 22.0,
+                radius: 15.0,
+                description: "Lanza una roca gigantesca que explota al impacto",
+            },
+            Self::ThunderStrike => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 8,
+                damage: 25.0,
+                radius: 10.0,
+                description: "Rayo directo sobre el jugador objetivo",
+            },
+            Self::Tsunami => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 30,
+                damage: 35.0,
+                radius: 20.0,
+                description: "Ola gigantesca de agua que arrastra a los jugadores",
+            },
+            Self::UnderworldPortal => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 50,
+                damage: 0.0,
+                radius: 15.0,
+                description: "Portal del Inframundo que arrastra almas al vacío",
+            },
+            Self::ZeusTeleport => BossSkillSpec {
+                skill_type: *self,
+                cooldown_seconds: 12,
+                damage: 10.0,
+                radius: 5.0,
+                description: "Teletransporte relámpago detrás de la víctima",
+            },
+        }
+    }
+}
