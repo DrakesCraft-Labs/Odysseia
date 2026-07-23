@@ -28,7 +28,7 @@
 
 ```text
 Odysseia/
-├── Cargo.toml                       # Configuración del Workspace Rust 2021
+├── Cargo.toml                       # Configuration del Workspace Rust 2021
 ├── odysseia-core/                   # Lógica central del juego, Jefes y Políticas
 │   └── src/
 │       ├── lib.rs
