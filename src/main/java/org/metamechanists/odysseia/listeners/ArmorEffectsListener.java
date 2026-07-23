@@ -50,10 +50,13 @@ public final class ArmorEffectsListener implements Listener {
         UUID uuid = player.getUniqueId();
         boolean hasFullDiamond = isWearingFullDiamond(player);
         boolean hasFullNetherite = isWearingFullNetherite(player);
+        boolean hasFullIron = isWearingFullIron(player);
 
         Set<PotionEffect> effectsToApply = new HashSet<>();
 
-        if (hasFullDiamond && player.hasPermission("drakes.kit.hercules")) {
+        if (player.hasPermission("drakes.kit.oldschool") && (hasFullDiamond || hasFullNetherite || hasFullIron)) {
+            addConfiguredEffects(effectsToApply, "oldschool");
+        } else if (hasFullDiamond && player.hasPermission("drakes.kit.hercules")) {
             addConfiguredEffects(effectsToApply, "hercules");
         } else if (hasFullNetherite && player.hasPermission("drakes.kit.zeus")) {
             addConfiguredEffects(effectsToApply, "zeus");
@@ -90,6 +93,14 @@ public final class ArmorEffectsListener implements Listener {
                 }
             }
         }
+    }
+
+    private boolean isWearingFullIron(Player player) {
+        PlayerInventory inv = player.getInventory();
+        return inv.getHelmet() != null && inv.getHelmet().getType() == Material.IRON_HELMET
+                && inv.getChestplate() != null && inv.getChestplate().getType() == Material.IRON_CHESTPLATE
+                && inv.getLeggings() != null && inv.getLeggings().getType() == Material.IRON_LEGGINGS
+                && inv.getBoots() != null && inv.getBoots().getType() == Material.IRON_BOOTS;
     }
 
     private boolean isWearingFullDiamond(Player player) {

@@ -104,6 +104,14 @@ armor-effects:
     resistance: 1
     saturation: true
 
+  # Oldschool (Veteranos 5+ años) - requiere drakes.kit.oldschool
+  oldschool:
+    speed: 3
+    health-boost: 2
+    fire-resistance: true
+    saturation: true
+    resistance: 1
+
 # ─────────────────────────────────────────────
 #  Reliquias Personalizadas
 # ─────────────────────────────────────────────
@@ -903,54 +911,109 @@ kits:
           - "&6&lProtecciones\n\n&0Coloca tu ProtectionStone.\n&0/ps add <jugador>\n&0/ps remove <jugador>\n&0/ps home\n&0/ps list"
           - "&6&lAyuda\n\n&0Usa /discord para soporte y anuncios.\n&0Los rangos VIP duran 30 días.\n\n&2Gracias por jugar en DrakesCraft."
 
-  # ── Kit de reconocimiento Oldschool ────────────
+  # ── Kit de reconocimiento Oldschool (Veteranos 5+ Años) ────
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    money: 0
+    protection-alias: viphermes
+    protection-amount: 1
+    money: 100000
     vanilla-items:
-      - material: IRON_HELMET
+      - material: NETHERITE_HELMET
         amount: 1
-        name: "&8[&72022&8] &7Casco Oldschool"
+        name: "&8[&7Veterano 5+ Años&8] &7&lCasco del Fundador Oldschool"
+        lore:
+          - "&7Emblema legendario de los veteranos de DrakesCraft"
+          - "&c[Vínculo Divino] Soulbound"
         enchantments:
-          protection: 3
-          unbreaking: 2
-      - material: IRON_CHESTPLATE
+          protection: 10
+          unbreaking: 6
+          respiration: 3
+          aqua_affinity: 1
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_CHESTPLATE
         amount: 1
-        name: "&8[&72022&8] &7Peto Oldschool"
+        name: "&8[&7Veterano 5+ Años&8] &7&lPechera del Fundador Oldschool"
+        lore:
+          - "&7Protección ancestral forjada en la era clásica"
+          - "&c[Vínculo Divino] Soulbound"
         enchantments:
-          protection: 3
-          unbreaking: 2
-      - material: IRON_LEGGINGS
+          protection: 10
+          unbreaking: 6
+          thorns: 3
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_LEGGINGS
         amount: 1
-        name: "&8[&72022&8] &7Grebas Oldschool"
+        name: "&8[&7Veterano 5+ Años&8] &7&lGrebas del Fundador Oldschool"
+        lore:
+          - "&7Resistencia de cinco años de batallas"
+          - "&c[Vínculo Divino] Soulbound"
         enchantments:
-          protection: 3
-          unbreaking: 2
-      - material: IRON_BOOTS
+          protection: 10
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_BOOTS
         amount: 1
-        name: "&8[&72022&8] &7Botas Oldschool"
+        name: "&8[&7Veterano 5+ Años&8] &7&lBotas Aladas Oldschool"
+        lore:
+          - "&7Paso firme sobre los cimientos del servidor"
+          - "&c[Vínculo Divino] Soulbound"
         enchantments:
-          protection: 3
-          unbreaking: 2
-          feather_falling: 2
-      - material: IRON_SWORD
+          protection: 10
+          unbreaking: 6
+          feather_falling: 8
+          depth_strider: 3
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_SWORD
         amount: 1
+        name: "&8[&7Veterano 5+ Años&8] &7&lEspada Reliquia Oldschool"
+        lore:
+          - "&8✦ Filo del Caos Clásico"
+          - "&c[Vínculo Divino] Soulbound"
         enchantments:
-          sharpness: 2
-          unbreaking: 2
-      - material: IRON_PICKAXE
+          sharpness: 11
+          looting: 5
+          fire_aspect: 2
+          sweeping_edge: 3
+          unbreaking: 6
+          mending: 1
+        soulbound: true
+      - material: NETHERITE_PICKAXE
         amount: 1
+        name: "&8[&7Veterano 5+ Años&8] &7&lPico del Fundador Oldschool"
         enchantments:
-          efficiency: 3
-          unbreaking: 2
-          fortune: 1
-      - material: COOKED_BEEF
-        amount: 32
-      - material: BREAD
-        amount: 24
+          efficiency: 10
+          fortune: 6
+          unbreaking: 6
+          mending: 1
+      - material: NETHERITE_AXE
+        amount: 1
+        name: "&8[&7Veterano 5+ Años&8] &7&lHacha Ancestral Oldschool"
+        enchantments:
+          efficiency: 10
+          sharpness: 8
+          unbreaking: 6
+          mending: 1
+      - material: SHIELD
+        amount: 1
+        name: "&8[&7Veterano 5+ Años&8] &7&lEscudo Legendario Oldschool"
+        enchantments:
+          unbreaking: 6
+          mending: 1
       - material: GOLDEN_CARROT
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 64
+      - material: GOLDEN_APPLE
         amount: 16
+      - material: ENDER_PEARL
+        amount: 16
+      - material: TOTEM_OF_UNDYING
+        amount: 2
 
   # ── Kit VIP Hércules ───────────────────────────
   hercules:
