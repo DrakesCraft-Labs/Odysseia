@@ -1,130 +1,100 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
   <defs>
     <!-- Background Gradient -->
-    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#090d16" />
-      <stop offset="50%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e102d" />
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0d14"/>
+      <stop offset="50%" stop-color="#121824"/>
+      <stop offset="100%" stop-color="#080a0f"/>
     </linearGradient>
 
-    <!-- Title Gradient -->
-    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f8d66d" />
-      <stop offset="30%" stop-color="#a855f7" />
-      <stop offset="70%" stop-color="#38bdf8" />
-      <stop offset="100%" stop-color="#4ade80" />
+    <!-- Rust Orange & Cyber Cyan Accent Gradients -->
+    <linearGradient id="rustGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF512F"/>
+      <stop offset="100%" stop-color="#F09819"/>
     </linearGradient>
 
-    <!-- Card Gradients -->
-    <linearGradient id="dragon-card" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2d1b4e" />
-      <stop offset="100%" stop-color="#130d24" />
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="100%" stop-color="#4FACFE"/>
     </linearGradient>
-    <linearGradient id="boss-card" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4c1d1d" />
-      <stop offset="100%" stop-color="#1f0a0a" />
+
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE000"/>
+      <stop offset="100%" stop-color="#799F0C"/>
     </linearGradient>
-    <linearGradient id="terror-card" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f2d4a" />
-      <stop offset="100%" stop-color="#081424" />
-    </linearGradient>
-    <linearGradient id="staff-card" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#143823" />
-      <stop offset="100%" stop-color="#07190e" />
-    </linearGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="1"/>
+    </pattern>
   </defs>
 
-  <!-- Background Base -->
-  <rect x="0" y="0" width="1200" height="480" rx="20" fill="url(#bg-grad)" />
-  
-  <!-- Outer Glow Border -->
-  <rect x="10" y="10" width="1180" height="460" rx="16" fill="none" stroke="url(#title-grad)" stroke-width="2.5" opacity="0.8" />
+  <!-- Background Layer -->
+  <rect width="1200" height="420" fill="url(#bgGrad)" rx="16"/>
+  <rect width="1200" height="420" fill="url(#grid)" rx="16"/>
 
-  <!-- Background Ambient Circles -->
-  <circle cx="150" cy="120" r="140" fill="#a855f7" opacity="0.15" />
-  <circle cx="1050" cy="360" r="160" fill="#38bdf8" opacity="0.12" />
-  <circle cx="600" cy="240" r="130" fill="#f8d66d" opacity="0.1" />
+  <!-- Glowing Geometric Accent Lines -->
+  <path d="M -50 350 L 300 -50" stroke="url(#rustGrad)" stroke-width="2" stroke-opacity="0.3" fill="none"/>
+  <path d="M 900 470 L 1250 120" stroke="url(#cyanGrad)" stroke-width="2" stroke-opacity="0.3" fill="none"/>
 
-  <!-- HEADER SECTION -->
-  <!-- Version Badge -->
-  <g transform="translate(525, 30)">
-    <rect x="0" y="0" width="150" height="28" rx="14" fill="#a855f7" opacity="0.25" stroke="#a855f7" stroke-width="1.2" />
-    <text x="75" y="19" text-anchor="middle" fill="#e9d5ff" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="1">ODYSSEIA v1.1.0</text>
+  <!-- Central Emblem / Mythic Crest -->
+  <g transform="translate(600, 140)" filter="url(#neonGlow)">
+    <!-- Outer Shield Hexagon -->
+    <polygon points="0,-75 65,-37 65,37 0,75 -65,37 -65,-37" fill="none" stroke="url(#rustGrad)" stroke-width="3" opacity="0.8"/>
+    <!-- Inner Core Hexagon -->
+    <polygon points="0,-55 48,-27 48,27 0,55 -48,27 -48,-27" fill="rgba(18, 24, 36, 0.9)" stroke="url(#cyanGrad)" stroke-width="2"/>
+    
+    <!-- Rust Crab + Mythic Crown Symbol -->
+    <text x="0" y="16" font-family="'Segoe UI', Roboto, sans-serif" font-size="44" text-anchor="middle" fill="#FF7B00">🦀</text>
   </g>
 
   <!-- Main Title -->
-  <text x="600" y="110" text-anchor="middle" fill="url(#title-grad)" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="900" letter-spacing="4">ODYSSEIA</text>
-  
+  <text x="600" y="275" font-family="'Outfit', 'Inter', 'Segoe UI', sans-serif" font-weight="900" font-size="52" letter-spacing="6" text-anchor="middle" fill="#FFFFFF" filter="url(#softShadow)">
+    ODYSSEIA ENGINE
+  </text>
+
   <!-- Subtitle -->
-  <text x="600" y="145" text-anchor="middle" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" letter-spacing="2">EL NÚCLEO MÍTICO, TERROR NOCTURNO &amp; GESTIÓN DE PRODUCCIÓN</text>
+  <text x="600" y="315" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="600" font-size="18" letter-spacing="3" text-anchor="middle" fill="url(#cyanGrad)">
+    RUST 2021 WORKSPACE  •  JAVA 21 FFM API  •  PURPUR 1.21.11 &amp; STAR
+  </text>
 
-  <!-- CARDS SECTION - Absolute SVG Translations -->
+  <!-- Tech Badges Bar -->
+  <g transform="translate(600, 365)">
+    <!-- Badge 1: Rust Engine -->
+    <g transform="translate(-240, 0)">
+      <rect x="-70" y="-16" width="140" height="32" rx="16" fill="rgba(255, 81, 47, 0.15)" stroke="url(#rustGrad)" stroke-width="1.5"/>
+      <text x="0" y="5" font-family="sans-serif" font-weight="700" font-size="12" fill="#FF512F" text-anchor="middle">⚡ RUST CORE</text>
+    </g>
 
-  <!-- CARD 1: MONTURAS DRACÓNICAS (X: 40, Y: 180) -->
-  <g transform="translate(40, 180)">
-    <rect x="0" y="0" width="260" height="260" rx="16" fill="url(#dragon-card)" stroke="#a855f7" stroke-width="1.8" />
-    
-    <circle cx="130" cy="50" r="28" fill="#a855f7" opacity="0.3" />
-    <text x="130" y="59" text-anchor="middle" font-size="28">🐉</text>
-    
-    <text x="130" y="108" text-anchor="middle" fill="#f3e8ff" font-family="system-ui, sans-serif" font-size="18" font-weight="800">Monturas Dracónicas</text>
-    <text x="130" y="138" text-anchor="middle" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">Vuelo 3D libre WASD</text>
-    <text x="130" y="160" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Velocidad 1x - 20x (/dragon speed)</text>
-    <text x="130" y="182" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Alientos: Rayos, Árboles, Fuego</text>
-    <text x="130" y="204" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Dragón Esmeralda Cute (Kika)</text>
+    <!-- Badge 2: Java 21 FFM -->
+    <g transform="translate(-80, 0)">
+      <rect x="-70" y="-16" width="140" height="32" rx="16" fill="rgba(0, 242, 254, 0.15)" stroke="url(#cyanGrad)" stroke-width="1.5"/>
+      <text x="0" y="5" font-family="sans-serif" font-weight="700" font-size="12" fill="#00F2FE" text-anchor="middle">☕ JAVA 21 FFM</text>
+    </g>
 
-    <rect x="65" y="222" width="130" height="22" rx="11" fill="#a855f7" opacity="0.35" />
-    <text x="130" y="237" text-anchor="middle" fill="#d8b4fe" font-family="system-ui, sans-serif" font-size="11" font-weight="700">JACKSTAR &amp; KIKA</text>
-  </g>
+    <!-- Badge 3: 20 Bosses -->
+    <g transform="translate(80, 0)">
+      <rect x="-70" y="-16" width="140" height="32" rx="16" fill="rgba(255, 224, 0, 0.15)" stroke="url(#goldGrad)" stroke-width="1.5"/>
+      <text x="0" y="5" font-family="sans-serif" font-weight="700" font-size="12" fill="#FFE000" text-anchor="middle">⚔️ 20 BOSSES</text>
+    </g>
 
-  <!-- CARD 2: WITHER STORM & BOSSES (X: 330, Y: 180) -->
-  <g transform="translate(330, 180)">
-    <rect x="0" y="0" width="260" height="260" rx="16" fill="url(#boss-card)" stroke="#ef4444" stroke-width="1.8" />
-    
-    <circle cx="130" cy="50" r="28" fill="#ef4444" opacity="0.3" />
-    <text x="130" y="59" text-anchor="middle" font-size="28">🌩️</text>
-    
-    <text x="130" y="108" text-anchor="middle" fill="#ffe4e6" font-family="system-ui, sans-serif" font-size="18" font-weight="800">Jefes Míticos (17+)</text>
-    <text x="130" y="138" text-anchor="middle" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">Wither Storm Story Mode</text>
-    <text x="130" y="160" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Prometeo (Renacer Fénix)</text>
-    <text x="130" y="182" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Dragón Ancestral (3500 HP)</text>
-    <text x="130" y="204" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Botín 5000 XP Lock (setOwner)</text>
-
-    <rect x="65" y="222" width="130" height="22" rx="11" fill="#ef4444" opacity="0.35" />
-    <text x="130" y="237" text-anchor="middle" fill="#fca5a5" font-family="system-ui, sans-serif" font-size="11" font-weight="700">0% DAÑO EN CLAIMS</text>
-  </g>
-
-  <!-- CARD 3: TERROR & LUNA DE SANGRE (X: 620, Y: 180) -->
-  <g transform="translate(620, 180)">
-    <rect x="0" y="0" width="260" height="260" rx="16" fill="url(#terror-card)" stroke="#38bdf8" stroke-width="1.8" />
-    
-    <circle cx="130" cy="50" r="28" fill="#38bdf8" opacity="0.3" />
-    <text x="130" y="59" text-anchor="middle" font-size="28">👁️</text>
-    
-    <text x="130" y="108" text-anchor="middle" fill="#e0f2fe" font-family="system-ui, sans-serif" font-size="18" font-weight="800">Terror &amp; Luna Sangre</text>
-    <text x="130" y="138" text-anchor="middle" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">Eventos 1 vez al día Minecraft</text>
-    <text x="130" y="160" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Screamers, Espectros, Susurros</text>
-    <text x="130" y="182" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Niebla Ultra Densa (/niebla)</text>
-    <text x="130" y="204" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Evento Controlado BloodMoon</text>
-
-    <rect x="65" y="222" width="130" height="22" rx="11" fill="#38bdf8" opacity="0.35" />
-    <text x="130" y="237" text-anchor="middle" fill="#7dd3fc" font-family="system-ui, sans-serif" font-size="11" font-weight="700">ATMÓSFERA Y TERROR</text>
-  </g>
-
-  <!-- CARD 4: STAFF & COMERCIO (X: 910, Y: 180) -->
-  <g transform="translate(910, 180)">
-    <rect x="0" y="0" width="250" height="260" rx="16" fill="url(#staff-card)" stroke="#4ade80" stroke-width="1.8" />
-    
-    <circle cx="125" cy="50" r="28" fill="#4ade80" opacity="0.3" />
-    <text x="125" y="59" text-anchor="middle" font-size="28">🛡️</text>
-    
-    <text x="125" y="108" text-anchor="middle" fill="#dcfce7" font-family="system-ui, sans-serif" font-size="18" font-weight="800">Staff &amp; Comercio</text>
-    <text x="125" y="138" text-anchor="middle" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">Suite /troll (8 Comandos)</text>
-    <text x="125" y="160" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Vanish Avanzado (/vani)</text>
-    <text x="125" y="182" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Integración DrakesSlimeMarket</text>
-    <text x="125" y="204" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Filtro Endgame &amp; Slimefun</text>
-
-    <rect x="60" y="222" width="130" height="22" rx="11" fill="#4ade80" opacity="0.35" />
-    <text x="125" y="237" text-anchor="middle" fill="#86efac" font-family="system-ui, sans-serif" font-size="11" font-weight="700">STAFF &amp; MERCADO</text>
+    <!-- Badge 4: Star Server Daemon -->
+    <g transform="translate(240, 0)">
+      <rect x="-70" y="-16" width="140" height="32" rx="16" fill="rgba(79, 172, 254, 0.15)" stroke="#4FACFE" stroke-width="1.5"/>
+      <text x="0" y="5" font-family="sans-serif" font-weight="700" font-size="12" fill="#4FACFE" text-anchor="middle">🚀 STAR SERVER</text>
+    </g>
   </g>
 </svg>

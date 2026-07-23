@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-/// Definición completa de los 20 Bosses de Odysseia.
+/// Definición completa de los Bosses Míticos de Odysseia.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BossType {
@@ -25,6 +25,14 @@ pub enum BossType {
     Naga,
     Lich,
     Baphomet,
+    Prometeo,
+    DiosCorrupto,
+    Spartan,
+    Thor,
+    Ares,
+    Odin,
+    Kratos,
+    Loki,
 }
 
 impl BossType {
@@ -50,6 +58,14 @@ impl BossType {
             "naga" => Some(Self::Naga),
             "lich" => Some(Self::Lich),
             "baphomet" => Some(Self::Baphomet),
+            "prometeo" => Some(Self::Prometeo),
+            "dios_corrupto" | "dioscorrupto" => Some(Self::DiosCorrupto),
+            "spartan" => Some(Self::Spartan),
+            "thor" => Some(Self::Thor),
+            "ares" => Some(Self::Ares),
+            "odin" => Some(Self::Odin),
+            "kratos" => Some(Self::Kratos),
+            "loki" => Some(Self::Loki),
             _ => None,
         }
     }
@@ -76,6 +92,14 @@ impl BossType {
             Self::Naga => "naga",
             Self::Lich => "lich",
             Self::Baphomet => "baphomet",
+            Self::Prometeo => "prometeo",
+            Self::DiosCorrupto => "dios_corrupto",
+            Self::Spartan => "spartan",
+            Self::Thor => "thor",
+            Self::Ares => "ares",
+            Self::Odin => "odin",
+            Self::Kratos => "kratos",
+            Self::Loki => "loki",
         }
     }
 
@@ -101,13 +125,26 @@ impl BossType {
             Self::Naga => "§2§lNAGA ANCESTRAL",
             Self::Lich => "§5§lLICH NIGROMANTE",
             Self::Baphomet => "§4§lBAPHOMET, SEÑOR OSCURO",
+            Self::Prometeo => "§c§lPROMETEO, EL RENACIDO FÉNIX",
+            Self::DiosCorrupto => "§5§lDIOS CORRUPTO ANCESTRAL",
+            Self::Spartan => "§c§lREY ESPARTANO LLEÓNIDAS",
+            Self::Thor => "§e§lTHOR, DIOS DEL TRUENO",
+            Self::Ares => "§4§lARES, DIOS DE LA GUERRA",
+            Self::Odin => "§9§lODÍN, PADRE DE TODO",
+            Self::Kratos => "§c§lKRATOS, FANTASMA DE SPARTA",
+            Self::Loki => "§d§lLOKI, DIOS DE LAS ENGAÑOS",
         }
     }
 
     /// Bosses elegibles para spawneo natural en el mundo.
     /// (Tanto Wither Storm como Dragón Ancestral están excluidos de spawn natural).
     pub fn is_natural_spawn_allowed(&self) -> bool {
-        !matches!(self, Self::DragonAncestral | Self::WitherStorm)
+        !matches!(self, Self::DragonAncestral | Self::WitherStorm | Self::DiosCorrupto)
+    }
+
+    /// Divine Favor Rewards: Recompensa de 5,000 XP y Loot Firmado
+    pub fn divine_xp_reward(&self) -> u32 {
+        5000
     }
 
     pub fn profile(&self) -> BossCombatProfile {
@@ -125,6 +162,20 @@ impl BossType {
                 defense: 30.0,
                 scale: 3.0,
                 aura_radius: 25.0,
+            },
+            Self::DiosCorrupto => BossCombatProfile {
+                max_health: 4000.0,
+                attack_damage: 60.0,
+                defense: 35.0,
+                scale: 2.0,
+                aura_radius: 20.0,
+            },
+            Self::Prometeo => BossCombatProfile {
+                max_health: 2000.0,
+                attack_damage: 35.0,
+                defense: 20.0,
+                scale: 1.3,
+                aura_radius: 12.0,
             },
             Self::ColosoEnd => BossCombatProfile {
                 max_health: 2500.0,
