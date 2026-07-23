@@ -40,6 +40,16 @@ class PurchaseCommandTest {
         assertEquals("vip_hermes", arguments.productId());
     }
 
+    @Test void resolvesProductAliasesAndPackageIds() {
+        PurchaseCommand.DeliveryArguments byAlias = PurchaseCommand.DeliveryArguments.from(
+                catalog, "Mr_Em1lio", "hermes", "tbx-12345");
+        assertEquals("vip_hermes", byAlias.productId());
+
+        PurchaseCommand.DeliveryArguments byPackageId = PurchaseCommand.DeliveryArguments.from(
+                catalog, "Mr_Em1lio", "7510349", "tbx-12345");
+        assertEquals("vip_hermes", byPackageId.productId());
+    }
+
     @Test void rejectsArgumentsWithoutAKnownProductId() {
         assertThrows(IllegalArgumentException.class, () -> PurchaseCommand.DeliveryArguments.from(
                 catalog, "tbx-transaction", "Mr_Em1lio", "unknown_product"));
