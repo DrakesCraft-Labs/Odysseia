@@ -871,35 +871,39 @@ kits:
     protection-alias: starter
     protection-amount: 1
     vanilla-items:
-      - material: LEATHER_HELMET
-        enchantments: {protection: 5, thorns: 3, unbreaking: 10, mending: 1, respiration: 3, aqua_affinity: 1}
-      - material: LEATHER_CHESTPLATE
-        enchantments: {protection: 5, thorns: 3, unbreaking: 10, mending: 1}
-      - material: LEATHER_LEGGINGS
-        enchantments: {protection: 5, thorns: 3, unbreaking: 10, mending: 1}
-      - material: LEATHER_BOOTS
-        enchantments: {protection: 5, thorns: 3, unbreaking: 10, mending: 1, feather_falling: 4, depth_strider: 3}
-      - material: STONE_SWORD
-        name: "&fEspada del Guardia Inicial"
-        enchantments: {sharpness: 5, looting: 3, fire_aspect: 2, knockback: 2, sweeping_edge: 3, unbreaking: 10, mending: 1}
-      - material: IRON_PICKAXE
-        name: "&fPico del Prospecto Divino"
-        enchantments: {efficiency: 5, fortune: 3, unbreaking: 10, mending: 1}
-      - material: STONE_AXE
-        name: "&fHacha del Forjador Sagrado"
-        enchantments: {efficiency: 5, sharpness: 5, unbreaking: 10, mending: 1}
-      - material: STONE_SHOVEL
-        name: "&fPala del Sendero Eterno"
-        enchantments: {efficiency: 5, silk_touch: 1, unbreaking: 10, mending: 1}
+      - material: DIAMOND_HELMET
+        name: "&b&lCasco del Guardián Inicial"
+        enchantments: {protection: 6, thorns: 3, unbreaking: 10, mending: 1, respiration: 3, aqua_affinity: 1}
+      - material: DIAMOND_CHESTPLATE
+        name: "&b&lPechera del Guardián Inicial"
+        enchantments: {protection: 6, thorns: 3, unbreaking: 10, mending: 1}
+      - material: DIAMOND_LEGGINGS
+        name: "&b&lGrebas del Guardián Inicial"
+        enchantments: {protection: 6, thorns: 3, unbreaking: 10, mending: 1}
+      - material: DIAMOND_BOOTS
+        name: "&b&lBotas del Guardián Inicial"
+        enchantments: {protection: 6, thorns: 3, unbreaking: 10, mending: 1, feather_falling: 4, depth_strider: 3}
+      - material: DIAMOND_SWORD
+        name: "&b&lEspada del Guardia Inicial"
+        enchantments: {sharpness: 6, looting: 3, fire_aspect: 2, knockback: 2, sweeping_edge: 3, unbreaking: 10, mending: 1}
+      - material: DIAMOND_PICKAXE
+        name: "&b&lPico del Prospecto Divino"
+        enchantments: {efficiency: 6, fortune: 3, unbreaking: 10, mending: 1}
+      - material: DIAMOND_AXE
+        name: "&b&lHacha del Forjador Sagrado"
+        enchantments: {efficiency: 6, sharpness: 6, unbreaking: 10, mending: 1}
+      - material: DIAMOND_SHOVEL
+        name: "&b&lPala del Sendero Eterno"
+        enchantments: {efficiency: 6, silk_touch: 1, unbreaking: 10, mending: 1}
       - material: SHIELD
         name: "&bEscudo de la Polis"
         enchantments: {unbreaking: 10, mending: 1}
-      - material: BREAD
+      - material: GOLDEN_CARROT
         amount: 24
       - material: COOKED_BEEF
         amount: 32
       - material: TORCH
-        amount: 48
+        amount: 64
       - material: WRITTEN_BOOK
         book-title: "&6Guía de DrakesCraft"
         author: "&eStaff DrakesCraft"
