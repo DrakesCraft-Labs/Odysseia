@@ -1690,7 +1690,9 @@ polis-baseline:
   # Only default-only users become Polis; staff and permanent ranks remain unchanged.
   enabled: true
   default-group: default
-  base-group: polis
+  # Every account receives the implicit LuckPerms default group. Keep this
+  # aligned with purchases.yml so purchases do not create a redundant parent.
+  base-group: default
   reconcile-interval-seconds: 60
 
 # Seguridad de FastMachines: el addon no valida por sí mismo la región de la máquina.

@@ -184,7 +184,7 @@ class PurchaseServiceTest {
         assertTrue(catalog.validate().isEmpty());
         assertEquals(VerificationState.PARTIALLY_VERIFIED, catalog.get("protection_481").verification());
         assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
-        assertEquals("polis", action(catalog, "vip_hermes", "base-rank").parameters().get("group"));
+        assertEquals("default", action(catalog, "vip_hermes", "base-rank").parameters().get("group"));
         assertEquals("viphermes", action(catalog, "vip_hermes", "claim").parameters().get("alias"));
         assertEquals("vipzeus", action(catalog, "vip_zeus", "claim").parameters().get("alias"));
         assertEquals("viphefesto", catalog.get("protection_177").actions().getFirst().parameters().get("alias"));
