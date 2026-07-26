@@ -61,15 +61,42 @@ public final class ServerAutomationListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBedrockRtp(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (!player.getName().startsWith(".")) return;
-        String label = event.getMessage().substring(1).split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
+        String[] command = event.getMessage().substring(1).trim().split("\\s+");
+        if (command.length == 0 || command[0].isBlank()) return;
+        String label = command[0].toLowerCase(Locale.ROOT);
         if (!Set.of("rtp", "wild", "wildrtp", "wildrtp:rtp", "wildrtp:wild", "wildrtp:wildrtp").contains(label)) return;
+
+        if (command.length == 2 && label.equals("rtp")) {
+            handleStaffRtp(event, player, command[1]);
+            return;
+        }
+        if (!player.getName().startsWith(".")) return;
         event.setCancelled(true);
         boolean nether = player.getWorld().getName().equalsIgnoreCase("world_nether");
         String world = nether ? "world_nether" : "world";
         int maximum = nether ? 100_000 : 150_000;
         player.sendMessage(color("&c[!] &eRTP Bedrock limitado a " + maximum + " bloques para evitar fallos de renderizado."));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "customrtp " + player.getName() + " " + world + " 5000 " + maximum + " 0 0");
+    }
+
+    /** Lets authorized staff random-teleport an online player without changing normal /rtp behavior. */
+    private void handleStaffRtp(PlayerCommandPreprocessEvent event, Player sender, String targetName) {
+        if (!sender.hasPermission("odysseia.rtp.others")) {
+            return;
+        }
+        event.setCancelled(true);
+        Player target = Bukkit.getPlayerExact(targetName);
+        if (target == null) {
+            sender.sendMessage(color("&cEse jugador no está conectado."));
+            return;
+        }
+        if (!target.getWorld().getName().equalsIgnoreCase("world")) {
+            sender.sendMessage(color("&cEl RTP administrativo solo funciona en el mundo principal."));
+            return;
+        }
+        sender.sendMessage(color("&aRTP iniciado para &e" + target.getName() + "&a."));
+        target.sendMessage(color("&eUn miembro del staff inició un RTP para ti."));
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "customrtp " + target.getName() + " world 5000 150000 0 0");
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

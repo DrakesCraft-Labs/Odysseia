@@ -152,3 +152,6 @@ permissions:
   odysseia.owner.aura:
     description: Permite usar el aura destructiva absoluta del dueño.
     default: op
+  odysseia.rtp.others:
+    description: Permite ejecutar /rtp <jugador> para reubicarlo aleatoriamente en el mundo principal.
+    default: op
