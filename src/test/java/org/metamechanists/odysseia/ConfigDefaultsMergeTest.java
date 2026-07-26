@@ -27,7 +27,7 @@ class ConfigDefaultsMergeTest {
         assertTrue(config.getBoolean("discord-translator.translate-discord-to-mc"));
         assertTrue(!config.getBoolean("discord-translator.translate-mc-to-discord"));
         assertEquals("https://translate.drakescraft.cl", config.getString("discord-translator.api-url"));
-        assertEquals("hermes", config.getString("kits.oldschool.protection-alias"));
+        assertTrue(config.getString("kits.oldschool.protection-alias", "").isBlank());
         for (String kit : config.getConfigurationSection("kits").getKeys(false)) {
             String protectionKey = config.getString("kits." + kit + ".protection-alias", "").trim();
             if (!protectionKey.isEmpty()) {

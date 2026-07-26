@@ -826,8 +826,6 @@ kits:
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    protection-alias: hermes
-    protection-amount: 1
     money: 100000
     vanilla-items:
       - material: NETHERITE_HELMET
