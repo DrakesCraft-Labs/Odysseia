@@ -75,7 +75,7 @@ commands:
   kitgive:
     description: Entrega solo los ítems de un kit para pruebas administrativas.
     permission: odysseia.kitgive
-    usage: /kitgive <kit> o /kitgive <jugador> <kit>
+    usage: /kitgive <jugador> <kit>
   kit:
     description: Reclama un kit mensual configurado por Odysseia.
     aliases: [kits]

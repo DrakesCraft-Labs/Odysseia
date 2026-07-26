@@ -38,18 +38,13 @@ public final class KitGiveCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(color("&eKits: &f" + String.join(", ", kitNames())));
             return true;
         }
-        Player target;
-        String kit;
-        if (args.length == 1 && sender instanceof Player player) {
-            target = player;
-            kit = args[0];
-        } else if (args.length == 2) {
-            target = Bukkit.getPlayerExact(args[0]);
-            kit = args[1];
-        } else {
-            sender.sendMessage(color("&eUso: &f/kitgive <kit> &7o &f/kitgive <jugador> <kit>"));
+        if (args.length != 2) {
+            sender.sendMessage(color("&eUso: &f/kitgive <jugador> <kit>"));
+            sender.sendMessage(color("&7Para reclamar tu propio kit usa &f/kit <kit>&7."));
             return true;
         }
+        Player target = Bukkit.getPlayerExact(args[0]);
+        String kit = args[1];
         if (target == null) {
             sender.sendMessage(color("&cEl jugador debe estar conectado."));
             return true;
@@ -73,7 +68,6 @@ public final class KitGiveCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
             List<String> values = new ArrayList<>(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
-            values.addAll(kitNames());
             values.add("list");
             return filter(values, args[0]);
         }
