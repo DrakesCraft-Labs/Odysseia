@@ -59,7 +59,7 @@ public final class KitGiveCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(color("&cKit desconocido. Usa /kitgive list."));
             return true;
         }
-        ActionResult result = kits.deliver(target, kit, "kit-test-" + UUID.randomUUID());
+        ActionResult result = kits.deliver(target, kit, "kit-test-" + UUID.randomUUID(), false);
         if (result.status() == ActionResult.Status.COMPLETED) {
             sender.sendMessage(color("&aKit &f" + kit + " &aentregado a &f" + target.getName() + "&a. Solo ítems; sin dinero, rango ni protección."));
             if (!sender.equals(target)) target.sendMessage(color("&eRecibiste el kit de prueba &f" + kit + "&e."));

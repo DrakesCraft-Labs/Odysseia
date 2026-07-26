@@ -826,7 +826,7 @@ kits:
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    protection-alias: viphermes
+    protection-alias: hermes
     protection-amount: 1
     money: 100000
     vanilla-items:
@@ -1713,7 +1713,7 @@ sfmaster-guide:
 discord-translator:
   enabled: true
   # URL base de la API de traducción en Star (sin trailing slash)
-  api-url: "https://web.drakescraft.cl/api/translate"
+  api-url: "https://translate.drakescraft.cl"
   # API key de LibreTranslate configurada en Star
   api-key: "REPLACE_ME"
   # Secret HMAC para firmar peticiones al endpoint /api/chat/ingest de Star

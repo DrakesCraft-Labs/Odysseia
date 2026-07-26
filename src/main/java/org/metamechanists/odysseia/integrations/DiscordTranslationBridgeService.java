@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  * Servicio de Puente de Traducción Bidireccional entre DiscordSRV y Minecraft
- * utilizando la API de Star Translate (LibreTranslate en https://web.drakescraft.cl/api/translate)
+ * utilizando la API de Star Translate (LibreTranslate en https://translate.drakescraft.cl)
  * y emisor de telemetría de Chat en Vivo hacia https://web.drakescraft.cl/api/chat/ingest.
  *
  * Fix de timing: el registro con DiscordSRV se hace con 20 ticks de delay para asegurarse
@@ -55,7 +55,7 @@ public class DiscordTranslationBridgeService {
     public void reload() {
         FileConfiguration config = plugin.getConfig();
         this.enabled = config.getBoolean("discord-translator.enabled", true);
-        String rawUrl = config.getString("discord-translator.api-url", "https://web.drakescraft.cl/api/translate");
+        String rawUrl = config.getString("discord-translator.api-url", "https://translate.drakescraft.cl");
         if (rawUrl.endsWith("/translate")) {
             this.baseUrl = rawUrl;
         } else {

@@ -26,6 +26,15 @@ class ConfigDefaultsMergeTest {
         assertTrue(config.getStringList("starter-kit.commands").isEmpty());
         assertTrue(config.getBoolean("discord-translator.translate-discord-to-mc"));
         assertTrue(!config.getBoolean("discord-translator.translate-mc-to-discord"));
+        assertEquals("https://translate.drakescraft.cl", config.getString("discord-translator.api-url"));
+        assertEquals("hermes", config.getString("kits.oldschool.protection-alias"));
+        for (String kit : config.getConfigurationSection("kits").getKeys(false)) {
+            String protectionKey = config.getString("kits." + kit + ".protection-alias", "").trim();
+            if (!protectionKey.isEmpty()) {
+                assertTrue(config.isString("protectionstones.aliases." + protectionKey),
+                        () -> "Kit " + kit + " apunta a una ProtectionStone inexistente: " + protectionKey);
+            }
+        }
         assertEquals(6, config.getMapList("kits.inicial.vanilla-items").stream()
                 .filter(item -> "WRITTEN_BOOK".equals(item.get("material")))
                 .map(item -> ((java.util.List<?>) item.get("pages")).size())
