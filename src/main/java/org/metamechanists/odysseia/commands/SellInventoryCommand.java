@@ -89,7 +89,8 @@ public final class SellInventoryCommand implements CommandExecutor {
         sellPrices.put(Material.GLOW_BERRIES, 1.00);
         sellPrices.put(Material.BAMBOO, 0.50);
         sellPrices.put(Material.CACTUS, 1.00);
-        sellPrices.put(Material.NETHER_WART, 1.50);
+        // Nether wart is fully automatable; keep it below manual-farming value.
+        sellPrices.put(Material.NETHER_WART, 0.10);
 
         // Drops de Mobs
         sellPrices.put(Material.ROTTEN_FLESH, 0.50);
