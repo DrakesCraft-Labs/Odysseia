@@ -45,6 +45,7 @@ import org.metamechanists.odysseia.boss.instances.PrometeoBoss;
 import org.metamechanists.odysseia.boss.instances.ColosoEndBoss;
 import org.metamechanists.odysseia.boss.instances.WitherStormBoss;
 import org.metamechanists.odysseia.boss.instances.DragonAncestralBoss;
+import org.metamechanists.odysseia.boss.instances.EgyptianBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.boss.combat.BossCombatDirector;
 import org.metamechanists.odysseia.utils.WebhookSender;
@@ -274,6 +275,18 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("dragon_ancestral") || type.equalsIgnoreCase("dragon-ancestral") || type.equalsIgnoreCase("dragon")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ENDER_DRAGON);
             boss = new DragonAncestralBoss(entity);
+        } else if (type.equalsIgnoreCase("ra")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.BLAZE);
+            boss = new EgyptianBoss(entity, EgyptianBoss.Kind.RA);
+        } else if (type.equalsIgnoreCase("isis")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.EVOKER);
+            boss = new EgyptianBoss(entity, EgyptianBoss.Kind.ISIS);
+        } else if (type.equalsIgnoreCase("anubis")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.WITHER_SKELETON);
+            boss = new EgyptianBoss(entity, EgyptianBoss.Kind.ANUBIS);
+        } else if (type.equalsIgnoreCase("set")) {
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.HUSK);
+            boss = new EgyptianBoss(entity, EgyptianBoss.Kind.SET);
         } else {
             return null;
         }
