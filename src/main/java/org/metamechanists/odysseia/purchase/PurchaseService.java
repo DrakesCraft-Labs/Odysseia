@@ -130,9 +130,10 @@ public final class PurchaseService {
                 // Reload action state so recovery can retry it without replaying rewards.
                 actions = repository.actions(delivery.id());
             }
-            waiting = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.WAITING_FOR_PLAYER);
-            retryable = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_RETRYABLE);
-            manual = actions.stream().anyMatch(a -> a.required() && a.state() == ActionState.FAILED_MANUAL_REVIEW);
+            // Announcements are observability only. A webhook outage must never hold a paid delivery hostage.
+            waiting = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && a.state() == ActionState.WAITING_FOR_PLAYER);
+            retryable = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && a.state() == ActionState.FAILED_RETRYABLE);
+            manual = actions.stream().anyMatch(a -> a.required() && a.type() != ActionType.ANNOUNCEMENT && a.state() == ActionState.FAILED_MANUAL_REVIEW);
             PurchaseState state = manual ? PurchaseState.FAILED_MANUAL_REVIEW : retryable ? PurchaseState.FAILED_RETRYABLE : waiting ? PurchaseState.WAITING_FOR_PLAYER : incomplete ? PurchaseState.PARTIALLY_DELIVERED : PurchaseState.COMPLETED;
             repository.deliveryState(delivery.id(), state, null);
             repository.audit(delivery.id(), actor, "STATE_" + state, null);
