@@ -40,7 +40,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lUSO: &e/boss <spawn|spawnall|give> ..."));
+                    "&c&lUSO: &e/boss <spawn|spawnall|give> ... &7| &fEspeciales: &ddragon&f, &5wither"));
             return true;
         }
 
@@ -59,7 +59,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
 
             if (args.length < 2) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&c&lUSO: &e/boss spawn <tipo>"));
+                        "&c&lUSO: &e/boss spawn <tipo> &7| &fEjemplo: &e/boss spawn dragon"));
                 return true;
             }
 
@@ -164,7 +164,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 || type.equals("tifon") || type.equals("tifón")
                 || type.equals("prometeo") || type.equals("coloso_end")
                 || type.equals("coloso-end") || type.equals("coloso")
-                || type.equals("wither_storm") || type.equals("wither-storm")
+                || type.equals("wither") || type.equals("wither_storm") || type.equals("wither-storm")
                 || type.equals("witherstorm") || type.equals("dragon_ancestral")
                 || type.equals("dragon-ancestral") || type.equals("dragon");
     }
@@ -214,7 +214,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 "thor", "ares", "hades", "poseidon", "zeus",
                 "loki", "odin", "kratos",
                 "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo",
-                "coloso_end", "wither_storm", "dragon_ancestral"
+                "coloso_end", "wither", "dragon"
         );
     }
 }

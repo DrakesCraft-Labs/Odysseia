@@ -268,7 +268,7 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("coloso_end") || type.equalsIgnoreCase("coloso-end") || type.equalsIgnoreCase("coloso")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.ENDERMAN);
             boss = new ColosoEndBoss(entity);
-        } else if (type.equalsIgnoreCase("wither_storm") || type.equalsIgnoreCase("wither-storm") || type.equalsIgnoreCase("witherstorm")) {
+        } else if (type.equalsIgnoreCase("wither") || type.equalsIgnoreCase("wither_storm") || type.equalsIgnoreCase("wither-storm") || type.equalsIgnoreCase("witherstorm")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.WITHER);
             boss = new WitherStormBoss(entity);
         } else if (type.equalsIgnoreCase("dragon_ancestral") || type.equalsIgnoreCase("dragon-ancestral") || type.equalsIgnoreCase("dragon")) {
