@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -97,7 +99,7 @@ public final class BossArenaService implements Listener {
         for (UUID playerId : session.participants()) {
             byPlayer.remove(playerId);
             Player player = Bukkit.getPlayer(playerId);
-            if (player != null) player.sendMessage("§a[BossArena] Victoria. Las recompensas se entregarán directamente.");
+            if (player != null) reward(player, session.group());
         }
         occupiedCells.remove((int) Math.floor(session.center().getX() / CELL_SIZE));
         Bukkit.getScheduler().runTaskLater(plugin, () -> clearFloor(session.center()), 20L * 15L);
@@ -119,5 +121,17 @@ public final class BossArenaService implements Listener {
         int y = center.getBlockY() - 1;
         for (int x = -48; x <= 48; x++) for (int z = -48; z <= 48; z++)
             world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(Material.AIR, false);
+    }
+
+    /** Rewards never use world drops, avoiding grave and arena duplication paths. */
+    private void reward(Player player, boolean group) {
+        int xp = group ? 450 : 250;
+        int emeralds = group ? 16 : 8;
+        player.giveExp(xp);
+        player.getInventory().addItem(new ItemStack(Material.EMERALD, emeralds));
+        int roll = ThreadLocalRandom.current().nextInt(100);
+        if (roll < 50) player.getInventory().addItem(new ItemStack(Material.GOLDEN_APPLE, group ? 3 : 1));
+        if (roll < 20) player.getInventory().addItem(new ItemStack(Material.DIAMOND, group ? 4 : 2));
+        player.sendMessage("§a[BossArena] Victoria: §e" + xp + " XP §ay recompensas directas recibidas.");
     }
 }
