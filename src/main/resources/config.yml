@@ -33,6 +33,14 @@ horror-night:
   worlds: [world]
 
 # ─────────────────────────────────────────────
+# Borde visual de ProtectionStones. Solo usa paquetes de bloque al cliente.
+protection-border:
+  enabled: true
+  material: LIGHT_BLUE_STAINED_GLASS
+  max-blocks: 2048
+  staff-permission: odysseia.protection.border
+
+# ─────────────────────────────────────────────
 #  Ciclo de Prefijos del Propietario (Owner)
 # ─────────────────────────────────────────────
 owner-cycle:
