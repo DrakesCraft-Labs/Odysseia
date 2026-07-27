@@ -2,6 +2,7 @@ package org.metamechanists.odysseia.boss;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -66,6 +67,8 @@ public class BossManager implements Listener {
     // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Long> lastMobility = new ConcurrentHashMap<>();
+    /** Arena visual temporal de invocaciones manuales; nunca modifica bloques del mundo. */
+    private final Map<UUID, BukkitTask> activeDomains = new ConcurrentHashMap<>();
     private final DiosesDrakesBossBridge divineBossBridge;
     private final BossCombatDirector combatDirector;
     private BukkitTask updateTask;
@@ -195,6 +198,11 @@ public class BossManager implements Listener {
     }
 
     public OdysseyBoss spawnBoss(String type, Location loc) {
+        return spawnBoss(type, loc, false);
+    }
+
+    /** Invoca un jefe y, si corresponde, su dominio visual temporal. */
+    public OdysseyBoss spawnBoss(String type, Location loc, boolean createDomain) {
         LivingEntity entity;
         OdysseyBoss boss;
 
@@ -264,6 +272,9 @@ public class BossManager implements Listener {
 
         applyCombatBalance(boss);
         activeBosses.put(entity.getUniqueId(), boss);
+        if (createDomain) {
+            createDomain(boss, loc);
+        }
         broadcastSpawn(boss);
         sendDiscordWebhook(boss, true, null);
         return boss;
@@ -356,6 +367,8 @@ public class BossManager implements Listener {
 
     public void removeBoss(UUID uuid, Player killer) {
         OdysseyBoss boss = activeBosses.remove(uuid);
+        BukkitTask domain = activeDomains.remove(uuid);
+        if (domain != null) domain.cancel();
         naturalBosses.remove(uuid);
         bossContributions.remove(uuid);
         lastMobility.remove(uuid);
@@ -367,6 +380,55 @@ public class BossManager implements Listener {
             }
             boss.cleanup();
         }
+    }
+
+    /**
+     * Renders a temporary arena from particles instead of blocks so an admin summon
+     * cannot overwrite claims, terrain, or player constructions.
+     */
+    private void createDomain(OdysseyBoss boss, Location origin) {
+        if (!plugin.getConfig().getBoolean("boss-domains.enabled", true) || origin.getWorld() == null) {
+            return;
+        }
+        double radius = Math.clamp(plugin.getConfig().getDouble("boss-domains.radius", 26.0D), 12.0D, 48.0D);
+        double height = Math.clamp(plugin.getConfig().getDouble("boss-domains.height", 16.0D), 6.0D, 32.0D);
+        long duration = Math.clamp(plugin.getConfig().getLong("boss-domains.duration-seconds", 900L), 60L, 1800L) * 20L;
+        Location center = origin.clone().add(0.0D, 0.1D, 0.0D);
+        UUID bossId = boss.getEntity().getUniqueId();
+        long startedAt = System.currentTimeMillis();
+
+        BukkitTask domain = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            LivingEntity entity = boss.getEntity();
+            if (!activeBosses.containsKey(bossId) || entity == null || entity.isDead()
+                    || System.currentTimeMillis() - startedAt >= duration * 50L) {
+                BukkitTask task = activeDomains.remove(bossId);
+                if (task != null) task.cancel();
+                return;
+            }
+
+            var world = center.getWorld();
+            double phase = (System.currentTimeMillis() - startedAt) / 1000.0D;
+            for (int index = 0; index < 40; index++) {
+                double angle = (Math.PI * 2.0D * index / 40.0D) + phase * 0.35D;
+                double x = center.getX() + Math.cos(angle) * radius;
+                double z = center.getZ() + Math.sin(angle) * radius;
+                world.spawnParticle(org.bukkit.Particle.END_ROD, x, center.getY() + 0.15D, z,
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+                if (index % 4 == 0) {
+                    world.spawnParticle(org.bukkit.Particle.DUST, x, center.getY() + height, z,
+                            1, new org.bukkit.Particle.DustOptions(Color.fromRGB(121, 48, 255), 1.4F));
+                }
+            }
+            for (int index = 0; index < 16; index++) {
+                double angle = Math.PI * 2.0D * index / 16.0D;
+                double x = center.getX() + Math.cos(angle) * radius;
+                double z = center.getZ() + Math.sin(angle) * radius;
+                world.spawnParticle(org.bukkit.Particle.PORTAL, x, center.getY() + height / 2.0D, z,
+                        2, 0.15D, height / 2.0D, 0.15D, 0.02D);
+            }
+        }, 0L, 10L);
+        activeDomains.put(bossId, domain);
+        origin.getWorld().playSound(center, Sound.BLOCK_BEACON_ACTIVATE, 1.5F, 0.55F);
     }
 
     public void shutdown() {
@@ -619,13 +681,13 @@ public class BossManager implements Listener {
                     ? creditedKiller
                     : pickRecipient(recipients, contributions);
             
-            // Garantizar el drop soltándolo en el suelo con protección anti-robo (Lock de Paper)
-            if (dropLocation.getWorld() != null) {
-                org.bukkit.entity.Item itemEntity = dropLocation.getWorld().dropItemNaturally(dropLocation, item.clone());
+            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
+            // Entrega de una sola vía: el suelo es únicamente el respaldo si el inventario está lleno.
+            for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+                if (dropLocation.getWorld() == null) continue;
+                org.bukkit.entity.Item itemEntity = dropLocation.getWorld().dropItemNaturally(dropLocation, leftover);
                 itemEntity.setOwner(recipient.getUniqueId());
             }
-
-            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
             recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
         }
