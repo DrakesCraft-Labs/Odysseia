@@ -28,4 +28,17 @@ class BossDeliveryAndCommandTest {
         assertTrue(source.contains("dragon_ancestral"));
         assertTrue(source.contains("spawnBoss(bossType, player.getLocation(), true)"));
     }
+
+    @Test
+    void leviathanUsesBoundedOrbitAndSafeInventoryReturn() throws IOException {
+        String source = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "listeners", "BossItemListener.java"));
+
+        assertTrue(source.contains("startLeviathanOrbit(player, item)"));
+        assertTrue(source.contains("tick >= 100"));
+        assertTrue(source.contains("victim instanceof Player || victim instanceof ArmorStand"));
+        assertTrue(source.contains("pendingLeviathanAxes.put"));
+        assertTrue(source.contains("player.getInventory().addItem(pending.item())"));
+        assertFalse(source.contains("setItemInMainHand(axeItem)"));
+        assertFalse(source.contains("setItemInOffHand(axeItem)"));
+    }
 }

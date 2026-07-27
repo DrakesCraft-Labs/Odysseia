@@ -7,6 +7,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -25,12 +27,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.items.OdysseyItemManager;
 
@@ -39,14 +44,21 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class BossItemListener implements Listener {
 
     private final Odysseia plugin;
     private final NamespacedKey kratosTempOffhandKey;
     private final Map<UUID, Long> scepterCooldowns = new HashMap<>();
+    private final Map<UUID, Long> leviathanCooldowns = new HashMap<>();
+    private final Map<UUID, PendingLeviathanAxe> pendingLeviathanAxes = new HashMap<>();
+    private final Map<UUID, BukkitTask> activeLeviathanOrbits = new HashMap<>();
     private final Set<UUID> syntheticDamageTargets = new HashSet<>();
     private static final Map<UUID, ItemStack> savedOffhands = new HashMap<>();
+
+    private record PendingLeviathanAxe(ItemStack item) {
+    }
 
     public BossItemListener(Odysseia plugin) {
         this.plugin = plugin;
@@ -480,54 +492,15 @@ public final class BossItemListener implements Listener {
             }, 1L, 1L);
         }
 
-        // ── Hacha Leviatán: Lanzamiento y Reclamación Rúnica ──
+        // ── Hacha Leviatán: órbita rúnica o lanzamiento y retorno seguro ──
         if ("leviathan_axe".equals(type)) {
             event.setCancelled(true);
-
-            // Cooldown de 2 segundos para evitar spam de lanzamiento
-            long now = System.currentTimeMillis();
-            long lastUse = scepterCooldowns.getOrDefault(player.getUniqueId(), 0L);
-            if (now - lastUse < 2000L) {
-                return;
-            }
-            scepterCooldowns.put(player.getUniqueId(), now);
-
-            ItemStack axeItem = item.clone();
-            
-            // Remover temporalmente del inventario (simula lanzamiento)
-            if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
-                player.getInventory().setItemInMainHand(null);
+            if (player.isSneaking()) {
+                startLeviathanOrbit(player, item);
             } else {
-                player.getInventory().setItemInOffHand(null);
+                throwLeviathanAxe(player, event.getHand(), item);
             }
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1.0f, 0.5f);
-
-            // Disparar proyectil físico (bola de nieve pesada)
-            Snowball ball = player.launchProjectile(Snowball.class);
-            ball.setMetadata("kratos_axe", new FixedMetadataValue(plugin, true));
-
-            // Espiral de partículas de nieve siguiendo al proyectil
-            Bukkit.getScheduler().runTaskTimer(plugin, task -> {
-                if (ball.isDead() || !ball.isValid()) {
-                    task.cancel();
-                    return;
-                }
-                ball.getWorld().spawnParticle(Particle.SNOWFLAKE, ball.getLocation(), 4, 0.1, 0.1, 0.1, 0.01);
-            }, 1L, 1L);
-
-            // Devolver automáticamente el hacha a la mano en 1 segundo (20 ticks)
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (player.isOnline()) {
-                    if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
-                        player.getInventory().setItemInMainHand(axeItem);
-                    } else {
-                        player.getInventory().setItemInOffHand(axeItem);
-                    }
-                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1.0f, 1.2f);
-                    player.getWorld().spawnParticle(Particle.SNOWFLAKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.05);
-                    player.sendMessage("§b§o[Leviatán] El hacha ha regresado a tu mano.");
-                }
-            }, 20L);
+            return;
         }
 
         if ("circe_staff".equals(type) && tryUseCooldown(player, 10_000L, "&dTransmutación")) {
@@ -555,6 +528,113 @@ public final class BossItemListener implements Listener {
         }
     }
 
+    /** Starts the bounded orbit mode without removing the real item from the player's inventory. */
+    private void startLeviathanOrbit(Player player, ItemStack axe) {
+        UUID playerId = player.getUniqueId();
+        if (activeLeviathanOrbits.containsKey(playerId)) {
+            player.sendMessage("§b[Leviatán] §7El hacha ya está orbitando.");
+            return;
+        }
+        if (!tryUseLeviathanCooldown(player, 20_000L, "Órbita rúnica")) return;
+
+        ItemDisplay display = player.getWorld().spawn(player.getLocation().add(0, 1.2, 0), ItemDisplay.class);
+        display.setItemStack(axe.clone());
+        display.setInvulnerable(true);
+        display.setPersistent(false);
+
+        AtomicInteger orbitTicks = new AtomicInteger();
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || player.isDead()) {
+                    display.remove();
+                    activeLeviathanOrbits.remove(playerId);
+                    cancel();
+                    return;
+                }
+
+                int tick = orbitTicks.getAndIncrement();
+                if (tick >= 100) {
+                    display.remove();
+                    activeLeviathanOrbits.remove(playerId);
+                    cancel();
+                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_RETURN, 0.9f, 1.2f);
+                    return;
+                }
+
+                double angle = tick * 0.36;
+                Location center = player.getLocation().add(0, 1.15, 0);
+                Location position = center.clone().add(Math.cos(angle) * 2.2, Math.sin(angle * 2.0) * 0.35, Math.sin(angle) * 2.2);
+                display.teleport(position);
+                display.setRotation((float) Math.toDegrees(-angle), (float) (Math.sin(angle) * 35));
+                player.getWorld().spawnParticle(Particle.SNOWFLAKE, position, 2, 0.08, 0.08, 0.08, 0.01);
+
+                if (tick % 10 != 0) return;
+                for (Entity nearby : display.getNearbyEntities(1.4, 1.4, 1.4)) {
+                    if (!(nearby instanceof LivingEntity victim) || victim instanceof Player || victim instanceof ArmorStand || victim.equals(player)) continue;
+                    applySyntheticDamage(victim, 5.0, player);
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 1, false, true));
+                }
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
+        activeLeviathanOrbits.put(playerId, task);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 0.9f, 0.7f);
+        player.sendMessage("§b[Leviatán] §fÓrbita rúnica activada.");
+    }
+
+    /** Throws the axe and returns the exact item through addItem, never overwriting a hand slot. */
+    private void throwLeviathanAxe(Player player, EquipmentSlot hand, ItemStack item) {
+        UUID playerId = player.getUniqueId();
+        if (pendingLeviathanAxes.containsKey(playerId)) return;
+        if (!tryUseLeviathanCooldown(player, 2_000L, "Lanzamiento rúnico")) return;
+
+        ItemStack axe = item.clone();
+        if (hand == EquipmentSlot.HAND) {
+            player.getInventory().setItemInMainHand(null);
+        } else {
+            player.getInventory().setItemInOffHand(null);
+        }
+        pendingLeviathanAxes.put(playerId, new PendingLeviathanAxe(axe));
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1.0f, 0.5f);
+
+        Snowball ball = player.launchProjectile(Snowball.class);
+        ball.setMetadata("leviathan_axe", new FixedMetadataValue(plugin, true));
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            if (ball.isDead() || !ball.isValid()) {
+                task.cancel();
+                return;
+            }
+            ball.getWorld().spawnParticle(Particle.SNOWFLAKE, ball.getLocation(), 4, 0.1, 0.1, 0.1, 0.01);
+        }, 1L, 1L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> returnLeviathanAxe(player), 20L);
+    }
+
+    /** Restores a pending axe safely; overflow drops only the exact missing axe at the player. */
+    private void returnLeviathanAxe(Player player) {
+        PendingLeviathanAxe pending = pendingLeviathanAxes.remove(player.getUniqueId());
+        if (pending == null) return;
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(pending.item());
+        for (ItemStack leftover : overflow.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), leftover).setOwner(player.getUniqueId());
+        }
+        if (player.isOnline()) {
+            player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1.0f, 1.2f);
+            player.getWorld().spawnParticle(Particle.SNOWFLAKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.05);
+        }
+    }
+
+    private boolean tryUseLeviathanCooldown(Player player, long cooldownMillis, String abilityName) {
+        long now = System.currentTimeMillis();
+        long lastUse = leviathanCooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long remaining = cooldownMillis - (now - lastUse);
+        if (remaining > 0L) {
+            player.sendMessage("§b[Leviatán] §7" + abilityName + " disponible en §f" + String.format("%.1f", remaining / 1000.0) + "s§7.");
+            return false;
+        }
+        leviathanCooldowns.put(player.getUniqueId(), now);
+        return true;
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onProjectileHit(ProjectileHitEvent event) {
         Projectile proj = event.getEntity();
@@ -580,7 +660,7 @@ public final class BossItemListener implements Listener {
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 1, false, true));
                     victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_BAT_DEATH, 0.8f, 0.5f);
                 }
-            } else if (ball.hasMetadata("kratos_axe")) {
+            } else if (ball.hasMetadata("leviathan_axe")) {
                 Location loc = ball.getLocation();
                 loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc, 30, 0.5, 0.5, 0.5, 0.1);
                 loc.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 0.5f);
@@ -696,6 +776,7 @@ public final class BossItemListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        returnLeviathanAxe(event.getPlayer());
         restoreKratosOffhand(event.getPlayer(), true);
     }
 
@@ -703,6 +784,11 @@ public final class BossItemListener implements Listener {
     public void onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent event) {
         Player player = event.getEntity();
         UUID playerId = player.getUniqueId();
+        PendingLeviathanAxe pending = pendingLeviathanAxes.remove(playerId);
+        if (pending != null) {
+            // The axe was removed only for flight; it must participate in the same death flow as any held item.
+            event.getDrops().add(pending.item());
+        }
         if (!savedOffhands.containsKey(playerId)) {
             return;
         }
