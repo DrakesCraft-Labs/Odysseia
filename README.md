@@ -25,6 +25,7 @@ Odysseia is deliberately the integration layer for DrakesCraft rather than a rep
 | Kits and passes | Handles configured kits, pending/offline delivery, timed rank/pass workflows, and the controlled SFMaster/SF Cheat path. |
 | Mythic bosses | Manages Greek, Norse, and Egyptian boss families, boss rewards, the isolated `boss_arena`, and `/bosswarp` sessions. Boss combat stays outside ordinary player claims. |
 | Events | Runs Blood Moon, meteor and horror-fog controls with explicit staff permissions and protection-aware behaviour. |
+| Seasonal chat games | Runs compact weekly game formats under Odysseia: math, runes, trivia, reflexes and map codes. The sequence restarts on the first day of each month and unanswered games reveal their solution. |
 | Protection and automation | Supplies bounded integrations for ProtectionStones, Slimefun machines, automation safeguards, and staff bypasses. It must not grant access to another player's protection by default. |
 | Moderation and operations | Includes chat warning tools, safe restart support, staff utilities, owner-only tools, DiscordSRV hooks, and diagnostics/reload controls. |
 

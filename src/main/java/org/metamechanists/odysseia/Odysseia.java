@@ -50,7 +50,7 @@ public final class Odysseia extends JavaPlugin {
     private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
-    private int chatGamesCountdown = 0;
+    private org.metamechanists.odysseia.chatgames.SeasonalChatGamesService seasonalChatGames;
     private PurchaseEngine purchaseEngine;
     private StarTelemetryPublisher starTelemetry;
     private PolisBaselineListener polisBaseline;
@@ -178,6 +178,8 @@ public final class Odysseia extends JavaPlugin {
         this.vipExpiryAlertService = new org.metamechanists.odysseia.services.VipExpiryAlertService(this);
         vipExpiryAlertService.startScheduler();
         this.discordTranslationBridge = new org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService(this);
+        this.seasonalChatGames = new org.metamechanists.odysseia.chatgames.SeasonalChatGamesService(this);
+        Bukkit.getPluginManager().registerEvents(seasonalChatGames, this);
         horrorNightScheduler.start();
         bloodMoonManager.start();
 
@@ -470,31 +472,12 @@ public final class Odysseia extends JavaPlugin {
     }
 
     private void startChatGamesScheduler() {
-        if (!getConfig().getBoolean("chatgames.enabled", false)) {
-            getLogger().info("[ChatGames] Scheduler deshabilitado (chatgames.enabled: false).");
+        if (seasonalChatGames == null || !getConfig().getBoolean("chatgames.enabled", true)) {
+            getLogger().info("[ChatGames] Motor semanal deshabilitado (chatgames.enabled: false).");
             return;
         }
-        String command = getConfig().getString("chatgames.command", "chatgames force");
-        chatGamesCountdown = getRandomChatGamesInterval();
-        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
-            if (Bukkit.getOnlinePlayers().isEmpty()) {
-                return;
-            }
-            chatGamesCountdown--;
-            if (chatGamesCountdown <= 0) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-                chatGamesCountdown = getRandomChatGamesInterval();
-            }
-        }, 1200L, 1200L));
-    }
-
-    private int getRandomChatGamesInterval() {
-        int min = getConfig().getInt("chatgames.min-interval", 15);
-        int max = getConfig().getInt("chatgames.max-interval", 30);
-        if (min >= max) {
-            return min;
-        }
-        return min + new java.util.Random().nextInt(max - min + 1);
+        seasonalChatGames.resetSchedule();
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, seasonalChatGames::tick, 20L, 20L));
     }
 
     private void startLenadorLocoScheduler() {

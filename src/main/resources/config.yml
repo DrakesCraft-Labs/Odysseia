@@ -166,13 +166,19 @@ starter-kit:
 #  ChatGames Scheduler
 # ─────────────────────────────────────────────
 chatgames:
-  # Poner en false si ChatGames ya maneja su propio scheduler (automatic-games: true)
-  enabled: false
-  # Comando que se dispara — cambiar sin recompilar
-  command: "chatgames force"
-  # Rango de tiempo aleatorio para lanzar un juego (minutos)
-  min-interval: 15
-  max-interval: 30
+  # Odysseia owns this schedule. Set ChatGames' external automatic-games to false
+  # to avoid overlapping events after the next restart.
+  enabled: true
+  timezone: "America/Santiago"
+  minimum-players: 2
+  min-interval-minutes: 12
+  max-interval-minutes: 18
+  timeout-seconds: 35
+  # The sequence resets every calendar month: week 1 math, week 2 runes,
+  # week 3 trivia, week 4 reflexes and week 5 cartographer codes.
+  reward-commands:
+    - "minecraft:xp add {player} 150 points"
+    - "eco give {player} 500"
 
 # ─────────────────────────────────────────────
 #  Leñador Loco
