@@ -143,7 +143,7 @@ public final class BossCombatDirector {
                 if (pull.lengthSquared() > 0.05D) {
                     player.setVelocity(pull.normalize().multiply(1.05D).setY(0.22D));
                 }
-                player.damage(9.0D, boss.getEntity());
+                player.damage(boss.scaleArenaDamage(9.0D), boss.getEntity());
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 50, 2));
             }
         });
@@ -210,7 +210,7 @@ public final class BossCombatDirector {
             Vector away = target.getLocation().toVector().subtract(boss.getEntity().getLocation().toVector());
             if (away.lengthSquared() < 0.01D) away = target.getLocation().getDirection();
             target.setVelocity(away.normalize().multiply(1.6D).setY(0.55D));
-            target.damage(15.0D, boss.getEntity());
+            target.damage(boss.scaleArenaDamage(15.0D), boss.getEntity());
             target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 1));
             target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 30, 0.4, 0.7, 0.4, 0.15);
         });
@@ -238,7 +238,7 @@ public final class BossCombatDirector {
             Location previous = boss.getEntity().getEyeLocation();
             for (Player victim : victims) {
                 drawLine(previous, victim.getEyeLocation(), Particle.ELECTRIC_SPARK, null);
-                victim.damage(10.0D, boss.getEntity());
+                victim.damage(boss.scaleArenaDamage(10.0D), boss.getEntity());
                 previous = victim.getEyeLocation();
             }
             impact.getWorld().playSound(impact, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 1.3F, 1.1F);
@@ -264,7 +264,7 @@ public final class BossCombatDirector {
                 victim.damage(9.0D, boss.getEntity());
             }
             if (victims.isEmpty() && target.isOnline()) {
-                target.damage(9.0D, boss.getEntity());
+                target.damage(boss.scaleArenaDamage(9.0D), boss.getEntity());
             }
         });
     }
@@ -276,7 +276,7 @@ public final class BossCombatDirector {
             if (!target.isOnline() || target.isDead() || target.getWorld() != boss.getEntity().getWorld()) return;
             target.getWorld().spawnParticle(Particle.OMINOUS_SPAWNING, target.getLocation().add(0, 1, 0),
                     45, 0.45, 0.9, 0.45, 0.04);
-            target.damage(16.0D, boss.getEntity());
+            target.damage(boss.scaleArenaDamage(16.0D), boss.getEntity());
             target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0));
             target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 80, 1));
         });
@@ -312,7 +312,7 @@ public final class BossCombatDirector {
     private void damagePlayers(OdysseyBoss boss, Location center, double radius, double damage,
                                java.util.function.Consumer<Player> effect) {
         for (Player player : playersNear(center, radius)) {
-            player.damage(damage, boss.getEntity());
+            player.damage(boss.scaleArenaDamage(damage), boss.getEntity());
             effect.accept(player);
         }
     }

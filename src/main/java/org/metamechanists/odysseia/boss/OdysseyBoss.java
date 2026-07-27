@@ -31,7 +31,7 @@ public abstract class OdysseyBoss {
     protected final LivingEntity entity;
     protected final String id;
     protected final String displayName;
-    protected final double maxHealth;
+    protected double maxHealth;
     protected final BossBar bossBar;
     protected final Set<UUID> playersWatching = new HashSet<>();
 
@@ -41,6 +41,7 @@ public abstract class OdysseyBoss {
     private boolean rebirthConsumed;
     private long rebirthInvulnerableUntil;
     private long phaseShieldUntil;
+    private double arenaPowerMultiplier = 1.0D;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -365,4 +366,17 @@ public abstract class OdysseyBoss {
     }
 
     public abstract void executeSkillsRotation();
+
+    /** Scales only this instance; global boss definitions remain untouched. */
+    public void applyArenaPowerMultiplier(double multiplier) {
+        arenaPowerMultiplier = Math.clamp(multiplier, 1.0D, 5.0D);
+        maxHealth *= arenaPowerMultiplier;
+        var attribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        if (attribute != null) attribute.setBaseValue(maxHealth);
+        entity.setHealth(maxHealth);
+    }
+
+    public double scaleArenaDamage(double baseDamage) {
+        return baseDamage * arenaPowerMultiplier;
+    }
 }
