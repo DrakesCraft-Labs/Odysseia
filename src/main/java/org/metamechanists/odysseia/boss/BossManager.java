@@ -46,6 +46,7 @@ import org.metamechanists.odysseia.boss.instances.ColosoEndBoss;
 import org.metamechanists.odysseia.boss.instances.WitherStormBoss;
 import org.metamechanists.odysseia.boss.instances.DragonAncestralBoss;
 import org.metamechanists.odysseia.boss.instances.EgyptianBoss;
+import org.metamechanists.odysseia.boss.instances.JaxDisplayBoss;
 import org.metamechanists.odysseia.boss.skills.PolymorphSkill;
 import org.metamechanists.odysseia.boss.combat.BossCombatDirector;
 import org.metamechanists.odysseia.utils.WebhookSender;
@@ -287,6 +288,12 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("set")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.HUSK);
             boss = new EgyptianBoss(entity, EgyptianBoss.Kind.SET);
+        } else if (type.equalsIgnoreCase("jax")) {
+            if (!plugin.getConfig().getBoolean("bosses.jax.enabled", true)) {
+                return null;
+            }
+            entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.RAVAGER);
+            boss = new JaxDisplayBoss(entity);
         } else {
             return null;
         }

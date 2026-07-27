@@ -502,6 +502,18 @@ boss-domains:
   height: 16
   duration-seconds: 900
 
+# Jax usa un Ravager invisible como núcleo de combate y una escultura de displays como cuerpo.
+# Es manual por diseño: /boss spawn jax. Sus ataques no alteran bloques ni claims.
+bosses:
+  jax:
+    enabled: true
+    health: 1350.0
+    core-damage: 16.0
+    target-range: 28.0
+    charge-speed: 1.05
+    impact-radius: 4.0
+    impact-damage: 11.0
+
 # Cada drop se sortea una vez por muerte y se entrega a un participante
 # ponderado por daño. Los valores son probabilidades entre 0.0 y 1.0.
 boss-loot:
