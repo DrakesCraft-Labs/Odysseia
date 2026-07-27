@@ -139,6 +139,9 @@ public final class Odysseia extends JavaPlugin {
         getCommand("spawnallbosses").setTabCompleter(bossCmd);
         this.bloodMoonManager = new BloodMoonManager(this);
         getCommand("bloodmoon").setExecutor(new org.metamechanists.odysseia.commands.BloodMoonCommand(bloodMoonManager));
+        org.metamechanists.odysseia.commands.MeteorCommand meteorCommand = new org.metamechanists.odysseia.commands.MeteorCommand(this);
+        getCommand("meteorito").setExecutor(meteorCommand);
+        getCommand("meteorito").setTabCompleter(meteorCommand);
         org.metamechanists.odysseia.commands.HorrorFogCommand fogCmd = new org.metamechanists.odysseia.commands.HorrorFogCommand(this);
         getCommand("niebla").setExecutor(fogCmd);
         getCommand("niebla").setTabCompleter(fogCmd);

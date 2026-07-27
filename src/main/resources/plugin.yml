@@ -46,6 +46,11 @@ commands:
     description: Gestiona la Luna de Sangre de Odysseia.
     permission: odysseia.bloodmoon.admin
     usage: /bloodmoon <start|stop|status>
+  meteorito:
+    description: Invoca meteoritos destructivos fuera de las protecciones.
+    permission: odysseia.meteor.admin
+    aliases: [meteoritos, lluviameteoritos]
+    usage: /meteorito <pequeno|pesado|void|lluvia> [cantidad] [radio]
   odysseia:
     description: Comando principal de administración de Odysseia.
     permission: odysseia.reload
@@ -117,6 +122,9 @@ permissions:
   odysseia.bosswarp.use:
     description: Permite iniciar y espectear arenas de jefes.
     default: true
+  odysseia.meteor.admin:
+    description: Permite al dueño invocar meteoritos controlados.
+    default: op
   odysseia.horrorfog:
     description: Permite activar o desactivar la niebla densa de terror.
     default: op
