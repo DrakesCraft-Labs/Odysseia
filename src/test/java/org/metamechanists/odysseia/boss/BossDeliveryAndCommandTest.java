@@ -11,13 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BossDeliveryAndCommandTest {
     @Test
-    void customBossLootUsesOneDeliveryPath() throws IOException {
+    void customBossLootNeverFallsToTheGround() throws IOException {
         String source = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "BossManager.java"));
 
         assertFalse(source.contains("dropItemNaturally(dropLocation, item.clone())"));
-        assertTrue(source.indexOf("recipient.getInventory().addItem(item)")
-                        < source.indexOf("dropItemNaturally(dropLocation, leftover)"),
-                "El suelo debe ser solo el respaldo cuando el inventario no tiene espacio");
+        assertFalse(source.contains("dropItemNaturally(dropLocation, leftover)"));
+        assertTrue(source.contains("queuePendingReward(recipient.getUniqueId(), leftover)"));
+        assertTrue(source.contains("boss-rewards.yml"));
     }
 
     @Test

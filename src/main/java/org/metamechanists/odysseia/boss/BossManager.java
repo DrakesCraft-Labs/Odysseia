@@ -18,10 +18,12 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.instances.CirceBoss;
 import org.metamechanists.odysseia.boss.instances.PolifemoBoss;
@@ -55,6 +57,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.File;
+import java.io.IOException;
 
 public class BossManager implements Listener {
 
@@ -71,6 +75,8 @@ public class BossManager implements Listener {
     private final Map<UUID, BukkitTask> activeDomains = new ConcurrentHashMap<>();
     private final DiosesDrakesBossBridge divineBossBridge;
     private final BossCombatDirector combatDirector;
+    private final File pendingRewardsFile;
+    private final YamlConfiguration pendingRewards;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -85,6 +91,8 @@ public class BossManager implements Listener {
         this.plugin = plugin;
         this.divineBossBridge = new DiosesDrakesBossBridge(plugin);
         this.combatDirector = new BossCombatDirector(plugin);
+        this.pendingRewardsFile = new File(plugin.getDataFolder(), "boss-rewards.yml");
+        this.pendingRewards = YamlConfiguration.loadConfiguration(pendingRewardsFile);
         startTasks();
     }
 
@@ -648,7 +656,7 @@ public class BossManager implements Listener {
     }
 
 
-    /** Sortea cada drop una vez y lo entrega al vencedor acreditado. */
+    /** Sortea cada drop una vez y lo entrega al vencedor acreditado, sin soltar loot al mundo. */
     private void distributeCustomDrops(String bossId, Location dropLocation, Player creditedKiller,
                                        List<Player> recipients, Map<UUID, Double> contributions) {
         if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
@@ -682,15 +690,62 @@ public class BossManager implements Listener {
                     : pickRecipient(recipients, contributions);
             
             Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
-            // Entrega de una sola vía: el suelo es únicamente el respaldo si el inventario está lleno.
             for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
-                if (dropLocation.getWorld() == null) continue;
-                org.bukkit.entity.Item itemEntity = dropLocation.getWorld().dropItemNaturally(dropLocation, leftover);
-                itemEntity.setOwner(recipient.getUniqueId());
+                queuePendingReward(recipient.getUniqueId(), leftover);
             }
             recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
+            if (!overflow.isEmpty()) {
+                recipient.sendMessage("§6[MÍTICO] §eInventario lleno: tu recompensa quedó guardada y se entregará al tener espacio.");
+            }
         }
+    }
+
+    /** Keeps boss rewards out of the world and persists them across restarts until delivery succeeds. */
+    private synchronized void queuePendingReward(UUID playerId, org.bukkit.inventory.ItemStack item) {
+        String path = "players." + playerId;
+        List<org.bukkit.inventory.ItemStack> queued = new ArrayList<>(pendingRewards.getList(path, List.of()).stream()
+                .filter(org.bukkit.inventory.ItemStack.class::isInstance)
+                .map(org.bukkit.inventory.ItemStack.class::cast)
+                .toList());
+        queued.add(item.clone());
+        pendingRewards.set(path, queued);
+        savePendingRewards();
+    }
+
+    /** Delivers the persistent mailbox on join and retains only items that still do not fit. */
+    private synchronized void deliverPendingRewards(Player player) {
+        String path = "players." + player.getUniqueId();
+        List<org.bukkit.inventory.ItemStack> queued = pendingRewards.getList(path, List.of()).stream()
+                .filter(org.bukkit.inventory.ItemStack.class::isInstance)
+                .map(org.bukkit.inventory.ItemStack.class::cast)
+                .toList();
+        if (queued.isEmpty()) return;
+
+        List<org.bukkit.inventory.ItemStack> remaining = new ArrayList<>();
+        for (org.bukkit.inventory.ItemStack item : queued) {
+            remaining.addAll(player.getInventory().addItem(item).values());
+        }
+        pendingRewards.set(path, remaining.isEmpty() ? null : remaining);
+        savePendingRewards();
+        if (remaining.isEmpty()) {
+            player.sendMessage("§6[MÍTICO] §eTus recompensas pendientes fueron entregadas.");
+        } else {
+            player.sendMessage("§6[MÍTICO] §eAún tienes recompensas pendientes: libera espacio en tu inventario.");
+        }
+    }
+
+    private void savePendingRewards() {
+        try {
+            pendingRewards.save(pendingRewardsFile);
+        } catch (IOException exception) {
+            plugin.getLogger().severe("[Bosses] No se pudo guardar boss-rewards.yml: " + exception.getMessage());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Bukkit.getScheduler().runTask(plugin, () -> deliverPendingRewards(event.getPlayer()));
     }
 
     private List<Player> findEligibleRecipients(Player killer, Map<UUID, Double> contributions) {
