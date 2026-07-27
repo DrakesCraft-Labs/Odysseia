@@ -100,22 +100,25 @@ public final class BossCombatDirector {
     }
 
     private void launch(OdysseyBoss boss, Player target, AttackFamily family, int rotation) {
-        int variant = Math.floorMod(rotation / 2, 3);
+        int variant = Math.floorMod(rotation / 2, 4);
         switch (family) {
             case AERIAL -> {
                 if (variant == 0) starfall(boss, target);
                 else if (variant == 1) gravityWell(boss, target);
-                else airSlam(boss, target);
+                else if (variant == 2) airSlam(boss, target);
+                else tempestCage(boss, target);
             }
             case GROUND -> {
                 if (variant == 0) warStomp(boss);
                 else if (variant == 1) vortexPull(boss, target);
-                else shieldBash(boss, target);
+                else if (variant == 2) shieldBash(boss, target);
+                else ruptureWave(boss);
             }
             case RANGED -> {
                 if (variant == 0) chainLightning(boss, target);
                 else if (variant == 1) spiritBeam(boss, target);
-                else arcaneMissiles(boss, target);
+                else if (variant == 2) arcaneMissiles(boss, target);
+                else hunterMark(boss, target);
             }
         }
     }
@@ -159,6 +162,22 @@ public final class BossCombatDirector {
         });
     }
 
+    /** Traps a marked area briefly without changing blocks or forcing chunk loads. */
+    private void tempestCage(OdysseyBoss boss, Player target) {
+        Location center = target.getLocation().clone();
+        telegraph(boss, "Prisión de tormenta", center, AERIAL_DUST, Sound.ENTITY_WARDEN_SONIC_BOOM, () -> {
+            drawRing(center, 6.0D, AERIAL_DUST);
+            center.getWorld().spawnParticle(Particle.GUST, center.clone().add(0, 1, 0), 18, 2.5, 1.2, 2.5, 0.08);
+            for (Player player : playersNear(center, 6.0D)) {
+                Vector away = player.getLocation().toVector().subtract(center.toVector());
+                if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
+                player.setVelocity(away.normalize().multiply(0.95D).setY(0.45D));
+                player.damage(10.0D, boss.getEntity());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 70, 0));
+            }
+        });
+    }
+
     private void warStomp(OdysseyBoss boss) {
         Location center = boss.getEntity().getLocation().clone();
         telegraph(boss, "Pisotón de guerra", center, GROUND_DUST, Sound.ENTITY_RAVAGER_ROAR, () -> {
@@ -197,6 +216,21 @@ public final class BossCombatDirector {
         });
     }
 
+    /** Expanding ground pulse that punishes players who remain around a melee boss. */
+    private void ruptureWave(OdysseyBoss boss) {
+        Location center = boss.getEntity().getLocation().clone();
+        telegraph(boss, "Onda de ruptura", center, GROUND_DUST, Sound.ENTITY_WARDEN_ATTACK_IMPACT, () -> {
+            drawRing(center, 11.0D, GROUND_DUST);
+            center.getWorld().spawnParticle(Particle.LAVA, center.clone().add(0, 0.2, 0), 42, 4.5, 0.15, 4.5, 0.03);
+            damagePlayers(boss, center, 11.0D, 14.0D, player -> {
+                Vector away = player.getLocation().toVector().subtract(center.toVector());
+                if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
+                player.setVelocity(away.normalize().multiply(1.1D).setY(0.65D));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 50, 1));
+            });
+        });
+    }
+
     private void chainLightning(OdysseyBoss boss, Player target) {
         Location impact = target.getLocation().clone();
         telegraph(boss, "Relámpago encadenado", impact, RANGED_DUST, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, () -> {
@@ -232,6 +266,19 @@ public final class BossCombatDirector {
             if (victims.isEmpty() && target.isOnline()) {
                 target.damage(9.0D, boss.getEntity());
             }
+        });
+    }
+
+    /** Marks one target and gives nearby combatants a short, visible escape window. */
+    private void hunterMark(OdysseyBoss boss, Player target) {
+        Location snapshot = target.getLocation().clone();
+        telegraph(boss, "Marca del cazador", snapshot, RANGED_DUST, Sound.ENTITY_ELDER_GUARDIAN_CURSE, () -> {
+            if (!target.isOnline() || target.isDead() || target.getWorld() != boss.getEntity().getWorld()) return;
+            target.getWorld().spawnParticle(Particle.OMINOUS_SPAWNING, target.getLocation().add(0, 1, 0),
+                    45, 0.45, 0.9, 0.45, 0.04);
+            target.damage(16.0D, boss.getEntity());
+            target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 80, 1));
         });
     }
 

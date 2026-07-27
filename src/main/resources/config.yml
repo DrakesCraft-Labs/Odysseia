@@ -380,6 +380,10 @@ boss-balance:
   dialogue-radius: 48.0
   # Escudo cinematográfico breve al cruzar cada fase; bloquea golpes durante el telegraph.
   phase-shield-ticks: 32
+  phase-rupture:
+    # Descarga local al cambiar de fase. No modifica bloques ni carga chunks.
+    radius: 8.0
+    damage: 6.0
   combat-director:
     # Ataques comunes inspirados en encuentros por fases, limitados a una tarea pendiente por jefe.
     enabled: true

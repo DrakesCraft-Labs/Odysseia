@@ -41,4 +41,17 @@ class BossDeliveryAndCommandTest {
         assertFalse(source.contains("setItemInMainHand(axeItem)"));
         assertFalse(source.contains("setItemInOffHand(axeItem)"));
     }
+
+    @Test
+    void everyCombatFamilyHasAFourthTelegraphedVariantAndPhaseRupture() throws IOException {
+        String director = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "combat", "BossCombatDirector.java"));
+        String boss = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "OdysseyBoss.java"));
+
+        assertTrue(director.contains("Math.floorMod(rotation / 2, 4)"));
+        assertTrue(director.contains("tempestCage(boss, target)"));
+        assertTrue(director.contains("ruptureWave(boss)"));
+        assertTrue(director.contains("hunterMark(boss, target)"));
+        assertTrue(boss.contains("emitPhaseRupture(loc, phase)"));
+        assertTrue(boss.contains("boss-balance.phase-rupture.radius"));
+    }
 }
