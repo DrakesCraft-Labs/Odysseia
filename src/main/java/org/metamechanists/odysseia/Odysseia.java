@@ -128,6 +128,10 @@ public final class Odysseia extends JavaPlugin {
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
+        var bossArenas = new org.metamechanists.odysseia.boss.arena.BossArenaService(this, bossManager);
+        var bossWarp = new org.metamechanists.odysseia.commands.BossWarpCommand(bossArenas);
+        getCommand("bosswarp").setExecutor(bossWarp);
+        getCommand("bosswarp").setTabCompleter(bossWarp);
         BossCommand bossCmd = new BossCommand(this, bossManager);
         getCommand("boss").setExecutor(bossCmd);
         getCommand("boss").setTabCompleter(bossCmd);
@@ -148,6 +152,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         vanishCommand.startReminder();
         Bukkit.getPluginManager().registerEvents(bossManager, this);
+        Bukkit.getPluginManager().registerEvents(bossArenas, this);
         Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);

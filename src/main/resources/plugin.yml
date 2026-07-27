@@ -34,6 +34,10 @@ commands:
     description: Comando administrativo para gestionar jefes míticos.
     permission: odysseia.boss.admin
     usage: /boss <spawn|spawnall|give> ...
+  bosswarp:
+    description: Inicia una arena de jefe aislada o permite espectearla.
+    permission: odysseia.bosswarp.use
+    usage: /bosswarp <jefe> [solo|grupo]
   spawnallbosses:
     description: Invoca todos los jefes míticos alrededor del administrador.
     permission: odysseia.boss.admin
@@ -110,6 +114,9 @@ commands:
     aliases: [grantoldschool, viejodesde, oldschoolgive]
     usage: /esteusuarioesviejo <jugador>
 permissions:
+  odysseia.bosswarp.use:
+    description: Permite iniciar y espectear arenas de jefes.
+    default: true
   odysseia.horrorfog:
     description: Permite activar o desactivar la niebla densa de terror.
     default: op
