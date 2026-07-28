@@ -46,6 +46,9 @@ class BossDeliveryAndCommandTest {
         assertTrue(command.contains("ARENA_BOSS_TYPES"));
         assertTrue(command.contains("Circe, Polifemo, Dios Corrupto"));
         assertTrue(command.contains("Heimdall, Hidra, Cerbero"));
+        assertTrue(arena.contains("Entrada cobrada:"));
+        assertTrue(arena.contains("enforceArenaBounds"));
+        assertTrue(arena.contains("Contención aplicada"));
     }
 
     @Test

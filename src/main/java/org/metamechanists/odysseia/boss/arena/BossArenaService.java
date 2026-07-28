@@ -41,6 +41,7 @@ public final class BossArenaService implements Listener {
     public BossArenaService(Odysseia plugin, BossManager bosses) {
         this.plugin = plugin;
         this.bosses = bosses;
+        Bukkit.getScheduler().runTaskTimer(plugin, this::enforceArenaBounds, 20L, 20L);
     }
 
     /** Result of a paid arena creation attempt, including a player-safe failure reason. */
@@ -167,6 +168,8 @@ public final class BossArenaService implements Listener {
                 return EntryCharge.failed("No se pudo cobrar la entrada. Todo cobro previo fue reembolsado.");
             }
             charged.add(player);
+            plugin.getLogger().info("[BossArena] Entrada cobrada: " + player.getName() + " -> "
+                    + type + " por " + formatFee(fee) + " Dragmas.");
         }
         return new EntryCharge(economy, charged, fee, "");
     }
@@ -269,6 +272,28 @@ public final class BossArenaService implements Listener {
         int y = center.getBlockY() - 1;
         for (int x = -48; x <= 48; x++) for (int z = -48; z <= 48; z++)
             world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(Material.AIR, false);
+    }
+
+    /** Keeps flying and pathfinding-heavy bosses inside their assigned arena cell. */
+    private void enforceArenaBounds() {
+        for (BossArenaSession session : byBoss.values()) {
+            var entity = Bukkit.getEntity(session.bossId());
+            if (entity == null || !entity.isValid()) {
+                continue;
+            }
+            Location center = session.center();
+            Location current = entity.getLocation();
+            double dx = current.getX() - center.getX();
+            double dz = current.getZ() - center.getZ();
+            boolean outside = dx * dx + dz * dz > 42D * 42D
+                    || current.getY() < center.getY() - 8D || current.getY() > center.getY() + 58D;
+            if (!outside) {
+                continue;
+            }
+            entity.teleport(center.clone().add(0, 2, 0));
+            entity.setVelocity(entity.getVelocity().zero());
+            plugin.getLogger().info("[BossArena] Contención aplicada a " + session.bossType() + " en arena " + session.id() + ".");
+        }
     }
 
     /** Rewards never use world drops, avoiding grave and arena duplication paths. */
