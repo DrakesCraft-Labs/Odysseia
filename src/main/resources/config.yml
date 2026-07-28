@@ -423,12 +423,12 @@ boss-balance:
 # Odysseia reembolsa todos los cobros de esa sesión.
 boss-arena:
   entry-fees:
-    default: 100000
-    zeus: 50000
-    hades: 75000
-    tifon: 300000
-    dragon: 500000
-    wither_storm: 1000000
+    default: 500000
+    zeus: 250000
+    hades: 375000
+    tifon: 1500000
+    dragon: 2500000
+    wither_storm: 5000000
     # Permiso opcional para pruebas administrativas sin retirar Dragmas.
     free-permission: "odysseia.bosswarp.free"
   targeted-challenges:
