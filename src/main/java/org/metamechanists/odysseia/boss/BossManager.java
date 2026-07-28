@@ -609,8 +609,12 @@ public class BossManager implements Listener {
             attackerPlayer = p;
         }
 
-        // Caso A: Jugador VIP ataca a un Jefe Mítico -> Inflige +25% de daño
-        if (activeBosses.containsKey(victim.getUniqueId()) && attackerPlayer != null) {
+        // Caso A: jugadores atacan a un jefe. Los retos de arena absorben daño
+        // antes de aplicar ventajas VIP, manteniendo un escalado efectivo sin
+        // superar los límites del atributo MAX_HEALTH de Minecraft.
+        OdysseyBoss defendingBoss = activeBosses.get(victim.getUniqueId());
+        if (defendingBoss != null && attackerPlayer != null) {
+            event.setDamage(defendingBoss.scaleIncomingArenaDamage(event.getDamage()));
             if (attackerPlayer.hasPermission("odysseia.boss.vip_advantage")) {
                 event.setDamage(event.getDamage() * 1.25);
                 // Partículas críticas de poder celestial

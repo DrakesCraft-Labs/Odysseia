@@ -42,6 +42,11 @@ public abstract class OdysseyBoss {
     private long rebirthInvulnerableUntil;
     private long phaseShieldUntil;
     private double arenaPowerMultiplier = 1.0D;
+    /**
+     * Converts a high-health arena challenge into damage absorption instead of
+     * exceeding Minecraft's max-health attribute limits.
+     */
+    private double arenaHealthDamageDivider = 1.0D;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -374,6 +379,16 @@ public abstract class OdysseyBoss {
         var attribute = entity.getAttribute(Attribute.MAX_HEALTH);
         if (attribute != null) attribute.setBaseValue(maxHealth);
         entity.setHealth(maxHealth);
+    }
+
+    /** Applies a bounded effective-health multiplier to this arena instance only. */
+    public void applyArenaHealthMultiplier(double multiplier) {
+        arenaHealthDamageDivider = Math.clamp(multiplier, 1.0D, 1_000_000.0D);
+    }
+
+    /** Reduces incoming player damage for a targeted arena challenge. */
+    public double scaleIncomingArenaDamage(double damage) {
+        return damage / arenaHealthDamageDivider;
     }
 
     public double scaleArenaDamage(double baseDamage) {

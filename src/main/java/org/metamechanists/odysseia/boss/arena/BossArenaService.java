@@ -1,7 +1,9 @@
 package org.metamechanists.odysseia.boss.arena;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +18,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -24,6 +27,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.BossManager;
 import org.metamechanists.odysseia.boss.OdysseyBoss;
+import net.milkbowl.vault.economy.Economy;
 
 /** Owns isolated, non-destructive boss fights in reserved cells of boss_arena. */
 public final class BossArenaService implements Listener {
@@ -39,15 +43,39 @@ public final class BossArenaService implements Listener {
         this.bosses = bosses;
     }
 
-    public BossArenaSession start(String type, Collection<Player> players, boolean group) {
-        if (players.isEmpty()) return null;
+    /** Result of a paid arena creation attempt, including a player-safe failure reason. */
+    public record StartResult(BossArenaSession session, double feePerPlayer, String error) {
+        public boolean started() { return session != null; }
+    }
+
+    public StartResult start(String type, Collection<Player> players, boolean group) {
+        if (players.isEmpty()) return failed("No hay jugadores para esta arena.");
         World world = arenaWorld();
-        if (world == null || players.stream().anyMatch(player -> byPlayer.containsKey(player.getUniqueId()))) return null;
+        if (world == null) return failed("No se pudo preparar el mundo de jefes.");
+        if (players.stream().anyMatch(player -> byPlayer.containsKey(player.getUniqueId()))) {
+            return failed("Un integrante ya está en otra arena.");
+        }
+        EntryCharge charge = chargeEntry(type, players);
+        if (!charge.success()) return failed(charge.error());
         int cell = reserveCell();
         Location center = new Location(world, cell * CELL_SIZE + 0.5D, 65D, 0.5D);
         buildFloor(world, center);
-        OdysseyBoss boss = bosses.spawnBoss(type, center.clone().add(0, 1, 0), false);
-        if (boss == null) { occupiedCells.remove(cell); return null; }
+        OdysseyBoss boss;
+        try {
+            boss = bosses.spawnBoss(type, center.clone().add(0, 1, 0), false);
+        } catch (RuntimeException exception) {
+            plugin.getLogger().warning("[BossArena] Falló la creación de " + type + ": " + exception.getMessage());
+            occupiedCells.remove(cell);
+            clearFloor(center);
+            charge.refund();
+            return failed("La arena falló al crear el jefe. Tu entrada fue reembolsada.");
+        }
+        if (boss == null) {
+            occupiedCells.remove(cell);
+            clearFloor(center);
+            charge.refund();
+            return failed("Ese jefe no existe. Tu entrada fue reembolsada.");
+        }
         if (group) boss.applyArenaPowerMultiplier(5.0D);
         Set<UUID> ids = new LinkedHashSet<>();
         for (Player player : players) {
@@ -55,6 +83,15 @@ public final class BossArenaService implements Listener {
             byPlayer.put(player.getUniqueId(), boss.getEntity().getUniqueId());
             player.teleport(center.clone().add(0, 1, 12));
             player.setFallDistance(0);
+        }
+        double challengeMultiplier = targetedHealthMultiplier(ids);
+        if (challengeMultiplier > 1.0D) {
+            boss.applyArenaHealthMultiplier(challengeMultiplier);
+            for (Player player : players) {
+                player.sendMessage("§5[BossArena] §dDesafío de élite activo: §fx"
+                        + String.format(java.util.Locale.ROOT, "%.0f", challengeMultiplier)
+                        + " §dde vida efectiva.");
+            }
         }
         BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), type,
                 center, group, Set.copyOf(ids), System.currentTimeMillis());
@@ -64,7 +101,69 @@ public final class BossArenaService implements Listener {
         for (Player nearby : world.getPlayers()) {
             if (nearby.getLocation().distanceSquared(center) <= 256.0D * 256.0D) nearby.sendMessage(notice);
         }
-        return session;
+        return new StartResult(session, charge.feePerPlayer(), "");
+    }
+
+    /** Price shown to players before they enter, excluding a configured staff bypass. */
+    public double entryFee(String type) {
+        return BossArenaPricing.feeFor(plugin.getConfig().getConfigurationSection("boss-arena.entry-fees"), type);
+    }
+
+    private StartResult failed(String error) {
+        return new StartResult(null, 0.0D, error);
+    }
+
+    private EntryCharge chargeEntry(String type, Collection<Player> players) {
+        double fee = entryFee(type);
+        if (fee <= 0.0D) return EntryCharge.free();
+        RegisteredServiceProvider<Economy> registration = Bukkit.getServicesManager().getRegistration(Economy.class);
+        if (registration == null || registration.getProvider() == null) {
+            return EntryCharge.failed("La economía no está disponible; no se cobró ninguna entrada.");
+        }
+        Economy economy = registration.getProvider();
+        String bypass = plugin.getConfig().getString("boss-arena.entry-fees.free-permission", "");
+        ArrayList<Player> charged = new ArrayList<>();
+        for (Player player : players) {
+            if (!bypass.isBlank() && player.hasPermission(bypass)) continue;
+            if (!economy.has(player, fee)) {
+                return EntryCharge.failed("§c" + player.getName() + " no tiene §e"
+                        + formatFee(fee) + " Dragmas§c para entrar.");
+            }
+        }
+        for (Player player : players) {
+            if (!bypass.isBlank() && player.hasPermission(bypass)) continue;
+            if (!economy.withdrawPlayer(player, fee).transactionSuccess()) {
+                refund(economy, charged, fee);
+                return EntryCharge.failed("No se pudo cobrar la entrada. Todo cobro previo fue reembolsado.");
+            }
+            charged.add(player);
+        }
+        return new EntryCharge(economy, charged, fee, "");
+    }
+
+    private void refund(Economy economy, Collection<Player> players, double fee) {
+        for (Player player : players) economy.depositPlayer(player, fee);
+    }
+
+    private double targetedHealthMultiplier(Set<UUID> participants) {
+        var profiles = plugin.getConfig().getConfigurationSection("boss-arena.targeted-challenges.players");
+        if (profiles == null) return 1.0D;
+        double multiplier = 1.0D;
+        for (UUID participant : participants) {
+            multiplier = Math.max(multiplier, profiles.getDouble(participant.toString() + ".health-multiplier", 1.0D));
+        }
+        return Math.clamp(multiplier, 1.0D, 1_000_000.0D);
+    }
+
+    private static String formatFee(double fee) {
+        return String.format(java.util.Locale.ROOT, "%,.0f", fee);
+    }
+
+    private record EntryCharge(Economy economy, Collection<Player> charged, double feePerPlayer, String error) {
+        static EntryCharge free() { return new EntryCharge(null, List.of(), 0.0D, ""); }
+        static EntryCharge failed(String error) { return new EntryCharge(null, List.of(), 0.0D, error); }
+        boolean success() { return error.isEmpty(); }
+        void refund() { if (economy != null) for (Player player : charged) economy.depositPlayer(player, feePerPlayer); }
     }
 
     public boolean spectate(Player viewer, Player participant) {

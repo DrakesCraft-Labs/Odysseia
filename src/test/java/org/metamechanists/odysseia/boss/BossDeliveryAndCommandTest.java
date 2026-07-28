@@ -30,6 +30,17 @@ class BossDeliveryAndCommandTest {
     }
 
     @Test
+    void bossWarpUsesPaidEntriesAndCanExplainItsPrices() throws IOException {
+        String command = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "commands", "BossWarpCommand.java"));
+        String arena = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "arena", "BossArenaService.java"));
+
+        assertTrue(command.contains("bosswarp precios"));
+        assertTrue(command.contains("Entrada cobrada"));
+        assertTrue(arena.contains("withdrawPlayer"));
+        assertTrue(arena.contains("Tu entrada fue reembolsada"));
+    }
+
+    @Test
     void leviathanUsesBoundedOrbitAndSafeInventoryReturn() throws IOException {
         String source = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "listeners", "BossItemListener.java"));
 

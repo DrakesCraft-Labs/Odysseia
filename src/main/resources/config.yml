@@ -417,6 +417,29 @@ boss-balance:
     health-percent: 0.55
     invulnerability-seconds: 5
 
+# ─────────────────────────────────────────────
+# Arenas públicas de jefes (/bosswarp)
+# Cada integrante de un grupo paga su entrada. Si el jefe no se puede crear,
+# Odysseia reembolsa todos los cobros de esa sesión.
+boss-arena:
+  entry-fees:
+    default: 100000
+    zeus: 50000
+    hades: 75000
+    tifon: 300000
+    dragon: 500000
+    wither_storm: 1000000
+    # Permiso opcional para pruebas administrativas sin retirar Dragmas.
+    free-permission: "odysseia.bosswarp.free"
+  targeted-challenges:
+    players:
+      # Pasiente. Se usa UUID para que un cambio de nick no reduzca el reto.
+      # El divisor representa vida efectiva sin sobrepasar MAX_HEALTH: x1000000
+      # significa que los golpes de jugadores bajan la vida del jefe un millón de veces menos.
+      "7ddf2641-14fb-4c1f-8499-aa5ff6c6b295":
+        name: "Pasiente"
+        health-multiplier: 1000000.0
+
 #  Purchase Engine: anuncios de compras confirmadas
 # ─────────────────────────────────────────────
 # Este endpoint es privado: el valor real vive solo en la configuración desplegada.
