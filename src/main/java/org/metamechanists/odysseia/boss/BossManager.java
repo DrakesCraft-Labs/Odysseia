@@ -220,7 +220,7 @@ public class BossManager implements Listener {
                     "tifón", "prometeo", "coloso_end", "coloso-end", "coloso", "wither", "wither_storm",
                     "wither-storm", "witherstorm", "dragon_ancestral", "dragon-ancestral", "dragon", "ra", "isis",
                     "anubis", "set" -> true;
-            case "jax" -> plugin.getConfig().getBoolean("bosses.jax.enabled", true);
+            case "jax", "ajax" -> plugin.getConfig().getBoolean("bosses.jax.enabled", true);
             default -> false;
         };
     }
@@ -302,7 +302,7 @@ public class BossManager implements Listener {
         } else if (type.equalsIgnoreCase("set")) {
             entity = (LivingEntity) loc.getWorld().spawnEntity(loc, EntityType.HUSK);
             boss = new EgyptianBoss(entity, EgyptianBoss.Kind.SET);
-        } else if (type.equalsIgnoreCase("jax")) {
+        } else if (type.equalsIgnoreCase("jax") || type.equalsIgnoreCase("ajax")) {
             if (!plugin.getConfig().getBoolean("bosses.jax.enabled", true)) {
                 return null;
             }

@@ -104,11 +104,11 @@ public final class BossWarpCommand implements CommandExecutor, TabCompleter {
     }
     @Override public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command c, @NotNull String a, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(List.of("zeus", "hades", "tifon", "dragon", "wither_storm", "precios", "spectate"));
+            List<String> options = new ArrayList<>(List.of("zeus", "hades", "tifon", "dragon", "wither_storm", "jax", "precios", "spectate"));
             if (s.hasPermission("odysseia.bosswarp.staff")) options.add("staff");
             return options;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("staff")) return List.of("zeus", "hades", "tifon", "dragon", "wither_storm");
+        if (args.length == 2 && args[0].equalsIgnoreCase("staff")) return List.of("zeus", "hades", "tifon", "dragon", "wither_storm", "jax");
         if (args.length >= 3 && args[0].equalsIgnoreCase("staff")) return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         if (args.length == 2 && !args[0].equalsIgnoreCase("spectate")) return List.of("solo", "grupo");
         if (args.length >= 3 && args[1].equalsIgnoreCase("grupo")) return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();

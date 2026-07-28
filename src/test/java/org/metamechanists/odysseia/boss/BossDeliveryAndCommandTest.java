@@ -46,6 +46,18 @@ class BossDeliveryAndCommandTest {
     }
 
     @Test
+    void jaxAcceptsTheSpanishFriendlyAjaxAlias() throws IOException {
+        String manager = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "BossManager.java"));
+        String command = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "commands", "BossCommand.java"));
+        String bossWarp = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "commands", "BossWarpCommand.java"));
+
+        assertTrue(manager.contains("case \"jax\", \"ajax\""));
+        assertTrue(manager.contains("type.equalsIgnoreCase(\"ajax\")"));
+        assertTrue(command.contains("type.equals(\"jax\") || type.equals(\"ajax\")"));
+        assertTrue(bossWarp.contains("\"jax\""));
+    }
+
+    @Test
     void leviathanUsesBoundedOrbitAndSafeInventoryReturn() throws IOException {
         String source = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "listeners", "BossItemListener.java"));
 
