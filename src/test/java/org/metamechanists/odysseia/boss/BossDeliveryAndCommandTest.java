@@ -43,6 +43,9 @@ class BossDeliveryAndCommandTest {
         assertTrue(arena.contains("rollbackSpawn(boss, players, cell, center, charge)"));
         assertTrue(command.contains("/bosswarp staff <jefe> <jugador>"));
         assertTrue(command.contains("startForced"));
+        assertTrue(command.contains("ARENA_BOSS_TYPES"));
+        assertTrue(command.contains("Circe, Polifemo, Dios Corrupto"));
+        assertTrue(command.contains("Heimdall, Hidra, Cerbero"));
     }
 
     @Test

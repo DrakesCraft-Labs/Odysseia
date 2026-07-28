@@ -16,6 +16,11 @@ import org.metamechanists.odysseia.boss.arena.BossArenaService;
 
 /** Public entry point for isolated boss sessions. */
 public final class BossWarpCommand implements CommandExecutor, TabCompleter {
+    private static final List<String> ARENA_BOSS_TYPES = List.of(
+            "circe", "polifemo", "dios_corrupto", "thor", "ares", "hades", "poseidon", "zeus",
+            "loki", "odin", "kratos", "heimdall", "hidra", "cerbero", "artemisa", "tifon",
+            "prometeo", "coloso_end", "wither_storm", "dragon_ancestral", "ra", "isis", "anubis",
+            "set", "jax");
     private final BossArenaService arenas;
     public BossWarpCommand(BossArenaService arenas) { this.arenas = arenas; }
     @Override public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -91,12 +96,16 @@ public final class BossWarpCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendPrices(Player player) {
+        String standard = formatFee(arenas.entryFee("default"));
         player.sendMessage("§6[BossArena] §eEntradas por jugador: §fZeus §6" + formatFee(arenas.entryFee("zeus"))
                 + " §8| §fHades §6" + formatFee(arenas.entryFee("hades"))
                 + " §8| §fTifón §6" + formatFee(arenas.entryFee("tifon")));
-        player.sendMessage("§6[BossArena] §fDragón §6" + formatFee(arenas.entryFee("dragon"))
-                + " §8| §fWither Storm §6" + formatFee(arenas.entryFee("wither_storm"))
-                + " §8| §7El grupo paga una entrada por integrante.");
+        player.sendMessage("§6[BossArena] §fDragón Ancestral §6" + formatFee(arenas.entryFee("dragon"))
+                + " §8| §fWither Storm §6" + formatFee(arenas.entryFee("wither_storm")));
+        player.sendMessage("§6[BossArena] §eEntrada general: §6" + standard
+                + " §7(Circe, Polifemo, Dios Corrupto, Thor, Ares, Poseidón, Loki, Odín, Kratos)");
+        player.sendMessage("§6[BossArena] §7Heimdall, Hidra, Cerbero, Artemisa, Prometeo, Coloso End, Ra, Isis, Anubis, Set, Jax/Ajax.");
+        player.sendMessage("§8El grupo paga una entrada por integrante. Si falla la creación, se reembolsa todo.");
     }
 
     private static String formatFee(double fee) {
@@ -104,11 +113,12 @@ public final class BossWarpCommand implements CommandExecutor, TabCompleter {
     }
     @Override public List<String> onTabComplete(@NotNull CommandSender s, @NotNull Command c, @NotNull String a, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(List.of("zeus", "hades", "tifon", "dragon", "wither_storm", "jax", "precios", "spectate"));
+            List<String> options = new ArrayList<>(ARENA_BOSS_TYPES);
+            options.addAll(List.of("precios", "spectate"));
             if (s.hasPermission("odysseia.bosswarp.staff")) options.add("staff");
             return options;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("staff")) return List.of("zeus", "hades", "tifon", "dragon", "wither_storm", "jax");
+        if (args.length == 2 && args[0].equalsIgnoreCase("staff")) return ARENA_BOSS_TYPES;
         if (args.length >= 3 && args[0].equalsIgnoreCase("staff")) return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         if (args.length == 2 && !args[0].equalsIgnoreCase("spectate")) return List.of("solo", "grupo");
         if (args.length >= 3 && args[1].equalsIgnoreCase("grupo")) return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
