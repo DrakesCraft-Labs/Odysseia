@@ -15,10 +15,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Servicio de Puente de Traducción Bidireccional entre DiscordSRV y Minecraft
@@ -37,6 +41,7 @@ public class DiscordTranslationBridgeService {
     private boolean enabled;
     private String baseUrl;
     private String apiKey;
+    private String ingestSecret;
     private boolean translateDiscordToMc;
     private boolean translateMcToDiscord;
     private String mcTargetLanguage;
@@ -63,6 +68,7 @@ public class DiscordTranslationBridgeService {
         }
 
         this.apiKey = config.getString("discord-translator.api-key", "");
+        this.ingestSecret = config.getString("discord-translator.ingest-secret", "");
         this.translateDiscordToMc = config.getBoolean("discord-translator.translate-discord-to-mc", true);
         this.translateMcToDiscord = config.getBoolean("discord-translator.translate-mc-to-discord", false);
         this.mcTargetLanguage = config.getString("discord-translator.mc-target-language", "es");
@@ -183,11 +189,10 @@ public class DiscordTranslationBridgeService {
     // ─── Live Chat Feed ────────────────────────────────────────────────────────
 
     /**
-     * Publica el mensaje en el feed de chat web en Star usando la API key del translator.
-     * Payload: { player, message, rank, world, api_key }
+     * Publica el mensaje en el feed de chat web en Star mediante una firma HMAC.
      */
     public void postWebChatFeed(String playerName, String message, String rank, String world) {
-        if (apiKey == null || apiKey.isEmpty()) return;
+        if (isPlaceholder(ingestSecret)) return;
         if (playerName == null || message == null || message.trim().isEmpty()) return;
 
         try {
@@ -195,31 +200,52 @@ public class DiscordTranslationBridgeService {
             String safeWorld = world != null ? world : "Olimpo";
 
             String jsonBody = String.format(
-                    "{\"player\":%s,\"message\":%s,\"rank\":%s,\"world\":%s,\"api_key\":%s}",
+                    "{\"player\":%s,\"message\":%s,\"rank\":%s,\"world\":%s}",
                     escapeJson(playerName),
                     escapeJson(message),
                     escapeJson(safeRank),
-                    escapeJson(safeWorld),
-                    escapeJson(apiKey)
+                    escapeJson(safeWorld)
             );
 
             String url = "https://web.drakescraft.cl/api/chat/ingest";
+            long timestamp = System.currentTimeMillis();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(3))
                     .header("Content-Type", "application/json")
                     .header("User-Agent", "Odysseia/1.1.0")
+                    .header("X-Odysseia-Timestamp", Long.toString(timestamp))
+                    .header("X-Odysseia-Signature", signIngest(timestamp, jsonBody))
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .exceptionally(ex -> {
+                    .thenAccept(response -> {
+                        if (response.statusCode() != 202) {
+                            log.warning("[Odysseia] Chat feed rechazado por Star: HTTP " + response.statusCode());
+                        }
+                    }).exceptionally(ex -> {
                         log.fine("[Odysseia] Error en chat feed ingest: " + ex.getMessage());
                         return null;
                     });
         } catch (Exception ex) {
             log.fine("[Odysseia] Error preparando chat feed ingest: " + ex.getMessage());
         }
+    }
+
+    private String signIngest(long timestamp, String jsonBody) throws GeneralSecurityException {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(ingestSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        byte[] signature = mac.doFinal((timestamp + "." + jsonBody).getBytes(StandardCharsets.UTF_8));
+        StringBuilder hex = new StringBuilder(signature.length * 2);
+        for (byte value : signature) {
+            hex.append(String.format("%02x", value & 0xff));
+        }
+        return hex.toString();
+    }
+
+    private static boolean isPlaceholder(String value) {
+        return value == null || value.isBlank() || value.startsWith("REPLACE_ME");
     }
 
     // ─── Eventos DiscordSRV ────────────────────────────────────────────────────
