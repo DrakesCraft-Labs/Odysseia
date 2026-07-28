@@ -38,6 +38,11 @@ class BossDeliveryAndCommandTest {
         assertTrue(command.contains("Entrada cobrada"));
         assertTrue(arena.contains("withdrawPlayer"));
         assertTrue(arena.contains("Tu entrada fue reembolsada"));
+        assertTrue(arena.contains("spawnBoss(type, center.clone()"));
+        assertTrue(arena.indexOf("spawnBoss(type, center.clone()") < arena.indexOf("chargeEntry(type, players)"));
+        assertTrue(arena.contains("rollbackSpawn(boss, players, cell, center, charge)"));
+        assertTrue(command.contains("/bosswarp staff <jefe> <jugador>"));
+        assertTrue(command.contains("startForced"));
     }
 
     @Test

@@ -48,15 +48,24 @@ public final class BossArenaService implements Listener {
         public boolean started() { return session != null; }
     }
 
+    /** Starts a public, paid arena. */
     public StartResult start(String type, Collection<Player> players, boolean group) {
+        return startInternal(type, players, group, true);
+    }
+
+    /** Starts a no-cost arena for controlled staff testing. */
+    public StartResult startForced(String type, Collection<Player> players) {
+        return startInternal(type, players, players.size() > 1, false);
+    }
+
+    private StartResult startInternal(String type, Collection<Player> players, boolean group, boolean chargeEntry) {
         if (players.isEmpty()) return failed("No hay jugadores para esta arena.");
+        if (!bosses.supportsBossType(type)) return failed("Ese jefe no existe o está desactivado.");
         World world = arenaWorld();
         if (world == null) return failed("No se pudo preparar el mundo de jefes.");
         if (players.stream().anyMatch(player -> byPlayer.containsKey(player.getUniqueId()))) {
             return failed("Un integrante ya está en otra arena.");
         }
-        EntryCharge charge = chargeEntry(type, players);
-        if (!charge.success()) return failed(charge.error());
         int cell = reserveCell();
         Location center = new Location(world, cell * CELL_SIZE + 0.5D, 65D, 0.5D);
         buildFloor(world, center);
@@ -67,41 +76,62 @@ public final class BossArenaService implements Listener {
             plugin.getLogger().warning("[BossArena] Falló la creación de " + type + ": " + exception.getMessage());
             occupiedCells.remove(cell);
             clearFloor(center);
-            charge.refund();
-            return failed("La arena falló al crear el jefe. Tu entrada fue reembolsada.");
+            return failed("La arena falló antes de cobrar la entrada.");
         }
         if (boss == null) {
             occupiedCells.remove(cell);
             clearFloor(center);
-            charge.refund();
-            return failed("Ese jefe no existe. Tu entrada fue reembolsada.");
+            return failed("La creación del jefe fue cancelada antes de cobrar la entrada.");
         }
-        if (group) boss.applyArenaPowerMultiplier(5.0D);
-        Set<UUID> ids = new LinkedHashSet<>();
-        for (Player player : players) {
-            ids.add(player.getUniqueId());
-            byPlayer.put(player.getUniqueId(), boss.getEntity().getUniqueId());
-            player.teleport(center.clone().add(0, 1, 12));
-            player.setFallDistance(0);
+        EntryCharge charge = chargeEntry ? chargeEntry(type, players) : EntryCharge.free();
+        if (!charge.success()) {
+            rollbackSpawn(boss, players, cell, center, EntryCharge.free());
+            return failed(charge.error());
         }
-        double challengeMultiplier = targetedHealthMultiplier(ids);
-        if (challengeMultiplier > 1.0D) {
-            boss.applyArenaHealthMultiplier(challengeMultiplier);
+        try {
+            if (group) boss.applyArenaPowerMultiplier(5.0D);
+            Set<UUID> ids = new LinkedHashSet<>();
             for (Player player : players) {
-                player.sendMessage("§5[BossArena] §dDesafío de élite activo: §fx"
-                        + String.format(java.util.Locale.ROOT, "%.0f", challengeMultiplier)
-                        + " §dde vida efectiva.");
+                if (!player.teleport(center.clone().add(0, 1, 12))) {
+                    throw new IllegalStateException("No se pudo teletransportar a " + player.getName());
+                }
+                ids.add(player.getUniqueId());
+                byPlayer.put(player.getUniqueId(), boss.getEntity().getUniqueId());
+                player.setFallDistance(0);
             }
+            double challengeMultiplier = targetedHealthMultiplier(ids);
+            if (challengeMultiplier > 1.0D) {
+                boss.applyArenaHealthMultiplier(challengeMultiplier);
+                for (Player player : players) {
+                    player.sendMessage("§5[BossArena] §dDesafío de élite activo: §fx"
+                            + String.format(java.util.Locale.ROOT, "%.0f", challengeMultiplier)
+                            + " §dde vida efectiva.");
+                }
+            }
+            BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), type,
+                    center, group, Set.copyOf(ids), System.currentTimeMillis());
+            byBoss.put(session.bossId(), session);
+            String notice = "§6[BossArena] §e" + players.iterator().next().getName() + " desafía a §c" + boss.getDisplayName()
+                    + "§e. Usa §f/bosswarp spectate " + players.iterator().next().getName() + " §epara mirar.";
+            for (Player nearby : world.getPlayers()) {
+                if (nearby.getLocation().distanceSquared(center) <= 256.0D * 256.0D) nearby.sendMessage(notice);
+            }
+            return new StartResult(session, charge.feePerPlayer(), "");
+        } catch (RuntimeException exception) {
+            plugin.getLogger().warning("[BossArena] Rollback de arena " + type + ": " + exception.getMessage());
+            rollbackSpawn(boss, players, cell, center, charge);
+            return failed("La arena no pudo inicializarse. Tu entrada fue reembolsada.");
         }
-        BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), type,
-                center, group, Set.copyOf(ids), System.currentTimeMillis());
-        byBoss.put(session.bossId(), session);
-        String notice = "§6[BossArena] §e" + players.iterator().next().getName() + " desafía a §c" + boss.getDisplayName()
-                + "§e. Usa §f/bosswarp spectate " + players.iterator().next().getName() + " §epara mirar.";
-        for (Player nearby : world.getPlayers()) {
-            if (nearby.getLocation().distanceSquared(center) <= 256.0D * 256.0D) nearby.sendMessage(notice);
-        }
-        return new StartResult(session, charge.feePerPlayer(), "");
+    }
+
+    /** Removes every partial arena side effect before an entry can be refunded. */
+    private void rollbackSpawn(OdysseyBoss boss, Collection<Player> players, int cell, Location center, EntryCharge charge) {
+        byBoss.remove(boss.getEntity().getUniqueId());
+        for (Player player : players) byPlayer.remove(player.getUniqueId(), boss.getEntity().getUniqueId());
+        bosses.removeBoss(boss.getEntity().getUniqueId(), null);
+        occupiedCells.remove(cell);
+        clearFloor(center);
+        charge.refund();
     }
 
     /** Price shown to players before they enter, excluding a configured staff bypass. */
@@ -159,11 +189,30 @@ public final class BossArenaService implements Listener {
         return String.format(java.util.Locale.ROOT, "%,.0f", fee);
     }
 
-    private record EntryCharge(Economy economy, Collection<Player> charged, double feePerPlayer, String error) {
+    private static final class EntryCharge {
+        private final Economy economy;
+        private final Collection<Player> charged;
+        private final double feePerPlayer;
+        private final String error;
+        private boolean refunded;
+
+        private EntryCharge(Economy economy, Collection<Player> charged, double feePerPlayer, String error) {
+            this.economy = economy;
+            this.charged = charged;
+            this.feePerPlayer = feePerPlayer;
+            this.error = error;
+        }
+
         static EntryCharge free() { return new EntryCharge(null, List.of(), 0.0D, ""); }
         static EntryCharge failed(String error) { return new EntryCharge(null, List.of(), 0.0D, error); }
         boolean success() { return error.isEmpty(); }
-        void refund() { if (economy != null) for (Player player : charged) economy.depositPlayer(player, feePerPlayer); }
+        String error() { return error; }
+        double feePerPlayer() { return feePerPlayer; }
+        void refund() {
+            if (refunded || economy == null) return;
+            refunded = true;
+            for (Player player : charged) economy.depositPlayer(player, feePerPlayer);
+        }
     }
 
     public boolean spectate(Player viewer, Player participant) {

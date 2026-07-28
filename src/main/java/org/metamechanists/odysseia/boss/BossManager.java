@@ -211,6 +211,20 @@ public class BossManager implements Listener {
         return spawnBoss(type, loc, false);
     }
 
+    /** Validates a boss id before an arena can charge an entry fee. */
+    public boolean supportsBossType(String type) {
+        if (type == null) return false;
+        return switch (type.toLowerCase(java.util.Locale.ROOT)) {
+            case "circe", "polifemo", "dios_corrupto", "dios-corrupto", "thor", "ares", "hades", "poseidon",
+                    "zeus", "loki", "odin", "kratos", "heimdall", "hidra", "cerbero", "artemisa", "tifon",
+                    "tifón", "prometeo", "coloso_end", "coloso-end", "coloso", "wither", "wither_storm",
+                    "wither-storm", "witherstorm", "dragon_ancestral", "dragon-ancestral", "dragon", "ra", "isis",
+                    "anubis", "set" -> true;
+            case "jax" -> plugin.getConfig().getBoolean("bosses.jax.enabled", true);
+            default -> false;
+        };
+    }
+
     /** Invoca un jefe y, si corresponde, su dominio visual temporal. */
     public OdysseyBoss spawnBoss(String type, Location loc, boolean createDomain) {
         LivingEntity entity;

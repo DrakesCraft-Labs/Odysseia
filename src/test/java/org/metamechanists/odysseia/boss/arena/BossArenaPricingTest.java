@@ -25,4 +25,16 @@ class BossArenaPricingTest {
         assertEquals(0D, BossArenaPricing.feeFor(fees, "hades"));
         assertEquals(0D, BossArenaPricing.feeFor(fees, "zeus"));
     }
+
+    @Test
+    void publicBossAliasesKeepTheirConfiguredPrice() {
+        YamlConfiguration fees = new YamlConfiguration();
+        fees.set("tifon", 300_000D);
+        fees.set("dragon", 500_000D);
+        fees.set("wither_storm", 1_000_000D);
+
+        assertEquals(300_000D, BossArenaPricing.feeFor(fees, "tifón"));
+        assertEquals(500_000D, BossArenaPricing.feeFor(fees, "dragon_ancestral"));
+        assertEquals(1_000_000D, BossArenaPricing.feeFor(fees, "wither"));
+    }
 }

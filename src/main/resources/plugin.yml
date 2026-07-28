@@ -122,6 +122,9 @@ permissions:
   odysseia.bosswarp.use:
     description: Permite iniciar y espectear arenas de jefes.
     default: true
+  odysseia.bosswarp.staff:
+    description: Permite crear arenas de prueba sin cobro para jugadores indicados.
+    default: op
   odysseia.meteor.admin:
     description: Permite al dueño invocar meteoritos controlados.
     default: op
