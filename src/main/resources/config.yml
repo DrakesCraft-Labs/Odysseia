@@ -416,6 +416,19 @@ boss-balance:
     bosses: [thor, ares, hades, zeus, odin, kratos, heimdall, hidra, cerbero, tifon]
     health-percent: 0.55
     invulnerability-seconds: 5
+  # Defensa adaptativa contra armas SF/Tinker y encantamientos de endgame.
+  # Reduce ráfagas; no borra, modifica ni bloquea ítems de jugadores.
+  adaptive-counters:
+    enabled: true
+    burst-window-seconds: 4
+    counter-cooldown-seconds: 12
+    normal:
+      max-hit-health-fraction: 0.045
+      max-burst-health-fraction: 0.20
+    high-power:
+      sharpness-threshold: 7
+      max-hit-health-fraction: 0.025
+      max-burst-health-fraction: 0.12
 
 # ─────────────────────────────────────────────
 # Arenas públicas de jefes (/bosswarp)
