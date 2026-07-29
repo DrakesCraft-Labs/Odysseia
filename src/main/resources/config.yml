@@ -608,6 +608,30 @@ boss-loot:
     prometeo:
       drops:
         prometeo_flame: 0.50
+    coloso_end:
+      drops:
+        coloso_core: 0.50
+    wither_storm:
+      drops:
+        storm_heart: 0.50
+    dragon_ancestral:
+      drops:
+        dragon_heart: 0.50
+    ra:
+      drops:
+        ra_sun: 0.50
+    isis:
+      drops:
+        isis_feather: 0.50
+    anubis:
+      drops:
+        anubis_seal: 0.50
+    set:
+      drops:
+        set_shard: 0.50
+    jax:
+      drops:
+        jax_fragment: 0.50
 
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)

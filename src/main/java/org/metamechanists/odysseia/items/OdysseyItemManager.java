@@ -628,6 +628,21 @@ public final class OdysseyItemManager {
         return item;
     }
 
+    /** Crea reliquias de jefe que no requieren una habilidad activa propia. */
+    private static ItemStack createBossRelic(Material material, String name, String typeId, String origin) {
+        ItemStack item = createBaseItem(material, name, typeId,
+                "&8▸ Reliquia Mítica",
+                "&7Fragmento recuperado de " + origin + ".",
+                "&7Puede usarse en futuras forjas divinas.");
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
     /** Construye un drop por su identificador lógico de config.yml. */
     public static ItemStack createBossDrop(String itemId) {
         return switch (itemId.toLowerCase(java.util.Locale.ROOT)) {
@@ -655,6 +670,14 @@ public final class OdysseyItemManager {
             case "tifon_claw" -> createTifonClaw();
             case "tifon_chest" -> createTifonChestplate();
             case "prometeo_flame" -> createPrometeoFlame();
+            case "coloso_core" -> createBossRelic(Material.END_CRYSTAL, "&5&l✦ Núcleo del Coloso End", "coloso_core", "el Coloso End");
+            case "storm_heart" -> createBossRelic(Material.NETHER_STAR, "&8&l✦ Corazón de la Tormenta", "storm_heart", "la Wither Storm");
+            case "dragon_heart" -> createBossRelic(Material.DRAGON_BREATH, "&d&l✦ Aliento del Dragón Ancestral", "dragon_heart", "el Dragón Ancestral");
+            case "ra_sun" -> createBossRelic(Material.SUNFLOWER, "&6&l✦ Disco Solar de Ra", "ra_sun", "Ra");
+            case "isis_feather" -> createBossRelic(Material.PHANTOM_MEMBRANE, "&d&l✦ Pluma de Isis", "isis_feather", "Isis");
+            case "anubis_seal" -> createBossRelic(Material.BONE, "&8&l✦ Sello de Anubis", "anubis_seal", "Anubis");
+            case "set_shard" -> createBossRelic(Material.ECHO_SHARD, "&4&l✦ Fragmento de Set", "set_shard", "Set");
+            case "jax_fragment" -> createBossRelic(Material.AMETHYST_SHARD, "&5&l✦ Fragmento de Jax", "jax_fragment", "Jax");
             default -> null;
         };
     }
