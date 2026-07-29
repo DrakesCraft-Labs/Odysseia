@@ -24,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.boss.BossManager;
 import org.metamechanists.odysseia.boss.OdysseyBoss;
@@ -36,6 +37,8 @@ public final class BossArenaService implements Listener {
     private final BossManager bosses;
     private final Map<UUID, BossArenaSession> byBoss = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> byPlayer = new ConcurrentHashMap<>();
+    private final Map<UUID, Location> pendingReturns = new ConcurrentHashMap<>();
+    private final Map<UUID, SpectatorReturn> spectators = new ConcurrentHashMap<>();
     private final Set<Integer> occupiedCells = ConcurrentHashMap.newKeySet();
 
     public BossArenaService(Odysseia plugin, BossManager bosses) {
@@ -97,7 +100,9 @@ public final class BossArenaService implements Listener {
         try {
             if (group) boss.applyArenaPowerMultiplier(5.0D);
             Set<UUID> ids = new LinkedHashSet<>();
+            Map<UUID, Location> returnLocations = new ConcurrentHashMap<>();
             for (Player player : players) {
+                returnLocations.put(player.getUniqueId(), player.getLocation().clone());
                 if (!player.teleport(center.clone().add(0, 1, 12))) {
                     throw new IllegalStateException("No se pudo teletransportar a " + player.getName());
                 }
@@ -115,7 +120,7 @@ public final class BossArenaService implements Listener {
                 }
             }
             BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), type,
-                    center, group, Set.copyOf(ids), System.currentTimeMillis());
+                    center, group, Set.copyOf(ids), Map.copyOf(returnLocations), System.currentTimeMillis());
             byBoss.put(session.bossId(), session);
             String notice = "§6[BossArena] §e" + players.iterator().next().getName() + " desafía a §c" + boss.getDisplayName()
                     + "§e. Usa §f/bosswarp spectate " + players.iterator().next().getName() + " §epara mirar.";
@@ -227,6 +232,7 @@ public final class BossArenaService implements Listener {
         UUID boss = byPlayer.get(participant.getUniqueId());
         BossArenaSession session = boss == null ? null : byBoss.get(boss);
         if (session == null) return false;
+        spectators.put(viewer.getUniqueId(), new SpectatorReturn(boss, viewer.getLocation().clone(), viewer.getGameMode()));
         viewer.setGameMode(GameMode.SPECTATOR);
         viewer.teleport(session.center().clone().add(0, 18, 0));
         return true;
@@ -255,8 +261,14 @@ public final class BossArenaService implements Listener {
         for (UUID playerId : session.participants()) {
             byPlayer.remove(playerId);
             Player player = Bukkit.getPlayer(playerId);
-            if (player != null) reward(player, session.group());
+            if (player != null) {
+                reward(player, session.group());
+                returnPlayer(player, session.returnLocations().get(playerId));
+            } else {
+                rememberReturn(playerId, session.returnLocations().get(playerId));
+            }
         }
+        returnSpectators(session.bossId());
         occupiedCells.remove((int) Math.floor(session.center().getX() / CELL_SIZE));
         Bukkit.getScheduler().runTaskLater(plugin, () -> clearFloor(session.center()), 20L * 15L);
     }
@@ -265,6 +277,40 @@ public final class BossArenaService implements Listener {
         World world = Bukkit.getWorld("boss_arena");
         if (world != null) return world;
         return Bukkit.createWorld(new WorldCreator("boss_arena").type(WorldType.FLAT).generateStructures(false));
+    }
+
+    /** Returns a participant to the exact location they had before entering the arena. */
+    private void returnPlayer(Player player, Location origin) {
+        if (origin == null || !player.teleport(origin)) {
+            player.teleport(Bukkit.getWorlds().getFirst().getSpawnLocation());
+        }
+        player.setFallDistance(0.0F);
+        player.sendMessage("§a[BossArena] Regresaste al lugar desde donde entraste.");
+    }
+
+    private void rememberReturn(UUID playerId, Location origin) {
+        if (origin != null) pendingReturns.put(playerId, origin.clone());
+    }
+
+    private void returnSpectators(UUID bossId) {
+        spectators.entrySet().removeIf(entry -> {
+            SpectatorReturn spectator = entry.getValue();
+            if (!spectator.bossId().equals(bossId)) return false;
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null) {
+                player.setGameMode(spectator.gameMode());
+                returnPlayer(player, spectator.origin());
+            } else {
+                rememberReturn(entry.getKey(), spectator.origin());
+            }
+            return true;
+        });
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Location origin = pendingReturns.remove(event.getPlayer().getUniqueId());
+        if (origin != null) Bukkit.getScheduler().runTask(plugin, () -> returnPlayer(event.getPlayer(), origin));
     }
     private int reserveCell() { for (int i = 0; ; i++) if (occupiedCells.add(i)) return i; }
     private void buildFloor(World world, Location center) {
@@ -284,6 +330,7 @@ public final class BossArenaService implements Listener {
         for (BossArenaSession session : byBoss.values()) {
             var entity = Bukkit.getEntity(session.bossId());
             if (entity == null || !entity.isValid()) {
+                closeBrokenSession(session);
                 continue;
             }
             Location center = session.center();
@@ -301,6 +348,21 @@ public final class BossArenaService implements Listener {
         }
     }
 
+    /** Prevents a despawned or externally removed boss from marooning arena players. */
+    private void closeBrokenSession(BossArenaSession session) {
+        if (!byBoss.remove(session.bossId(), session)) return;
+        for (UUID playerId : session.participants()) {
+            byPlayer.remove(playerId, session.bossId());
+            Player player = Bukkit.getPlayer(playerId);
+            if (player != null) returnPlayer(player, session.returnLocations().get(playerId));
+            else rememberReturn(playerId, session.returnLocations().get(playerId));
+        }
+        returnSpectators(session.bossId());
+        occupiedCells.remove((int) Math.floor(session.center().getX() / CELL_SIZE));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> clearFloor(session.center()), 20L);
+        plugin.getLogger().warning("[BossArena] Sesión " + session.id() + " cerrada: el jefe dejó de existir.");
+    }
+
     /** Rewards never use world drops, avoiding grave and arena duplication paths. */
     private void reward(Player player, boolean group) {
         int xp = group ? 450 : 250;
@@ -312,4 +374,6 @@ public final class BossArenaService implements Listener {
         if (roll < 20) player.getInventory().addItem(new ItemStack(Material.DIAMOND, group ? 4 : 2));
         player.sendMessage("§a[BossArena] Victoria: §e" + xp + " XP §ay recompensas directas recibidas.");
     }
+
+    private record SpectatorReturn(UUID bossId, Location origin, GameMode gameMode) { }
 }
