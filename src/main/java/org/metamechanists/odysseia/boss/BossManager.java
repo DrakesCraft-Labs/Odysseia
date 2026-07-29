@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -209,6 +210,20 @@ public class BossManager implements Listener {
 
     public OdysseyBoss spawnBoss(String type, Location loc) {
         return spawnBoss(type, loc, false);
+    }
+
+    /**
+     * Vanilla replaces piglins and similar entities during transformations.
+     * A replacement has a new UUID and loses the boss state, gear and phases,
+     * so bosses must remain their original entity for their full encounter.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBossTransform(EntityTransformEvent event) {
+        if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
+            event.setCancelled(true);
+            plugin.getLogger().fine("[Bosses] Transformación vanilla bloqueada para "
+                    + activeBosses.get(event.getEntity().getUniqueId()).getId());
+        }
     }
 
     /** Validates a boss id before an arena can charge an entry fee. */
