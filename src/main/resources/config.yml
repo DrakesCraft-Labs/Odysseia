@@ -224,9 +224,10 @@ presence:
     advancement: false
     rate-limit-per-minute: 12
 
-# Reinicio diario seguro con guardado y cuenta regresiva de /restart30.
+# Los reinicios programados de Pterodactyl se gestionan fuera de Minecraft.
+# Nunca actives este scheduler sin un supervisor que pueda volver a arrancar el contenedor.
 restart:
-  enabled: true
+  enabled: false
   day: DAILY
   hour: 5
   minute: 0
