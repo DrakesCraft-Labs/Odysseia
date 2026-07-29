@@ -61,6 +61,8 @@ Actual availability is controlled by permissions and the deployed configuration.
 | --- | --- |
 | `/odysseia reload` | Reloads the supported runtime configuration and services. Validate output before declaring a change active. |
 | `/odysseia status` | Prints the operational status summary. |
+| `/odysseia sfmaster audit <player>` | Reports marked guides/items and suspicious legacy candidates. It never deletes an unmarked item automatically. |
+| `/odysseia maintenance start [seconds]\|status\|cancel` | Protects inventories during the final countdown of a planned restart. |
 | `/odysseiapurchase deliver\|test\|status\|pending\|retry\|history\|validate\|dry-run` | Transactional purchase operations and diagnostics. Restrict to trusted staff. |
 | `/odysseiapendingkit <player> <kit>` | Queues a configured kit/rank delivery safely. |
 | `/kitgive <player> <kit>` | Item-only kit testing. It does not perform a store transaction. |
@@ -87,6 +89,25 @@ Tebex payment -> Tebex console command -> Odysseia validation -> SQLite transact
 5. Use `status`, `history`, `pending`, `retry`, and `dry-run` before manually repairing a transaction.
 
 Never commit store credentials, webhook URLs, API keys, player databases, transaction databases, or production logs.
+
+## SFMaster responsibility split
+
+- Slimefun Core authorizes and delivers claims, persists the rolling quota, and
+  marks the item and owner before insertion.
+- Odysseia owns the paid pass lifecycle, owned guide, expiry cleanup,
+  anti-transfer events, and staff audit.
+- Audit candidates are evidence only. Old unmarked items can also be legitimate
+  crafts, so removal requires manual review.
+- Production uses 12 claims per rolling hour unless the deployed Core
+  configuration explicitly changes it.
+
+## Planned restart contract
+
+Star is the scheduler and Pterodactyl is the power authority. The supported
+flow announces 15, 5 and 1 minute warnings, starts Odysseia maintenance for the
+last minute, announces 30 and 10 seconds, runs `save-all flush`, and only then
+sends the restart signal. Direct panel restarts are reserved for actual
+incidents.
 
 ## Bosses and the arena
 

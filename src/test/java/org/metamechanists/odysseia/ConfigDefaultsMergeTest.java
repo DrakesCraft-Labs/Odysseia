@@ -27,6 +27,10 @@ class ConfigDefaultsMergeTest {
         assertTrue(config.getBoolean("discord-translator.translate-discord-to-mc"));
         assertTrue(!config.getBoolean("discord-translator.translate-mc-to-discord"));
         assertEquals("https://translate.drakescraft.cl", config.getString("discord-translator.api-url"));
+        assertTrue(config.getStringList("sfmaster-audit.approved-addons").contains("SLIMEFUN"));
+        assertTrue(config.getStringList("sfmaster-audit.blocked-addons").contains("INFINITYEXPANSION"));
+        assertTrue(config.getConfigurationSection("sfmaster-policy") == null);
+        assertTrue(config.getConfigurationSection("restart") == null);
         assertTrue(config.getString("kits.oldschool.protection-alias", "").isBlank());
         for (String kit : config.getConfigurationSection("kits").getKeys(false)) {
             String protectionKey = config.getString("kits." + kit + ".protection-alias", "").trim();

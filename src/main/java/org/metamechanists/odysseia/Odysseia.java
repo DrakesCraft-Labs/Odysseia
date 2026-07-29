@@ -26,14 +26,11 @@ import org.metamechanists.odysseia.utils.WebhookSender;
 import org.metamechanists.odysseia.purchase.PurchaseEngine;
 import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
 import org.metamechanists.odysseia.events.BloodMoonManager;
-import org.metamechanists.odysseia.services.RestartSchedule;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +56,8 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.events.HorrorNightScheduler horrorNightScheduler;
     private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
     private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
+    private org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher;
+    private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
@@ -164,10 +163,12 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
-        org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
+        this.sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
         Bukkit.getScheduler().runTask(this, sfMasterWatcher::deliverGuidesToOnlinePassHolders);
         sfMasterWatcher.startGuideCleanup();
+        this.maintenanceGuard = new org.metamechanists.odysseia.listeners.MaintenanceGuardListener(this);
+        Bukkit.getPluginManager().registerEvents(maintenanceGuard, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.ProtectionBorderListener(this), this);
         Bukkit.getPluginManager().registerEvents(automation, this);
@@ -226,6 +227,9 @@ public final class Odysseia extends JavaPlugin {
         reloadConfig();
         mergeDefaultConfig();
         cancelRuntimeTasks();
+        if (sfMasterWatcher != null) {
+            sfMasterWatcher.reloadConfiguration();
+        }
 
         if (purchaseEngine != null) {
             HandlerList.unregisterAll(purchaseEngine);
@@ -413,7 +417,6 @@ public final class Odysseia extends JavaPlugin {
         startLenadorLocoScheduler();
         startPapaDeMarDeliveryScheduler();
         startHeartbeatScheduler();
-        startRestartScheduler();
         startPolisBaselineScheduler();
     }
 
@@ -640,61 +643,6 @@ public final class Odysseia extends JavaPlugin {
         }, delayTicks, periodTicks));
     }
 
-    private void startRestartScheduler() {
-        if (!getConfig().getBoolean("restart.enabled", false)) {
-            return;
-        }
-        String dayStr = getConfig().getString("restart.day", "DAILY");
-        int hour = getConfig().getInt("restart.hour", 5);
-        int minute = getConfig().getInt("restart.minute", 0);
-        String timezone = getConfig().getString("restart.timezone", "America/Santiago");
-
-        ZoneId zone;
-        try {
-            zone = ZoneId.of(timezone);
-        } catch (Exception e) {
-            getLogger().warning("[Restart] Timezone inválido: " + timezone + ". Usando America/Santiago.");
-            zone = ZoneId.of("America/Santiago");
-        }
-
-        ZonedDateTime now = ZonedDateTime.now(zone);
-        ZonedDateTime next;
-        try {
-            next = RestartSchedule.next(now, dayStr, hour, minute);
-        } catch (IllegalArgumentException e) {
-            getLogger().warning("[Restart] Día inválido en config: " + dayStr + ". Usando DAILY.");
-            dayStr = "DAILY";
-            next = RestartSchedule.next(now, dayStr, hour, minute);
-        }
-
-        long delaySeconds = java.time.Duration.between(now, next).getSeconds();
-        long delayTicks = delaySeconds * 20L;
-
-        getLogger().info(String.format("[Restart] Próximo reinicio: %s (%s) en %d horas.",
-                next, timezone, delaySeconds / 3600));
-
-        // Avisos previos: 10 min, 5 min, 1 min antes
-        long[] warnOffsets = {10 * 60 * 20L, 5 * 60 * 20L, 60 * 20L};
-        String[] warnMessages = {
-            "&6&l⚡ &eel servidor se reiniciará en &6&l10 minutos&e. Guarda tus cosas.",
-            "&c&l⚡ &cel servidor se reiniciará en &c&l5 minutos&c.",
-            "&4&l⚡ &4Reinicio en &4&l1 minuto&4. Prepárate."
-        };
-        for (int i = 0; i < warnOffsets.length; i++) {
-            long warnTicks = delayTicks - warnOffsets[i];
-            if (warnTicks > 0) {
-                final String msg = ChatColor.translateAlternateColorCodes('&', warnMessages[i]);
-                trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () ->
-                        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(msg)), warnTicks));
-            }
-        }
-
-        trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () -> {
-            getLogger().info("[Restart] Iniciando guardado y cuenta regresiva programada.");
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart30");
-        }, delayTicks));
-    }
-
     private void sendStartupWebhook() {
         if (!getConfig().getBoolean("presence.enabled", true)
                 || !getConfig().getBoolean("presence.events.server-startup", true)) {
@@ -759,6 +707,14 @@ public final class Odysseia extends JavaPlugin {
 
     public org.metamechanists.odysseia.services.VipExpiryAlertService getVipExpiryAlertService() {
         return vipExpiryAlertService;
+    }
+
+    public org.metamechanists.odysseia.listeners.SFMasterWatcherListener getSfMasterWatcher() {
+        return sfMasterWatcher;
+    }
+
+    public org.metamechanists.odysseia.listeners.MaintenanceGuardListener getMaintenanceGuard() {
+        return maintenanceGuard;
     }
 
     public void registerDynamicCommand(String name, org.bukkit.command.CommandExecutor executor) {

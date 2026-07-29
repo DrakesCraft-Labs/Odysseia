@@ -28,7 +28,7 @@ public final class SafeRestartCommand implements CommandExecutor {
 
         Bukkit.savePlayers();
         executeConsoleCommand("save-all flush");
-        sender.sendMessage(org.bukkit.ChatColor.YELLOW + "Guardado completado. Reinicia DrakesCraft desde Pterodactyl o scheduled_drakescraft_restart.ps1.");
+        sender.sendMessage(org.bukkit.ChatColor.YELLOW + "Guardado completado. El reinicio se gestiona desde Star con scheduled_drakescraft_restart.py.");
         plugin.getLogger().warning("[Restart] /restart30 no envía /restart dentro de Pterodactyl; usa la API externa.");
         return true;
     }

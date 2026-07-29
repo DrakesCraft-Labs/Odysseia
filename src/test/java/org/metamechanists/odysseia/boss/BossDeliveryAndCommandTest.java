@@ -26,7 +26,7 @@ class BossDeliveryAndCommandTest {
 
         assertTrue(source.contains("wither_storm"));
         assertTrue(source.contains("dragon_ancestral"));
-        assertTrue(source.contains("spawnBoss(bossType, player.getLocation(), true)"));
+        assertTrue(source.contains("getBossArenas().startForced(bossType, List.of(player))"));
     }
 
     @Test
@@ -38,9 +38,9 @@ class BossDeliveryAndCommandTest {
         assertTrue(command.contains("Entrada cobrada"));
         assertTrue(arena.contains("withdrawPlayer"));
         assertTrue(arena.contains("Tu entrada fue reembolsada"));
-        assertTrue(arena.contains("spawnBoss(type, center.clone()"));
-        assertTrue(arena.indexOf("spawnBoss(type, center.clone()") < arena.indexOf("chargeEntry(type, players)"));
-        assertTrue(arena.contains("rollbackSpawn(boss, players, cell, center, charge)"));
+        assertTrue(arena.contains("spawnBoss(arenaBossType, center.clone()"));
+        assertTrue(arena.indexOf("spawnBoss(arenaBossType, center.clone()") < arena.indexOf("chargeEntry(type, players)"));
+        assertTrue(arena.contains("rollbackSpawn(boss, players, cell, center, arenaBossType, charge)"));
         assertTrue(command.contains("/bosswarp staff <jefe> <jugador>"));
         assertTrue(command.contains("startForced"));
         assertTrue(command.contains("ARENA_BOSS_TYPES"));
@@ -81,10 +81,13 @@ class BossDeliveryAndCommandTest {
         String director = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "combat", "BossCombatDirector.java"));
         String boss = Files.readString(Path.of("src", "main", "java", "org", "metamechanists", "odysseia", "boss", "OdysseyBoss.java"));
 
-        assertTrue(director.contains("Math.floorMod(rotation / 2, 4)"));
+        assertTrue(director.contains("Math.floorMod(rotation / 2, 6)"));
         assertTrue(director.contains("tempestCage(boss, target)"));
+        assertTrue(director.contains("skyLance(boss, target)"));
         assertTrue(director.contains("ruptureWave(boss)"));
+        assertTrue(director.contains("seismicSpikes(boss)"));
         assertTrue(director.contains("hunterMark(boss, target)"));
+        assertTrue(director.contains("voidRift(boss, target)"));
         assertTrue(boss.contains("emitPhaseRupture(loc, phase)"));
         assertTrue(boss.contains("boss-balance.phase-rupture.radius"));
     }

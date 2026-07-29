@@ -224,14 +224,8 @@ presence:
     advancement: false
     rate-limit-per-minute: 12
 
-# Los reinicios programados de Pterodactyl se gestionan fuera de Minecraft.
-# Nunca actives este scheduler sin un supervisor que pueda volver a arrancar el contenedor.
-restart:
-  enabled: false
-  day: DAILY
-  hour: 5
-  minute: 0
-  timezone: "America/Santiago"
+# Los reinicios programados pertenecen a Star y Pterodactyl. Odysseia solo
+# protege inventarios durante la ventana final iniciada por el supervisor.
 
 # ─────────────────────────────────────────────
 #  Alertador Diario de Caducidad de Rangos VIP
@@ -677,9 +671,14 @@ boss-loot:
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)
 # ─────────────────────────────────────────────
-sfmaster-policy:
-  max-claims: 12
-  window-minutes: 60
+# Odysseia no entrega ítems Cheat. Slimefun Core es la única autoridad de
+# allowlist, cuota persistente y marcado; esta sección solo detecta candidatos
+# legacy para /odysseia sfmaster audit <jugador>.
+sfmaster-audit:
+  approved-addons:
+    - "SLIMEFUN"
+    - "CULTIVATION"
+    - "NETWORKS"
   blocked-addons:
     - "SUPREME"
     - "INFINITYEXPANSION"

@@ -1,5 +1,5 @@
 name: Odysseia
-version: 1.1.2
+version: 1.1.3
 main: org.metamechanists.odysseia.Odysseia
 api-version: 1.21
 description: Suite principal de sistemas, tienda, kits, eventos y administracion de DrakesCraft.
@@ -54,7 +54,7 @@ commands:
   odysseia:
     description: Comando principal de administración de Odysseia.
     permission: odysseia.reload
-    usage: /odysseia <reload|status>
+    usage: /odysseia <reload|status|vipalerts|sfmaster|maintenance>
   odysseiaannounce:
     description: Dispara el anuncio público de Discord de una compra entregada (uso desde Tebex).
     permission: odysseia.store.announce
@@ -142,6 +142,15 @@ permissions:
     default: op
   odysseia.reload:
     description: Permite recargar config.yml, purchases.yml y servicios runtime.
+    default: op
+  odysseia.sfmaster.audit:
+    description: Permite auditar candidatos legacy SFMaster sin borrarlos.
+    default: op
+  odysseia.maintenance.admin:
+    description: Permite abrir, consultar o cancelar la ventana segura de reinicio.
+    default: op
+  odysseia.maintenance.bypass:
+    description: Excluye al staff del bloqueo temporal de inventarios.
     default: op
   odysseia.purchase.admin:
     description: Control total del motor de compras.
