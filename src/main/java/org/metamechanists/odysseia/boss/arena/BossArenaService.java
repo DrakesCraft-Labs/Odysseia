@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.WorldBorder;
 import org.bukkit.WorldType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +34,9 @@ import net.milkbowl.vault.economy.Economy;
 /** Owns isolated, non-destructive boss fights in reserved cells of boss_arena. */
 public final class BossArenaService implements Listener {
     private static final int CELL_SIZE = 256;
+    private static final int ARENA_RADIUS = 48;
+    private static final int DOME_HEIGHT = 24;
+    private static final String ARENA_WORLD = "boss_arena";
     private final Odysseia plugin;
     private final BossManager bosses;
     private final Map<UUID, BossArenaSession> byBoss = new ConcurrentHashMap<>();
@@ -295,9 +299,31 @@ public final class BossArenaService implements Listener {
     }
 
     private World arenaWorld() {
-        World world = Bukkit.getWorld("boss_arena");
-        if (world != null) return world;
-        return Bukkit.createWorld(new WorldCreator("boss_arena").type(WorldType.FLAT).generateStructures(false));
+        World world = Bukkit.getWorld(ARENA_WORLD);
+        if (world == null) {
+            world = Bukkit.createWorld(new WorldCreator(ARENA_WORLD)
+                    .environment(World.Environment.NORMAL)
+                    .type(WorldType.FLAT)
+                    .generateStructures(false));
+        }
+        if (world == null) return null;
+        configureArenaWorld(world);
+        return world;
+    }
+
+    /** Keeps the arena world finite and reports legacy non-flat folders without deleting them live. */
+    private void configureArenaWorld(World world) {
+        double borderSize = Math.clamp(plugin.getConfig().getDouble("boss-arena.world-border-size", 4096.0D), 1024.0D, 8192.0D);
+        WorldBorder border = world.getWorldBorder();
+        border.setCenter(borderSize / 4.0D, 0.0D);
+        border.setSize(borderSize);
+        world.setGameRule(org.bukkit.GameRule.DO_MOB_SPAWNING, false);
+        world.setGameRule(org.bukkit.GameRule.DO_DAYLIGHT_CYCLE, false);
+        world.setTime(18000L);
+        if (world.getWorldType() != WorldType.FLAT) {
+            plugin.getLogger().warning("[BossArena] '" + ARENA_WORLD
+                    + "' ya existía y no es plano. No se recreará con jugadores o sesiones activas.");
+        }
     }
 
     /** Returns a participant to the exact location they had before entering the arena. */
@@ -334,16 +360,41 @@ public final class BossArenaService implements Listener {
         if (origin != null) Bukkit.getScheduler().runTask(plugin, () -> returnPlayer(event.getPlayer(), origin));
     }
     private int reserveCell() { for (int i = 0; ; i++) if (occupiedCells.add(i)) return i; }
+    /** Builds a non-destructive circular combat dome; no fire, lava, or world drops are used. */
     private void buildFloor(World world, Location center) {
         int y = center.getBlockY() - 1;
-        for (int x = -48; x <= 48; x++) for (int z = -48; z <= 48; z++)
-            world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(Material.DEEPSLATE_TILES, false);
+        for (int x = -ARENA_RADIUS; x <= ARENA_RADIUS; x++) {
+            for (int z = -ARENA_RADIUS; z <= ARENA_RADIUS; z++) {
+                int distanceSquared = x * x + z * z;
+                if (distanceSquared > ARENA_RADIUS * ARENA_RADIUS) continue;
+                Material floor = Math.floorMod(x + z, 8) == 0 ? Material.POLISHED_DEEPSLATE : Material.DEEPSLATE_TILES;
+                if (Math.floorMod(x, 12) == 0 && Math.floorMod(z, 12) == 0) floor = Material.SEA_LANTERN;
+                world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(floor, false);
+
+                int edge = ARENA_RADIUS * ARENA_RADIUS - distanceSquared;
+                if (edge > ARENA_RADIUS * 3) continue;
+                for (int height = 0; height <= DOME_HEIGHT; height++) {
+                    world.getBlockAt(center.getBlockX() + x, y + 1 + height, center.getBlockZ() + z)
+                            .setType(height % 8 == 0 ? Material.SEA_LANTERN : Material.TINTED_GLASS, false);
+                }
+            }
+        }
     }
     private void clearFloor(Location center) {
         World world = center.getWorld();
         int y = center.getBlockY() - 1;
-        for (int x = -48; x <= 48; x++) for (int z = -48; z <= 48; z++)
-            world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(Material.AIR, false);
+        for (int x = -ARENA_RADIUS; x <= ARENA_RADIUS; x++) {
+            for (int z = -ARENA_RADIUS; z <= ARENA_RADIUS; z++) {
+                int distanceSquared = x * x + z * z;
+                if (distanceSquared > ARENA_RADIUS * ARENA_RADIUS) continue;
+                world.getBlockAt(center.getBlockX() + x, y, center.getBlockZ() + z).setType(Material.AIR, false);
+                int edge = ARENA_RADIUS * ARENA_RADIUS - distanceSquared;
+                if (edge > ARENA_RADIUS * 3) continue;
+                for (int height = 0; height <= DOME_HEIGHT; height++) {
+                    world.getBlockAt(center.getBlockX() + x, y + 1 + height, center.getBlockZ() + z).setType(Material.AIR, false);
+                }
+            }
+        }
     }
 
     /** Keeps flying and pathfinding-heavy bosses inside their assigned arena cell. */

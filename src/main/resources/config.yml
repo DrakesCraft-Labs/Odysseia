@@ -422,6 +422,9 @@ boss-balance:
 # Cada integrante de un grupo paga su entrada. Si el jefe no se puede crear,
 # Odysseia reembolsa todos los cobros de esa sesión.
 boss-arena:
+  # Mundo fijo superplano. Si ya existe un mundo no plano con este nombre, no se borra en vivo.
+  # Debe recrearse manualmente solo con el servidor detenido y sin jugadores dentro.
+  world-border-size: 4096
   entry-fees:
     default: 500000
     zeus: 250000
