@@ -80,6 +80,9 @@ public class BossManager implements Listener {
     private final BossCombatDirector combatDirector;
     private final File pendingRewardsFile;
     private final YamlConfiguration pendingRewards;
+    private final java.lang.reflect.Method slimefunGetById;
+    private final java.lang.reflect.Method slimefunGetItem;
+    private boolean slimefunLootWarningLogged;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
@@ -96,6 +99,17 @@ public class BossManager implements Listener {
         this.combatDirector = new BossCombatDirector(plugin);
         this.pendingRewardsFile = new File(plugin.getDataFolder(), "boss-rewards.yml");
         this.pendingRewards = YamlConfiguration.loadConfiguration(pendingRewardsFile);
+        java.lang.reflect.Method getById = null;
+        java.lang.reflect.Method getItem = null;
+        try {
+            Class<?> slimefunItem = Class.forName("com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem");
+            getById = slimefunItem.getMethod("getById", String.class);
+            getItem = slimefunItem.getMethod("getItem");
+        } catch (ReflectiveOperationException ignored) {
+            // Slimefun is optional; boss reliquias siguen funcionando sin su pool aleatorio.
+        }
+        this.slimefunGetById = getById;
+        this.slimefunGetItem = getItem;
         startTasks();
     }
 
@@ -709,7 +723,7 @@ public class BossManager implements Listener {
     }
 
 
-    /** Sortea cada drop una vez y lo entrega al vencedor acreditado, sin soltar loot al mundo. */
+    /** Entrega un único premio: reliquia del boss, material SF seguro o ningún drop. */
     private void distributeCustomDrops(String bossId, Location dropLocation, Player creditedKiller,
                                        List<Player> recipients, Map<UUID, Double> contributions) {
         if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
@@ -726,32 +740,72 @@ public class BossManager implements Listener {
             return;
         }
 
-        for (String itemId : drops.getKeys(false)) {
-            double chance = Math.clamp(drops.getDouble(itemId, 0.0), 0.0, 1.0);
-            if (ThreadLocalRandom.current().nextDouble() > chance) {
-                continue;
-            }
+        double relicChance = Math.clamp(plugin.getConfig().getDouble("boss-loot.boss-relic-chance", 0.30D), 0.0D, 1.0D);
+        double slimefunChance = Math.clamp(plugin.getConfig().getDouble("boss-loot.slimefun-reward-chance", 0.60D), 0.0D, 1.0D - relicChance);
+        double roll = ThreadLocalRandom.current().nextDouble();
+        org.bukkit.inventory.ItemStack item = roll < relicChance
+                ? rollBossReward(drops)
+                : roll < relicChance + slimefunChance ? rollSlimefunReward() : null;
+        if (item == null) {
+            return;
+        }
 
-            org.bukkit.inventory.ItemStack item = org.metamechanists.odysseia.items.OdysseyItemManager.createBossDrop(itemId);
-            if (item == null) {
-                plugin.getLogger().warning("[Bosses] Drop desconocido en config: " + itemId);
-                continue;
-            }
+        Player recipient = creditedKiller != null && creditedKiller.isOnline()
+                ? creditedKiller
+                : pickRecipient(recipients, contributions);
 
-            Player recipient = creditedKiller != null && creditedKiller.isOnline()
-                    ? creditedKiller
-                    : pickRecipient(recipients, contributions);
-            
-            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
-            for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
-                queuePendingReward(recipient.getUniqueId(), leftover);
+        Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
+        for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+            queuePendingReward(recipient.getUniqueId(), leftover);
+        }
+        recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
+        if (!overflow.isEmpty()) {
+            recipient.sendMessage("§6[MÍTICO] §eInventario lleno: tu recompensa quedó guardada y se entregará al tener espacio.");
+        }
+    }
+
+    /** Sortea una reliquia configurada sin permitir que varias caigan en la misma muerte. */
+    private org.bukkit.inventory.ItemStack rollBossReward(ConfigurationSection drops) {
+        List<String> ids = new ArrayList<>(drops.getKeys(false));
+        while (!ids.isEmpty()) {
+            String id = ids.remove(ThreadLocalRandom.current().nextInt(ids.size()));
+            org.bukkit.inventory.ItemStack item = org.metamechanists.odysseia.items.OdysseyItemManager.createBossDrop(id);
+            if (item != null) {
+                return item;
             }
-            recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
-            if (!overflow.isEmpty()) {
-                recipient.sendMessage("§6[MÍTICO] §eInventario lleno: tu recompensa quedó guardada y se entregará al tener espacio.");
+            plugin.getLogger().warning("[Bosses] Drop desconocido en config: " + id);
+        }
+        return null;
+    }
+
+    /** Crea materiales SF útiles definidos por lista blanca; nunca objetos de endgame. */
+    private org.bukkit.inventory.ItemStack rollSlimefunReward() {
+        if (slimefunGetById == null || slimefunGetItem == null) {
+            return null;
+        }
+        List<String> ids = new ArrayList<>(plugin.getConfig().getStringList("boss-loot.slimefun-rewards.item-ids"));
+        while (!ids.isEmpty()) {
+            String id = ids.remove(ThreadLocalRandom.current().nextInt(ids.size()));
+            try {
+                Object slimefunItem = slimefunGetById.invoke(null, id);
+                if (slimefunItem == null) continue;
+                org.bukkit.inventory.ItemStack item = (org.bukkit.inventory.ItemStack) slimefunGetItem.invoke(slimefunItem);
+                if (item == null) continue;
+                int minimum = Math.max(1, plugin.getConfig().getInt("boss-loot.slimefun-rewards.minimum-amount", 1));
+                int maximum = Math.max(minimum, plugin.getConfig().getInt("boss-loot.slimefun-rewards.maximum-amount", 3));
+                item = item.clone();
+                item.setAmount(Math.min(item.getMaxStackSize(), ThreadLocalRandom.current().nextInt(minimum, maximum + 1)));
+                return item;
+            } catch (ReflectiveOperationException exception) {
+                if (!slimefunLootWarningLogged) {
+                    slimefunLootWarningLogged = true;
+                    plugin.getLogger().warning("[Bosses] No se pudo generar recompensa Slimefun: " + exception.getMessage());
+                }
+                return null;
             }
         }
+        return null;
     }
 
     /** Keeps boss rewards out of the world and persists them across restarts until delivery succeeds. */

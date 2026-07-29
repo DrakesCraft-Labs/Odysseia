@@ -540,11 +540,38 @@ bosses:
     impact-radius: 4.0
     impact-damage: 11.0
 
-# Cada drop se sortea una vez por muerte y se entrega a un participante
-# ponderado por daño. Los valores son probabilidades entre 0.0 y 1.0.
+# Cada muerte concede como máximo un premio ponderado por daño: una reliquia
+# propia, un material SF seguro o ninguno. Nunca se sueltan items al mundo.
 boss-loot:
   enabled: true
   experience: 750
+  boss-relic-chance: 0.30
+  slimefun-reward-chance: 0.60
+  slimefun-rewards:
+    minimum-amount: 1
+    maximum-amount: 3
+    # Lista blanca: sin Infinity, Supreme, radioactivos, armas ni armaduras.
+    item-ids:
+      - MAGICAL_LUMP_1
+      - MAGICAL_LUMP_2
+      - SULFUR
+      - COPPER_DUST
+      - GOLD_DUST
+      - IRON_DUST
+      - ALUMINUM_DUST
+      - ZINC_DUST
+      - TIN_DUST
+      - MAGNESIUM_DUST
+      - SILVER_DUST
+      - DAMASCUS_STEEL
+      - REINFORCED_ALLOY_INGOT
+      - CORINTHIAN_BRONZE_INGOT
+      - HARDENED_METAL_INGOT
+      - REDSTONE_ALLOY
+      - SYNTHETIC_EMERALD
+      - SIFTED_ORE
+      - STRANGE_NETHER_DUST
+      - ENDER_LUMP
   contributors:
     # Daño mínimo y porcentaje mínimo del daño total para entrar al sorteo.
     minimum-damage: 25.0
