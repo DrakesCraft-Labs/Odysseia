@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -70,6 +71,9 @@ public class BossManager implements Listener {
     private final Map<String, Long> lastSpawnAnnouncements = new ConcurrentHashMap<>();
     /** Daño efectivo aportado por jugador a cada boss, usado para repartir el loot. */
     private final Map<UUID, Map<UUID, Double>> bossContributions = new ConcurrentHashMap<>();
+    /** Ventanas breves para que una espada de endgame no borre un boss por ráfaga. */
+    private final Map<UUID, Map<UUID, DamageWindow>> bossDamageWindows = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> adaptiveCounterCooldowns = new ConcurrentHashMap<>();
     // Debounce: evita encolar múltiples updateBossBar por hit en el mismo tick
     private final java.util.Set<UUID> pendingBarUpdate = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Long> lastMobility = new ConcurrentHashMap<>();
@@ -79,9 +83,15 @@ public class BossManager implements Listener {
     private final BossCombatDirector combatDirector;
     private final File pendingRewardsFile;
     private final YamlConfiguration pendingRewards;
+    private final java.lang.reflect.Method slimefunGetById;
+    private final java.lang.reflect.Method slimefunGetItem;
+    private boolean slimefunLootWarningLogged;
     private BukkitTask updateTask;
     private BukkitTask skillTask;
     private BukkitTask naturalSpawnTask;
+
+    private record DamageWindow(long startedAt, double damage) {
+    }
 
     /** Jefes elegibles para spawn natural por defecto (si la config no especifica lista). */
     private static final java.util.List<String> DEFAULT_NATURAL_BOSSES = java.util.List.of(
@@ -95,6 +105,17 @@ public class BossManager implements Listener {
         this.combatDirector = new BossCombatDirector(plugin);
         this.pendingRewardsFile = new File(plugin.getDataFolder(), "boss-rewards.yml");
         this.pendingRewards = YamlConfiguration.loadConfiguration(pendingRewardsFile);
+        java.lang.reflect.Method getById = null;
+        java.lang.reflect.Method getItem = null;
+        try {
+            Class<?> slimefunItem = Class.forName("com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem");
+            getById = slimefunItem.getMethod("getById", String.class);
+            getItem = slimefunItem.getMethod("getItem");
+        } catch (ReflectiveOperationException ignored) {
+            // Slimefun is optional; boss reliquias siguen funcionando sin su pool aleatorio.
+        }
+        this.slimefunGetById = getById;
+        this.slimefunGetItem = getItem;
         startTasks();
     }
 
@@ -209,6 +230,20 @@ public class BossManager implements Listener {
 
     public OdysseyBoss spawnBoss(String type, Location loc) {
         return spawnBoss(type, loc, false);
+    }
+
+    /**
+     * Vanilla replaces piglins and similar entities during transformations.
+     * A replacement has a new UUID and loses the boss state, gear and phases,
+     * so bosses must remain their original entity for their full encounter.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBossTransform(EntityTransformEvent event) {
+        if (activeBosses.containsKey(event.getEntity().getUniqueId())) {
+            event.setCancelled(true);
+            plugin.getLogger().fine("[Bosses] Transformación vanilla bloqueada para "
+                    + activeBosses.get(event.getEntity().getUniqueId()).getId());
+        }
     }
 
     /** Validates a boss id before an arena can charge an entry fee. */
@@ -413,6 +448,8 @@ public class BossManager implements Listener {
         if (domain != null) domain.cancel();
         naturalBosses.remove(uuid);
         bossContributions.remove(uuid);
+        bossDamageWindows.remove(uuid);
+        adaptiveCounterCooldowns.remove(uuid);
         lastMobility.remove(uuid);
         combatDirector.cleanup(uuid);
         if (boss != null) {
@@ -629,6 +666,7 @@ public class BossManager implements Listener {
         OdysseyBoss defendingBoss = activeBosses.get(victim.getUniqueId());
         if (defendingBoss != null && attackerPlayer != null) {
             event.setDamage(defendingBoss.scaleIncomingArenaDamage(event.getDamage()));
+            applyAdaptiveWeaponCounter(defendingBoss, attackerPlayer, event);
             if (attackerPlayer.hasPermission("odysseia.boss.vip_advantage")) {
                 event.setDamage(event.getDamage() * 1.25);
                 // Partículas críticas de poder celestial
@@ -694,7 +732,7 @@ public class BossManager implements Listener {
     }
 
 
-    /** Sortea cada drop una vez y lo entrega al vencedor acreditado, sin soltar loot al mundo. */
+    /** Entrega un único premio: reliquia del boss, material SF seguro o ningún drop. */
     private void distributeCustomDrops(String bossId, Location dropLocation, Player creditedKiller,
                                        List<Player> recipients, Map<UUID, Double> contributions) {
         if (!plugin.getConfig().getBoolean("boss-loot.enabled", true)) {
@@ -711,32 +749,127 @@ public class BossManager implements Listener {
             return;
         }
 
-        for (String itemId : drops.getKeys(false)) {
-            double chance = Math.clamp(drops.getDouble(itemId, 0.0), 0.0, 1.0);
-            if (ThreadLocalRandom.current().nextDouble() > chance) {
-                continue;
-            }
+        double relicChance = Math.clamp(plugin.getConfig().getDouble("boss-loot.boss-relic-chance", 0.30D), 0.0D, 1.0D);
+        double slimefunChance = Math.clamp(plugin.getConfig().getDouble("boss-loot.slimefun-reward-chance", 0.60D), 0.0D, 1.0D - relicChance);
+        double roll = ThreadLocalRandom.current().nextDouble();
+        org.bukkit.inventory.ItemStack item = roll < relicChance
+                ? rollBossReward(drops)
+                : roll < relicChance + slimefunChance ? rollSlimefunReward() : null;
+        if (item == null) {
+            return;
+        }
 
-            org.bukkit.inventory.ItemStack item = org.metamechanists.odysseia.items.OdysseyItemManager.createBossDrop(itemId);
-            if (item == null) {
-                plugin.getLogger().warning("[Bosses] Drop desconocido en config: " + itemId);
-                continue;
-            }
+        Player recipient = creditedKiller != null && creditedKiller.isOnline()
+                ? creditedKiller
+                : pickRecipient(recipients, contributions);
 
-            Player recipient = creditedKiller != null && creditedKiller.isOnline()
-                    ? creditedKiller
-                    : pickRecipient(recipients, contributions);
-            
-            Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
-            for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
-                queuePendingReward(recipient.getUniqueId(), leftover);
+        Map<Integer, org.bukkit.inventory.ItemStack> overflow = recipient.getInventory().addItem(item);
+        for (org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+            queuePendingReward(recipient.getUniqueId(), leftover);
+        }
+        recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
+        if (!overflow.isEmpty()) {
+            recipient.sendMessage("§6[MÍTICO] §eInventario lleno: tu recompensa quedó guardada y se entregará al tener espacio.");
+        }
+    }
+
+    /** Limits extreme Slimefun/Tinker bursts while leaving normal weapons untouched. */
+    private void applyAdaptiveWeaponCounter(OdysseyBoss boss, Player attacker, org.bukkit.event.entity.EntityDamageByEntityEvent event) {
+        if (!plugin.getConfig().getBoolean("boss-balance.adaptive-counters.enabled", true)) return;
+
+        var healthAttribute = boss.getEntity().getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        double maxHealth = healthAttribute == null ? boss.getEntity().getHealth() : healthAttribute.getValue();
+        boolean highPowerWeapon = isHighPowerWeapon(attacker);
+        String prefix = highPowerWeapon ? "boss-balance.adaptive-counters.high-power" : "boss-balance.adaptive-counters.normal";
+        double perHitFraction = Math.clamp(plugin.getConfig().getDouble(prefix + ".max-hit-health-fraction", highPowerWeapon ? 0.025D : 0.045D), 0.001D, 1.0D);
+        double maxPerHit = Math.max(1.0D, maxHealth * perHitFraction);
+        double adjustedDamage = Math.min(event.getDamage(), maxPerHit);
+
+        long now = System.currentTimeMillis();
+        long windowMillis = Math.max(1L, plugin.getConfig().getLong("boss-balance.adaptive-counters.burst-window-seconds", 4L)) * 1_000L;
+        double burstFraction = Math.clamp(plugin.getConfig().getDouble(prefix + ".max-burst-health-fraction", highPowerWeapon ? 0.12D : 0.20D), perHitFraction, 1.0D);
+        double burstLimit = Math.max(maxPerHit, maxHealth * burstFraction);
+        Map<UUID, DamageWindow> windows = bossDamageWindows.computeIfAbsent(boss.getEntity().getUniqueId(), ignored -> new ConcurrentHashMap<>());
+        DamageWindow previous = windows.get(attacker.getUniqueId());
+        boolean sameWindow = previous != null && now - previous.startedAt() <= windowMillis;
+        double priorDamage = sameWindow ? previous.damage() : 0.0D;
+        adjustedDamage = Math.min(adjustedDamage, Math.max(0.0D, burstLimit - priorDamage));
+        windows.put(attacker.getUniqueId(), new DamageWindow(sameWindow ? previous.startedAt() : now, priorDamage + adjustedDamage));
+
+        boolean countered = adjustedDamage + 0.01D < event.getDamage();
+        event.setDamage(adjustedDamage);
+        if (countered) triggerAdaptiveCounter(boss, attacker, highPowerWeapon);
+    }
+
+    /** Detects Slimefun/Tinker metadata and unusually high enchant levels without fixed item IDs. */
+    private boolean isHighPowerWeapon(Player attacker) {
+        org.bukkit.inventory.ItemStack weapon = attacker.getInventory().getItemInMainHand();
+        if (weapon == null || weapon.getType().isAir()) return false;
+        int sharpness = weapon.getEnchantmentLevel(org.bukkit.enchantments.Enchantment.SHARPNESS);
+        if (sharpness >= plugin.getConfig().getInt("boss-balance.adaptive-counters.high-power.sharpness-threshold", 7)) return true;
+        org.bukkit.inventory.meta.ItemMeta meta = weapon.getItemMeta();
+        return meta != null && meta.getPersistentDataContainer().getKeys().stream().anyMatch(key ->
+                key.getNamespace().equals("slimefun") || key.getNamespace().equals("slimetinker"));
+    }
+
+    /** Gives a readable, cooldown-protected retaliation instead of silently nullifying a weapon. */
+    private void triggerAdaptiveCounter(OdysseyBoss boss, Player attacker, boolean highPowerWeapon) {
+        long now = System.currentTimeMillis();
+        long cooldown = Math.max(1L, plugin.getConfig().getLong("boss-balance.adaptive-counters.counter-cooldown-seconds", 12L)) * 1_000L;
+        Map<UUID, Long> counters = adaptiveCounterCooldowns.computeIfAbsent(boss.getEntity().getUniqueId(), ignored -> new ConcurrentHashMap<>());
+        if (now < counters.getOrDefault(attacker.getUniqueId(), 0L)) return;
+        counters.put(attacker.getUniqueId(), now + cooldown);
+
+        attacker.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.WEAKNESS,
+                highPowerWeapon ? 80 : 40, highPowerWeapon ? 1 : 0, true, true, true));
+        attacker.getWorld().spawnParticle(org.bukkit.Particle.ENCHANT, attacker.getLocation().add(0, 1, 0), 32, 0.35, 0.55, 0.35, 0.1);
+        attacker.playSound(attacker.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.9F, 0.65F);
+        attacker.sendActionBar(ChatColor.translateAlternateColorCodes('&',
+                highPowerWeapon ? "&5&lEl jefe adapta su defensa a tu arma de endgame." : "&6&lEl jefe bloquea tu ráfaga de daño."));
+    }
+
+    /** Sortea una reliquia configurada sin permitir que varias caigan en la misma muerte. */
+    private org.bukkit.inventory.ItemStack rollBossReward(ConfigurationSection drops) {
+        List<String> ids = new ArrayList<>(drops.getKeys(false));
+        while (!ids.isEmpty()) {
+            String id = ids.remove(ThreadLocalRandom.current().nextInt(ids.size()));
+            org.bukkit.inventory.ItemStack item = org.metamechanists.odysseia.items.OdysseyItemManager.createBossDrop(id);
+            if (item != null) {
+                return item;
             }
-            recipient.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6&l[MÍTICO] &eRecibiste &f" + item.getItemMeta().getDisplayName() + " &epor derrotar a &f" + bossId + "&e."));
-            if (!overflow.isEmpty()) {
-                recipient.sendMessage("§6[MÍTICO] §eInventario lleno: tu recompensa quedó guardada y se entregará al tener espacio.");
+            plugin.getLogger().warning("[Bosses] Drop desconocido en config: " + id);
+        }
+        return null;
+    }
+
+    /** Crea materiales SF útiles definidos por lista blanca; nunca objetos de endgame. */
+    private org.bukkit.inventory.ItemStack rollSlimefunReward() {
+        if (slimefunGetById == null || slimefunGetItem == null) {
+            return null;
+        }
+        List<String> ids = new ArrayList<>(plugin.getConfig().getStringList("boss-loot.slimefun-rewards.item-ids"));
+        while (!ids.isEmpty()) {
+            String id = ids.remove(ThreadLocalRandom.current().nextInt(ids.size()));
+            try {
+                Object slimefunItem = slimefunGetById.invoke(null, id);
+                if (slimefunItem == null) continue;
+                org.bukkit.inventory.ItemStack item = (org.bukkit.inventory.ItemStack) slimefunGetItem.invoke(slimefunItem);
+                if (item == null) continue;
+                int minimum = Math.max(1, plugin.getConfig().getInt("boss-loot.slimefun-rewards.minimum-amount", 1));
+                int maximum = Math.max(minimum, plugin.getConfig().getInt("boss-loot.slimefun-rewards.maximum-amount", 3));
+                item = item.clone();
+                item.setAmount(Math.min(item.getMaxStackSize(), ThreadLocalRandom.current().nextInt(minimum, maximum + 1)));
+                return item;
+            } catch (ReflectiveOperationException exception) {
+                if (!slimefunLootWarningLogged) {
+                    slimefunLootWarningLogged = true;
+                    plugin.getLogger().warning("[Bosses] No se pudo generar recompensa Slimefun: " + exception.getMessage());
+                }
+                return null;
             }
         }
+        return null;
     }
 
     /** Keeps boss rewards out of the world and persists them across restarts until delivery succeeds. */

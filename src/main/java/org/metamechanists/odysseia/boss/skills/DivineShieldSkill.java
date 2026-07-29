@@ -15,6 +15,9 @@ public class DivineShieldSkill implements BossSkill {
         if (boss.getEntity() == null || boss.getEntity().isDead()) {
             return;
         }
+        if (boss.getEntity().hasPotionEffect(PotionEffectType.RESISTANCE)) {
+            return;
+        }
 
         Location loc = boss.getEntity().getLocation();
         loc.getWorld().playSound(loc, Sound.ITEM_SHIELD_BLOCK, 1.5f, 0.5f);
@@ -38,6 +41,6 @@ public class DivineShieldSkill implements BossSkill {
             }, delay);
         }
 
-        target.sendMessage("§e§l¡Zeus invoca su Escudo Divino! Es temporalmente inmune al daño físico.");
+        boss.announceAttack("Escudo Divino: inmune por 8s");
     }
 }

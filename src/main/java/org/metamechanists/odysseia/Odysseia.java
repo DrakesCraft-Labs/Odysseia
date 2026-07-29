@@ -47,6 +47,7 @@ public final class Odysseia extends JavaPlugin {
 
     private VanishCommand vanishCommand;
     private BossManager bossManager;
+    private org.metamechanists.odysseia.boss.arena.BossArenaService bossArenas;
     private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
@@ -128,7 +129,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
-        var bossArenas = new org.metamechanists.odysseia.boss.arena.BossArenaService(this, bossManager);
+        this.bossArenas = new org.metamechanists.odysseia.boss.arena.BossArenaService(this, bossManager);
         var bossWarp = new org.metamechanists.odysseia.commands.BossWarpCommand(bossArenas);
         getCommand("bosswarp").setExecutor(bossWarp);
         getCommand("bosswarp").setTabCompleter(bossWarp);
@@ -162,6 +163,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
         org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
         Bukkit.getScheduler().runTask(this, sfMasterWatcher::deliverGuidesToOnlinePassHolders);
@@ -744,6 +746,11 @@ public final class Odysseia extends JavaPlugin {
 
     public BossManager getBossManager() {
         return this.bossManager;
+    }
+
+    /** Provides the isolated arena coordinator to controlled boss entry points. */
+    public org.metamechanists.odysseia.boss.arena.BossArenaService getBossArenas() {
+        return bossArenas;
     }
 
     public BloodMoonManager getBloodMoonManager() {

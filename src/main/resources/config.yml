@@ -417,12 +417,28 @@ boss-balance:
     bosses: [thor, ares, hades, zeus, odin, kratos, heimdall, hidra, cerbero, tifon]
     health-percent: 0.55
     invulnerability-seconds: 5
+  # Defensa adaptativa contra armas SF/Tinker y encantamientos de endgame.
+  # Reduce ráfagas; no borra, modifica ni bloquea ítems de jugadores.
+  adaptive-counters:
+    enabled: true
+    burst-window-seconds: 4
+    counter-cooldown-seconds: 12
+    normal:
+      max-hit-health-fraction: 0.045
+      max-burst-health-fraction: 0.20
+    high-power:
+      sharpness-threshold: 7
+      max-hit-health-fraction: 0.025
+      max-burst-health-fraction: 0.12
 
 # ─────────────────────────────────────────────
 # Arenas públicas de jefes (/bosswarp)
 # Cada integrante de un grupo paga su entrada. Si el jefe no se puede crear,
 # Odysseia reembolsa todos los cobros de esa sesión.
 boss-arena:
+  # Mundo fijo superplano. Si ya existe un mundo no plano con este nombre, no se borra en vivo.
+  # Debe recrearse manualmente solo con el servidor detenido y sin jugadores dentro.
+  world-border-size: 4096
   entry-fees:
     default: 500000
     zeus: 250000
@@ -538,11 +554,38 @@ bosses:
     impact-radius: 4.0
     impact-damage: 11.0
 
-# Cada drop se sortea una vez por muerte y se entrega a un participante
-# ponderado por daño. Los valores son probabilidades entre 0.0 y 1.0.
+# Cada muerte concede como máximo un premio ponderado por daño: una reliquia
+# propia, un material SF seguro o ninguno. Nunca se sueltan items al mundo.
 boss-loot:
   enabled: true
   experience: 750
+  boss-relic-chance: 0.30
+  slimefun-reward-chance: 0.60
+  slimefun-rewards:
+    minimum-amount: 1
+    maximum-amount: 3
+    # Lista blanca: sin Infinity, Supreme, radioactivos, armas ni armaduras.
+    item-ids:
+      - MAGICAL_LUMP_1
+      - MAGICAL_LUMP_2
+      - SULFUR
+      - COPPER_DUST
+      - GOLD_DUST
+      - IRON_DUST
+      - ALUMINUM_DUST
+      - ZINC_DUST
+      - TIN_DUST
+      - MAGNESIUM_DUST
+      - SILVER_DUST
+      - DAMASCUS_STEEL
+      - REINFORCED_ALLOY_INGOT
+      - CORINTHIAN_BRONZE_INGOT
+      - HARDENED_METAL_INGOT
+      - REDSTONE_ALLOY
+      - SYNTHETIC_EMERALD
+      - SIFTED_ORE
+      - STRANGE_NETHER_DUST
+      - ENDER_LUMP
   contributors:
     # Daño mínimo y porcentaje mínimo del daño total para entrar al sorteo.
     minimum-damage: 25.0
@@ -606,6 +649,30 @@ boss-loot:
     prometeo:
       drops:
         prometeo_flame: 0.50
+    coloso_end:
+      drops:
+        coloso_core: 0.50
+    wither_storm:
+      drops:
+        storm_heart: 0.50
+    dragon_ancestral:
+      drops:
+        dragon_heart: 0.50
+    ra:
+      drops:
+        ra_sun: 0.50
+    isis:
+      drops:
+        isis_feather: 0.50
+    anubis:
+      drops:
+        anubis_seal: 0.50
+    set:
+      drops:
+        set_shard: 0.50
+    jax:
+      drops:
+        jax_fragment: 0.50
 
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)

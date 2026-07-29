@@ -20,6 +20,8 @@ public class ZeusBoss extends OdysseyBoss {
 
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
+    private long nextAttackAt;
+    private long shieldAvailableAt;
 
     public ZeusBoss(LivingEntity entity) {
         super(entity, "zeus", "§e§lZeus §7§l- §eRey del Olimpo", 2000.0, BarColor.YELLOW, BarStyle.SEGMENTED_20);
@@ -56,10 +58,23 @@ public class ZeusBoss extends OdysseyBoss {
     public void executeSkillsRotation() {
         if (entity == null || entity.isDead()) return;
 
+        long now = System.currentTimeMillis();
+        if (now < nextAttackAt) return;
+
         Player target = getNearestPlayer(25);
-        if (target != null) {
-            BossSkill skill = skills.get(random.nextInt(skills.size()));
-            skill.execute(this, target);
+        if (target == null) return;
+
+        List<BossSkill> available = new ArrayList<>(skills);
+        if (now < shieldAvailableAt || entity.hasPotionEffect(org.bukkit.potion.PotionEffectType.RESISTANCE)) {
+            available.removeIf(skill -> skill instanceof DivineShieldSkill);
+        }
+        if (available.isEmpty()) return;
+
+        BossSkill skill = available.get(random.nextInt(available.size()));
+        skill.execute(this, target);
+        nextAttackAt = now + 5_000L;
+        if (skill instanceof DivineShieldSkill) {
+            shieldAvailableAt = now + 45_000L;
         }
     }
 

@@ -45,15 +45,7 @@ public final class JaxDisplayBoss extends OdysseyBoss {
             scale.setBaseValue(1.15D);
         }
 
-        visualRoot = spawnVisual(entity.getLocation());
-        if (visualRoot != null) {
-            entity.addPassenger(visualRoot);
-            entity.setInvisible(true);
-            entity.setSilent(true);
-            entity.setCustomNameVisible(false);
-        } else {
-            Odysseia.getInstance().getLogger().warning("[Bosses] Jax no pudo cargar su modelo; el núcleo sigue visible para evitar un boss invisible.");
-        }
+        scheduleVisual(entity.getLocation());
     }
 
     @Override
@@ -126,40 +118,51 @@ public final class JaxDisplayBoss extends OdysseyBoss {
         at.getWorld().playSound(at, Sound.ENTITY_IRON_GOLEM_ATTACK, 1.2F, 0.72F);
     }
 
-    private BlockDisplay spawnVisual(Location location) {
+    /** Dispatches the display model, then attaches it after Paper registers passengers. */
+    private void scheduleVisual(Location location) {
         String command = readModelCommand();
         if (command == null) {
-            return null;
+            logModelFallback();
+            return;
         }
         World world = location.getWorld();
         if (world == null) {
-            return null;
+            logModelFallback();
+            return;
         }
-        Set<UUID> before = new HashSet<>();
-        for (BlockDisplay display : world.getEntitiesByClass(BlockDisplay.class)) {
-            before.add(display.getUniqueId());
-        }
+        String marker = "odysseia_jax_" + entity.getUniqueId().toString().replace("-", "");
+        String taggedCommand = command.replaceFirst("\\{", "{Tags:[\"" + marker + "\"],");
         String positioned = String.format(Locale.ROOT, "execute positioned %.3f %.3f %.3f run %s",
-                location.getX(), location.getY(), location.getZ(), command);
+                location.getX(), location.getY(), location.getZ(), taggedCommand);
         if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), positioned)) {
-            return null;
+            logModelFallback();
+            return;
         }
-        BlockDisplay nearest = null;
-        double bestDistance = Double.MAX_VALUE;
-        for (Entity candidate : world.getNearbyEntities(location, 5.0D, 5.0D, 5.0D)) {
-            if (candidate instanceof BlockDisplay display && !before.contains(display.getUniqueId())) {
-                double distance = display.getLocation().distanceSquared(location);
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    nearest = display;
-                }
-            }
+        Bukkit.getScheduler().runTaskLater(Odysseia.getInstance(), () -> attachVisual(world, marker), 1L);
+    }
+
+    private void attachVisual(World world, String marker) {
+        BlockDisplay root = world.getEntitiesByClass(BlockDisplay.class).stream()
+                .filter(display -> display.getScoreboardTags().contains(marker))
+                .findFirst()
+                .orElse(null);
+        if (root == null || entity.isDead()) {
+            if (root != null) root.remove();
+            logModelFallback();
+            return;
         }
-        if (nearest != null) {
-            nearest.setTeleportDuration(2);
-            nearest.setInterpolationDuration(2);
-        }
-        return nearest;
+        visualRoot = root;
+        root.setTeleportDuration(2);
+        root.setInterpolationDuration(2);
+        entity.addPassenger(root);
+        entity.setInvisible(true);
+        entity.setSilent(true);
+        entity.setCustomNameVisible(false);
+    }
+
+    private void logModelFallback() {
+        Odysseia.getInstance().getLogger().warning(
+                "[Bosses] Jax no pudo cargar su modelo; el núcleo sigue visible para evitar un boss invisible.");
     }
 
     private String readModelCommand() {
