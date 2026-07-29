@@ -70,12 +70,12 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            var spawned = bossManager.spawnBoss(bossType, player.getLocation(), true);
-            if (spawned != null) {
+            var result = plugin.getBossArenas().startForced(bossType, List.of(player));
+            if (result.started()) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&l¡ÉXITO! &eHas invocado al jefe mítico " + spawned.getDisplayName() + " &een tu posición."));
+                        "&a&l¡ÉXITO! &eEl jefe mítico &f" + bossType + " &eha sido llevado a una arena segura."));
             } else {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cOcurrió un error al invocar al jefe."));
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cNo se pudo crear la arena: " + result.error()));
             }
             return true;
         }

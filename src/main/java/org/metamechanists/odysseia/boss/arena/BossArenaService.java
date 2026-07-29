@@ -59,6 +59,11 @@ public final class BossArenaService implements Listener {
         return startInternal(type, players, players.size() > 1, false);
     }
 
+    /** Starts a solo arena paid by a consumed summoner rather than Vault currency. */
+    public StartResult startWithSummoner(String type, Player player) {
+        return startInternal(type, List.of(player), false, false);
+    }
+
     private StartResult startInternal(String type, Collection<Player> players, boolean group, boolean chargeEntry) {
         if (players.isEmpty()) return failed("No hay jugadores para esta arena.");
         if (!bosses.supportsBossType(type)) return failed("Ese jefe no existe o está desactivado.");

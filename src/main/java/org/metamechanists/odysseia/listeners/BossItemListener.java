@@ -439,26 +439,18 @@ public final class BossItemListener implements Listener {
                 return;
             }
 
-            // Consumir el invocador (1 unidad)
-            if (item.getAmount() > 1) {
-                item.setAmount(item.getAmount() - 1);
-            } else {
-                player.getInventory().setItem(event.getHand(), null);
+            var result = plugin.getBossArenas().startWithSummoner(bossId, player);
+            if (!result.started()) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        "&c[BossArena] No se consumió el invocador: " + result.error()));
+                return;
             }
 
-            Location spawnLoc = event.getClickedBlock().getLocation().clone().add(0.5, 1.0, 0.5);
-            org.bukkit.World world = spawnLoc.getWorld();
-            
-            // Efectos celestiales de invocación
-            if (world != null) {
-                world.strikeLightningEffect(spawnLoc);
-                world.spawnParticle(Particle.EXPLOSION_EMITTER, spawnLoc, 5, 0.5, 0.5, 0.5, 0.1);
-                world.playSound(spawnLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.5f, 0.8f);
-                world.playSound(spawnLoc, Sound.ENTITY_WITHER_SPAWN, 1.5f, 0.5f);
-            }
-
-            // Invocar al jefe
-            plugin.getBossManager().spawnBoss(bossId, spawnLoc);
+            // The summoner is payment for the isolated fight, never a world-spawn token.
+            if (item.getAmount() > 1) item.setAmount(item.getAmount() - 1);
+            else player.getInventory().setItem(event.getHand(), null);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&d[BossArena] El invocador abrió una arena segura. Buena suerte."));
             return;
         }
 
