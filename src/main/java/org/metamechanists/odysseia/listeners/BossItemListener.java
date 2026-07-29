@@ -424,6 +424,8 @@ public final class BossItemListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
+        // Bukkit emits a second interaction for the off-hand; summoners are main-hand only.
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (item == null || !item.hasItemMeta()) return;
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 

@@ -40,6 +40,7 @@ public final class BossArenaService implements Listener {
     private final Map<UUID, Location> pendingReturns = new ConcurrentHashMap<>();
     private final Map<UUID, SpectatorReturn> spectators = new ConcurrentHashMap<>();
     private final Set<Integer> occupiedCells = ConcurrentHashMap.newKeySet();
+    private final Set<String> activeBossTypes = ConcurrentHashMap.newKeySet();
 
     public BossArenaService(Odysseia plugin, BossManager bosses) {
         this.plugin = plugin;
@@ -75,26 +76,32 @@ public final class BossArenaService implements Listener {
         if (players.stream().anyMatch(player -> byPlayer.containsKey(player.getUniqueId()))) {
             return failed("Un integrante ya está en otra arena.");
         }
+        String arenaBossType = canonicalBossType(type);
+        if (!activeBossTypes.add(arenaBossType)) {
+            return failed("Ese jefe ya tiene una arena activa. Espera a que termine.");
+        }
         int cell = reserveCell();
         Location center = new Location(world, cell * CELL_SIZE + 0.5D, 65D, 0.5D);
         buildFloor(world, center);
         OdysseyBoss boss;
         try {
-            boss = bosses.spawnBoss(type, center.clone().add(0, 1, 0), false);
+            boss = bosses.spawnBoss(arenaBossType, center.clone().add(0, 1, 0), false);
         } catch (RuntimeException exception) {
             plugin.getLogger().warning("[BossArena] Falló la creación de " + type + ": " + exception.getMessage());
             occupiedCells.remove(cell);
+            activeBossTypes.remove(arenaBossType);
             clearFloor(center);
             return failed("La arena falló antes de cobrar la entrada.");
         }
         if (boss == null) {
             occupiedCells.remove(cell);
+            activeBossTypes.remove(arenaBossType);
             clearFloor(center);
             return failed("La creación del jefe fue cancelada antes de cobrar la entrada.");
         }
         EntryCharge charge = chargeEntry ? chargeEntry(type, players) : EntryCharge.free();
         if (!charge.success()) {
-            rollbackSpawn(boss, players, cell, center, EntryCharge.free());
+            rollbackSpawn(boss, players, cell, center, arenaBossType, EntryCharge.free());
             return failed(charge.error());
         }
         try {
@@ -119,7 +126,7 @@ public final class BossArenaService implements Listener {
                             + " §dde vida efectiva.");
                 }
             }
-            BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), type,
+            BossArenaSession session = new BossArenaSession(UUID.randomUUID(), boss.getEntity().getUniqueId(), arenaBossType,
                     center, group, Set.copyOf(ids), Map.copyOf(returnLocations), System.currentTimeMillis());
             byBoss.put(session.bossId(), session);
             String notice = "§6[BossArena] §e" + players.iterator().next().getName() + " desafía a §c" + boss.getDisplayName()
@@ -130,17 +137,18 @@ public final class BossArenaService implements Listener {
             return new StartResult(session, charge.feePerPlayer(), "");
         } catch (RuntimeException exception) {
             plugin.getLogger().warning("[BossArena] Rollback de arena " + type + ": " + exception.getMessage());
-            rollbackSpawn(boss, players, cell, center, charge);
+            rollbackSpawn(boss, players, cell, center, arenaBossType, charge);
             return failed("La arena no pudo inicializarse. Tu entrada fue reembolsada.");
         }
     }
 
     /** Removes every partial arena side effect before an entry can be refunded. */
-    private void rollbackSpawn(OdysseyBoss boss, Collection<Player> players, int cell, Location center, EntryCharge charge) {
+    private void rollbackSpawn(OdysseyBoss boss, Collection<Player> players, int cell, Location center, String bossType, EntryCharge charge) {
         byBoss.remove(boss.getEntity().getUniqueId());
         for (Player player : players) byPlayer.remove(player.getUniqueId(), boss.getEntity().getUniqueId());
         bosses.removeBoss(boss.getEntity().getUniqueId(), null);
         occupiedCells.remove(cell);
+        activeBossTypes.remove(bossType);
         clearFloor(center);
         charge.refund();
     }
@@ -152,6 +160,18 @@ public final class BossArenaService implements Listener {
 
     private StartResult failed(String error) {
         return new StartResult(null, 0.0D, error);
+    }
+
+    private static String canonicalBossType(String type) {
+        return switch (type.toLowerCase(java.util.Locale.ROOT)) {
+            case "dios-corrupto" -> "dios_corrupto";
+            case "tifón" -> "tifon";
+            case "coloso-end", "coloso" -> "coloso_end";
+            case "wither", "wither-storm", "witherstorm" -> "wither_storm";
+            case "dragon-ancestral", "dragon" -> "dragon_ancestral";
+            case "ajax" -> "jax";
+            default -> type.toLowerCase(java.util.Locale.ROOT);
+        };
     }
 
     private EntryCharge chargeEntry(String type, Collection<Player> players) {
@@ -270,6 +290,7 @@ public final class BossArenaService implements Listener {
         }
         returnSpectators(session.bossId());
         occupiedCells.remove((int) Math.floor(session.center().getX() / CELL_SIZE));
+        activeBossTypes.remove(session.bossType());
         Bukkit.getScheduler().runTaskLater(plugin, () -> clearFloor(session.center()), 20L * 15L);
     }
 
@@ -359,6 +380,7 @@ public final class BossArenaService implements Listener {
         }
         returnSpectators(session.bossId());
         occupiedCells.remove((int) Math.floor(session.center().getX() / CELL_SIZE));
+        activeBossTypes.remove(session.bossType());
         Bukkit.getScheduler().runTaskLater(plugin, () -> clearFloor(session.center()), 20L);
         plugin.getLogger().warning("[BossArena] Sesión " + session.id() + " cerrada: el jefe dejó de existir.");
     }
