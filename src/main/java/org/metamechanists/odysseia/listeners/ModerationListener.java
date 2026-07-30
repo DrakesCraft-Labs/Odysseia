@@ -108,6 +108,10 @@ public final class ModerationListener implements Listener {
     private boolean isOperationalKick(String reason) {
         String normalized = reason == null ? "" : reason.toLowerCase(Locale.ROOT);
         return normalized.contains("reinicio") || normalized.contains("restarting")
-                || normalized.contains("maintenance") || normalized.contains("mantenimiento");
+                || normalized.contains("maintenance") || normalized.contains("mantenimiento")
+                // Network disconnects are not moderation actions and must never alert staff.
+                || normalized.contains("timed out") || normalized.contains("timeout")
+                || normalized.contains("connection reset") || normalized.contains("connection closed")
+                || normalized.contains("forcibly closed") || normalized.contains("disconnected");
     }
 }
