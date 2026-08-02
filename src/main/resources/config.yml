@@ -1884,3 +1884,25 @@ anti-alt:
   enabled: true
   max-concurrent-per-ip: 2
   exempt-addresses: []
+
+# Capa transversal contra macros de comercio. Complementa las cuotas por ítem
+# de /sellinv y cubre comandos equivalentes de otros plugins.
+exploit-guard:
+  enabled: true
+  commerce:
+    enabled: true
+    bypass-permission: odysseia.exploitguard.bypass
+    cooldown-millis: 750
+    burst-window-seconds: 20
+    max-commands-per-window: 8
+    restriction-seconds: 120
+    commands:
+      - sell
+      - sellall
+      - sellinv
+      - sellhand
+      - vender
+      - venderinv
+      - ushop
+      - ah
+      - auctionhouse

@@ -125,6 +125,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(chatFilter, this);
         Bukkit.getPluginManager().registerEvents(shopMenu, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
 
         // Initialize BossManager
         this.bossManager = new BossManager(this);
