@@ -1855,3 +1855,32 @@ discord-translator:
   mc-target-language: "es"
   # Idioma al que se traducen los mensajes de MC para Discord
   discord-target-language: "en"
+
+# Defensa de economía: las ventas rápidas no pueden financiar granjas AFK.
+economy-guard:
+  sell-inventory:
+    cooldown-seconds: 20
+    window-seconds: 3600
+    max-items-per-material: 3456
+    # Se añaden a la lista segura del código para impedir una reactivación accidental.
+    blocked-materials:
+      - COBBLESTONE
+      - STONE
+      - DEEPSLATE
+      - COBBLED_DEEPSLATE
+      - DIRT
+      - SAND
+      - GRAVEL
+      - GRANITE
+      - DIORITE
+      - ANDESITE
+      - NETHERRACK
+      - BASALT
+      - BLACKSTONE
+
+# Máximo de cuentas simultáneas por dirección real. Añadir aquí redes compartidas
+# autorizadas antes de elevar este límite; no guardar nombres ni credenciales.
+anti-alt:
+  enabled: true
+  max-concurrent-per-ip: 2
+  exempt-addresses: []

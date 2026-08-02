@@ -174,6 +174,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(automation, this);
         this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
         Bukkit.getPluginManager().registerEvents(automationGuard, this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.AntiAltListener(this), this);
         this.polisBaseline = new PolisBaselineListener(this);
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
         this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);

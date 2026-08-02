@@ -13,11 +13,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.metamechanists.odysseia.Odysseia;
+import org.metamechanists.odysseia.economy.CommerceRateLimiter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Permite a los jugadores vender de forma rápida y 100% segura los ítems de recursos
@@ -29,6 +34,11 @@ public final class SellInventoryCommand implements CommandExecutor {
     private final Map<Material, Double> sellPrices = new EnumMap<>(Material.class);
     private Method slimefunGetByItemMethod;
     private boolean reflectionInitialized = false;
+    private final CommerceRateLimiter rateLimiter = new CommerceRateLimiter();
+    private static final Set<Material> DEFAULT_BLOCKED_MATERIALS = Set.of(
+            Material.COBBLESTONE, Material.STONE, Material.DEEPSLATE, Material.COBBLED_DEEPSLATE,
+            Material.DIRT, Material.SAND, Material.GRAVEL, Material.GRANITE, Material.DIORITE,
+            Material.ANDESITE, Material.NETHERRACK, Material.BASALT, Material.BLACKSTONE);
 
     public SellInventoryCommand(Odysseia plugin) {
         this.plugin = plugin;
@@ -120,7 +130,7 @@ public final class SellInventoryCommand implements CommandExecutor {
 
     /** Visible para pruebas de regresión de la política económica. */
     boolean isSellable(Material material) {
-        return sellPrices.containsKey(material);
+        return sellPrices.containsKey(material) && !blockedMaterials().contains(material);
     }
 
     @Override
@@ -137,8 +147,8 @@ public final class SellInventoryCommand implements CommandExecutor {
         }
 
         Economy economy = rsp.getProvider();
-        double totalEarnings = 0.0;
-        int totalItemsSold = 0;
+        List<SaleCandidate> candidates = new ArrayList<>();
+        Map<Material, Integer> requestedByMaterial = new EnumMap<>(Material.class);
 
         // Escanear ÚNICAMENTE el inventario principal (ranuras 0 a 35). Omitir armadura y offhand.
         for (int i = 0; i < 36; i++) {
@@ -163,25 +173,48 @@ public final class SellInventoryCommand implements CommandExecutor {
 
             // BLINDAJE DE SEGURIDAD 3: Verificar si el material tiene precio asignado
             Material type = item.getType();
-            if (!sellPrices.containsKey(type)) {
+            if (!isSellable(type)) {
                 continue;
             }
-
-            double unitPrice = sellPrices.get(type);
-            int amount = item.getAmount();
-            double earnings = unitPrice * amount;
-
-            totalEarnings += earnings;
-            totalItemsSold += amount;
-
-            // Eliminar ítem del inventario
-            player.getInventory().setItem(i, null);
+            candidates.add(new SaleCandidate(i, type, item.getAmount(), sellPrices.get(type)));
+            requestedByMaterial.merge(type, item.getAmount(), Integer::sum);
         }
 
-        if (totalItemsSold == 0 || totalEarnings <= 0) {
+        if (candidates.isEmpty()) {
             player.sendMessage(ChatColor.YELLOW + "💡 No se encontraron recursos vendibles en tu inventario principal.");
-            player.sendMessage(ChatColor.GRAY + "Pista: /sellinv solo vende recursos y materiales sin encantamientos ni ítems custom.");
+            player.sendMessage(ChatColor.GRAY + "Pista: piedra, cobble y recursos de granjas automáticas no se compran aquí.");
             return true;
+        }
+
+        long now = System.currentTimeMillis();
+        long cooldownMillis = Math.clamp(configLong("economy-guard.sell-inventory.cooldown-seconds", 20L), 5L, 300L) * 1000L;
+        long windowMillis = Math.clamp(configLong("economy-guard.sell-inventory.window-seconds", 3600L), 60L, 86_400L) * 1000L;
+        int maxPerMaterial = Math.clamp(configInt("economy-guard.sell-inventory.max-items-per-material", 3456), 64, 100_000);
+        CommerceRateLimiter.Decision decision = rateLimiter.reserve(player.getUniqueId(), requestedByMaterial,
+                now, cooldownMillis, windowMillis, maxPerMaterial);
+        if (decision.reason() == CommerceRateLimiter.Reason.COOLDOWN) {
+            player.sendMessage(ChatColor.RED + "⏳ Espera " + seconds(decision.retryAfterMillis()) + "s antes de vender otra vez.");
+            return true;
+        }
+        if (decision.reason() == CommerceRateLimiter.Reason.QUOTA_REACHED) {
+            player.sendMessage(ChatColor.RED + "📦 Alcanzaste la cuota de venta por material. Intenta nuevamente en "
+                    + seconds(decision.retryAfterMillis()) + "s.");
+            return true;
+        }
+
+        double totalEarnings = 0.0;
+        int totalItemsSold = 0;
+        Map<Material, Integer> remainingAllowed = new EnumMap<>(decision.accepted());
+        for (SaleCandidate candidate : candidates) {
+            int allowed = Math.min(candidate.amount(), remainingAllowed.getOrDefault(candidate.material(), 0));
+            if (allowed <= 0) continue;
+            remainingAllowed.merge(candidate.material(), -allowed, Integer::sum);
+            totalEarnings += candidate.unitPrice() * allowed;
+            totalItemsSold += allowed;
+            ItemStack current = player.getInventory().getItem(candidate.slot());
+            if (current == null || current.getType() != candidate.material()) continue;
+            if (current.getAmount() == allowed) player.getInventory().setItem(candidate.slot(), null);
+            else current.setAmount(current.getAmount() - allowed);
         }
 
         // Acreditar dinero
@@ -195,4 +228,28 @@ public final class SellInventoryCommand implements CommandExecutor {
 
         return true;
     }
+
+    private Set<Material> blockedMaterials() {
+        Set<Material> blocked = new HashSet<>(DEFAULT_BLOCKED_MATERIALS);
+        if (plugin == null) return blocked;
+        for (String name : plugin.getConfig().getStringList("economy-guard.sell-inventory.blocked-materials")) {
+            Material material = Material.matchMaterial(name);
+            if (material != null) blocked.add(material);
+        }
+        return blocked;
+    }
+
+    private long configLong(String path, long fallback) {
+        return plugin == null ? fallback : plugin.getConfig().getLong(path, fallback);
+    }
+
+    private int configInt(String path, int fallback) {
+        return plugin == null ? fallback : plugin.getConfig().getInt(path, fallback);
+    }
+
+    private long seconds(long millis) {
+        return Math.max(1L, (millis + 999L) / 1000L);
+    }
+
+    private record SaleCandidate(int slot, Material material, int amount, double unitPrice) { }
 }
