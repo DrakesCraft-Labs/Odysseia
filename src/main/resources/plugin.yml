@@ -12,6 +12,7 @@ softdepend:
   - ProtectionStones
   - Slimefun
   - DiosesDrakes
+  - DrakesBosses
   - floodgate
   - DiscordSRV
   - WorldwideChat
@@ -30,18 +31,6 @@ commands:
     description: Desvanecimiento creativo para moderadores.
     permission: odysseia.vanish
     aliases: [odysseiavanish]
-  boss:
-    description: Comando administrativo para gestionar jefes míticos.
-    permission: odysseia.boss.admin
-    usage: /boss <spawn|spawnall|give> ...
-  bosswarp:
-    description: Inicia una arena de jefe aislada o permite espectearla.
-    permission: odysseia.bosswarp.use
-    usage: /bosswarp <jefe> [solo|grupo]
-  spawnallbosses:
-    description: Invoca todos los jefes míticos alrededor del administrador.
-    permission: odysseia.boss.admin
-    usage: /spawnallbosses
   bloodmoon:
     description: Gestiona la Luna de Sangre de Odysseia.
     permission: odysseia.bloodmoon.admin

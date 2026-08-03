@@ -191,8 +191,27 @@ public final class BloodMoonManager implements Listener {
         Location location = findSpawn(anchor);
         if (location == null || isProtected(location)) return;
         String id = plugin.getConfig().getString("blood-moon.final-boss.id", "dios_corrupto");
-        if (plugin.getBossManager().spawnBoss(id, location) != null) {
+        if (spawnDrakesBoss(id, location)) {
             announce(state.world(), "&4&l[LUNA DE SANGRE] &cLa última horda ha traído al heraldo " + id + ".");
+        }
+    }
+
+    /** Uses the optional boss module without retaining a compile-time lifecycle dependency. */
+    private boolean spawnDrakesBoss(String id, Location location) {
+        Plugin bossesPlugin = Bukkit.getPluginManager().getPlugin("DrakesBosses");
+        if (bossesPlugin == null || !bossesPlugin.isEnabled()) {
+            plugin.getLogger().warning("[BloodMoon] DrakesBosses no esta disponible; se omitio el jefe final.");
+            return false;
+        }
+        try {
+            Object manager = bossesPlugin.getClass().getMethod("getBossManager").invoke(bossesPlugin);
+            Object spawned = manager.getClass().getMethod("spawnBoss", String.class, Location.class)
+                    .invoke(manager, id, location);
+            return spawned != null;
+        } catch (ReflectiveOperationException exception) {
+            plugin.getLogger().warning("[BloodMoon] No se pudo invocar el jefe final mediante DrakesBosses: "
+                    + exception.getClass().getSimpleName());
+            return false;
         }
     }
 

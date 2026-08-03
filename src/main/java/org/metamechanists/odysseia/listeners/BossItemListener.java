@@ -441,18 +441,8 @@ public final class BossItemListener implements Listener {
                 return;
             }
 
-            var result = plugin.getBossArenas().startWithSummoner(bossId, player);
-            if (!result.started()) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&c[BossArena] No se consumió el invocador: " + result.error()));
-                return;
-            }
-
-            // The summoner is payment for the isolated fight, never a world-spawn token.
-            if (item.getAmount() > 1) item.setAmount(item.getAmount() - 1);
-            else player.getInventory().setItem(event.getHand(), null);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&d[BossArena] El invocador abrió una arena segura. Buena suerte."));
+                    "&e[BossArena] Este listener fue migrado a DrakesBosses; el objeto no se consumió."));
             return;
         }
 

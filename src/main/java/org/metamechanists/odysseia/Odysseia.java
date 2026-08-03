@@ -13,8 +13,6 @@ import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
 import org.metamechanists.odysseia.commands.ReloadCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
-import org.metamechanists.odysseia.commands.BossCommand;
-import org.metamechanists.odysseia.boss.BossManager;
 import org.metamechanists.odysseia.kits.KitClaimService;
 import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
@@ -43,8 +41,6 @@ public final class Odysseia extends JavaPlugin {
     private static Odysseia instance;
 
     private VanishCommand vanishCommand;
-    private BossManager bossManager;
-    private org.metamechanists.odysseia.boss.arena.BossArenaService bossArenas;
     private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
@@ -127,17 +123,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
 
-        // Initialize BossManager
-        this.bossManager = new BossManager(this);
-        this.bossArenas = new org.metamechanists.odysseia.boss.arena.BossArenaService(this, bossManager);
-        var bossWarp = new org.metamechanists.odysseia.commands.BossWarpCommand(bossArenas);
-        getCommand("bosswarp").setExecutor(bossWarp);
-        getCommand("bosswarp").setTabCompleter(bossWarp);
-        BossCommand bossCmd = new BossCommand(this, bossManager);
-        getCommand("boss").setExecutor(bossCmd);
-        getCommand("boss").setTabCompleter(bossCmd);
-        getCommand("spawnallbosses").setExecutor(bossCmd);
-        getCommand("spawnallbosses").setTabCompleter(bossCmd);
+        // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
         this.bloodMoonManager = new BloodMoonManager(this);
         getCommand("bloodmoon").setExecutor(new org.metamechanists.odysseia.commands.BloodMoonCommand(bloodMoonManager));
         org.metamechanists.odysseia.commands.MeteorCommand meteorCommand = new org.metamechanists.odysseia.commands.MeteorCommand(this);
@@ -155,14 +141,11 @@ public final class Odysseia extends JavaPlugin {
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         vanishCommand.startReminder();
-        Bukkit.getPluginManager().registerEvents(bossManager, this);
-        Bukkit.getPluginManager().registerEvents(bossArenas, this);
         Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
         this.sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
@@ -347,10 +330,6 @@ public final class Odysseia extends JavaPlugin {
 
         if (purchaseEngine != null) purchaseEngine.close();
 
-        // Shutdown BossManager
-        if (bossManager != null) {
-            bossManager.shutdown();
-        }
         if (bloodMoonManager != null) {
             bloodMoonManager.shutdown();
         }
@@ -692,15 +671,6 @@ public final class Odysseia extends JavaPlugin {
                 + escapeJson(instanceId + " · " + serverLabel) + "\"}}]}";
         
         WebhookSender.sendSyncBestEffort(this, url, json);
-    }
-
-    public BossManager getBossManager() {
-        return this.bossManager;
-    }
-
-    /** Provides the isolated arena coordinator to controlled boss entry points. */
-    public org.metamechanists.odysseia.boss.arena.BossArenaService getBossArenas() {
-        return bossArenas;
     }
 
     public BloodMoonManager getBloodMoonManager() {
