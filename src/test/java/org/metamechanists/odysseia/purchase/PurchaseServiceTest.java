@@ -177,7 +177,7 @@ class PurchaseServiceTest {
 
     @Test void packagedCatalogHasAllAuditedProductsAndNoDuplicateTebexIds() {
         ProductCatalog catalog = new ProductCatalog(new File("src/main/resources/purchases.yml"));
-        assertEquals(23, catalog.all().size());
+        assertEquals(26, catalog.all().size());
         assertTrue(catalog.validate().isEmpty());
         assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_481").verification());
         assertEquals(ActionType.PROTECTION_STONE, catalog.get("protection_481").actions().getFirst().type());
@@ -186,6 +186,9 @@ class PurchaseServiceTest {
         assertEquals("vipzeus", action(catalog, "vip_zeus", "claim").parameters().get("alias"));
         assertEquals("viphefesto", catalog.get("protection_177").actions().getFirst().parameters().get("alias"));
         assertEquals("vipzeus", catalog.get("protection_481").actions().getFirst().parameters().get("alias"));
+        assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_atlas").verification());
+        assertEquals("atlas", catalog.get("protection_atlas").actions().getFirst().parameters().get("alias"));
+        assertEquals("nethercolossus", catalog.get("protection_nether_colossus").actions().getFirst().parameters().get("alias"));
     }
 
     private ProductAction action(ProductCatalog catalog, String productId, String actionId) {

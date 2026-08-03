@@ -30,7 +30,7 @@ public final class PurchaseCommand implements CommandExecutor {
                 case "status" -> args.length == 2 ? deliveries(sender, service.status(args[1])) : usage(sender, label);
                 case "pending" -> deliveries(sender, service.pending());
                 case "history" -> args.length == 2 ? deliveries(sender, service.history(args[1])) : usage(sender, label);
-                case "validate" -> message(sender, service.catalog().validate().isEmpty(), service.catalog().validate().isEmpty() ? "Catálogo válido: 23 productos." : String.join("; ", service.catalog().validate()));
+                case "validate" -> message(sender, service.catalog().validate().isEmpty(), service.catalog().validate().isEmpty() ? "Catálogo válido: " + service.catalog().all().size() + " productos." : String.join("; ", service.catalog().validate()));
                 case "catalog" -> { service.catalog().all().forEach(product -> sender.sendMessage(product.id() + " | " + product.name() + " | " + product.verification())); yield true; }
                 case "reconcile" -> result(sender, service.reconcile(sender.getName()));
                 case "manual-review", "complete", "cancel" -> args.length == 2 ? result(sender, service.adminState(args[1], args[0], sender.getName())) : usage(sender, label);

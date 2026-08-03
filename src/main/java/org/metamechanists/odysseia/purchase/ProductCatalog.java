@@ -16,13 +16,13 @@ public final class ProductCatalog {
         File file = new File(plugin.getDataFolder(), "purchases.yml");
         if (!file.exists()) plugin.saveResource("purchases.yml", false);
         this.products = Collections.unmodifiableMap(load(file));
-        this.expectedCount = 23;
+        this.expectedCount = expectedCount(file);
         ensureValid();
     }
 
     public ProductCatalog(File file) {
         this.products = Collections.unmodifiableMap(load(file));
-        this.expectedCount = 23;
+        this.expectedCount = expectedCount(file);
         ensureValid();
     }
 
@@ -66,6 +66,12 @@ public final class ProductCatalog {
                     List.copyOf(section.getStringList("dependencies")), List.copyOf(actions)));
         }
         return result;
+    }
+
+    /** Keeps a deliberate production catalog size guard without hardcoding it in Java. */
+    private int expectedCount(File file) {
+        int configured = YamlConfiguration.loadConfiguration(file).getInt("expected-product-count", -1);
+        return configured > 0 ? configured : -1;
     }
 
     private String text(Object value) { return String.valueOf(value == null ? "" : value); }

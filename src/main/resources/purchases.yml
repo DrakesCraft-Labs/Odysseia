@@ -1,4 +1,5 @@
 catalog-version: 1
+expected-product-count: 26
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -226,6 +227,45 @@ products:
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipzeus, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 481x481 entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Protección 481x481"}}
+  protection_nether_colossus:
+    tebex-package-id: 7596916
+    name: "Coloso del Nether 501x501"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el Nether. Solo se puede colocar en world_nether."
+    source: "ProtectionStones production: nethercolossus radius 250"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: nethercolossus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aColoso del Nether 501x501 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Coloso del Nether 501x501"}}
+  protection_end_colossus:
+    tebex-package-id: 7596920
+    name: "Coloso del End 501x501"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el End. Solo se puede colocar en world_the_end."
+    source: "ProtectionStones production: endcolossus radius 250"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: endcolossus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aColoso del End 501x501 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Coloso del End 501x501"}}
+  protection_atlas:
+    tebex-package-id: 7596924
+    name: "Dominio de Atlas 1001x1001"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el Overworld. Solo se puede colocar en world."
+    source: "ProtectionStones production: atlas radius 500"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: atlas, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aDominio de Atlas 1001x1001 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Dominio de Atlas 1001x1001"}}
   economy_premium:
     tebex-package-id: 7510372
     name: "Economía Premium"

@@ -777,6 +777,13 @@ protectionstones:
     zeus: vipzeus
     protection_177: viphefesto
     protection_481: vipzeus
+    nether_61: ashlands
+    nether_201: tartarus
+    end_61: aether
+    end_201: elysion
+    nether_501: nethercolossus
+    end_501: endcolossus
+    overworld_1001: atlas
 
 # Hub único de comercio. Las categorías se navegan con clic, sin comandos extra.
 # Cada destino se despacha como jugador; no se elevan permisos desde el menú.

@@ -29,6 +29,8 @@ class ConfigDefaultsMergeTest {
         assertEquals("https://translate.drakescraft.cl", config.getString("discord-translator.api-url"));
         assertTrue(config.getStringList("sfmaster-audit.approved-addons").contains("SLIMEFUN"));
         assertTrue(config.getStringList("sfmaster-audit.blocked-addons").contains("INFINITYEXPANSION"));
+        assertEquals("atlas", config.getString("protectionstones.aliases.overworld_1001"));
+        assertEquals("nethercolossus", config.getString("protectionstones.aliases.nether_501"));
         assertTrue(config.getConfigurationSection("sfmaster-policy") == null);
         assertTrue(config.getConfigurationSection("restart") == null);
         assertTrue(config.getString("kits.oldschool.protection-alias", "").isBlank());
