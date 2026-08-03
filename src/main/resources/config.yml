@@ -1844,9 +1844,6 @@ discord-translator:
   api-url: "https://translate.drakescraft.cl"
   # API key de LibreTranslate configurada en Star
   api-key: "REPLACE_ME"
-  # Secret HMAC para firmar peticiones al endpoint /api/chat/ingest de Star
-  # Debe coincidir con ODYSSEIA_INGEST_SECRET en el .env de Star
-  ingest-secret: "REPLACE_ME"
   # Traducir mensajes de Discord al español en Minecraft
   translate-discord-to-mc: true
   # Traducir mensajes de Minecraft al inglés en Discord
