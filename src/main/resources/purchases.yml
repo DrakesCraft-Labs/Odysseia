@@ -217,13 +217,15 @@ products:
     tebex-package-id: 7510371
     name: "Protección 481x481"
     category: protection
-    description: "Protección pendiente de conciliación: existe ilios 481x481, pero el paquete Tebex 7510371 no tiene alias de entrega aprobado."
-    source: "Tebex package vs ProtectionStones production discrepancy; ProtectionStones production has ilios radius 240"
-    version: 1
-    verification: PARTIALLY_VERIFIED
+    description: "ProtectionStone VIP Zeus de 481x481 para bases y gremios grandes."
+    source: "ProtectionStones production: vipzeus radius 240"
+    version: 2
+    verification: VERIFIED_PRODUCTION
     dependencies: [ProtectionStones]
     actions:
-      - {id: review, type: MANUAL, refund: MANUAL_REVIEW, parameters: {reason: "Paquete 7510371 requiere decidir alias comercial: ilios 481x481, vipzeus 1801x1801 o un alias nuevo"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipzeus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 481x481 entregada."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Protección 481x481"}}
   economy_premium:
     tebex-package-id: 7510372
     name: "Economía Premium"

@@ -179,12 +179,13 @@ class PurchaseServiceTest {
         ProductCatalog catalog = new ProductCatalog(new File("src/main/resources/purchases.yml"));
         assertEquals(23, catalog.all().size());
         assertTrue(catalog.validate().isEmpty());
-        assertEquals(VerificationState.PARTIALLY_VERIFIED, catalog.get("protection_481").verification());
-        assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
+        assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_481").verification());
+        assertEquals(ActionType.PROTECTION_STONE, catalog.get("protection_481").actions().getFirst().type());
         assertTrue(catalog.get("vip_hermes").actions().stream().noneMatch(action -> action.id().equals("base-rank")));
         assertEquals("viphermes", action(catalog, "vip_hermes", "claim").parameters().get("alias"));
         assertEquals("vipzeus", action(catalog, "vip_zeus", "claim").parameters().get("alias"));
         assertEquals("viphefesto", catalog.get("protection_177").actions().getFirst().parameters().get("alias"));
+        assertEquals("vipzeus", catalog.get("protection_481").actions().getFirst().parameters().get("alias"));
     }
 
     private ProductAction action(ProductCatalog catalog, String productId, String actionId) {
