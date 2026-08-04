@@ -775,6 +775,14 @@ protectionstones:
     artemisa: vipartemisa
     afrodita: vipafrodita
     zeus: vipzeus
+    thor: vipthor
+    anubis: vipanubis
+    poseidon: vipposeidon
+    titanjapeto: titanjapeto
+    titanoceanus: titanoceanus
+    titanhiperion: titanhiperion
+    titancronos: titancronos
+    titancaos: titancaos
     protection_177: viphefesto
     protection_481: vipzeus
     nether_61: ashlands
@@ -906,6 +914,1366 @@ native-menus:
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).
 kits:
+  # Kit de Thor — banda Panteones.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  thor:
+    cooldown: 30d
+    permission: drakes.kit.thor
+    protection-alias: thor
+    protection-amount: 1
+    money: 2000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&b&lCasco de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 18
+          mending: 1
+          unbreaking: 15
+          fire_protection: 14
+          blast_protection: 14
+          projectile_protection: 14
+        attributes:
+          max_health: 4
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&b&lPeto de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 18
+          mending: 1
+          unbreaking: 15
+          fire_protection: 14
+          blast_protection: 14
+          projectile_protection: 14
+        attributes:
+          max_health: 4
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&b&lGrebas de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 18
+          mending: 1
+          unbreaking: 15
+          fire_protection: 14
+          blast_protection: 14
+          projectile_protection: 14
+        attributes:
+          max_health: 4
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&b&lBotas de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 18
+          mending: 1
+          unbreaking: 15
+          fire_protection: 14
+          blast_protection: 14
+          projectile_protection: 14
+        attributes:
+          max_health: 4
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&b&lEspada de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 18
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 15
+        attributes:
+          attack_damage: 1.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&b&lPico de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 18
+          fortune: 5
+          mending: 1
+          unbreaking: 15
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&b&lHacha de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 18
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 15
+        attributes:
+          attack_damage: 1.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&b&lPala de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 18
+          fortune: 5
+          mending: 1
+          unbreaking: 15
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&b&lMazo de Thor'
+        lore:
+          - '&7Trueno del Norte'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 18
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 15
+        attributes:
+          attack_damage: 1.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&bAmbrosia de Thor'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 7
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Anubis — banda Panteones.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  anubis:
+    cooldown: 30d
+    permission: drakes.kit.anubis
+    protection-alias: anubis
+    protection-amount: 1
+    money: 2500000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&e&lCasco de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 19
+          mending: 1
+          unbreaking: 16
+          fire_protection: 15
+          blast_protection: 15
+          projectile_protection: 15
+        attributes:
+          max_health: 6
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&e&lPeto de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 19
+          mending: 1
+          unbreaking: 16
+          fire_protection: 15
+          blast_protection: 15
+          projectile_protection: 15
+        attributes:
+          max_health: 6
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&e&lGrebas de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 19
+          mending: 1
+          unbreaking: 16
+          fire_protection: 15
+          blast_protection: 15
+          projectile_protection: 15
+        attributes:
+          max_health: 6
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&e&lBotas de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 19
+          mending: 1
+          unbreaking: 16
+          fire_protection: 15
+          blast_protection: 15
+          projectile_protection: 15
+        attributes:
+          max_health: 6
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&e&lEspada de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 19
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 16
+        attributes:
+          attack_damage: 2.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&e&lPico de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 19
+          fortune: 5
+          mending: 1
+          unbreaking: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&e&lHacha de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 19
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 16
+        attributes:
+          attack_damage: 2.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&e&lPala de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 19
+          fortune: 5
+          mending: 1
+          unbreaking: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&e&lMazo de Anubis'
+        lore:
+          - '&7Juicio del Desierto'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 19
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 16
+        attributes:
+          attack_damage: 2.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&eAmbrosia de Anubis'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 8
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Poseidon — banda Panteones.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  poseidon:
+    cooldown: 30d
+    permission: drakes.kit.poseidon
+    protection-alias: poseidon
+    protection-amount: 1
+    money: 3000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&3&lCasco de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 20
+          mending: 1
+          unbreaking: 17
+          fire_protection: 16
+          blast_protection: 16
+          projectile_protection: 16
+        attributes:
+          max_health: 8
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&3&lPeto de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 20
+          mending: 1
+          unbreaking: 17
+          fire_protection: 16
+          blast_protection: 16
+          projectile_protection: 16
+        attributes:
+          max_health: 8
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&3&lGrebas de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 20
+          mending: 1
+          unbreaking: 17
+          fire_protection: 16
+          blast_protection: 16
+          projectile_protection: 16
+        attributes:
+          max_health: 8
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&3&lBotas de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 20
+          mending: 1
+          unbreaking: 17
+          fire_protection: 16
+          blast_protection: 16
+          projectile_protection: 16
+        attributes:
+          max_health: 8
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&3&lEspada de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 20
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 17
+        attributes:
+          attack_damage: 2.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&3&lPico de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 20
+          fortune: 5
+          mending: 1
+          unbreaking: 17
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&3&lHacha de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 20
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 17
+        attributes:
+          attack_damage: 2.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&3&lPala de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 20
+          fortune: 5
+          mending: 1
+          unbreaking: 17
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&3&lMazo de Poseidon'
+        lore:
+          - '&7Marea Abisal'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 20
+          looting: 5
+          fire_aspect: 3
+          mending: 1
+          unbreaking: 17
+        attributes:
+          attack_damage: 2.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&3Ambrosia de Poseidon'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 8
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Titan Japeto — banda Titanes.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  titanjapeto:
+    cooldown: 30d
+    permission: drakes.kit.titanjapeto
+    protection-alias: titanjapeto
+    protection-amount: 1
+    money: 4000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&6&lCasco de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 25
+          mending: 1
+          unbreaking: 20
+          fire_protection: 21
+          blast_protection: 21
+          projectile_protection: 21
+        attributes:
+          max_health: 12
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&6&lPeto de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 25
+          mending: 1
+          unbreaking: 20
+          fire_protection: 21
+          blast_protection: 21
+          projectile_protection: 21
+        attributes:
+          max_health: 12
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&6&lGrebas de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 25
+          mending: 1
+          unbreaking: 20
+          fire_protection: 21
+          blast_protection: 21
+          projectile_protection: 21
+        attributes:
+          max_health: 12
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&6&lBotas de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 25
+          mending: 1
+          unbreaking: 20
+          fire_protection: 21
+          blast_protection: 21
+          projectile_protection: 21
+        attributes:
+          max_health: 12
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&6&lEspada de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 25
+          looting: 6
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 20
+        attributes:
+          attack_damage: 4.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&6&lPico de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 25
+          fortune: 6
+          mending: 1
+          unbreaking: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&6&lHacha de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 25
+          looting: 6
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 20
+        attributes:
+          attack_damage: 4.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&6&lPala de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 25
+          fortune: 6
+          mending: 1
+          unbreaking: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&6&lMazo de Titan Japeto'
+        lore:
+          - '&7Forja Primordial'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 25
+          looting: 6
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 20
+        attributes:
+          attack_damage: 4.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&6Ambrosia de Titan Japeto'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 9
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Titan Oceanus — banda Titanes.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  titanoceanus:
+    cooldown: 30d
+    permission: drakes.kit.titanoceanus
+    protection-alias: titanoceanus
+    protection-amount: 1
+    money: 5000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&b&lCasco de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 28
+          mending: 1
+          unbreaking: 22
+          fire_protection: 24
+          blast_protection: 24
+          projectile_protection: 24
+        attributes:
+          max_health: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&b&lPeto de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 28
+          mending: 1
+          unbreaking: 22
+          fire_protection: 24
+          blast_protection: 24
+          projectile_protection: 24
+        attributes:
+          max_health: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&b&lGrebas de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 28
+          mending: 1
+          unbreaking: 22
+          fire_protection: 24
+          blast_protection: 24
+          projectile_protection: 24
+        attributes:
+          max_health: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&b&lBotas de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 28
+          mending: 1
+          unbreaking: 22
+          fire_protection: 24
+          blast_protection: 24
+          projectile_protection: 24
+        attributes:
+          max_health: 16
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&b&lEspada de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 28
+          looting: 7
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 22
+        attributes:
+          attack_damage: 5.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&b&lPico de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 28
+          fortune: 7
+          mending: 1
+          unbreaking: 22
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&b&lHacha de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 28
+          looting: 7
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 22
+        attributes:
+          attack_damage: 5.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&b&lPala de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 28
+          fortune: 7
+          mending: 1
+          unbreaking: 22
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&b&lMazo de Titan Oceanus'
+        lore:
+          - '&7Corriente Eterna'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 28
+          looting: 7
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 22
+        attributes:
+          attack_damage: 5.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&bAmbrosia de Titan Oceanus'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 9
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Titan Hiperion — banda Titanes.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  titanhiperion:
+    cooldown: 30d
+    permission: drakes.kit.titanhiperion
+    protection-alias: titanhiperion
+    protection-amount: 1
+    money: 6500000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&e&lCasco de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 31
+          mending: 1
+          unbreaking: 24
+          fire_protection: 27
+          blast_protection: 27
+          projectile_protection: 27
+        attributes:
+          max_health: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&e&lPeto de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 31
+          mending: 1
+          unbreaking: 24
+          fire_protection: 27
+          blast_protection: 27
+          projectile_protection: 27
+        attributes:
+          max_health: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&e&lGrebas de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 31
+          mending: 1
+          unbreaking: 24
+          fire_protection: 27
+          blast_protection: 27
+          projectile_protection: 27
+        attributes:
+          max_health: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&e&lBotas de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 31
+          mending: 1
+          unbreaking: 24
+          fire_protection: 27
+          blast_protection: 27
+          projectile_protection: 27
+        attributes:
+          max_health: 20
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&e&lEspada de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 31
+          looting: 8
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 24
+        attributes:
+          attack_damage: 6.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&e&lPico de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 31
+          fortune: 8
+          mending: 1
+          unbreaking: 24
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&e&lHacha de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 31
+          looting: 8
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 24
+        attributes:
+          attack_damage: 6.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&e&lPala de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 31
+          fortune: 8
+          mending: 1
+          unbreaking: 24
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&e&lMazo de Titan Hiperion'
+        lore:
+          - '&7Luz Primera'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 31
+          looting: 8
+          fire_aspect: 4
+          mending: 1
+          unbreaking: 24
+        attributes:
+          attack_damage: 6.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&eAmbrosia de Titan Hiperion'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 10
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Titan Cronos — banda Titanes.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  titancronos:
+    cooldown: 30d
+    permission: drakes.kit.titancronos
+    protection-alias: titancronos
+    protection-amount: 1
+    money: 8000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&d&lCasco de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 35
+          mending: 1
+          unbreaking: 26
+          fire_protection: 31
+          blast_protection: 31
+          projectile_protection: 31
+        attributes:
+          max_health: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&d&lPeto de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 35
+          mending: 1
+          unbreaking: 26
+          fire_protection: 31
+          blast_protection: 31
+          projectile_protection: 31
+        attributes:
+          max_health: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&d&lGrebas de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 35
+          mending: 1
+          unbreaking: 26
+          fire_protection: 31
+          blast_protection: 31
+          projectile_protection: 31
+        attributes:
+          max_health: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&d&lBotas de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 35
+          mending: 1
+          unbreaking: 26
+          fire_protection: 31
+          blast_protection: 31
+          projectile_protection: 31
+        attributes:
+          max_health: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&d&lEspada de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 35
+          looting: 8
+          fire_aspect: 5
+          mending: 1
+          unbreaking: 26
+        attributes:
+          attack_damage: 7.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&d&lPico de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 35
+          fortune: 8
+          mending: 1
+          unbreaking: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&d&lHacha de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 35
+          looting: 8
+          fire_aspect: 5
+          mending: 1
+          unbreaking: 26
+        attributes:
+          attack_damage: 7.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&d&lPala de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 35
+          fortune: 8
+          mending: 1
+          unbreaking: 26
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&d&lMazo de Titan Cronos'
+        lore:
+          - '&7Senor del Tiempo'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 35
+          looting: 8
+          fire_aspect: 5
+          mending: 1
+          unbreaking: 26
+        attributes:
+          attack_damage: 7.5
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&dAmbrosia de Titan Cronos'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 10
+      - material: COOKED_BEEF
+        amount: 64
+  # Kit de Titan Caos — banda Titanes.
+  # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
+  # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
+  titancaos:
+    cooldown: 30d
+    permission: drakes.kit.titancaos
+    protection-alias: titancaos
+    protection-amount: 1
+    money: 10000000
+    vanilla-items:
+      - material: NETHERITE_HELMET
+        amount: 1
+        name: '&5&lCasco de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 40
+          mending: 1
+          unbreaking: 30
+          fire_protection: 36
+          blast_protection: 36
+          projectile_protection: 36
+        attributes:
+          max_health: 34
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_CHESTPLATE
+        amount: 1
+        name: '&5&lPeto de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 40
+          mending: 1
+          unbreaking: 30
+          fire_protection: 36
+          blast_protection: 36
+          projectile_protection: 36
+        attributes:
+          max_health: 34
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_LEGGINGS
+        amount: 1
+        name: '&5&lGrebas de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 40
+          mending: 1
+          unbreaking: 30
+          fire_protection: 36
+          blast_protection: 36
+          projectile_protection: 36
+        attributes:
+          max_health: 34
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_BOOTS
+        amount: 1
+        name: '&5&lBotas de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          protection: 40
+          mending: 1
+          unbreaking: 30
+          fire_protection: 36
+          blast_protection: 36
+          projectile_protection: 36
+        attributes:
+          max_health: 34
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SWORD
+        amount: 1
+        name: '&5&lEspada de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 40
+          looting: 10
+          fire_aspect: 6
+          mending: 1
+          unbreaking: 30
+        attributes:
+          attack_damage: 10.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_PICKAXE
+        amount: 1
+        name: '&5&lPico de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 40
+          fortune: 10
+          mending: 1
+          unbreaking: 30
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_AXE
+        amount: 1
+        name: '&5&lHacha de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 40
+          looting: 10
+          fire_aspect: 6
+          mending: 1
+          unbreaking: 30
+        attributes:
+          attack_damage: 10.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: NETHERITE_SHOVEL
+        amount: 1
+        name: '&5&lPala de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          efficiency: 40
+          fortune: 10
+          mending: 1
+          unbreaking: 30
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: MACE
+        amount: 1
+        name: '&5&lMazo de Titan Caos'
+        lore:
+          - '&7Origen sin Forma'
+          - '&c[Vinculo Divino] Soulbound'
+        enchantments:
+          sharpness: 40
+          looting: 10
+          fire_aspect: 6
+          mending: 1
+          unbreaking: 30
+        attributes:
+          attack_damage: 10.0
+        soulbound: true
+        unbreakable: true
+        hide-flags: true
+      - material: GOLDEN_APPLE
+        amount: 64
+        name: '&5Ambrosia de Titan Caos'
+      - material: ENDER_PEARL
+        amount: 32
+      - material: TOTEM_OF_UNDYING
+        amount: 11
+      - material: COOKED_BEEF
+        amount: 64
   # Reclamación única. Sustituye el bloque starter-kit heredado, que no tenía listener activo.
   inicial:
     cooldown: "-1"
