@@ -33,6 +33,14 @@ horror-night:
   worlds: [world]
 
 # ─────────────────────────────────────────────
+# Borde visual de ProtectionStones. Solo usa paquetes de bloque al cliente.
+protection-border:
+  enabled: true
+  material: LIGHT_BLUE_STAINED_GLASS
+  max-blocks: 2048
+  staff-permission: odysseia.protection.border
+
+# ─────────────────────────────────────────────
 #  Ciclo de Prefijos del Propietario (Owner)
 # ─────────────────────────────────────────────
 owner-cycle:
@@ -146,134 +154,31 @@ papa-de-mar:
 # ─────────────────────────────────────────────
 starter-kit:
   enabled: true
-  # Ticks de espera tras el join antes de entregar el kit (100 = 5 segundos)
-  delay-ticks: 100
-  # Mensaje al jugador al recibir el kit (soporta códigos de color '&')
+  # Entrega exclusivamente kits.inicial a cuentas nuevas. Espera a que nLogin
+  # termine; si el inventario está lleno, reintenta sin duplicar objetos.
+  kit: inicial
+  delay-ticks: 400
+  max-retries: 3
+  retry-delay-ticks: 200
   welcome-message: "&8[&6&lDrakesCraft&8] &eKit de inicio entregado. ¡Bienvenido a la Odisea!"
-  # Comandos a ejecutar en consola tras entregar el kit ({player} = nombre del jugador)
-  commands:
-    - "ps give novato {player} 1"
-  # Lista de items del kit
-  # Campos por item:
-  #   material:      nombre del material en MAYÚSCULAS (ej. LEATHER_HELMET)
-  #   amount:        cantidad (opcional, default 1)
-  #   enchantments:  mapa de encantamiento: nivel (usa claves minecraft, ej. protection: 5)
-  #   name:          nombre personalizado (opcional, soporta '&')
-  #   lore:          lista de líneas de lore (opcional, soporta '&')
-  items:
-    # ── Armadura de cuero ──────────────────────────────
-    - material: LEATHER_HELMET
-      enchantments:
-        protection: 5
-        thorns: 3
-        unbreaking: 10
-        mending: 1
-        respiration: 3
-        aqua_affinity: 1
-
-    - material: LEATHER_CHESTPLATE
-      enchantments:
-        protection: 5
-        thorns: 3
-        unbreaking: 10
-        mending: 1
-
-    - material: LEATHER_LEGGINGS
-      enchantments:
-        protection: 5
-        thorns: 3
-        unbreaking: 10
-        mending: 1
-
-    - material: LEATHER_BOOTS
-      enchantments:
-        protection: 5
-        thorns: 3
-        unbreaking: 10
-        mending: 1
-        feather_falling: 4
-        depth_strider: 3
-
-    # ── Herramientas ───────────────────────────────────
-    - material: STONE_SWORD
-      enchantments:
-        sharpness: 5
-        looting: 3
-        fire_aspect: 2
-        knockback: 2
-        sweeping_edge: 3
-        unbreaking: 10
-        mending: 1
-      name: "&fEspada del Guardia Inicial"
-      lore:
-        - "&8✦ Arma bendecida por Ares"
-        - "&7Protección de los Dioses"
-        - "&eDefiende tu primera odisea"
-        - "&6No luchas solo, luchas por la Polis"
-
-    - material: IRON_PICKAXE
-      enchantments:
-        efficiency: 5
-        fortune: 3
-        unbreaking: 10
-        mending: 1
-      name: "&fPico del Prospecto Divino"
-      lore:
-        - "&8✦ Herramienta consagrada por Hefesto"
-        - "&7Abre camino hacia tu destino"
-
-    - material: STONE_AXE
-      enchantments:
-        efficiency: 5
-        sharpness: 5
-        unbreaking: 10
-        mending: 1
-      name: "&fHacha del Forjador Sagrado"
-      lore:
-        - "&8✦ Filo forjado en hornos sagrados"
-        - "&7Madera y acero bajo tu mando"
-
-    - material: STONE_SHOVEL
-      enchantments:
-        efficiency: 5
-        silk_touch: 1
-        unbreaking: 10
-        mending: 1
-      name: "&fPala del Sendero Eterno"
-      lore:
-        - "&8✦ Paso firme en tierra desconocida"
-        - "&7Allana rutas para tu equipo"
-
-    - material: SHIELD
-      enchantments:
-        unbreaking: 10
-        mending: 1
-      name: "&bEscudo de la Polis"
-      lore:
-        - "&8✦ Muro sagrado de los héroes"
-        - "&7El muro entre tú y el peligro"
-
-    # ── Consumibles ────────────────────────────────────
-    - material: BREAD
-      amount: 24
-
-    - material: COOKED_BEEF
-      amount: 32
-
-    - material: TORCH
-      amount: 48
 
 # ─────────────────────────────────────────────
 #  ChatGames Scheduler
 # ─────────────────────────────────────────────
 chatgames:
-  # Poner en false si ChatGames ya maneja su propio scheduler (automatic-games: true)
-  enabled: false
-  # Comando que se dispara — cambiar sin recompilar
-  command: "chatgames force"
-  # Rango de tiempo aleatorio para lanzar un juego (minutos)
-  min-interval: 15
-  max-interval: 30
+  # Odysseia owns this schedule. Set ChatGames' external automatic-games to false
+  # to avoid overlapping events after the next restart.
+  enabled: true
+  timezone: "America/Santiago"
+  minimum-players: 2
+  min-interval-minutes: 12
+  max-interval-minutes: 18
+  timeout-seconds: 35
+  # The sequence resets every calendar month: week 1 math, week 2 runes,
+  # week 3 trivia, week 4 reflexes and week 5 cartographer codes.
+  reward-commands:
+    - "minecraft:xp add {player} 150 points"
+    - "eco give {player} 500"
 
 # ─────────────────────────────────────────────
 #  Leñador Loco
@@ -318,6 +223,9 @@ presence:
     player-death: false
     advancement: false
     rate-limit-per-minute: 12
+
+# Los reinicios programados pertenecen a Star y Pterodactyl. Odysseia solo
+# protege inventarios durante la ventana final iniciada por el supervisor.
 
 # ─────────────────────────────────────────────
 #  Alertador Diario de Caducidad de Rangos VIP
@@ -481,6 +389,10 @@ boss-balance:
   dialogue-radius: 48.0
   # Escudo cinematográfico breve al cruzar cada fase; bloquea golpes durante el telegraph.
   phase-shield-ticks: 32
+  phase-rupture:
+    # Descarga local al cambiar de fase. No modifica bloques ni carga chunks.
+    radius: 8.0
+    damage: 6.0
   combat-director:
     # Ataques comunes inspirados en encuentros por fases, limitados a una tarea pendiente por jefe.
     enabled: true
@@ -499,6 +411,45 @@ boss-balance:
     bosses: [thor, ares, hades, zeus, odin, kratos, heimdall, hidra, cerbero, tifon]
     health-percent: 0.55
     invulnerability-seconds: 5
+  # Defensa adaptativa contra armas SF/Tinker y encantamientos de endgame.
+  # Reduce ráfagas; no borra, modifica ni bloquea ítems de jugadores.
+  adaptive-counters:
+    enabled: true
+    burst-window-seconds: 4
+    counter-cooldown-seconds: 12
+    normal:
+      max-hit-health-fraction: 0.045
+      max-burst-health-fraction: 0.20
+    high-power:
+      sharpness-threshold: 7
+      max-hit-health-fraction: 0.025
+      max-burst-health-fraction: 0.12
+
+# ─────────────────────────────────────────────
+# Arenas públicas de jefes (/bosswarp)
+# Cada integrante de un grupo paga su entrada. Si el jefe no se puede crear,
+# Odysseia reembolsa todos los cobros de esa sesión.
+boss-arena:
+  # Mundo fijo superplano. Si ya existe un mundo no plano con este nombre, no se borra en vivo.
+  # Debe recrearse manualmente solo con el servidor detenido y sin jugadores dentro.
+  world-border-size: 4096
+  entry-fees:
+    default: 500000
+    zeus: 250000
+    hades: 375000
+    tifon: 1500000
+    dragon: 2500000
+    wither_storm: 5000000
+    # Permiso opcional para pruebas administrativas sin retirar Dragmas.
+    free-permission: "odysseia.bosswarp.free"
+  targeted-challenges:
+    players:
+      # Pasiente. Se usa UUID para que un cambio de nick no reduzca el reto.
+      # El divisor representa vida efectiva sin sobrepasar MAX_HEALTH: x1000000
+      # significa que los golpes de jugadores bajan la vida del jefe un millón de veces menos.
+      "7ddf2641-14fb-4c1f-8499-aa5ff6c6b295":
+        name: "Pasiente"
+        health-multiplier: 1000000.0
 
 #  Purchase Engine: anuncios de compras confirmadas
 # ─────────────────────────────────────────────
@@ -577,11 +528,58 @@ blood-moon:
 # ─────────────────────────────────────────────
 #  Recompensas de jefes míticos
 # ─────────────────────────────────────────────
-# Cada drop se sortea una vez por muerte y se entrega a un participante
-# ponderado por daño. Los valores son probabilidades entre 0.0 y 1.0.
+# Los dominios se activan sólo con /boss spawn; spawns naturales y Horror Night no los crean.
+# Son puramente visuales: nunca reemplazan bloques, ignoran claims y se limpian al morir el jefe.
+boss-domains:
+  enabled: true
+  radius: 26
+  height: 16
+  duration-seconds: 900
+
+# Jax usa un Ravager invisible como núcleo de combate y una escultura de displays como cuerpo.
+# Es manual por diseño: /boss spawn jax. Sus ataques no alteran bloques ni claims.
+bosses:
+  jax:
+    enabled: true
+    health: 1350.0
+    core-damage: 16.0
+    target-range: 28.0
+    charge-speed: 1.05
+    impact-radius: 4.0
+    impact-damage: 11.0
+
+# Cada muerte concede como máximo un premio ponderado por daño: una reliquia
+# propia, un material SF seguro o ninguno. Nunca se sueltan items al mundo.
 boss-loot:
   enabled: true
   experience: 750
+  boss-relic-chance: 0.30
+  slimefun-reward-chance: 0.60
+  slimefun-rewards:
+    minimum-amount: 1
+    maximum-amount: 3
+    # Lista blanca: sin Infinity, Supreme, radioactivos, armas ni armaduras.
+    item-ids:
+      - MAGICAL_LUMP_1
+      - MAGICAL_LUMP_2
+      - SULFUR
+      - COPPER_DUST
+      - GOLD_DUST
+      - IRON_DUST
+      - ALUMINUM_DUST
+      - ZINC_DUST
+      - TIN_DUST
+      - MAGNESIUM_DUST
+      - SILVER_DUST
+      - DAMASCUS_STEEL
+      - REINFORCED_ALLOY_INGOT
+      - CORINTHIAN_BRONZE_INGOT
+      - HARDENED_METAL_INGOT
+      - REDSTONE_ALLOY
+      - SYNTHETIC_EMERALD
+      - SIFTED_ORE
+      - STRANGE_NETHER_DUST
+      - ENDER_LUMP
   contributors:
     # Daño mínimo y porcentaje mínimo del daño total para entrar al sorteo.
     minimum-damage: 25.0
@@ -645,13 +643,42 @@ boss-loot:
     prometeo:
       drops:
         prometeo_flame: 0.50
+    coloso_end:
+      drops:
+        coloso_core: 0.50
+    wither_storm:
+      drops:
+        storm_heart: 0.50
+    dragon_ancestral:
+      drops:
+        dragon_heart: 0.50
+    ra:
+      drops:
+        ra_sun: 0.50
+    isis:
+      drops:
+        isis_feather: 0.50
+    anubis:
+      drops:
+        anubis_seal: 0.50
+    set:
+      drops:
+        set_shard: 0.50
+    jax:
+      drops:
+        jax_fragment: 0.50
 
 # ─────────────────────────────────────────────
 #  Sistema de Kits VIP e Integraciones (Slimefun)
 # ─────────────────────────────────────────────
-sfmaster-policy:
-  max-claims: 12
-  window-minutes: 60
+# Odysseia no entrega ítems Cheat. Slimefun Core es la única autoridad de
+# allowlist, cuota persistente y marcado; esta sección solo detecta candidatos
+# legacy para /odysseia sfmaster audit <jugador>.
+sfmaster-audit:
+  approved-addons:
+    - "SLIMEFUN"
+    - "CULTIVATION"
+    - "NETWORKS"
   blocked-addons:
     - "SUPREME"
     - "INFINITYEXPANSION"
@@ -706,7 +733,8 @@ chat-filter:
 # Traducción automática por locale; reemplaza drakes_translation.dsc.
 translation:
   enabled: true
-  join-delay-ticks: 60
+  # nLogin suele completar la autenticación entre 5 y 15 segundos.
+  join-delay-ticks: 400
 
 # Guardia de automatizaciones vanilla. No inspecciona clics ni bloquea autoclicker.
 automation-guard:
@@ -715,9 +743,16 @@ automation-guard:
     enabled: true
     # Los límites se aplican sólo si existe una estructura vanilla de reloj.
     fast-window-seconds: 10
-    fast-pulse-limit: 12
-    long-window-seconds: 600
-    long-pulse-limit: 8
+    fast-pulse-limit: 40
+    long-window-seconds: 120
+    long-pulse-limit: 180
+    minimum-components: 3
+    minimum-timing-components: 2
+    # Los dos primeros excesos sólo pausan el circuito; la tercera reincidencia
+    # dentro de diez minutos desarma un componente temporizador.
+    violations-before-break: 3
+    violation-window-seconds: 600
+    suppression-seconds: 5
   afk:
     enabled: true
     inactivity-seconds: 300
@@ -742,6 +777,13 @@ protectionstones:
     zeus: vipzeus
     protection_177: viphefesto
     protection_481: vipzeus
+    nether_61: ashlands
+    nether_201: tartarus
+    end_61: aether
+    end_201: elysion
+    nether_501: nethercolossus
+    end_501: endcolossus
+    overworld_1001: atlas
 
 # Hub único de comercio. Las categorías se navegan con clic, sin comandos extra.
 # Cada destino se despacha como jugador; no se elevan permisos desde el menú.
@@ -919,8 +961,6 @@ kits:
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    protection-alias: viphermes
-    protection-amount: 1
     money: 100000
     vanilla-items:
       - material: NETHERITE_HELMET
@@ -1785,7 +1825,9 @@ polis-baseline:
   # Only default-only users become Polis; staff and permanent ranks remain unchanged.
   enabled: true
   default-group: default
-  base-group: polis
+  # Every account receives the implicit LuckPerms default group. Keep this
+  # aligned with purchases.yml so purchases do not create a redundant parent.
+  base-group: default
   reconcile-interval-seconds: 60
 
 # Seguridad de FastMachines: el addon no valida por sí mismo la región de la máquina.
@@ -1806,17 +1848,65 @@ sfmaster-guide:
 discord-translator:
   enabled: true
   # URL base de la API de traducción en Star (sin trailing slash)
-  api-url: "https://web.drakescraft.cl/api/translate"
+  api-url: "https://translate.drakescraft.cl"
   # API key de LibreTranslate configurada en Star
   api-key: "REPLACE_ME"
-  # Secret HMAC para firmar peticiones al endpoint /api/chat/ingest de Star
-  # Debe coincidir con ODYSSEIA_INGEST_SECRET en el .env de Star
-  ingest-secret: "REPLACE_ME"
   # Traducir mensajes de Discord al español en Minecraft
   translate-discord-to-mc: true
   # Traducir mensajes de Minecraft al inglés en Discord
-  translate-mc-to-discord: true
+  translate-mc-to-discord: false
   # Idioma al que se traducen los mensajes recibidos en Minecraft
   mc-target-language: "es"
   # Idioma al que se traducen los mensajes de MC para Discord
   discord-target-language: "en"
+
+# Defensa de economía: las ventas rápidas no pueden financiar granjas AFK.
+economy-guard:
+  sell-inventory:
+    cooldown-seconds: 20
+    window-seconds: 3600
+    max-items-per-material: 3456
+    # Se añaden a la lista segura del código para impedir una reactivación accidental.
+    blocked-materials:
+      - COBBLESTONE
+      - STONE
+      - DEEPSLATE
+      - COBBLED_DEEPSLATE
+      - DIRT
+      - SAND
+      - GRAVEL
+      - GRANITE
+      - DIORITE
+      - ANDESITE
+      - NETHERRACK
+      - BASALT
+      - BLACKSTONE
+
+# Máximo de cuentas simultáneas por dirección real. Añadir aquí redes compartidas
+# autorizadas antes de elevar este límite; no guardar nombres ni credenciales.
+anti-alt:
+  enabled: true
+  max-concurrent-per-ip: 2
+  exempt-addresses: []
+
+# Capa transversal contra macros de comercio. Complementa las cuotas por ítem
+# de /sellinv y cubre comandos equivalentes de otros plugins.
+exploit-guard:
+  enabled: true
+  commerce:
+    enabled: true
+    bypass-permission: odysseia.exploitguard.bypass
+    cooldown-millis: 750
+    burst-window-seconds: 20
+    max-commands-per-window: 8
+    restriction-seconds: 120
+    commands:
+      - sell
+      - sellall
+      - sellinv
+      - sellhand
+      - vender
+      - venderinv
+      - ushop
+      - ah
+      - auctionhouse

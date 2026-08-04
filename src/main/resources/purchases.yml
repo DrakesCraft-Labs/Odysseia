@@ -1,4 +1,5 @@
 catalog-version: 1
+expected-product-count: 26
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -12,7 +13,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hercules, duration: 30d, hierarchy: "1"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "35000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hercules}}
@@ -29,7 +29,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hestia, duration: 30d, hierarchy: "2"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "75000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hestia}}
@@ -46,7 +45,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hermes, duration: 30d, hierarchy: "3"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "150000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hermes}}
@@ -63,7 +61,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: hefesto, duration: 30d, hierarchy: "4"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "250000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: hefesto}}
@@ -80,7 +77,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: artemisa, duration: 30d, hierarchy: "5"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "450000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: artemisa}}
@@ -97,7 +93,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: afrodita, duration: 30d, hierarchy: "6"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "700000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: afrodita}}
@@ -114,7 +109,6 @@ products:
     verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
-      - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: zeus, duration: 30d, hierarchy: "7"}}
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "1500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: zeus}}
@@ -368,13 +362,54 @@ products:
     tebex-package-id: 7510371
     name: "Protección 481x481"
     category: protection
-    description: "Protección pendiente de conciliación: existe ilios 481x481, pero el paquete Tebex 7510371 no tiene alias de entrega aprobado."
-    source: "Tebex package vs ProtectionStones production discrepancy; ProtectionStones production has ilios radius 240"
-    version: 1
-    verification: PARTIALLY_VERIFIED
+    description: "ProtectionStone VIP Zeus de 481x481 para bases y gremios grandes."
+    source: "ProtectionStones production: vipzeus radius 240"
+    version: 2
+    verification: VERIFIED_PRODUCTION
     dependencies: [ProtectionStones]
     actions:
-      - {id: review, type: MANUAL, refund: MANUAL_REVIEW, parameters: {reason: "Paquete 7510371 requiere decidir alias comercial: ilios 481x481, vipzeus 1801x1801 o un alias nuevo"}}
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipzeus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aProtección 481x481 entregada."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Protección 481x481"}}
+  protection_nether_colossus:
+    tebex-package-id: 7596916
+    name: "Coloso del Nether 501x501"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el Nether. Solo se puede colocar en world_nether."
+    source: "ProtectionStones production: nethercolossus radius 250"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: nethercolossus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aColoso del Nether 501x501 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Coloso del Nether 501x501"}}
+  protection_end_colossus:
+    tebex-package-id: 7596920
+    name: "Coloso del End 501x501"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el End. Solo se puede colocar en world_the_end."
+    source: "ProtectionStones production: endcolossus radius 250"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: endcolossus, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aColoso del End 501x501 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Coloso del End 501x501"}}
+  protection_atlas:
+    tebex-package-id: 7596924
+    name: "Dominio de Atlas 1001x1001"
+    category: protection
+    description: "ProtectionStone exclusiva para una megabase en el Overworld. Solo se puede colocar en world."
+    source: "ProtectionStones production: atlas radius 500"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: atlas, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aDominio de Atlas 1001x1001 entregado."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Dominio de Atlas 1001x1001"}}
   economy_premium:
     tebex-package-id: 7510372
     name: "Economía Premium"

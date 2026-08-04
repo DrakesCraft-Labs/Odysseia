@@ -1,5 +1,5 @@
 name: Odysseia
-version: 1.1.0
+version: 1.1.3
 main: org.metamechanists.odysseia.Odysseia
 api-version: 1.21
 description: Suite principal de sistemas, tienda, kits, eventos y administracion de DrakesCraft.
@@ -12,8 +12,11 @@ softdepend:
   - ProtectionStones
   - Slimefun
   - DiosesDrakes
+  - DrakesBosses
   - floodgate
   - DiscordSRV
+  - WorldwideChat
+  - nLogin
 
 commands:
   papademar:
@@ -28,22 +31,19 @@ commands:
     description: Desvanecimiento creativo para moderadores.
     permission: odysseia.vanish
     aliases: [odysseiavanish]
-  boss:
-    description: Comando administrativo para gestionar jefes míticos.
-    permission: odysseia.boss.admin
-    usage: /boss <spawn|spawnall|give> ...
-  spawnallbosses:
-    description: Invoca todos los jefes míticos alrededor del administrador.
-    permission: odysseia.boss.admin
-    usage: /spawnallbosses
   bloodmoon:
     description: Gestiona la Luna de Sangre de Odysseia.
     permission: odysseia.bloodmoon.admin
     usage: /bloodmoon <start|stop|status>
+  meteorito:
+    description: Invoca meteoritos destructivos fuera de las protecciones.
+    permission: odysseia.meteor.admin
+    aliases: [meteoritos, lluviameteoritos]
+    usage: /meteorito <pequeno|pesado|void|lluvia> [cantidad] [radio]
   odysseia:
     description: Comando principal de administración de Odysseia.
     permission: odysseia.reload
-    usage: /odysseia <reload|status>
+    usage: /odysseia <reload|status|vipalerts|sfmaster|maintenance>
   odysseiaannounce:
     description: Dispara el anuncio público de Discord de una compra entregada (uso desde Tebex).
     permission: odysseia.store.announce
@@ -76,7 +76,7 @@ commands:
   kitgive:
     description: Entrega solo los ítems de un kit para pruebas administrativas.
     permission: odysseia.kitgive
-    usage: /kitgive <kit> o /kitgive <jugador> <kit>
+    usage: /kitgive <jugador> <kit>
   kit:
     description: Reclama un kit mensual configurado por Odysseia.
     aliases: [kits]
@@ -111,6 +111,15 @@ commands:
     aliases: [grantoldschool, viejodesde, oldschoolgive]
     usage: /esteusuarioesviejo <jugador>
 permissions:
+  odysseia.bosswarp.use:
+    description: Permite iniciar y espectear arenas de jefes.
+    default: true
+  odysseia.bosswarp.staff:
+    description: Permite crear arenas de prueba sin cobro para jugadores indicados.
+    default: op
+  odysseia.meteor.admin:
+    description: Permite al dueño invocar meteoritos controlados.
+    default: op
   odysseia.horrorfog:
     description: Permite activar o desactivar la niebla densa de terror.
     default: op
@@ -125,6 +134,15 @@ permissions:
     default: op
   odysseia.reload:
     description: Permite recargar config.yml, purchases.yml y servicios runtime.
+    default: op
+  odysseia.sfmaster.audit:
+    description: Permite auditar candidatos legacy SFMaster sin borrarlos.
+    default: op
+  odysseia.maintenance.admin:
+    description: Permite abrir, consultar o cancelar la ventana segura de reinicio.
+    default: op
+  odysseia.maintenance.bypass:
+    description: Excluye al staff del bloqueo temporal de inventarios.
     default: op
   odysseia.purchase.admin:
     description: Control total del motor de compras.
@@ -152,4 +170,7 @@ permissions:
     default: op
   odysseia.owner.aura:
     description: Permite usar el aura destructiva absoluta del dueño.
+    default: op
+  odysseia.rtp.others:
+    description: Permite ejecutar /rtp <jugador> para reubicarlo aleatoriamente en el mundo principal.
     default: op

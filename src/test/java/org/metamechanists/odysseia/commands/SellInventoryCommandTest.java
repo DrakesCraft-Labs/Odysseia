@@ -23,6 +23,8 @@ class SellInventoryCommandTest {
         );
 
         minerals.forEach(material -> assertFalse(command.isSellable(material), material.name()));
+        assertFalse(command.isSellable(Material.COBBLESTONE));
+        assertFalse(command.isSellable(Material.STONE));
     }
 
     @Test

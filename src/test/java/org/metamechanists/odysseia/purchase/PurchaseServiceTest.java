@@ -82,21 +82,18 @@ class PurchaseServiceTest {
         assertEquals(PurchaseState.COMPLETED, service.status("txn-retry").getFirst().state());
     }
 
-    @Test void failedAnnouncementRemainsRecoverableWithoutRepeatingRewards() throws Exception {
+    @Test void failedAnnouncementDoesNotBlockDeliveredRewards() throws Exception {
         runtime.online = true;
         runtime.failAnnouncementOnce = true;
         service.deliver("txn-announce-retry", "TestPlayer", "dragmas_saco", false, "test");
 
         long deliveryId = service.status("txn-announce-retry").getFirst().id();
-        assertEquals(PurchaseState.FAILED_RETRYABLE, service.status("txn-announce-retry").getFirst().state());
+        assertEquals(PurchaseState.COMPLETED, service.status("txn-announce-retry").getFirst().state());
         assertEquals(ActionState.FAILED_RETRYABLE, repository.actions(deliveryId).stream()
                 .filter(action -> action.type() == ActionType.ANNOUNCEMENT).findFirst().orElseThrow().state());
-
-        service.retry("txn-announce-retry", "admin");
         assertEquals(1, runtime.calls(ActionType.ECONOMY));
         assertEquals(1, runtime.calls(ActionType.KIT));
-        assertEquals(2, runtime.calls(ActionType.ANNOUNCEMENT));
-        assertEquals(PurchaseState.COMPLETED, service.status("txn-announce-retry").getFirst().state());
+        assertEquals(1, runtime.calls(ActionType.ANNOUNCEMENT));
     }
 
     @Test void concurrentDuplicateEventsStillDeliverOnce() throws Exception {
@@ -180,14 +177,18 @@ class PurchaseServiceTest {
 
     @Test void packagedCatalogHasAllAuditedProductsAndNoDuplicateTebexIds() {
         ProductCatalog catalog = new ProductCatalog(new File("src/main/resources/purchases.yml"));
-        assertEquals(23, catalog.all().size());
+        assertEquals(26, catalog.all().size());
         assertTrue(catalog.validate().isEmpty());
-        assertEquals(VerificationState.PARTIALLY_VERIFIED, catalog.get("protection_481").verification());
-        assertEquals(ActionType.MANUAL, catalog.get("protection_481").actions().getFirst().type());
-        assertEquals("polis", action(catalog, "vip_hermes", "base-rank").parameters().get("group"));
+        assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_481").verification());
+        assertEquals(ActionType.PROTECTION_STONE, catalog.get("protection_481").actions().getFirst().type());
+        assertTrue(catalog.get("vip_hermes").actions().stream().noneMatch(action -> action.id().equals("base-rank")));
         assertEquals("viphermes", action(catalog, "vip_hermes", "claim").parameters().get("alias"));
         assertEquals("vipzeus", action(catalog, "vip_zeus", "claim").parameters().get("alias"));
         assertEquals("viphefesto", catalog.get("protection_177").actions().getFirst().parameters().get("alias"));
+        assertEquals("vipzeus", catalog.get("protection_481").actions().getFirst().parameters().get("alias"));
+        assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_atlas").verification());
+        assertEquals("atlas", catalog.get("protection_atlas").actions().getFirst().parameters().get("alias"));
+        assertEquals("nethercolossus", catalog.get("protection_nether_colossus").actions().getFirst().parameters().get("alias"));
     }
 
     private ProductAction action(ProductCatalog catalog, String productId, String actionId) {

@@ -13,8 +13,6 @@ import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
 import org.metamechanists.odysseia.commands.ReloadCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
-import org.metamechanists.odysseia.commands.BossCommand;
-import org.metamechanists.odysseia.boss.BossManager;
 import org.metamechanists.odysseia.kits.KitClaimService;
 import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
 import org.metamechanists.odysseia.listeners.ItemConsumeListener;
@@ -31,10 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.DayOfWeek;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -47,11 +41,10 @@ public final class Odysseia extends JavaPlugin {
     private static Odysseia instance;
 
     private VanishCommand vanishCommand;
-    private BossManager bossManager;
     private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
-    private int chatGamesCountdown = 0;
+    private org.metamechanists.odysseia.chatgames.SeasonalChatGamesService seasonalChatGames;
     private PurchaseEngine purchaseEngine;
     private StarTelemetryPublisher starTelemetry;
     private PolisBaselineListener polisBaseline;
@@ -59,6 +52,8 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.events.HorrorNightScheduler horrorNightScheduler;
     private org.metamechanists.odysseia.dragon.DragonMountService dragonMountService;
     private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
+    private org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher;
+    private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
@@ -130,16 +125,14 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(chatFilter, this);
         Bukkit.getPluginManager().registerEvents(shopMenu, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
 
-        // Initialize BossManager
-        this.bossManager = new BossManager(this);
-        BossCommand bossCmd = new BossCommand(this, bossManager);
-        getCommand("boss").setExecutor(bossCmd);
-        getCommand("boss").setTabCompleter(bossCmd);
-        getCommand("spawnallbosses").setExecutor(bossCmd);
-        getCommand("spawnallbosses").setTabCompleter(bossCmd);
+        // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
         this.bloodMoonManager = new BloodMoonManager(this);
         getCommand("bloodmoon").setExecutor(new org.metamechanists.odysseia.commands.BloodMoonCommand(bloodMoonManager));
+        org.metamechanists.odysseia.commands.MeteorCommand meteorCommand = new org.metamechanists.odysseia.commands.MeteorCommand(this);
+        getCommand("meteorito").setExecutor(meteorCommand);
+        getCommand("meteorito").setTabCompleter(meteorCommand);
         org.metamechanists.odysseia.commands.HorrorFogCommand fogCmd = new org.metamechanists.odysseia.commands.HorrorFogCommand(this);
         getCommand("niebla").setExecutor(fogCmd);
         getCommand("niebla").setTabCompleter(fogCmd);
@@ -152,22 +145,25 @@ public final class Odysseia extends JavaPlugin {
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         vanishCommand.startReminder();
-        Bukkit.getPluginManager().registerEvents(bossManager, this);
         Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.WorldChangeSafetyListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
         org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
         Bukkit.getScheduler().runTask(this, sfMasterWatcher::deliverGuidesToOnlinePassHolders);
         sfMasterWatcher.startGuideCleanup();
+        this.maintenanceGuard = new org.metamechanists.odysseia.listeners.MaintenanceGuardListener(this);
+        Bukkit.getPluginManager().registerEvents(maintenanceGuard, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.ProtectionBorderListener(this), this);
         Bukkit.getPluginManager().registerEvents(automation, this);
         this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
         Bukkit.getPluginManager().registerEvents(automationGuard, this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.AntiAltListener(this), this);
         this.polisBaseline = new PolisBaselineListener(this);
         Bukkit.getPluginManager().registerEvents(polisBaseline, this);
         this.horrorNightScheduler = new org.metamechanists.odysseia.events.HorrorNightScheduler(this);
@@ -175,6 +171,8 @@ public final class Odysseia extends JavaPlugin {
         this.vipExpiryAlertService = new org.metamechanists.odysseia.services.VipExpiryAlertService(this);
         vipExpiryAlertService.startScheduler();
         this.discordTranslationBridge = new org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService(this);
+        this.seasonalChatGames = new org.metamechanists.odysseia.chatgames.SeasonalChatGamesService(this);
+        Bukkit.getPluginManager().registerEvents(seasonalChatGames, this);
         horrorNightScheduler.start();
         bloodMoonManager.start();
 
@@ -219,6 +217,9 @@ public final class Odysseia extends JavaPlugin {
         reloadConfig();
         mergeDefaultConfig();
         cancelRuntimeTasks();
+        if (sfMasterWatcher != null) {
+            sfMasterWatcher.reloadConfiguration();
+        }
 
         if (purchaseEngine != null) {
             HandlerList.unregisterAll(purchaseEngine);
@@ -253,7 +254,9 @@ public final class Odysseia extends JavaPlugin {
             }
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
                     new InputStreamReader(stream, StandardCharsets.UTF_8));
-            if (mergeMissingConfig(getConfig(), defaults)) {
+            boolean changed = mergeMissingConfig(getConfig(), defaults);
+            changed |= migrateUnsafeLegacyDefaults(getConfig());
+            if (changed) {
                 saveConfig();
             }
         } catch (IOException | RuntimeException error) {
@@ -283,6 +286,41 @@ public final class Odysseia extends JavaPlugin {
         return changed;
     }
 
+    /**
+     * Removes superseded duplicate systems and upgrades only known unsafe
+     * defaults, preserving deliberate production tuning everywhere else.
+     */
+    static boolean migrateUnsafeLegacyDefaults(ConfigurationSection config) {
+        boolean changed = false;
+        if (config.contains("starter-kit.items") || config.contains("starter-kit.commands")) {
+            config.set("starter-kit.items", null);
+            config.set("starter-kit.commands", null);
+            changed = true;
+        }
+        if (config.getLong("starter-kit.delay-ticks", 400L) <= 100L) {
+            config.set("starter-kit.delay-ticks", 400L);
+            changed = true;
+        }
+        if (config.getLong("translation.join-delay-ticks", 400L) <= 60L) {
+            config.set("translation.join-delay-ticks", 400L);
+            changed = true;
+        }
+        if (config.getBoolean("discord-translator.translate-mc-to-discord", false)) {
+            config.set("discord-translator.translate-mc-to-discord", false);
+            changed = true;
+        }
+        if (config.getInt("automation-guard.redstone.fast-pulse-limit", 40) == 12) {
+            config.set("automation-guard.redstone.fast-pulse-limit", 40);
+            changed = true;
+        }
+        if (config.getInt("automation-guard.redstone.long-pulse-limit", 180) == 8) {
+            config.set("automation-guard.redstone.long-window-seconds", 120);
+            config.set("automation-guard.redstone.long-pulse-limit", 180);
+            changed = true;
+        }
+        return changed;
+    }
+
     @Override
     public void onDisable() {
         if (discordTranslationBridge != null) {
@@ -297,10 +335,6 @@ public final class Odysseia extends JavaPlugin {
 
         if (purchaseEngine != null) purchaseEngine.close();
 
-        // Shutdown BossManager
-        if (bossManager != null) {
-            bossManager.shutdown();
-        }
         if (bloodMoonManager != null) {
             bloodMoonManager.shutdown();
         }
@@ -369,7 +403,6 @@ public final class Odysseia extends JavaPlugin {
         startLenadorLocoScheduler();
         startPapaDeMarDeliveryScheduler();
         startHeartbeatScheduler();
-        startRestartScheduler();
         startPolisBaselineScheduler();
     }
 
@@ -430,31 +463,12 @@ public final class Odysseia extends JavaPlugin {
     }
 
     private void startChatGamesScheduler() {
-        if (!getConfig().getBoolean("chatgames.enabled", false)) {
-            getLogger().info("[ChatGames] Scheduler deshabilitado (chatgames.enabled: false).");
+        if (seasonalChatGames == null || !getConfig().getBoolean("chatgames.enabled", true)) {
+            getLogger().info("[ChatGames] Motor semanal deshabilitado (chatgames.enabled: false).");
             return;
         }
-        String command = getConfig().getString("chatgames.command", "chatgames force");
-        chatGamesCountdown = getRandomChatGamesInterval();
-        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, () -> {
-            if (Bukkit.getOnlinePlayers().isEmpty()) {
-                return;
-            }
-            chatGamesCountdown--;
-            if (chatGamesCountdown <= 0) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-                chatGamesCountdown = getRandomChatGamesInterval();
-            }
-        }, 1200L, 1200L));
-    }
-
-    private int getRandomChatGamesInterval() {
-        int min = getConfig().getInt("chatgames.min-interval", 15);
-        int max = getConfig().getInt("chatgames.max-interval", 30);
-        if (min >= max) {
-            return min;
-        }
-        return min + new java.util.Random().nextInt(max - min + 1);
+        seasonalChatGames.resetSchedule();
+        trackRuntimeTask(Bukkit.getScheduler().runTaskTimer(this, seasonalChatGames::tick, 20L, 20L));
     }
 
     private void startLenadorLocoScheduler() {
@@ -615,71 +629,6 @@ public final class Odysseia extends JavaPlugin {
         }, delayTicks, periodTicks));
     }
 
-    private void startRestartScheduler() {
-        if (!getConfig().getBoolean("restart.enabled", false)) {
-            return;
-        }
-        String dayStr = getConfig().getString("restart.day", "MONDAY").toUpperCase();
-        int hour = getConfig().getInt("restart.hour", 5);
-        int minute = getConfig().getInt("restart.minute", 0);
-        String timezone = getConfig().getString("restart.timezone", "America/Santiago");
-
-        DayOfWeek targetDay;
-        try {
-            targetDay = DayOfWeek.valueOf(dayStr);
-        } catch (IllegalArgumentException e) {
-            getLogger().warning("[Restart] Día inválido en config: " + dayStr + ". Usando MONDAY.");
-            targetDay = DayOfWeek.MONDAY;
-        }
-
-        ZoneId zone;
-        try {
-            zone = ZoneId.of(timezone);
-        } catch (Exception e) {
-            getLogger().warning("[Restart] Timezone inválido: " + timezone + ". Usando America/Santiago.");
-            zone = ZoneId.of("America/Santiago");
-        }
-
-        ZonedDateTime now = ZonedDateTime.now(zone);
-        ZonedDateTime next = now.with(TemporalAdjusters.nextOrSame(targetDay))
-                .withHour(hour).withMinute(minute).withSecond(0).withNano(0);
-        if (!next.isAfter(now)) {
-            next = next.with(TemporalAdjusters.next(targetDay));
-        }
-
-        long delaySeconds = java.time.Duration.between(now, next).getSeconds();
-        long delayTicks = delaySeconds * 20L;
-
-        getLogger().info(String.format("[Restart] Próximo reinicio: %s (%s) en %d horas.",
-                next, timezone, delaySeconds / 3600));
-
-        // Avisos previos: 10 min, 5 min, 1 min antes
-        long[] warnOffsets = {10 * 60 * 20L, 5 * 60 * 20L, 60 * 20L};
-        String[] warnMessages = {
-            "&6&l⚡ &eel servidor se reiniciará en &6&l10 minutos&e. Guarda tus cosas.",
-            "&c&l⚡ &cel servidor se reiniciará en &c&l5 minutos&c.",
-            "&4&l⚡ &4Reinicio en &4&l1 minuto&4. Prepárate."
-        };
-        for (int i = 0; i < warnOffsets.length; i++) {
-            long warnTicks = delayTicks - warnOffsets[i];
-            if (warnTicks > 0) {
-                final String msg = ChatColor.translateAlternateColorCodes('&', warnMessages[i]);
-                trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () ->
-                        Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(msg)), warnTicks));
-            }
-        }
-
-        final DayOfWeek finalDay = targetDay;
-        final int finalHour = hour;
-        final int finalMin = minute;
-        final ZoneId finalZone = zone;
-        trackRuntimeTask(Bukkit.getScheduler().runTaskLater(this, () -> {
-            getLogger().info("[Restart] Ejecutando reinicio semanal programado.");
-            Bukkit.broadcastMessage(ChatColor.RED + "⚡ Reiniciando servidor ahora...");
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
-        }, delayTicks));
-    }
-
     private void sendStartupWebhook() {
         if (!getConfig().getBoolean("presence.enabled", true)
                 || !getConfig().getBoolean("presence.events.server-startup", true)) {
@@ -729,16 +678,20 @@ public final class Odysseia extends JavaPlugin {
         WebhookSender.sendSyncBestEffort(this, url, json);
     }
 
-    public BossManager getBossManager() {
-        return this.bossManager;
-    }
-
     public BloodMoonManager getBloodMoonManager() {
         return this.bloodMoonManager;
     }
 
     public org.metamechanists.odysseia.services.VipExpiryAlertService getVipExpiryAlertService() {
         return vipExpiryAlertService;
+    }
+
+    public org.metamechanists.odysseia.listeners.SFMasterWatcherListener getSfMasterWatcher() {
+        return sfMasterWatcher;
+    }
+
+    public org.metamechanists.odysseia.listeners.MaintenanceGuardListener getMaintenanceGuard() {
+        return maintenanceGuard;
     }
 
     public void registerDynamicCommand(String name, org.bukkit.command.CommandExecutor executor) {

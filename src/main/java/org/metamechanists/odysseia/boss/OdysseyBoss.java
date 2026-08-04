@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.metamechanists.odysseia.Odysseia;
@@ -30,7 +31,7 @@ public abstract class OdysseyBoss {
     protected final LivingEntity entity;
     protected final String id;
     protected final String displayName;
-    protected final double maxHealth;
+    protected double maxHealth;
     protected final BossBar bossBar;
     protected final Set<UUID> playersWatching = new HashSet<>();
 
@@ -40,6 +41,12 @@ public abstract class OdysseyBoss {
     private boolean rebirthConsumed;
     private long rebirthInvulnerableUntil;
     private long phaseShieldUntil;
+    private double arenaPowerMultiplier = 1.0D;
+    /**
+     * Converts a high-health arena challenge into damage absorption instead of
+     * exceeding Minecraft's max-health attribute limits.
+     */
+    private double arenaHealthDamageDivider = 1.0D;
 
     public OdysseyBoss(LivingEntity entity, String id, String displayName, double maxHealth, BarColor barColor, BarStyle barStyle) {
         this.entity = entity;
@@ -241,9 +248,42 @@ public abstract class OdysseyBoss {
         loc.getWorld().spawnParticle(Particle.FLAME, loc, 60, 1, 1.5, 1, 0.1);
         loc.getWorld().spawnParticle(Particle.LARGE_SMOKE, loc, 30, 1, 1, 1, 0.05);
         loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1.2f, phase == 3 ? 0.5f : 0.8f);
+        emitPhaseRupture(loc, phase);
         speak(phase == 3
                 ? "¡No conocéis mi verdadero poder!"
                 : "Esto apenas comienza, mortales.");
+    }
+
+    /** Applies one local, bounded phase shockwave to every boss encounter. */
+    private void emitPhaseRupture(Location center, int phase) {
+        double radius = Math.clamp(Odysseia.getInstance().getConfig().getDouble(
+                "boss-balance.phase-rupture.radius", 8.0D), 3.0D, 16.0D);
+        double damage = Math.clamp(Odysseia.getInstance().getConfig().getDouble(
+                "boss-balance.phase-rupture.damage", 6.0D), 0.0D, 20.0D) + (phase - 2) * 2.0D;
+        for (Player player : nearbyPlayers(radius)) {
+            Vector push = player.getLocation().toVector().subtract(center.toVector());
+            if (push.lengthSquared() < 0.01D) push = new Vector(0.1D, 0, 0.1D);
+            player.setVelocity(push.normalize().multiply(0.75D).setY(0.45D));
+            player.damage(damage, entity);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 35, phase - 1));
+        }
+    }
+
+    /** Returns eligible local combatants without loading chunks or including staff spectators. */
+    private Set<Player> nearbyPlayers(double radius) {
+        double radiusSquared = radius * radius;
+        Set<Player> targets = new HashSet<>();
+        for (Player player : entity.getWorld().getPlayers()) {
+            if (!player.isOnline() || player.isDead()
+                    || player.getGameMode() == org.bukkit.GameMode.CREATIVE
+                    || player.getGameMode() == org.bukkit.GameMode.SPECTATOR) {
+                continue;
+            }
+            if (player.getLocation().distanceSquared(entity.getLocation()) <= radiusSquared) {
+                targets.add(player);
+            }
+        }
+        return targets;
     }
 
     /** Aura de partículas constante según la fase (lo llama el tick del manager). */
@@ -331,4 +371,27 @@ public abstract class OdysseyBoss {
     }
 
     public abstract void executeSkillsRotation();
+
+    /** Scales only this instance; global boss definitions remain untouched. */
+    public void applyArenaPowerMultiplier(double multiplier) {
+        arenaPowerMultiplier = Math.clamp(multiplier, 1.0D, 5.0D);
+        maxHealth *= arenaPowerMultiplier;
+        var attribute = entity.getAttribute(Attribute.MAX_HEALTH);
+        if (attribute != null) attribute.setBaseValue(maxHealth);
+        entity.setHealth(maxHealth);
+    }
+
+    /** Applies a bounded effective-health multiplier to this arena instance only. */
+    public void applyArenaHealthMultiplier(double multiplier) {
+        arenaHealthDamageDivider = Math.clamp(multiplier, 1.0D, 1_000_000.0D);
+    }
+
+    /** Reduces incoming player damage for a targeted arena challenge. */
+    public double scaleIncomingArenaDamage(double damage) {
+        return damage / arenaHealthDamageDivider;
+    }
+
+    public double scaleArenaDamage(double baseDamage) {
+        return baseDamage * arenaPowerMultiplier;
+    }
 }

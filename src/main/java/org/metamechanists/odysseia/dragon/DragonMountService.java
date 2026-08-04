@@ -17,7 +17,6 @@ import org.bukkit.entity.DragonFireball;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Interaction;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.event.EventHandler;
@@ -96,33 +95,33 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
                 && player.isOnline()
                 && session.dragon() != null
                 && !session.dragon().isDead()
-                && session.carrier() != null
-                && !session.carrier().isDead()
-                && session.carrier().getPassengers().contains(player);
+                && session.dragon().getPassengers().contains(player);
     }
 
-    /** Moves the rider safely and lets the visual dragon follow with client-smooth motion. */
+    /** Moves the actual dragon vehicle with velocity, never by teleporting its passenger. */
     private void updateFlight(Player player, FlightSession session) {
-        Location current = session.carrier().getLocation();
+        EnderDragon dragon = session.dragon();
+        Location current = dragon.getLocation();
         Vector direction = player.getEyeLocation().getDirection().normalize();
         double speed = DragonFlightPolicy.clampSpeed(playerSpeeds.getOrDefault(
                 player.getUniqueId(), session.variant().defaultSpeed()));
-        Location target = current.clone().add(direction.multiply(speed));
-        World world = target.getWorld();
+        Location target = current.clone().add(direction.clone().multiply(speed));
+        World world = current.getWorld();
         if (world == null) return;
 
         double safeY = DragonFlightPolicy.clampY(target.getY(), world.getMinHeight(), world.getMaxHeight());
-        target.setY(safeY);
+        Vector velocity = direction.multiply(speed);
+        velocity.setY(velocity.getY() + (safeY - target.getY()));
         int chunkX = target.getBlockX() >> 4;
         int chunkZ = target.getBlockZ() >> 4;
 
         if (!world.getWorldBorder().isInside(target)) {
-            session.carrier().setVelocity(new Vector());
+            dragon.setVelocity(new Vector());
             player.sendActionBar(ChatColor.RED + "Límite del mundo alcanzado");
             return;
         }
         if (!world.isChunkLoaded(chunkX, chunkZ)) {
-            session.carrier().setVelocity(new Vector());
+            dragon.setVelocity(new Vector());
             if (session.requestChunk(chunkX, chunkZ)) {
                 world.getChunkAtAsync(chunkX, chunkZ, true);
             }
@@ -131,44 +130,10 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         }
         session.clearPendingChunk();
 
-        target.setYaw(player.getEyeLocation().getYaw());
-        target.setPitch(player.getEyeLocation().getPitch());
-        if (!session.carrier().teleport(target)) {
-            recoverPlayer(player, session);
-            return;
-        }
-        session.setLastSafe(target);
-
-        syncVisualDragon(session, target, direction, speed);
-    }
-
-    /** Leads the visual model slightly so packet interpolation never leaves it behind. */
-    private void syncVisualDragon(FlightSession session, Location carrier, Vector direction, double speed) {
-        EnderDragon dragon = session.dragon();
-        Location desired = carrier.clone()
-                .add(direction.clone().multiply(DragonFlightPolicy.visualLeadDistance(speed)))
-                .subtract(0, 1.25, 0);
-        desired.setYaw(carrier.getYaw() + 180F);
-        desired.setPitch(carrier.getPitch() * 0.35F);
-
-        Location current = dragon.getLocation();
-        if (current.getWorld() != desired.getWorld()) {
-            dragon.teleport(desired);
-            dragon.setVelocity(new Vector());
-        } else {
-            Vector correction = desired.toVector().subtract(current.toVector());
-            if (DragonFlightPolicy.shouldSnapVisual(correction.lengthSquared())) {
-                dragon.teleport(desired);
-                dragon.setVelocity(new Vector());
-            } else {
-                dragon.setRotation(desired.getYaw(), desired.getPitch());
-                dragon.setVelocity(DragonFlightPolicy.visualVelocity(direction, speed, correction));
-            }
-        }
-        if (dragon.getPhase() != EnderDragon.Phase.HOVER) {
-            dragon.setPhase(EnderDragon.Phase.HOVER);
-        }
-        spawnTrail(session.variant(), desired);
+        dragon.setRotation(player.getEyeLocation().getYaw(), player.getEyeLocation().getPitch() * 0.35F);
+        dragon.setVelocity(velocity);
+        session.setLastSafe(current);
+        spawnTrail(session.variant(), current);
     }
 
     private void spawnTrail(DragonVariant variant, Location location) {
@@ -327,22 +292,16 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         summon(player, variant);
     }
 
-    /** Creates a stable carrier and a separate visual dragon. */
+    /** Creates a real EnderDragon vehicle so the rider and model always share motion. */
     private void summon(Player player, DragonVariant variant) {
         Location origin = player.getLocation().clone();
         World world = origin.getWorld();
         if (world == null) return;
 
-        Interaction carrier = (Interaction) world.spawnEntity(origin, EntityType.INTERACTION);
-        carrier.setInteractionWidth(1.0F);
-        carrier.setInteractionHeight(1.0F);
-        carrier.setGravity(false);
-        carrier.setInvulnerable(true);
-        carrier.setPersistent(false);
-
         EnderDragon dragon = (EnderDragon) world.spawnEntity(origin, EntityType.ENDER_DRAGON);
-        // AI keeps wing/body animation alive; movement and world interaction remain controlled here.
-        dragon.setAI(true);
+        // The dragon is the vehicle; velocity supplies smooth flight while vanilla still animates its wings.
+        dragon.setAI(false);
+        dragon.setGravity(false);
         dragon.setInvulnerable(true);
         dragon.setSilent(true);
         dragon.setCollidable(false);
@@ -354,10 +313,10 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         dragon.setCustomName(color(variant.displayName(player.getName())));
         dragon.setCustomNameVisible(true);
 
-        FlightSession session = new FlightSession(variant, dragon, carrier, origin);
+        FlightSession session = new FlightSession(variant, dragon, origin);
         activeFlights.put(player.getUniqueId(), session);
         playerBreaths.putIfAbsent(player.getUniqueId(), variant.defaultBreath());
-        if (!carrier.addPassenger(player)) {
+        if (!dragon.addPassenger(player)) {
             activeFlights.remove(player.getUniqueId());
             cleanupFlight(player, session);
             player.sendMessage(ChatColor.RED + "No se pudo iniciar el vuelo. Inténtalo de nuevo en suelo firme.");
@@ -446,7 +405,7 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
     public void onDismount(EntityDismountEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         FlightSession session = activeFlights.get(player.getUniqueId());
-        if (session == null || !event.getDismounted().getUniqueId().equals(session.carrier().getUniqueId())) return;
+        if (session == null || !event.getDismounted().getUniqueId().equals(session.dragon().getUniqueId())) return;
         activeFlights.remove(player.getUniqueId());
         cleanupFlight(player, session);
     }
@@ -481,7 +440,6 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
 
     private void cleanupFlight(Player player, FlightSession session) {
         if (session == null) return;
-        if (session.carrier() != null && !session.carrier().isDead()) session.carrier().remove();
         if (session.dragon() != null && !session.dragon().isDead()) session.dragon().remove();
         if (player != null && player.isOnline()) {
             recoverPlayer(player, session);
@@ -556,20 +514,17 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
     private static final class FlightSession {
         private final DragonVariant variant;
         private final EnderDragon dragon;
-        private final Interaction carrier;
         private Location lastSafe;
         private long pendingChunk = Long.MIN_VALUE;
 
-        private FlightSession(DragonVariant variant, EnderDragon dragon, Interaction carrier, Location lastSafe) {
+        private FlightSession(DragonVariant variant, EnderDragon dragon, Location lastSafe) {
             this.variant = variant;
             this.dragon = dragon;
-            this.carrier = carrier;
             this.lastSafe = lastSafe.clone();
         }
 
         DragonVariant variant() { return variant; }
         EnderDragon dragon() { return dragon; }
-        Interaction carrier() { return carrier; }
         Location lastSafe() { return lastSafe.clone(); }
         void setLastSafe(Location location) { this.lastSafe = location.clone(); }
         boolean requestChunk(int chunkX, int chunkZ) {

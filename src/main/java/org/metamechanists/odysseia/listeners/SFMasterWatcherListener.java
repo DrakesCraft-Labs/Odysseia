@@ -1,7 +1,6 @@
 package org.metamechanists.odysseia.listeners;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -15,15 +14,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,8 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.UUID;
 import java.lang.reflect.Method;
@@ -59,18 +60,18 @@ public class SFMasterWatcherListener implements Listener {
 
     private final Plugin plugin;
     private final NamespacedKey sfMasterKey;
+    private final NamespacedKey sfMasterOwnerKey;
     
     private final File blocksFile;
     private final YamlConfiguration blocksConfig;
     private final Set<String> sfMasterBlocks = new HashSet<>();
-    private final Map<String, Long> brokenSFMasterBlocks = new HashMap<>();
-    private final Map<UUID, Deque<Long>> claimHistory = new HashMap<>();
-    private final Set<String> blockedAddons;
-    private final Set<String> blockedIdPrefixes;
-    private final Set<String> blockedIdFragments;
-    private final Set<String> blockedMaterials;
-    private final int maxClaims;
-    private final long claimWindowMillis;
+    private final Map<String, String> sfMasterBlockOwners = new HashMap<>();
+    private final Map<String, BrokenBlock> brokenSFMasterBlocks = new HashMap<>();
+    private Set<String> blockedAddons;
+    private Set<String> blockedIdPrefixes;
+    private Set<String> blockedIdFragments;
+    private Set<String> blockedMaterials;
+    private Set<String> approvedAddons;
     private final Method slimefunGetByItem;
     private final SlimefunGuideBridge slimefunGuide;
     private boolean reflectionWarningLogged;
@@ -78,17 +79,22 @@ public class SFMasterWatcherListener implements Listener {
     public SFMasterWatcherListener(Plugin plugin) {
         this.plugin = plugin;
         this.sfMasterKey = new NamespacedKey(plugin, "sfmaster_item");
+        this.sfMasterOwnerKey = new NamespacedKey(plugin, "sfmaster_item_owner");
         this.blocksFile = new File(plugin.getDataFolder(), "sfmaster_blocks.yml");
         this.blocksConfig = YamlConfiguration.loadConfiguration(blocksFile);
-        this.blockedAddons = normalizedConfigSet("sfmaster-policy.blocked-addons");
-        this.blockedIdPrefixes = normalizedConfigSet("sfmaster-policy.blocked-id-prefixes");
-        this.blockedIdFragments = normalizedConfigSet("sfmaster-policy.blocked-id-fragments");
-        this.blockedMaterials = normalizedConfigSet("sfmaster-policy.blocked-materials");
-        this.maxClaims = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.max-claims", 12));
-        this.claimWindowMillis = Math.max(1, plugin.getConfig().getInt("sfmaster-policy.window-minutes", 60)) * 60_000L;
+        reloadConfiguration();
         this.slimefunGetByItem = findSlimefunGetByItem();
         this.slimefunGuide = new SlimefunGuideBridge(plugin);
         loadBlocks();
+    }
+
+    /** Reloads only audit rules; claim authorization belongs to Slimefun Core. */
+    public void reloadConfiguration() {
+        this.blockedAddons = normalizedConfigSet("sfmaster-audit.blocked-addons");
+        this.blockedIdPrefixes = normalizedConfigSet("sfmaster-audit.blocked-id-prefixes");
+        this.blockedIdFragments = normalizedConfigSet("sfmaster-audit.blocked-id-fragments");
+        this.blockedMaterials = normalizedConfigSet("sfmaster-audit.blocked-materials");
+        this.approvedAddons = normalizedConfigSet("sfmaster-audit.approved-addons");
     }
 
     private Set<String> normalizedConfigSet(String path) {
@@ -152,29 +158,28 @@ public class SFMasterWatcherListener implements Listener {
         return null;
     }
 
-    private boolean consumeClaim(Player player) {
-        long now = System.currentTimeMillis();
-        Deque<Long> claims = claimHistory.computeIfAbsent(player.getUniqueId(), ignored -> new ArrayDeque<>());
-        while (!claims.isEmpty() && now - claims.peekFirst() >= claimWindowMillis) {
-            claims.removeFirst();
-        }
-        if (claims.size() >= maxClaims) {
-            return false;
-        }
-        claims.addLast(now);
-        return true;
-    }
-
     private void loadBlocks() {
         sfMasterBlocks.clear();
+        sfMasterBlockOwners.clear();
         List<String> list = blocksConfig.getStringList("blocks");
         if (list != null) {
             sfMasterBlocks.addAll(list);
+        }
+        var owners = blocksConfig.getConfigurationSection("owners");
+        if (owners != null) {
+            for (String location : owners.getKeys(false)) {
+                String owner = owners.getString(location);
+                if (owner != null && !owner.isBlank()) {
+                    sfMasterBlockOwners.put(location, owner);
+                }
+            }
         }
     }
 
     private void saveBlocks() {
         blocksConfig.set("blocks", new ArrayList<>(sfMasterBlocks));
+        blocksConfig.set("owners", null);
+        sfMasterBlockOwners.forEach((location, owner) -> blocksConfig.set("owners." + location, owner));
         try {
             blocksConfig.save(blocksFile);
         } catch (IOException e) {
@@ -188,6 +193,14 @@ public class SFMasterWatcherListener implements Listener {
         if (meta == null) return false;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         return pdc.has(sfMasterKey, PersistentDataType.BYTE);
+    }
+
+    private boolean belongsTo(ItemStack item, UUID playerId) {
+        if (!isSFMasterItem(item)) return true;
+        ItemMeta meta = item.getItemMeta();
+        String owner = meta == null ? null : meta.getPersistentDataContainer()
+                .get(sfMasterOwnerKey, PersistentDataType.STRING);
+        return owner == null || owner.equals(playerId.toString());
     }
 
     private boolean isSfMasterActive(Player player) {
@@ -269,23 +282,7 @@ public class SFMasterWatcherListener implements Listener {
         else player.getInventory().setItemInMainHand(null);
     }
 
-    private boolean isCheatGuideView(InventoryClickEvent event) {
-        return ChatColor.stripColor(event.getView().getTitle()).contains("Cheat Sheet");
-    }
-
-    private boolean matchesTemplate(ItemStack candidate, ItemStack template) {
-        if (candidate == null || template == null) {
-            return false;
-        }
-
-        ItemStack left = candidate.clone();
-        ItemStack right = template.clone();
-        left.setAmount(1);
-        right.setAmount(1);
-        return left.isSimilar(right);
-    }
-
-    private void markItem(ItemStack item) {
+    private void markItem(ItemStack item, String owner) {
         if (item == null) {
             return;
         }
@@ -296,6 +293,9 @@ public class SFMasterWatcherListener implements Listener {
         }
 
         meta.getPersistentDataContainer().set(sfMasterKey, PersistentDataType.BYTE, (byte) 1);
+        if (owner != null && !owner.isBlank()) {
+            meta.getPersistentDataContainer().set(sfMasterOwnerKey, PersistentDataType.STRING, owner);
+        }
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
         if (!lore.contains(SFMASTER_MARKER_LORE)) {
             lore.add("");
@@ -303,53 +303,6 @@ public class SFMasterWatcherListener implements Listener {
         }
         meta.setLore(lore);
         item.setItemMeta(meta);
-    }
-
-    private Map<Integer, Integer> snapshotMatchingSlots(Player player, ItemStack template) {
-        Map<Integer, Integer> snapshot = new HashMap<>();
-        ItemStack[] contents = player.getInventory().getStorageContents();
-
-        for (int slot = 0; slot < contents.length; slot++) {
-            ItemStack item = contents[slot];
-            if (matchesTemplate(item, template) && !isSFMasterItem(item)) {
-                snapshot.put(slot, item.getAmount());
-            }
-        }
-
-        return snapshot;
-    }
-
-    private void markNewCheatItems(Player player, ItemStack template, Map<Integer, Integer> before) {
-        ItemStack[] contents = player.getInventory().getStorageContents();
-
-        for (int slot = 0; slot < contents.length; slot++) {
-            ItemStack current = contents[slot];
-            if (!matchesTemplate(current, template) || isSFMasterItem(current)) {
-                continue;
-            }
-
-            int previousAmount = before.getOrDefault(slot, 0);
-            if (current.getAmount() <= previousAmount) {
-                continue;
-            }
-
-            int delta = current.getAmount() - previousAmount;
-            if (previousAmount <= 0) {
-                markItem(current);
-                player.getInventory().setItem(slot, current);
-                continue;
-            }
-
-            ItemStack originalStack = current.clone();
-            originalStack.setAmount(previousAmount);
-            player.getInventory().setItem(slot, originalStack);
-
-            ItemStack markedStack = current.clone();
-            markedStack.setAmount(delta);
-            markItem(markedStack);
-            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(markedStack);
-            leftovers.values().forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
-        }
     }
 
     @EventHandler
@@ -360,6 +313,18 @@ public class SFMasterWatcherListener implements Listener {
         }
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerPickup(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        ItemStack item = event.getItem().getItemStack();
+        if (isSFMasterItem(item) && !belongsTo(item, player.getUniqueId())) {
+            event.setCancelled(true);
+            player.sendMessage("§cEse ítem SFMaster pertenece a otro jugador.");
+            plugin.getLogger().warning("[SFMaster] " + player.getName()
+                    + " intentó recoger un ítem marcado de otro propietario.");
+        }
+    }
+
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         ItemStack item = event.getItemInHand();
@@ -367,6 +332,12 @@ public class SFMasterWatcherListener implements Listener {
             Block block = event.getBlockPlaced();
             String locKey = block.getWorld().getName() + "," + block.getX() + "," + block.getY() + "," + block.getZ();
             sfMasterBlocks.add(locKey);
+            ItemMeta meta = item.getItemMeta();
+            String owner = meta == null ? null : meta.getPersistentDataContainer()
+                    .get(sfMasterOwnerKey, PersistentDataType.STRING);
+            if (owner != null) {
+                sfMasterBlockOwners.put(locKey, owner);
+            }
             saveBlocks();
         }
     }
@@ -377,8 +348,9 @@ public class SFMasterWatcherListener implements Listener {
         String locKey = block.getWorld().getName() + "," + block.getX() + "," + block.getY() + "," + block.getZ();
         if (sfMasterBlocks.contains(locKey)) {
             sfMasterBlocks.remove(locKey);
+            String owner = sfMasterBlockOwners.remove(locKey);
             saveBlocks();
-            brokenSFMasterBlocks.put(locKey, System.currentTimeMillis());
+            brokenSFMasterBlocks.put(locKey, new BrokenBlock(System.currentTimeMillis(), owner));
         }
     }
 
@@ -389,8 +361,9 @@ public class SFMasterWatcherListener implements Listener {
         String targetKey = null;
         long now = System.currentTimeMillis();
 
-        for (Map.Entry<String, Long> entry : brokenSFMasterBlocks.entrySet()) {
-            if (now - entry.getValue() > 1000) {
+        String owner = null;
+        for (Map.Entry<String, BrokenBlock> entry : brokenSFMasterBlocks.entrySet()) {
+            if (now - entry.getValue().timestamp() > 1000) {
                 continue;
             }
             String[] parts = entry.getKey().split(",");
@@ -401,6 +374,7 @@ public class SFMasterWatcherListener implements Listener {
                 Location bLoc = new Location(loc.getWorld(), bx, by, bz);
                 if (loc.distanceSquared(bLoc) < 2.25) { // 1.5 bloques de radio
                     targetKey = entry.getKey();
+                    owner = entry.getValue().owner();
                     break;
                 }
             }
@@ -408,7 +382,7 @@ public class SFMasterWatcherListener implements Listener {
 
         if (targetKey != null) {
             ItemStack item = itemEntity.getItemStack();
-            markItem(item);
+            markItem(item, owner);
             itemEntity.setItemStack(item);
             brokenSFMasterBlocks.remove(targetKey);
         }
@@ -475,33 +449,47 @@ public class SFMasterWatcherListener implements Listener {
         event.getDrops().removeIf(item -> isSFMasterItem(item));
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryMove(InventoryMoveItemEvent event) {
+        if (isSFMasterItem(event.getItem())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        if (!belongsTo(event.getMainHandItem(), event.getPlayer().getUniqueId())
+                || !belongsTo(event.getOffHandItem(), event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§cNo puedes usar un ítem SFMaster de otro jugador.");
+        }
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player) {
             purgeInventory(event.getView().getTopInventory(), player.getUniqueId(), false, 0);
             purgeExpiredGuides(player);
         }
-        if (event.getWhoClicked() instanceof Player player
-                && isSfMasterActive(player)
-                && isCheatGuideView(event)
-                && event.getClickedInventory() != null
-                && event.getClickedInventory().getType() != InventoryType.PLAYER
-                && event.getCurrentItem() != null
-                && !event.isCancelled()) {
-            ItemStack template = event.getCurrentItem().clone();
-            String reason = blockedReason(template);
-            if (reason != null) {
+
+        if (event.getWhoClicked() instanceof Player player) {
+            ItemStack hotbarItem = event.getHotbarButton() >= 0
+                    ? player.getInventory().getItem(event.getHotbarButton())
+                    : null;
+            if (!belongsTo(event.getCurrentItem(), player.getUniqueId())
+                    || !belongsTo(event.getCursor(), player.getUniqueId())
+                    || !belongsTo(hotbarItem, player.getUniqueId())) {
                 event.setCancelled(true);
-                player.sendMessage("§cNo puedes reclamar este item: " + reason + ".");
+                player.sendMessage("§cNo puedes usar un ítem SFMaster de otro jugador.");
                 return;
             }
-            if (!consumeClaim(player)) {
+            if (event.getHotbarButton() >= 0
+                    && isSFMasterItem(hotbarItem)
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
                 event.setCancelled(true);
-                player.sendMessage("§cLimite SFMaster alcanzado: " + maxClaims + " reclamaciones por ventana.");
+                player.sendMessage("§cNo puedes guardar ítems de SFMaster aquí.");
                 return;
             }
-            Map<Integer, Integer> before = snapshotMatchingSlots(player, template);
-            Bukkit.getScheduler().runTask(plugin, () -> markNewCheatItems(player, template, before));
         }
 
         // Permitir interacciones puramente dentro del inventario del jugador
@@ -562,5 +550,50 @@ public class SFMasterWatcherListener implements Listener {
         }
     }
 
+    /**
+     * Reports suspicious legacy objects without deleting them. Unmarked objects
+     * may have been crafted legitimately, so staff must review every candidate.
+     */
+    public AuditResult audit(Player player) {
+        AuditAccumulator accumulator = new AuditAccumulator();
+        auditInventory(player.getInventory(), accumulator, 0);
+        auditInventory(player.getEnderChest(), accumulator, 0);
+        return new AuditResult(accumulator.marked, accumulator.guides, Map.copyOf(accumulator.suspicious));
+    }
+
+    private void auditInventory(Inventory inventory, AuditAccumulator accumulator, int depth) {
+        if (inventory == null || depth > 4) return;
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null || item.getType().isAir()) continue;
+            if (isSFMasterItem(item)) accumulator.marked += item.getAmount();
+            if (slimefunGuide.isCheatGuide(item)) accumulator.guides += item.getAmount();
+
+            SfItemDescriptor descriptor = describeSlimefunItem(item);
+            if (descriptor != null && isSuspiciousLegacy(item, descriptor) && !isSFMasterItem(item)) {
+                accumulator.suspicious.merge(descriptor.id(), item.getAmount(), Integer::sum);
+            }
+            ItemMeta meta = item.getItemMeta();
+            if (meta instanceof BlockStateMeta stateMeta && stateMeta.getBlockState() instanceof ShulkerBox shulker) {
+                auditInventory(shulker.getInventory(), accumulator, depth + 1);
+            }
+        }
+    }
+
+    private boolean isSuspiciousLegacy(ItemStack item, SfItemDescriptor descriptor) {
+        boolean approvedAddon = approvedAddons.stream().anyMatch(descriptor.addon()::contains);
+        return !approvedAddon || blockedReason(item) != null;
+    }
+
+    public record AuditResult(int markedItems, int cheatGuides, Map<String, Integer> suspiciousLegacy) {
+    }
+
+    private static final class AuditAccumulator {
+        private int marked;
+        private int guides;
+        private final Map<String, Integer> suspicious = new LinkedHashMap<>();
+    }
+
     private record SfItemDescriptor(String id, String addon) {}
+
+    private record BrokenBlock(long timestamp, String owner) {}
 }

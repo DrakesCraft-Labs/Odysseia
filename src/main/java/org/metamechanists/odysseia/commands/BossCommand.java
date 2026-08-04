@@ -40,7 +40,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&c&lUSO: &e/boss <spawn|spawnall|give> ..."));
+                    "&c&lUSO: &e/boss <spawn|spawnall|give> ... &7| &fEspeciales: &ddragon&f, &5wither"));
             return true;
         }
 
@@ -59,7 +59,7 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
 
             if (args.length < 2) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&c&lUSO: &e/boss spawn <tipo>"));
+                        "&c&lUSO: &e/boss spawn <tipo> &7| &fEjemplo: &e/boss spawn dragon"));
                 return true;
             }
 
@@ -70,12 +70,12 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            var spawned = bossManager.spawnBoss(bossType, player.getLocation());
-            if (spawned != null) {
+            var result = plugin.getBossArenas().startForced(bossType, List.of(player));
+            if (result.started()) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&l¡ÉXITO! &eHas invocado al jefe mítico " + spawned.getDisplayName() + " &een tu posición."));
+                        "&a&l¡ÉXITO! &eEl jefe mítico &f" + bossType + " &eha sido llevado a una arena segura."));
             } else {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cOcurrió un error al invocar al jefe."));
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cNo se pudo crear la arena: " + result.error()));
             }
             return true;
         }
@@ -162,7 +162,13 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 || type.equals("heimdall") || type.equals("hidra")
                 || type.equals("cerbero") || type.equals("artemisa")
                 || type.equals("tifon") || type.equals("tifón")
-                || type.equals("prometeo");
+                || type.equals("prometeo") || type.equals("coloso_end")
+                || type.equals("coloso-end") || type.equals("coloso")
+                || type.equals("wither") || type.equals("wither_storm") || type.equals("wither-storm")
+                || type.equals("witherstorm") || type.equals("dragon_ancestral")
+                || type.equals("dragon-ancestral") || type.equals("dragon")
+                || type.equals("ra") || type.equals("isis") || type.equals("anubis") || type.equals("set")
+                || type.equals("jax") || type.equals("ajax");
     }
 
     @Override
@@ -209,7 +215,8 @@ public final class BossCommand implements CommandExecutor, TabCompleter {
                 "circe", "polifemo", "dios_corrupto",
                 "thor", "ares", "hades", "poseidon", "zeus",
                 "loki", "odin", "kratos",
-                "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo"
+                "heimdall", "hidra", "cerbero", "artemisa", "tifon", "prometeo",
+                "coloso_end", "wither", "dragon", "ra", "isis", "anubis", "set", "jax"
         );
     }
 }

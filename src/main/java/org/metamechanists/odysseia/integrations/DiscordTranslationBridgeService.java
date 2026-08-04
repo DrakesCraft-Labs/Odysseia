@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 
 /**
  * Servicio de Puente de Traducción Bidireccional entre DiscordSRV y Minecraft
- * utilizando la API de Star Translate (LibreTranslate en https://web.drakescraft.cl/api/translate)
- * y emisor de telemetría de Chat en Vivo hacia https://web.drakescraft.cl/api/chat/ingest.
+ * utilizando directamente la API de Star Translate (LibreTranslate en
+ * https://translate.drakescraft.cl).
  *
  * Fix de timing: el registro con DiscordSRV se hace con 20 ticks de delay para asegurarse
  * de que DiscordSRV haya completado su inicialización asíncrona antes de intentar suscribir.
@@ -55,7 +55,7 @@ public class DiscordTranslationBridgeService {
     public void reload() {
         FileConfiguration config = plugin.getConfig();
         this.enabled = config.getBoolean("discord-translator.enabled", true);
-        String rawUrl = config.getString("discord-translator.api-url", "https://web.drakescraft.cl/api/translate");
+        String rawUrl = config.getString("discord-translator.api-url", "https://translate.drakescraft.cl");
         if (rawUrl.endsWith("/translate")) {
             this.baseUrl = rawUrl;
         } else {
@@ -180,48 +180,6 @@ public class DiscordTranslationBridgeService {
                 });
     }
 
-    // ─── Live Chat Feed ────────────────────────────────────────────────────────
-
-    /**
-     * Publica el mensaje en el feed de chat web en Star usando la API key del translator.
-     * Payload: { player, message, rank, world, api_key }
-     */
-    public void postWebChatFeed(String playerName, String message, String rank, String world) {
-        if (apiKey == null || apiKey.isEmpty()) return;
-        if (playerName == null || message == null || message.trim().isEmpty()) return;
-
-        try {
-            String safeRank = rank != null ? rank : "JUGADOR";
-            String safeWorld = world != null ? world : "Olimpo";
-
-            String jsonBody = String.format(
-                    "{\"player\":%s,\"message\":%s,\"rank\":%s,\"world\":%s,\"api_key\":%s}",
-                    escapeJson(playerName),
-                    escapeJson(message),
-                    escapeJson(safeRank),
-                    escapeJson(safeWorld),
-                    escapeJson(apiKey)
-            );
-
-            String url = "https://web.drakescraft.cl/api/chat/ingest";
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .timeout(Duration.ofSeconds(3))
-                    .header("Content-Type", "application/json")
-                    .header("User-Agent", "Odysseia/1.1.0")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .exceptionally(ex -> {
-                        log.fine("[Odysseia] Error en chat feed ingest: " + ex.getMessage());
-                        return null;
-                    });
-        } catch (Exception ex) {
-            log.fine("[Odysseia] Error preparando chat feed ingest: " + ex.getMessage());
-        }
-    }
-
     // ─── Eventos DiscordSRV ────────────────────────────────────────────────────
 
     /**
@@ -238,9 +196,6 @@ public class DiscordTranslationBridgeService {
         if (messageContent == null || messageContent.trim().isEmpty() || messageContent.startsWith("!")) return;
 
         String authorName = event.getAuthor().getName();
-
-        // Feed de chat web (Discord → Web)
-        postWebChatFeed(authorName, messageContent, "Discord", "discord");
 
         if (!translateDiscordToMc) return;
 
@@ -278,24 +233,6 @@ public class DiscordTranslationBridgeService {
 
         Player player = event.getPlayer();
         String playerName = player != null ? player.getName() : "Jugador";
-
-        // Detectar rango del jugador
-        String rank = "JUGADOR";
-        if (player != null) {
-            try {
-                org.bukkit.scoreboard.Team team = player.getScoreboard().getEntryTeam(playerName);
-                if (team != null && !team.getName().isEmpty()) {
-                    rank = team.getName().toUpperCase();
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        // Detectar mundo
-        String world = player != null ? player.getWorld().getName() : "Olimpo";
-
-        // Feed de chat web (MC → Web)
-        postWebChatFeed(playerName, messageContent, rank, world);
 
         if (!translateMcToDiscord) return;
 

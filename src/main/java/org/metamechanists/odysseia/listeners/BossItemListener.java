@@ -6,7 +6,10 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -25,12 +28,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.items.OdysseyItemManager;
 
@@ -39,14 +46,21 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class BossItemListener implements Listener {
 
     private final Odysseia plugin;
     private final NamespacedKey kratosTempOffhandKey;
     private final Map<UUID, Long> scepterCooldowns = new HashMap<>();
+    private final Map<UUID, Long> leviathanCooldowns = new HashMap<>();
+    private final Map<UUID, PendingLeviathanAxe> pendingLeviathanAxes = new HashMap<>();
+    private final Map<UUID, BukkitTask> activeLeviathanOrbits = new HashMap<>();
     private final Set<UUID> syntheticDamageTargets = new HashSet<>();
     private static final Map<UUID, ItemStack> savedOffhands = new HashMap<>();
+
+    private record PendingLeviathanAxe(ItemStack item) {
+    }
 
     public BossItemListener(Odysseia plugin) {
         this.plugin = plugin;
@@ -410,6 +424,8 @@ public final class BossItemListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
+        // Bukkit emits a second interaction for the off-hand; summoners are main-hand only.
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (item == null || !item.hasItemMeta()) return;
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
@@ -425,26 +441,8 @@ public final class BossItemListener implements Listener {
                 return;
             }
 
-            // Consumir el invocador (1 unidad)
-            if (item.getAmount() > 1) {
-                item.setAmount(item.getAmount() - 1);
-            } else {
-                player.getInventory().setItem(event.getHand(), null);
-            }
-
-            Location spawnLoc = event.getClickedBlock().getLocation().clone().add(0.5, 1.0, 0.5);
-            org.bukkit.World world = spawnLoc.getWorld();
-            
-            // Efectos celestiales de invocación
-            if (world != null) {
-                world.strikeLightningEffect(spawnLoc);
-                world.spawnParticle(Particle.EXPLOSION_EMITTER, spawnLoc, 5, 0.5, 0.5, 0.5, 0.1);
-                world.playSound(spawnLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.5f, 0.8f);
-                world.playSound(spawnLoc, Sound.ENTITY_WITHER_SPAWN, 1.5f, 0.5f);
-            }
-
-            // Invocar al jefe
-            plugin.getBossManager().spawnBoss(bossId, spawnLoc);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&e[BossArena] Este listener fue migrado a DrakesBosses; el objeto no se consumió."));
             return;
         }
 
@@ -480,54 +478,15 @@ public final class BossItemListener implements Listener {
             }, 1L, 1L);
         }
 
-        // ── Hacha Leviatán: Lanzamiento y Reclamación Rúnica ──
+        // ── Hacha Leviatán: órbita rúnica o lanzamiento y retorno seguro ──
         if ("leviathan_axe".equals(type)) {
             event.setCancelled(true);
-
-            // Cooldown de 2 segundos para evitar spam de lanzamiento
-            long now = System.currentTimeMillis();
-            long lastUse = scepterCooldowns.getOrDefault(player.getUniqueId(), 0L);
-            if (now - lastUse < 2000L) {
-                return;
-            }
-            scepterCooldowns.put(player.getUniqueId(), now);
-
-            ItemStack axeItem = item.clone();
-            
-            // Remover temporalmente del inventario (simula lanzamiento)
-            if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
-                player.getInventory().setItemInMainHand(null);
+            if (player.isSneaking()) {
+                startLeviathanOrbit(player, item);
             } else {
-                player.getInventory().setItemInOffHand(null);
+                throwLeviathanAxe(player, event.getHand(), item);
             }
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1.0f, 0.5f);
-
-            // Disparar proyectil físico (bola de nieve pesada)
-            Snowball ball = player.launchProjectile(Snowball.class);
-            ball.setMetadata("kratos_axe", new FixedMetadataValue(plugin, true));
-
-            // Espiral de partículas de nieve siguiendo al proyectil
-            Bukkit.getScheduler().runTaskTimer(plugin, task -> {
-                if (ball.isDead() || !ball.isValid()) {
-                    task.cancel();
-                    return;
-                }
-                ball.getWorld().spawnParticle(Particle.SNOWFLAKE, ball.getLocation(), 4, 0.1, 0.1, 0.1, 0.01);
-            }, 1L, 1L);
-
-            // Devolver automáticamente el hacha a la mano en 1 segundo (20 ticks)
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (player.isOnline()) {
-                    if (event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
-                        player.getInventory().setItemInMainHand(axeItem);
-                    } else {
-                        player.getInventory().setItemInOffHand(axeItem);
-                    }
-                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1.0f, 1.2f);
-                    player.getWorld().spawnParticle(Particle.SNOWFLAKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.05);
-                    player.sendMessage("§b§o[Leviatán] El hacha ha regresado a tu mano.");
-                }
-            }, 20L);
+            return;
         }
 
         if ("circe_staff".equals(type) && tryUseCooldown(player, 10_000L, "&dTransmutación")) {
@@ -553,6 +512,265 @@ public final class BossItemListener implements Listener {
             center.getWorld().spawnParticle(Particle.FLAME, center.add(0, 1, 0), 80, 2.5, 1.0, 2.5, 0.05);
             center.getWorld().playSound(center, Sound.ITEM_FIRECHARGE_USE, 1.1f, 0.8f);
         }
+
+        if (activateWeaponAbility(player, type)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Gives every boss weapon a bounded active ability without changing terrain. */
+    private boolean activateWeaponAbility(Player player, String type) {
+        if (type == null) {
+            return false;
+        }
+
+        if (!switch (type) {
+            case "loki_dagger", "odin_spear", "mjolnir", "ares_blade", "ares_shield",
+                 "hades_scythe", "poseidon_trident", "zeus_mace", "gjallarhorn",
+                 "hydra_fang", "artemis_bow", "tifon_claw", "polifemo_club",
+                 "corrupted_god_blade" -> true;
+            default -> false;
+        }) return false;
+        if (!tryUseCooldown(player, 8_000L, abilityName(type))) return true;
+
+        Location origin = player.getLocation().add(0, 1, 0);
+        switch (type) {
+            case "loki_dagger" -> {
+                Vector dash = player.getLocation().getDirection().normalize().multiply(1.35);
+                dash.setY(Math.max(0.18, dash.getY()));
+                player.setVelocity(dash);
+                visualBurst(origin, Particle.PORTAL, Sound.ENTITY_ENDERMAN_TELEPORT, 35, 1.0f);
+            }
+            case "odin_spear" -> {
+                Location strike = targetLocation(player, 18);
+                strike.getWorld().strikeLightningEffect(strike);
+                strike.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, strike, 45, 0.6, 1.0, 0.6, 0.08);
+                damageNearby(strike, 3.0, 8.0, player, PotionEffectType.GLOWING);
+            }
+            case "mjolnir" -> {
+                visualBurst(origin, Particle.ELECTRIC_SPARK, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 70, 1.0f);
+                damageNearby(player.getLocation(), 5.0, 7.0, player, PotionEffectType.SLOWNESS);
+            }
+            case "ares_blade" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 140, 1, false, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 140, 0, false, true));
+                visualBurst(origin, Particle.CRIT, Sound.ENTITY_PLAYER_ATTACK_STRONG, 45, 0.8f);
+            }
+            case "ares_shield" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 180, 1, false, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 180, 2, false, true));
+                visualBurst(origin, Particle.TOTEM_OF_UNDYING, Sound.ITEM_SHIELD_BLOCK, 45, 1.0f);
+            }
+            case "hades_scythe" -> {
+                int hits = damageNearby(player.getLocation(), 5.0, 5.0, player, PotionEffectType.WITHER);
+                heal(player, Math.min(6.0, hits * 1.5));
+                visualBurst(origin, Particle.SOUL, Sound.PARTICLE_SOUL_ESCAPE, 55, 0.7f);
+            }
+            case "poseidon_trident" -> {
+                Location wave = player.getLocation().add(player.getLocation().getDirection().normalize().multiply(4));
+                wave.getWorld().spawnParticle(Particle.SPLASH, wave, 100, 3.0, 1.0, 3.0, 0.2);
+                wave.getWorld().playSound(wave, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.2f, 0.7f);
+                damageNearby(wave, 5.0, 6.0, player, PotionEffectType.SLOWNESS);
+            }
+            case "zeus_mace" -> {
+                Location skyfall = targetLocation(player, 20);
+                skyfall.getWorld().strikeLightningEffect(skyfall);
+                skyfall.getWorld().spawnParticle(Particle.END_ROD, skyfall, 60, 1.0, 2.0, 1.0, 0.1);
+                damageNearby(skyfall, 4.0, 9.0, player, PotionEffectType.WEAKNESS);
+            }
+            case "gjallarhorn" -> {
+                visualBurst(origin, Particle.SONIC_BOOM, Sound.EVENT_RAID_HORN, 1, 1.0f);
+                damageNearby(player.getLocation(), 8.0, 5.0, player, PotionEffectType.SLOWNESS);
+            }
+            case "hydra_fang" -> {
+                damageNearby(player.getLocation(), 5.0, 4.0, player, PotionEffectType.POISON);
+                visualBurst(origin, Particle.HAPPY_VILLAGER, Sound.ENTITY_SPIDER_AMBIENT, 70, 0.6f);
+            }
+            case "artemis_bow" -> {
+                RayTraceResult hit = player.getWorld().rayTraceEntities(player.getEyeLocation(),
+                    player.getEyeLocation().getDirection(), 24.0, 0.35,
+                    entity -> entity instanceof LivingEntity && entity != player);
+                if (hit != null && hit.getHitEntity() instanceof LivingEntity target) {
+                    target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0, false, true));
+                    applySyntheticDamage(target, 7.0, player);
+                    target.getWorld().spawnParticle(Particle.GLOW, target.getLocation().add(0, 1, 0), 35, 0.3, 0.6, 0.3, 0.05);
+                }
+                visualBurst(origin, Particle.CRIT, Sound.ENTITY_ARROW_SHOOT, 20, 1.2f);
+            }
+            case "tifon_claw" -> {
+                Vector leap = player.getLocation().getDirection().normalize().multiply(0.8);
+                leap.setY(0.85);
+                player.setVelocity(leap);
+                damageNearby(player.getLocation(), 4.0, 6.0, player, PotionEffectType.SLOWNESS);
+                visualBurst(origin, Particle.LAVA, Sound.ENTITY_GENERIC_EXPLODE, 60, 0.8f);
+            }
+            case "polifemo_club" -> {
+                damageNearby(player.getLocation(), 6.0, 8.0, player, PotionEffectType.SLOWNESS);
+                visualBurst(origin, Particle.CLOUD, Sound.ENTITY_GENERIC_EXPLODE, 80, 0.65f);
+            }
+            case "corrupted_god_blade" -> {
+                damageNearby(player.getLocation(), 5.0, 7.0, player, PotionEffectType.WITHER);
+                visualBurst(origin, Particle.SOUL_FIRE_FLAME, Sound.ENTITY_WITHER_HURT, 80, 0.6f);
+            }
+            default -> { }
+        }
+        return true;
+    }
+
+    private String abilityName(String type) {
+        return switch (type) {
+            case "loki_dagger" -> "Salto de Loki";
+            case "odin_spear" -> "Sentencia de Odín";
+            case "mjolnir" -> "Pulso de Thor";
+            case "ares_blade" -> "Furia de Ares";
+            case "ares_shield" -> "Égida de Ares";
+            case "hades_scythe" -> "Cosecha de Hades";
+            case "poseidon_trident" -> "Marea de Poseidón";
+            case "zeus_mace" -> "Juicio de Zeus";
+            case "gjallarhorn" -> "Llamado de Gjallarhorn";
+            case "hydra_fang" -> "Veneno de Hidra";
+            case "artemis_bow" -> "Marca de Artemisa";
+            case "tifon_claw" -> "Salto de Tifón";
+            case "polifemo_club" -> "Terremoto de Polifemo";
+            case "corrupted_god_blade" -> "Nova Corrupta";
+            default -> "Habilidad";
+        };
+    }
+
+    private Location targetLocation(Player player, int range) {
+        Block block = player.getTargetBlockExact(range);
+        return block == null ? player.getLocation().add(player.getLocation().getDirection().normalize().multiply(range)) : block.getLocation().add(0.5, 1, 0.5);
+    }
+
+    private int damageNearby(Location center, double radius, double damage, Player source, PotionEffectType effect) {
+        int hits = 0;
+        for (Entity entity : center.getWorld().getNearbyEntities(center, radius, radius, radius)) {
+            if (!(entity instanceof LivingEntity victim) || victim.equals(source) || victim instanceof ArmorStand) continue;
+            applySyntheticDamage(victim, damage, source);
+            victim.addPotionEffect(new PotionEffect(effect, 100, 1, false, true));
+            Vector push = victim.getLocation().toVector().subtract(center.toVector());
+            if (push.lengthSquared() > 0.01) victim.setVelocity(push.normalize().multiply(0.65).setY(0.25));
+            hits++;
+        }
+        return hits;
+    }
+
+    private void visualBurst(Location center, Particle particle, Sound sound, int count, float volume) {
+        center.getWorld().spawnParticle(particle, center, count, 1.4, 0.8, 1.4, 0.08);
+        center.getWorld().playSound(center, sound, volume, 1.0f);
+    }
+
+    private void heal(Player player, double amount) {
+        var attribute = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        double maxHealth = attribute == null ? 20.0 : attribute.getValue();
+        player.setHealth(Math.min(maxHealth, player.getHealth() + Math.max(0.0, amount)));
+    }
+
+    /** Starts the bounded orbit mode without removing the real item from the player's inventory. */
+    private void startLeviathanOrbit(Player player, ItemStack axe) {
+        UUID playerId = player.getUniqueId();
+        if (activeLeviathanOrbits.containsKey(playerId)) {
+            player.sendMessage("§b[Leviatán] §7El hacha ya está orbitando.");
+            return;
+        }
+        if (!tryUseLeviathanCooldown(player, 20_000L, "Órbita rúnica")) return;
+
+        ItemDisplay display = player.getWorld().spawn(player.getLocation().add(0, 1.2, 0), ItemDisplay.class);
+        display.setItemStack(axe.clone());
+        display.setInvulnerable(true);
+        display.setPersistent(false);
+
+        AtomicInteger orbitTicks = new AtomicInteger();
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || player.isDead()) {
+                    display.remove();
+                    activeLeviathanOrbits.remove(playerId);
+                    cancel();
+                    return;
+                }
+
+                int tick = orbitTicks.getAndIncrement();
+                if (tick >= 100) {
+                    display.remove();
+                    activeLeviathanOrbits.remove(playerId);
+                    cancel();
+                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_RETURN, 0.9f, 1.2f);
+                    return;
+                }
+
+                double angle = tick * 0.36;
+                Location center = player.getLocation().add(0, 1.15, 0);
+                Location position = center.clone().add(Math.cos(angle) * 2.2, Math.sin(angle * 2.0) * 0.35, Math.sin(angle) * 2.2);
+                display.teleport(position);
+                display.setRotation((float) Math.toDegrees(-angle), (float) (Math.sin(angle) * 35));
+                player.getWorld().spawnParticle(Particle.SNOWFLAKE, position, 2, 0.08, 0.08, 0.08, 0.01);
+
+                if (tick % 10 != 0) return;
+                for (Entity nearby : display.getNearbyEntities(1.4, 1.4, 1.4)) {
+                    if (!(nearby instanceof LivingEntity victim) || victim instanceof Player || victim instanceof ArmorStand || victim.equals(player)) continue;
+                    applySyntheticDamage(victim, 5.0, player);
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 1, false, true));
+                }
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
+        activeLeviathanOrbits.put(playerId, task);
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THROW, 0.9f, 0.7f);
+        player.sendMessage("§b[Leviatán] §fÓrbita rúnica activada.");
+    }
+
+    /** Throws the axe and returns the exact item through addItem, never overwriting a hand slot. */
+    private void throwLeviathanAxe(Player player, EquipmentSlot hand, ItemStack item) {
+        UUID playerId = player.getUniqueId();
+        if (pendingLeviathanAxes.containsKey(playerId)) return;
+        if (!tryUseLeviathanCooldown(player, 2_000L, "Lanzamiento rúnico")) return;
+
+        ItemStack axe = item.clone();
+        if (hand == EquipmentSlot.HAND) {
+            player.getInventory().setItemInMainHand(null);
+        } else {
+            player.getInventory().setItemInOffHand(null);
+        }
+        pendingLeviathanAxes.put(playerId, new PendingLeviathanAxe(axe));
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1.0f, 0.5f);
+
+        Snowball ball = player.launchProjectile(Snowball.class);
+        ball.setMetadata("leviathan_axe", new FixedMetadataValue(plugin, true));
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            if (ball.isDead() || !ball.isValid()) {
+                task.cancel();
+                return;
+            }
+            ball.getWorld().spawnParticle(Particle.SNOWFLAKE, ball.getLocation(), 4, 0.1, 0.1, 0.1, 0.01);
+        }, 1L, 1L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> returnLeviathanAxe(player), 20L);
+    }
+
+    /** Restores a pending axe safely; overflow drops only the exact missing axe at the player. */
+    private void returnLeviathanAxe(Player player) {
+        PendingLeviathanAxe pending = pendingLeviathanAxes.remove(player.getUniqueId());
+        if (pending == null) return;
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(pending.item());
+        for (ItemStack leftover : overflow.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), leftover).setOwner(player.getUniqueId());
+        }
+        if (player.isOnline()) {
+            player.getWorld().playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN, 1.0f, 1.2f);
+            player.getWorld().spawnParticle(Particle.SNOWFLAKE, player.getLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.05);
+        }
+    }
+
+    private boolean tryUseLeviathanCooldown(Player player, long cooldownMillis, String abilityName) {
+        long now = System.currentTimeMillis();
+        long lastUse = leviathanCooldowns.getOrDefault(player.getUniqueId(), 0L);
+        long remaining = cooldownMillis - (now - lastUse);
+        if (remaining > 0L) {
+            player.sendMessage("§b[Leviatán] §7" + abilityName + " disponible en §f" + String.format("%.1f", remaining / 1000.0) + "s§7.");
+            return false;
+        }
+        leviathanCooldowns.put(player.getUniqueId(), now);
+        return true;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -580,7 +798,7 @@ public final class BossItemListener implements Listener {
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 1, false, true));
                     victim.getWorld().playSound(victim.getLocation(), Sound.ENTITY_BAT_DEATH, 0.8f, 0.5f);
                 }
-            } else if (ball.hasMetadata("kratos_axe")) {
+            } else if (ball.hasMetadata("leviathan_axe")) {
                 Location loc = ball.getLocation();
                 loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc, 30, 0.5, 0.5, 0.5, 0.1);
                 loc.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 0.5f);
@@ -696,6 +914,7 @@ public final class BossItemListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        returnLeviathanAxe(event.getPlayer());
         restoreKratosOffhand(event.getPlayer(), true);
     }
 
@@ -703,6 +922,11 @@ public final class BossItemListener implements Listener {
     public void onPlayerDeath(org.bukkit.event.entity.PlayerDeathEvent event) {
         Player player = event.getEntity();
         UUID playerId = player.getUniqueId();
+        PendingLeviathanAxe pending = pendingLeviathanAxes.remove(playerId);
+        if (pending != null) {
+            // The axe was removed only for flight; it must participate in the same death flow as any held item.
+            event.getDrops().add(pending.item());
+        }
         if (!savedOffhands.containsKey(playerId)) {
             return;
         }

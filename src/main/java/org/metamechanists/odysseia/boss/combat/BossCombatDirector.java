@@ -100,22 +100,31 @@ public final class BossCombatDirector {
     }
 
     private void launch(OdysseyBoss boss, Player target, AttackFamily family, int rotation) {
-        int variant = Math.floorMod(rotation / 2, 3);
+        int variant = Math.floorMod(rotation / 2, 6);
         switch (family) {
             case AERIAL -> {
                 if (variant == 0) starfall(boss, target);
                 else if (variant == 1) gravityWell(boss, target);
-                else airSlam(boss, target);
+                else if (variant == 2) airSlam(boss, target);
+                else if (variant == 3) tempestCage(boss, target);
+                else if (variant == 4) skyLance(boss, target);
+                else cyclonePrison(boss, target);
             }
             case GROUND -> {
                 if (variant == 0) warStomp(boss);
                 else if (variant == 1) vortexPull(boss, target);
-                else shieldBash(boss, target);
+                else if (variant == 2) shieldBash(boss, target);
+                else if (variant == 3) ruptureWave(boss);
+                else if (variant == 4) seismicSpikes(boss);
+                else gravitySlam(boss, target);
             }
             case RANGED -> {
                 if (variant == 0) chainLightning(boss, target);
                 else if (variant == 1) spiritBeam(boss, target);
-                else arcaneMissiles(boss, target);
+                else if (variant == 2) arcaneMissiles(boss, target);
+                else if (variant == 3) hunterMark(boss, target);
+                else if (variant == 4) voidRift(boss, target);
+                else solarFlare(boss, target);
             }
         }
     }
@@ -140,7 +149,7 @@ public final class BossCombatDirector {
                 if (pull.lengthSquared() > 0.05D) {
                     player.setVelocity(pull.normalize().multiply(1.05D).setY(0.22D));
                 }
-                player.damage(9.0D, boss.getEntity());
+                player.damage(boss.scaleArenaDamage(9.0D), boss.getEntity());
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 50, 2));
             }
         });
@@ -156,6 +165,49 @@ public final class BossCombatDirector {
                 if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
                 player.setVelocity(away.normalize().multiply(0.9D).setY(1.0D));
             });
+        });
+    }
+
+    /** Traps a marked area briefly without changing blocks or forcing chunk loads. */
+    private void tempestCage(OdysseyBoss boss, Player target) {
+        Location center = target.getLocation().clone();
+        telegraph(boss, "Prisión de tormenta", center, AERIAL_DUST, Sound.ENTITY_WARDEN_SONIC_BOOM, () -> {
+            drawRing(center, 6.0D, AERIAL_DUST);
+            center.getWorld().spawnParticle(Particle.GUST, center.clone().add(0, 1, 0), 18, 2.5, 1.2, 2.5, 0.08);
+            for (Player player : playersNear(center, 6.0D)) {
+                Vector away = player.getLocation().toVector().subtract(center.toVector());
+                if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
+                player.setVelocity(away.normalize().multiply(0.95D).setY(0.45D));
+                player.damage(10.0D, boss.getEntity());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 70, 0));
+            }
+        });
+    }
+
+    /** A high-damage vertical strike that is readable and never modifies terrain. */
+    private void skyLance(OdysseyBoss boss, Player target) {
+        Location impact = target.getLocation().clone();
+        telegraph(boss, "Lanza celeste", impact, AERIAL_DUST, Sound.BLOCK_BEACON_ACTIVATE, () -> {
+            Location origin = impact.clone().add(0, 12, 0);
+            drawLine(origin, impact, Particle.END_ROD, AERIAL_DUST);
+            impact.getWorld().spawnParticle(Particle.EXPLOSION, impact, 3, 0.8, 0.3, 0.8, 0.0);
+            impact.getWorld().playSound(impact, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 1.3F, 0.8F);
+            damagePlayers(boss, impact, 4.5D, 17.0D,
+                    player -> player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 45, 1)));
+        });
+    }
+
+    /** A short aerial lock that gives players a telegraphed window to reposition. */
+    private void cyclonePrison(OdysseyBoss boss, Player target) {
+        Location center = target.getLocation().clone();
+        telegraph(boss, "Prisión ciclónica", center, AERIAL_DUST, Sound.ENTITY_BREEZE_WIND_BURST, () -> {
+            drawRing(center, 7.5D, AERIAL_DUST);
+            center.getWorld().spawnParticle(Particle.CLOUD, center.clone().add(0, 1, 0), 80, 3.5, 1.5, 3.5, 0.08);
+            for (Player player : playersNear(center, 7.5D)) {
+                player.damage(boss.scaleArenaDamage(12.0D), boss.getEntity());
+                player.setVelocity(player.getVelocity().setY(0.72D));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 50, 0));
+            }
         });
     }
 
@@ -191,9 +243,53 @@ public final class BossCombatDirector {
             Vector away = target.getLocation().toVector().subtract(boss.getEntity().getLocation().toVector());
             if (away.lengthSquared() < 0.01D) away = target.getLocation().getDirection();
             target.setVelocity(away.normalize().multiply(1.6D).setY(0.55D));
-            target.damage(15.0D, boss.getEntity());
+            target.damage(boss.scaleArenaDamage(15.0D), boss.getEntity());
             target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 1));
             target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1, 0), 30, 0.4, 0.7, 0.4, 0.15);
+        });
+    }
+
+    /** Expanding ground pulse that punishes players who remain around a melee boss. */
+    private void ruptureWave(OdysseyBoss boss) {
+        Location center = boss.getEntity().getLocation().clone();
+        telegraph(boss, "Onda de ruptura", center, GROUND_DUST, Sound.ENTITY_WARDEN_ATTACK_IMPACT, () -> {
+            drawRing(center, 11.0D, GROUND_DUST);
+            center.getWorld().spawnParticle(Particle.LAVA, center.clone().add(0, 0.2, 0), 42, 4.5, 0.15, 4.5, 0.03);
+            damagePlayers(boss, center, 11.0D, 14.0D, player -> {
+                Vector away = player.getLocation().toVector().subtract(center.toVector());
+                if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
+                player.setVelocity(away.normalize().multiply(1.1D).setY(0.65D));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 50, 1));
+            });
+        });
+    }
+
+    /** Creates a temporary visual minefield without placing blocks or damaging structures. */
+    private void seismicSpikes(OdysseyBoss boss) {
+        Location center = boss.getEntity().getLocation().clone();
+        telegraph(boss, "Púas sísmicas", center, GROUND_DUST, Sound.BLOCK_ANVIL_LAND, () -> {
+            for (int point = 0; point < 16; point++) {
+                double angle = Math.PI * 2.0D * point / 16.0D;
+                Location spike = center.clone().add(Math.cos(angle) * 7.0D, 0.15D, Math.sin(angle) * 7.0D);
+                spike.getWorld().spawnParticle(Particle.BLOCK, spike, 18, 0.35, 1.2, 0.35, 0.06,
+                        spike.clone().add(0, -1, 0).getBlock().getBlockData());
+            }
+            damagePlayers(boss, center, 9.0D, 15.0D, player ->
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 70, 1)));
+        });
+    }
+
+    /** Punishes a stationary target with a strong localized impact. */
+    private void gravitySlam(OdysseyBoss boss, Player target) {
+        Location impact = target.getLocation().clone();
+        telegraph(boss, "Martillo gravitatorio", impact, GROUND_DUST, Sound.ENTITY_IRON_GOLEM_ATTACK, () -> {
+            impact.getWorld().spawnParticle(Particle.CRIT, impact.clone().add(0, 1, 0), 70, 1.2, 1.0, 1.2, 0.15);
+            impact.getWorld().playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, 1.25F, 0.55F);
+            damagePlayers(boss, impact, 5.0D, 19.0D, player -> {
+                Vector away = player.getLocation().toVector().subtract(impact.toVector());
+                if (away.lengthSquared() < 0.01D) away = new Vector(0.1D, 0, 0.1D);
+                player.setVelocity(away.normalize().multiply(1.25D).setY(0.8D));
+            });
         });
     }
 
@@ -204,7 +300,7 @@ public final class BossCombatDirector {
             Location previous = boss.getEntity().getEyeLocation();
             for (Player victim : victims) {
                 drawLine(previous, victim.getEyeLocation(), Particle.ELECTRIC_SPARK, null);
-                victim.damage(10.0D, boss.getEntity());
+                victim.damage(boss.scaleArenaDamage(10.0D), boss.getEntity());
                 previous = victim.getEyeLocation();
             }
             impact.getWorld().playSound(impact, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 1.3F, 1.1F);
@@ -230,7 +326,48 @@ public final class BossCombatDirector {
                 victim.damage(9.0D, boss.getEntity());
             }
             if (victims.isEmpty() && target.isOnline()) {
-                target.damage(9.0D, boss.getEntity());
+                target.damage(boss.scaleArenaDamage(9.0D), boss.getEntity());
+            }
+        });
+    }
+
+    /** Marks one target and gives nearby combatants a short, visible escape window. */
+    private void hunterMark(OdysseyBoss boss, Player target) {
+        Location snapshot = target.getLocation().clone();
+        telegraph(boss, "Marca del cazador", snapshot, RANGED_DUST, Sound.ENTITY_ELDER_GUARDIAN_CURSE, () -> {
+            if (!target.isOnline() || target.isDead() || target.getWorld() != boss.getEntity().getWorld()) return;
+            target.getWorld().spawnParticle(Particle.OMINOUS_SPAWNING, target.getLocation().add(0, 1, 0),
+                    45, 0.45, 0.9, 0.45, 0.04);
+            target.damage(boss.scaleArenaDamage(16.0D), boss.getEntity());
+            target.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 80, 1));
+        });
+    }
+
+    /** A short-lived void burst that pressures ranged players without block damage. */
+    private void voidRift(OdysseyBoss boss, Player target) {
+        Location center = target.getLocation().clone();
+        telegraph(boss, "Grieta del vacío", center, RANGED_DUST, Sound.ENTITY_ENDERMAN_STARE, () -> {
+            drawRing(center, 5.0D, RANGED_DUST);
+            center.getWorld().spawnParticle(Particle.PORTAL, center.clone().add(0, 0.8, 0), 100, 2.0, 0.8, 2.0, 0.2);
+            for (Player player : playersNear(center, 5.5D)) {
+                player.damage(boss.scaleArenaDamage(13.0D), boss.getEntity());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 70, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 35, 0));
+            }
+        });
+    }
+
+    /** A visible flash that rewards looking away and staying mobile. */
+    private void solarFlare(OdysseyBoss boss, Player target) {
+        Location center = target.getLocation().clone();
+        telegraph(boss, "Llamarada solar", center, RANGED_DUST, Sound.ITEM_TOTEM_USE, () -> {
+            center.getWorld().spawnParticle(Particle.FLASH, center.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
+            center.getWorld().spawnParticle(Particle.FIREWORK, center.clone().add(0, 1, 0), 80, 3.5, 1.5, 3.5, 0.15);
+            for (Player player : playersNear(center, 8.0D)) {
+                player.damage(boss.scaleArenaDamage(11.0D), boss.getEntity());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 50, 0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 80, 0));
             }
         });
     }
@@ -265,7 +402,7 @@ public final class BossCombatDirector {
     private void damagePlayers(OdysseyBoss boss, Location center, double radius, double damage,
                                java.util.function.Consumer<Player> effect) {
         for (Player player : playersNear(center, radius)) {
-            player.damage(damage, boss.getEntity());
+            player.damage(boss.scaleArenaDamage(damage), boss.getEntity());
             effect.accept(player);
         }
     }

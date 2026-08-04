@@ -6,7 +6,7 @@
 
     <groupId>com.github.drakescraft_labs</groupId>
     <artifactId>Odysseia</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.3</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -119,6 +119,18 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                    <!-- El codigo de arenas vive en DrakesBosses. Se conserva aqui
+                         durante la migracion como referencia, pero no se empaqueta. -->
+                    <excludes>
+                        <exclude>org/metamechanists/odysseia/boss/**</exclude>
+                        <exclude>org/metamechanists/odysseia/commands/BossCommand.java</exclude>
+                        <exclude>org/metamechanists/odysseia/commands/BossWarpCommand.java</exclude>
+                        <exclude>org/metamechanists/odysseia/listeners/BossItemListener.java</exclude>
+                        <exclude>org/metamechanists/odysseia/integrations/DiosesDrakesBossBridge.java</exclude>
+                    </excludes>
+                    <testExcludes>
+                        <testExclude>org/metamechanists/odysseia/boss/**</testExclude>
+                    </testExcludes>
                     <compilerArgs>
                         <arg>-parameters</arg>
                         <arg>--enable-preview</arg>
