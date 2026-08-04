@@ -132,7 +132,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: thor, duration: 30d, hierarchy: "8"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "2500000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "2000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: thor}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipthor, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Thor entregada."}}
@@ -150,7 +150,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: anubis, duration: 30d, hierarchy: "9"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "4000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "2500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: anubis}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipanubis, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Anubis entregada."}}
@@ -168,7 +168,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: poseidon, duration: 30d, hierarchy: "10"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "6000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "3000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: poseidon}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipposeidon, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Poseidón entregada."}}
@@ -186,7 +186,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: titanjapeto, duration: 30d, hierarchy: "11"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "10000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "4000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titanjapeto}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titanjapeto, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Japeto entregada."}}
@@ -204,7 +204,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: titanoceanus, duration: 30d, hierarchy: "12"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "5000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titanoceanus}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titanoceanus, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Oceanus entregada."}}
@@ -222,7 +222,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: titanhiperion, duration: 30d, hierarchy: "13"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "25000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "6500000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titanhiperion}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titanhiperion, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Hiperión entregada."}}
@@ -240,7 +240,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: titancronos, duration: 30d, hierarchy: "14"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "40000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "8000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titancronos}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titancronos, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Cronos entregada."}}
@@ -258,7 +258,7 @@ products:
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
       - {id: rank, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: titancaos, duration: 30d, hierarchy: "15"}}
-      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "75000000"}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "10000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titancaos}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titancaos, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Caos entregada."}}
