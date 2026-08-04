@@ -56,6 +56,10 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
+    @Getter
+    private org.metamechanists.odysseia.modalities.ModalityService modalityService;
+    @Getter
+    private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -126,6 +130,22 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(shopMenu, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
+
+        // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del
+        // plugin sigue funcionando: solo se pierde la separacion de /pv dentro de las islas.
+        this.modalityService = new org.metamechanists.odysseia.modalities.ModalityService(this);
+        org.metamechanists.odysseia.commands.ModalidadesCommand modalidadesCmd =
+                new org.metamechanists.odysseia.commands.ModalidadesCommand(modalityService);
+        getCommand("modalidades").setExecutor(modalidadesCmd);
+        Bukkit.getPluginManager().registerEvents(modalidadesCmd, this);
+        try {
+            this.modalityVaults = new org.metamechanists.odysseia.vaults.ModalityVaultService(this, modalityService);
+            Bukkit.getPluginManager().registerEvents(modalityVaults, this);
+            Bukkit.getPluginManager().registerEvents(
+                    new org.metamechanists.odysseia.listeners.ModalityStorageGuardListener(this, modalityService, modalityVaults), this);
+        } catch (java.sql.SQLException error) {
+            getLogger().log(Level.SEVERE, "[Bovedas] No se pudo iniciar el almacen de bovedas por modalidad", error);
+        }
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
         this.bloodMoonManager = new BloodMoonManager(this);
@@ -334,6 +354,9 @@ public final class Odysseia extends JavaPlugin {
         sendShutdownWebhookSync();
 
         if (purchaseEngine != null) purchaseEngine.close();
+
+        // Guarda las bovedas que sigan abiertas antes de cerrar la base.
+        if (modalityVaults != null) modalityVaults.close();
 
         if (bloodMoonManager != null) {
             bloodMoonManager.shutdown();

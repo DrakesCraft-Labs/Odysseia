@@ -19,6 +19,9 @@ softdepend:
   - nLogin
 
 commands:
+  modalidades:
+    description: Menu para saltar entre Survival, SkyBlock y OneBlock.
+    aliases: [modalidad, modos, hub]
   papademar:
     description: Entrega la legendaria Papa de mar.
     permission: odysseia.papademar
@@ -111,6 +114,12 @@ commands:
     aliases: [grantoldschool, viejodesde, oldschoolgive]
     usage: /esteusuarioesviejo <jugador>
 permissions:
+  odysseia.modalidades.storage-bypass:
+    description: Permite usar los almacenamientos globales dentro de las islas (staff y pruebas).
+    default: op
+  odysseia.bovedas.6:
+    description: Otorga 6 bovedas por modalidad. Existen nodos odysseia.bovedas.<n> para cualquier cantidad.
+    default: false
   odysseia.bosswarp.use:
     description: Permite iniciar y espectear arenas de jefes.
     default: true

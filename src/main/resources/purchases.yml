@@ -1,5 +1,9 @@
+# IDs 9000001+ son PLACEHOLDERS: esos paquetes todavia no existen en Tebex.
+# Al crearlos en el panel hay que reemplazar el tebex-package-id por el real y
+# cambiar verification a VERIFIED_PRODUCTION. Estan fuera del rango real (75xxxxx)
+# a proposito, para que ningun webhook de Tebex pueda activarlos por accidente.
 catalog-version: 1
-expected-product-count: 26
+expected-product-count: 34
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -117,13 +121,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Zeus"}}
 
   vip_thor:
-    tebex-package-id: 7510360
+    tebex-package-id: 9000001
     name: "Thor"
     category: ranks
     description: "Rango VIP mensual Thor."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -135,13 +139,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Thor"}}
 
   vip_anubis:
-    tebex-package-id: 7510361
+    tebex-package-id: 9000002
     name: "Anubis"
     category: ranks
     description: "Rango VIP mensual Anubis."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -153,13 +157,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Anubis"}}
 
   vip_poseidon:
-    tebex-package-id: 7510362
+    tebex-package-id: 9000003
     name: "Poseidón"
     category: ranks
     description: "Rango VIP mensual Poseidón."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -171,13 +175,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Poseidón"}}
 
   titan_japeto:
-    tebex-package-id: 7510370
+    tebex-package-id: 9000004
     name: "Titán Japeto"
     category: ranks
     description: "Rango Titán mensual Japeto (5x Favor Guerra)."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -189,13 +193,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Japeto"}}
 
   titan_oceanus:
-    tebex-package-id: 7510371
+    tebex-package-id: 9000005
     name: "Titán Oceanus"
     category: ranks
     description: "Rango Titán mensual Oceanus (5x Favor Abismo)."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -207,13 +211,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Oceanus"}}
 
   titan_hiperion:
-    tebex-package-id: 7510372
+    tebex-package-id: 9000006
     name: "Titán Hiperión"
     category: ranks
     description: "Rango Titán mensual Hiperión (5x Favor Solar)."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -225,13 +229,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Hiperión"}}
 
   titan_cronos:
-    tebex-package-id: 7510373
+    tebex-package-id: 9000007
     name: "Titán Cronos"
     category: ranks
     description: "Rango Titán mensual Cronos (5x Favor Tiempo + Fly)."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -243,13 +247,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Cronos"}}
 
   titan_caos:
-    tebex-package-id: 7510374
+    tebex-package-id: 9000008
     name: "Titán Caos"
     category: ranks
     description: "Rango Titán mensual Caos (Top Primordial 5x)."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: VERIFIED_PRODUCTION
+    verification: UNVERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}

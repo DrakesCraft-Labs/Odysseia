@@ -1,0 +1,134 @@
+package org.metamechanists.odysseia.commands;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.metamechanists.odysseia.modalities.Modality;
+import org.metamechanists.odysseia.modalities.ModalityService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Menu para saltar entre las modalidades del servidor.
+ *
+ * Deja explicito lo que mas se pregunta: el rango y los kits se conservan en las tres, y lo
+ * unico que cambia es el inventario y las bovedas.
+ */
+public final class ModalidadesCommand implements CommandExecutor, Listener {
+
+    private final ModalityService modalities;
+
+    public ModalidadesCommand(ModalityService modalities) {
+        this.modalities = modalities;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Solo un jugador puede abrir el menu de modalidades.");
+            return true;
+        }
+        open(player);
+        return true;
+    }
+
+    private void open(Player player) {
+        List<Modality> list = modalities.modalities();
+        Modality current = modalities.resolve(player);
+        Inventory inventory = Bukkit.createInventory(new Holder(), 27, color("&8Modalidades de &6DrakesCraft"));
+
+        // Centramos las modalidades en la fila del medio.
+        int[] slots = centeredSlots(list.size());
+        for (int index = 0; index < list.size() && index < slots.length; index++) {
+            Modality modality = list.get(index);
+            boolean here = modality.id().equals(current.id());
+            List<String> lore = new ArrayList<>();
+            if (!modality.description().isBlank()) lore.add(color("&7" + modality.description()));
+            lore.add("");
+            lore.add(color("&7Tu rango y tus kits &ase conservan&7 aqui."));
+            lore.add(color("&7Lo que cambia es el &einventario&7 y las &ebovedas&7."));
+            lore.add("");
+            lore.add(here ? color("&aEstas aqui ahora.")
+                          : color("&eClic para ir &8· &7/" + modality.command()));
+            inventory.setItem(slots[index], item(modality.icon(), modality.displayName(), lore, here));
+        }
+        inventory.setItem(22, item("BOOK", "&6Como funciona", List.of(
+                color("&7El &aSurvival&7 es la modalidad base:"),
+                color("&7Slimefun, magia, jefes y progresion clasica."),
+                "",
+                color("&7En &bSkyBlock&7 y &dOneBlock&7 tu isla crece"),
+                color("&7segun el rango que tengas."),
+                "",
+                color("&7Los rangos y kits son los mismos en las tres.")), false));
+        player.openInventory(inventory);
+    }
+
+    /** Distribuye los iconos centrados en la fila del medio del cofre. */
+    static int[] centeredSlots(int count) {
+        int[] slots = new int[count];
+        int start = 13 - (count / 2);
+        for (int index = 0; index < count; index++) slots[index] = start + index;
+        return slots;
+    }
+
+    @EventHandler
+    public void onClick(InventoryClickEvent event) {
+        if (!(event.getInventory().getHolder() instanceof Holder)) return;
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || !clicked.hasItemMeta()) return;
+        String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
+
+        for (Modality modality : modalities.modalities()) {
+            if (!name.equalsIgnoreCase(ChatColor.stripColor(color(modality.displayName())))) continue;
+            if (modality.id().equals(modalities.resolve(player).id())) {
+                player.sendMessage(color("&6DrakesCraft &8· &7Ya estas en &e" + name + "&7."));
+                return;
+            }
+            player.closeInventory();
+            if (!modality.command().isBlank()) player.performCommand(modality.command());
+            return;
+        }
+    }
+
+    private static ItemStack item(String material, String name, List<String> lore, boolean glow) {
+        Material type = Material.matchMaterial(material.toUpperCase(Locale.ROOT));
+        ItemStack stack = new ItemStack(type == null ? Material.GRASS_BLOCK : type);
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(color(name));
+            meta.setLore(lore);
+            if (glow) meta.addEnchant(org.bukkit.enchantments.Enchantment.UNBREAKING, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS,
+                    org.bukkit.inventory.ItemFlag.HIDE_ATTRIBUTES);
+            stack.setItemMeta(meta);
+        }
+        return stack;
+    }
+
+    private static String color(String text) {
+        return ChatColor.translateAlternateColorCodes('&', text);
+    }
+
+    /** Marca el inventario como propio para que los clics no muevan items. */
+    private static final class Holder implements InventoryHolder {
+        @Override
+        public Inventory getInventory() {
+            return Bukkit.createInventory(this, 27);
+        }
+    }
+}

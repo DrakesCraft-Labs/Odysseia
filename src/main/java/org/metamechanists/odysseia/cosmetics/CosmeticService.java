@@ -96,7 +96,9 @@ public final class CosmeticService implements Listener {
         switch (trail) {
             case "sparkle" -> loc.getWorld().spawnParticle(Particle.CRIT, loc, 3, 0.2, 0.1, 0.2, 0.01);
             case "heart" -> loc.getWorld().spawnParticle(Particle.HEART, loc, 1, 0.2, 0.2, 0.2, 0.01);
-            case "dragon" -> loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 4, 0.2, 0.1, 0.2, 0.01);
+            // DRAGON_BREATH exige dato Float en Paper 1.21.11; va por la capa de compatibilidad.
+            case "dragon" -> org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
+                    loc.getWorld(), loc, 4, 0.2, 0.1, 0.2, 0.01, 0.01f);
             case "portal" -> loc.getWorld().spawnParticle(Particle.PORTAL, loc, 6, 0.2, 0.1, 0.2, 0.05);
         }
     }

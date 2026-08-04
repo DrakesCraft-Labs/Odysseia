@@ -177,7 +177,7 @@ class PurchaseServiceTest {
 
     @Test void packagedCatalogHasAllAuditedProductsAndNoDuplicateTebexIds() {
         ProductCatalog catalog = new ProductCatalog(new File("src/main/resources/purchases.yml"));
-        assertEquals(26, catalog.all().size());
+        assertEquals(34, catalog.all().size());
         assertTrue(catalog.validate().isEmpty());
         assertEquals(VerificationState.VERIFIED_PRODUCTION, catalog.get("protection_481").verification());
         assertEquals(ActionType.PROTECTION_STONE, catalog.get("protection_481").actions().getFirst().type());

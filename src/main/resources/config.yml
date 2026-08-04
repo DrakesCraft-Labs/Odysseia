@@ -1910,3 +1910,47 @@ exploit-guard:
       - ushop
       - ah
       - auctionhouse
+
+# Modalidades del servidor.
+# Los rangos, los kits y la economia se comparten entre todas; lo que se separa es el
+# inventario (via InvSwitcher) y el almacenamiento personal (via las bovedas de aqui abajo).
+modalidades:
+  modos:
+    # La base es Survival: cualquier mundo no declarado en otra modalidad cae aqui, asi que
+    # los mundos de galactifun, las arenas de jefes, el hub y el limbo siguen igual que siempre.
+    survival:
+      nombre: "&aSurvival"
+      descripcion: "Slimefun, magia, jefes y progresion clasica."
+      icono: GRASS_BLOCK
+      comando: survival
+      mundos: []
+    skyblock:
+      nombre: "&bSkyBlock"
+      descripcion: "Tu isla en el vacio. Crece segun tu rango."
+      icono: SNOW_BLOCK
+      comando: skyblock
+      mundos:
+        - bskyblock_world
+    oneblock:
+      nombre: "&dOneBlock"
+      descripcion: "Un solo bloque infinito, por fases."
+      icono: END_STONE
+      comando: oneblock
+      mundos:
+        - oneblock_world
+  # Bovedas personales, una coleccion independiente por modalidad.
+  bovedas:
+    filas: 6
+    cantidad-base: 3
+  guard:
+    enabled: true
+    # Dentro de una isla estos comandos abren la boveda de esa modalidad en vez de la global.
+    comandos-boveda:
+      - pv
+      - vault
+      - playervault
+    # Comandos que quedan bloqueados dentro de las islas por dar acceso a almacenamiento
+    # del survival. Se deja vacio a proposito: /ec ya lo separa InvSwitcher y las mochilas de
+    # Slimefun viajan en el inventario, que tambien esta separado. Agregar aqui si aparece
+    # algun otro puente.
+    comandos-bloqueados: []
