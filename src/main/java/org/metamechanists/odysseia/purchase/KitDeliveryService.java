@@ -69,8 +69,9 @@ public final class KitDeliveryService {
             for (Map<?, ?> values : section.getMapList("vanilla-items")) {
                 index++;
                 String path = kit + ".vanilla-items[" + index + "]";
+                boolean fromSlimefun = values.get("slimefun-item") != null;
                 Material material = Material.matchMaterial(String.valueOf(values.get("material")));
-                if (material == null || !material.isItem()) {
+                if (!fromSlimefun && (material == null || !material.isItem())) {
                     errors.add(path + ": material inválido");
                     continue;
                 }
@@ -83,7 +84,8 @@ public final class KitDeliveryService {
                 Object enchantments = values.get("enchantments");
                 if (enchantments instanceof Map<?, ?> map) {
                     for (Map.Entry<?, ?> entry : map.entrySet()) {
-                        Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(String.valueOf(entry.getKey()).toLowerCase(Locale.ROOT)));
+                        Enchantment enchantment = org.metamechanists.odysseia.kits.CustomContentResolver
+                                .enchantment(String.valueOf(entry.getKey()));
                         int level = integer(entry.getValue(), 0);
                         if (enchantment == null) errors.add(path + ": encantamiento desconocido " + entry.getKey());
                         if (level < 1 || level > 255) errors.add(path + ": nivel inválido para " + entry.getKey());
@@ -95,10 +97,20 @@ public final class KitDeliveryService {
     }
 
     private List<ItemStack> createItems(Map<?, ?> values, String transaction) {
-        Material material = Material.matchMaterial(String.valueOf(values.get("material")));
+        // Un kit puede partir de un item de Slimefun o de uno vanilla.
+        Object slimefunId = values.get("slimefun-item");
+        ItemStack item = slimefunId == null ? null
+                : org.metamechanists.odysseia.kits.CustomContentResolver.slimefunItem(String.valueOf(slimefunId));
+        if (slimefunId != null && item == null) {
+            plugin.getLogger().warning("[Kits] Item de Slimefun no encontrado: " + slimefunId);
+            return null;
+        }
+        Material material = item != null ? item.getType()
+                : Material.matchMaterial(String.valueOf(values.get("material")));
         if (material == null) return null;
         int amount = integer(values.get("amount"), 1);
-        ItemStack item = new ItemStack(material, 1);
+        if (item == null) item = new ItemStack(material, 1);
+        item.setAmount(1);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return List.of(item);
         Object name = values.get("name");
@@ -120,7 +132,8 @@ public final class KitDeliveryService {
         Object enchantments = values.get("enchantments");
         if (enchantments instanceof Map<?, ?> map) {
             for (Map.Entry<?, ?> entry : map.entrySet()) {
-                Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(String.valueOf(entry.getKey()).toLowerCase(Locale.ROOT)));
+                Enchantment enchantment = org.metamechanists.odysseia.kits.CustomContentResolver
+                        .enchantment(String.valueOf(entry.getKey()));
                 if (enchantment != null) meta.addEnchant(enchantment, integer(entry.getValue(), 1), true);
             }
         }
@@ -134,6 +147,16 @@ public final class KitDeliveryService {
                     armorMeta.setTrim(new org.bukkit.inventory.meta.trim.ArmorTrim(trimMaterial, trimPattern));
                 }
             }
+        }
+        Object attributes = values.get("attributes");
+        if (attributes instanceof Map<?, ?> attributeMap) {
+            org.metamechanists.odysseia.kits.CustomContentResolver.applyAttributes(meta, attributeMap);
+        }
+        if (Boolean.parseBoolean(String.valueOf(values.containsKey("unbreakable") ? values.get("unbreakable") : false))) {
+            meta.setUnbreakable(true);
+        }
+        if (Boolean.parseBoolean(String.valueOf(values.containsKey("hide-flags") ? values.get("hide-flags") : false))) {
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.values());
         }
         if (Boolean.parseBoolean(String.valueOf(values.containsKey("soulbound") ? values.get("soulbound") : false))) {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "soulbound"), PersistentDataType.BYTE, (byte) 1);
