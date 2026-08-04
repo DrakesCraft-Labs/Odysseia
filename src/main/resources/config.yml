@@ -1938,6 +1938,8 @@ modalidades:
       comando: oneblock
       mundos:
         - oneblock_world
+  # Comando que /survival despacha desde consola para llevar al jugador a la modalidad base.
+  comando-spawn: spawn
   # Bovedas personales, una coleccion independiente por modalidad.
   bovedas:
     filas: 6

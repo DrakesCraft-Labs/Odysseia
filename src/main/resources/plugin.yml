@@ -19,6 +19,9 @@ softdepend:
   - nLogin
 
 commands:
+  survival:
+    description: Te lleva a la modalidad principal (Survival).
+    aliases: [principal, polis]
   modalidades:
     description: Menu para saltar entre Survival, SkyBlock y OneBlock.
     aliases: [modalidad, modos, hub]
