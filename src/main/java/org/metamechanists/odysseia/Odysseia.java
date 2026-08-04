@@ -115,6 +115,10 @@ public final class Odysseia extends JavaPlugin {
         getCommand("esteusuarioesviejo").setTabCompleter(esteViejo);
         org.metamechanists.odysseia.menus.ShopMenuService shopMenu = new org.metamechanists.odysseia.menus.ShopMenuService(this);
         getCommand("drakestienda").setExecutor(shopMenu);
+        org.metamechanists.odysseia.cosmetics.CosmeticService cosmeticService = new org.metamechanists.odysseia.cosmetics.CosmeticService(this);
+        org.metamechanists.odysseia.commands.CosmeticsCommand cosmeticsCmd = new org.metamechanists.odysseia.commands.CosmeticsCommand(cosmeticService);
+        getCommand("cosmeticos").setExecutor(cosmeticsCmd);
+        getCommand("cosmeticos").setTabCompleter(cosmeticsCmd);
         java.util.List<String> kitErrors = kitGive.validateConfiguration();
         if (kitErrors.isEmpty()) {
             getLogger().info("[SUCCESS] Configuración de kits validada.");
@@ -154,6 +158,7 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PresenceEventListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.WorldChangeSafetyListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
         org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);

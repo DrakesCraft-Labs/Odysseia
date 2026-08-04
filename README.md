@@ -5,15 +5,26 @@
 # Odysseia Engine v1.1.0 🦀☕
 
 <p align="center">
-  <strong>Motor Mítico, Noche de Terror, Sistema de Bosses y Gestión para Purpur/Paper 1.21.11</strong><br>
-  Reescrito en <strong>Rust (Edición 2021 Workspace)</strong> para máximo rendimiento + Binding nativo Java 21 (FFM / Project Panama).
+  <strong>Motor Mítico, Sistemas Core, Tienda, Kits y Administración para Purpur/Paper 1.21.11</strong><br>
+  Arquitectura modular desacoplada: Core Odysseia + Módulos Autónomos (DiosesDrakes, DrakesBosses, DrakesArcana).
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Language-Rust_2021_|_Java_21-orange.svg" alt="Rust + Java 21" />
+  <img src="https://img.shields.io/badge/Language-Java_21_|_Rust_2021-orange.svg" alt="Java 21 + Rust" />
   <img src="https://img.shields.io/badge/Minecraft-Paper_/_Purpur_1.21.11-brightgreen.svg" alt="Minecraft 1.21.11" />
   <img src="https://img.shields.io/badge/Server-Star_Production-blue.svg" alt="Star Production" />
 </p>
+
+---
+
+## 🏛️ Ecosistema Canónico de Plugins DrakesCraft
+
+Odysseia fue desacoplado en una arquitectura limpia y modular de 4 plugins autónomos:
+
+1. **`Odysseia` (Este Repositorio)**: Motor central de DrakesCraft. Gestiona la pasarela Tebex, entrega de compras, sistema de kits, recompensas diarias, guardias de seguridad/automatización, juegos de chat, `/restart30` con guardado preventivo, y avisos de seguridad de inventario al cambiar de mundo/modalidad.
+2. **`DiosesDrakes`**: Sistema divino y panteones (Greco-Romano, Nórdico, Céltico, Egipcio, Hindú). Gestiona bendiciones, habilidad de dioses, favor acumulado y anclas de Convergencia pública.
+3. **`DrakesBosses`**: Arenas aisladas de Jefes en la dimensión `drakes_bosses`. Cobro de entradas con Dragmas, entrega segura de botín por buzón `/buzon`, e invocación aislada (`/bosswarp`).
+4. **`DrakesArcana`**: Sistema elemental (Fuego, Agua, Aire, Tierra, Hielo, Electro). Habilidades PvE, meditación, códice y sintonía espiritual con dioses.
 
 ---
 

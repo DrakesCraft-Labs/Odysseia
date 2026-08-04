@@ -57,6 +57,9 @@ commands:
   restart30:
     description: Reinicio seguro con guardado y respaldo de inventarios.
     permission: drakes.admin
+  cosmeticos:
+    description: Menú de auras, rastros y efectos visuales de muerte.
+    aliases: [cosmetico, cosmetics]
   auradueno:
     description: Elimina absolutamente todas las entidades alrededor del ejecutor.
     aliases: [auradueño]
