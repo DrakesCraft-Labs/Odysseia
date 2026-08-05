@@ -58,6 +58,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     @Getter
     private org.metamechanists.odysseia.modalities.ModalityService modalityService;
+    private org.metamechanists.odysseia.listeners.ModalityStorageGuardListener modalityStorageGuard;
     @Getter
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
@@ -145,8 +146,9 @@ public final class Odysseia extends JavaPlugin {
         try {
             this.modalityVaults = new org.metamechanists.odysseia.vaults.ModalityVaultService(this, modalityService);
             Bukkit.getPluginManager().registerEvents(modalityVaults, this);
-            Bukkit.getPluginManager().registerEvents(
-                    new org.metamechanists.odysseia.listeners.ModalityStorageGuardListener(this, modalityService, modalityVaults), this);
+            this.modalityStorageGuard =
+                    new org.metamechanists.odysseia.listeners.ModalityStorageGuardListener(this, modalityService, modalityVaults);
+            Bukkit.getPluginManager().registerEvents(modalityStorageGuard, this);
         } catch (java.sql.SQLException error) {
             getLogger().log(Level.SEVERE, "[Bovedas] No se pudo iniciar el almacen de bovedas por modalidad", error);
         }
@@ -268,10 +270,23 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.commands.KitGiveCommand validator = new org.metamechanists.odysseia.commands.KitGiveCommand(this);
         errors.addAll(validator.validateConfiguration().stream().map(error -> "kits: " + error).toList());
 
+        // Servicios que leen su configuracion una sola vez al arrancar. Sin esto un
+        // /odysseia reload decia "recarga completa sin errores" y dejaba el guard con la lista
+        // vieja: la separacion entre modalidades siguio abierta despues de un reinicio porque
+        // nadie volvia a leer modalidades.guard.
+        if (modalityService != null) {
+            modalityService.reload();
+        }
+        if (modalityStorageGuard != null) {
+            modalityStorageGuard.reload();
+        } else {
+            errors.add("modalidades: el guard de almacenamiento no esta activo");
+        }
+
         startSchedulers();
         startStarTelemetry();
         if (discordTranslationBridge != null) discordTranslationBridge.reload();
-        getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, schedulers y purchase engine.");
+        getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, modalidades, schedulers y purchase engine.");
         return errors;
     }
 
@@ -284,6 +299,7 @@ public final class Odysseia extends JavaPlugin {
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
                     new InputStreamReader(stream, StandardCharsets.UTF_8));
             boolean changed = mergeMissingConfig(getConfig(), defaults);
+            changed |= adoptEmptyListDefaults(getConfig(), defaults);
             changed |= migrateUnsafeLegacyDefaults(getConfig());
             if (changed) {
                 saveConfig();
@@ -292,6 +308,36 @@ public final class Odysseia extends JavaPlugin {
             getLogger().log(Level.SEVERE, "No se pudo ampliar config.yml con los valores por defecto", error);
             throw new IllegalStateException("No se pudo migrar config.yml", error);
         }
+    }
+
+    /**
+     * Rutas de lista donde una lista vacia en produccion significa "todavia sin configurar" y hay
+     * que adoptar el valor del JAR.
+     *
+     * El merge normal solo agrega claves ausentes, asi que una lista que ya existia vacia nunca se
+     * llenaba. Paso en produccion: el JAR traia los diez comandos que cierran el paso de items
+     * entre modalidades y el servidor arranco con la lista vacia de la version anterior, dejando
+     * la fuga abierta sin ningun aviso.
+     */
+    private static final List<String> ADOPT_IF_EMPTY = List.of(
+            "modalidades.guard.comandos-bloqueados",
+            "modalidades.guard.comandos-boveda");
+
+    static boolean adoptEmptyListDefaults(ConfigurationSection current, ConfigurationSection defaults) {
+        boolean changed = false;
+        for (String path : ADOPT_IF_EMPTY) {
+            List<?> porDefecto = defaults.getList(path);
+            if (porDefecto == null || porDefecto.isEmpty()) {
+                continue;
+            }
+            List<?> actual = current.getList(path);
+            if (actual != null && !actual.isEmpty()) {
+                continue;
+            }
+            current.set(path, porDefecto);
+            changed = true;
+        }
+        return changed;
     }
 
     static boolean mergeMissingConfig(ConfigurationSection current, ConfigurationSection defaults) {

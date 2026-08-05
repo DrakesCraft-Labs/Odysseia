@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConfigDefaultsMergeTest {
@@ -90,5 +91,39 @@ class ConfigDefaultsMergeTest {
         assertEquals(40, config.getInt("automation-guard.redstone.fast-pulse-limit"));
         assertEquals(120, config.getInt("automation-guard.redstone.long-window-seconds"));
         assertEquals(180, config.getInt("automation-guard.redstone.long-pulse-limit"));
+    }
+
+    /**
+     * Una lista que ya existe vacia en produccion no se rellenaba con el default del JAR, asi que
+     * el guard de modalidades arranco con la lista vacia de la version anterior y la fuga de items
+     * siguio abierta despues del reinicio.
+     */
+    @Test
+    void emptyProductionListsAdoptTheDefaultFromTheJar() throws Exception {
+        YamlConfiguration defaults = new YamlConfiguration();
+        defaults.load(new File("src/main/resources/config.yml"));
+
+        YamlConfiguration produccion = new YamlConfiguration();
+        produccion.set("modalidades.guard.comandos-bloqueados", new java.util.ArrayList<String>());
+        produccion.set("modalidades.guard.comandos-boveda", java.util.List.of("pv"));
+
+        assertTrue(Odysseia.adoptEmptyListDefaults(produccion, defaults));
+        assertTrue(produccion.getStringList("modalidades.guard.comandos-bloqueados").contains("ah"),
+                "la lista vacia debe adoptar el default del JAR");
+        assertEquals(java.util.List.of("pv"),
+                produccion.getStringList("modalidades.guard.comandos-boveda"),
+                "una lista ya configurada no se pisa");
+    }
+
+    @Test
+    void adoptingIsIdempotent() throws Exception {
+        YamlConfiguration defaults = new YamlConfiguration();
+        defaults.load(new File("src/main/resources/config.yml"));
+        YamlConfiguration produccion = new YamlConfiguration();
+        produccion.set("modalidades.guard.comandos-bloqueados", new java.util.ArrayList<String>());
+
+        assertTrue(Odysseia.adoptEmptyListDefaults(produccion, defaults));
+        assertFalse(Odysseia.adoptEmptyListDefaults(produccion, defaults),
+                "una segunda pasada no debe marcar cambios");
     }
 }
