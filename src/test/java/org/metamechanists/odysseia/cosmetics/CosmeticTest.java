@@ -50,6 +50,40 @@ class CosmeticTest {
         }
     }
 
+    /**
+     * El rango que muestra el menu tiene que ser el que de verdad da el permiso en LuckPerms.
+     * Antes no coincidia: el catalogo decia que el totem era de Hermes cuando el permiso
+     * drakes.cosmetics.death.totem lo tiene Hestia, y asi ocho casos mas.
+     */
+    @Test
+    void declaredRankMatchesTheOneThatGrantsThePermission() {
+        record Esperado(String tipo, String id, String rango) { }
+        List<Esperado> reales = List.of(
+                new Esperado("aura", "flame", "Hércules"),
+                new Esperado("aura", "lightning", "Thor"),
+                new Esperado("aura", "soul", "Anubis"),
+                new Esperado("aura", "water", "Poseidón"),
+                new Esperado("aura", "titan", "Titanes"),
+                new Esperado("aura", "caos", "Titán Caos"),
+                new Esperado("rastro", "sparkle", "Hércules"),
+                new Esperado("rastro", "dragon", "Hermes"),
+                new Esperado("rastro", "portal", "Artemisa"),
+                new Esperado("rastro", "heart", "Afrodita"),
+                new Esperado("muerte", "totem", "Hestia"),
+                new Esperado("muerte", "lightning", "Hefesto"),
+                new Esperado("muerte", "explosion", "Zeus"));
+
+        for (Esperado esperado : reales) {
+            Cosmetic cosmetic = Cosmetic.of(esperado.tipo()).stream()
+                    .filter(c -> c.id().equals(esperado.id()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError(
+                            "falta el cosmetico " + esperado.tipo() + "/" + esperado.id()));
+            assertEquals(esperado.rango(), cosmetic.rango(),
+                    esperado.tipo() + "/" + esperado.id() + " no declara el rango que da el permiso");
+        }
+    }
+
     @Test
     void catalogGrewBeyondTheOriginalThirteen() {
         int total = Cosmetic.AURAS.size() + Cosmetic.RASTROS.size() + Cosmetic.MUERTES.size();

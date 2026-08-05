@@ -13,47 +13,53 @@ import java.util.Locale;
  */
 public record Cosmetic(String id, String nombre, String rango) {
 
+    /**
+     * Rango de los cosmeticos que todavia no tienen permiso asignado en LuckPerms. Existen en el
+     * catalogo para poder repartirlos sin recompilar, pero hoy nadie los alcanza.
+     */
+    public static final String SIN_ASIGNAR = "Sin asignar";
+
     /** Auras: particulas permanentes alrededor del jugador. */
     public static final List<Cosmetic> AURAS = List.of(
             new Cosmetic("flame", "Llama", "Hércules"),
-            new Cosmetic("sparkle", "Destello", "Hestia"),
-            new Cosmetic("water", "Marea", "Hermes"),
-            new Cosmetic("ember", "Brasa", "Hefesto"),
-            new Cosmetic("forest", "Espesura", "Artemisa"),
-            new Cosmetic("heart", "Encanto", "Afrodita"),
-            new Cosmetic("lightning", "Tormenta", "Zeus"),
-            new Cosmetic("soul", "Ánima", "Thor"),
-            new Cosmetic("sand", "Arena", "Anubis"),
-            new Cosmetic("abyss", "Abismo", "Poseidón"),
+            new Cosmetic("lightning", "Tormenta", "Thor"),
+            new Cosmetic("soul", "Ánima", "Anubis"),
+            new Cosmetic("water", "Marea", "Poseidón"),
             new Cosmetic("titan", "Titán", "Titanes"),
-            new Cosmetic("solar", "Solar", "Titán Hiperión"),
-            new Cosmetic("void", "Vacío", "Titán Cronos"),
             new Cosmetic("caos", "Caos", "Titán Caos"),
+            new Cosmetic("sparkle", "Destello", SIN_ASIGNAR),
+            new Cosmetic("ember", "Brasa", SIN_ASIGNAR),
+            new Cosmetic("forest", "Espesura", SIN_ASIGNAR),
+            new Cosmetic("heart", "Encanto", SIN_ASIGNAR),
+            new Cosmetic("sand", "Arena", SIN_ASIGNAR),
+            new Cosmetic("abyss", "Abismo", SIN_ASIGNAR),
+            new Cosmetic("solar", "Solar", SIN_ASIGNAR),
+            new Cosmetic("void", "Vacío", SIN_ASIGNAR),
             new Cosmetic("staff", "Cetro", "Staff"));
 
     /** Rastros: particulas que quedan al caminar. */
     public static final List<Cosmetic> RASTROS = List.of(
             new Cosmetic("sparkle", "Chispas", "Hércules"),
-            new Cosmetic("heart", "Corazones", "Hestia"),
-            new Cosmetic("note", "Notas", "Hermes"),
-            new Cosmetic("lava", "Lava", "Hefesto"),
-            new Cosmetic("leaf", "Hojas", "Artemisa"),
-            new Cosmetic("cloud", "Nube", "Afrodita"),
-            new Cosmetic("portal", "Portal", "Zeus"),
-            new Cosmetic("dragon", "Aliento", "Thor"),
-            new Cosmetic("snow", "Escarcha", "Anubis"),
-            new Cosmetic("bubble", "Burbujas", "Poseidón"),
-            new Cosmetic("rune", "Runas", "Titanes"),
+            new Cosmetic("dragon", "Aliento", "Hermes"),
+            new Cosmetic("portal", "Portal", "Artemisa"),
+            new Cosmetic("heart", "Corazones", "Afrodita"),
+            new Cosmetic("note", "Notas", SIN_ASIGNAR),
+            new Cosmetic("lava", "Lava", SIN_ASIGNAR),
+            new Cosmetic("leaf", "Hojas", SIN_ASIGNAR),
+            new Cosmetic("cloud", "Nube", SIN_ASIGNAR),
+            new Cosmetic("snow", "Escarcha", SIN_ASIGNAR),
+            new Cosmetic("bubble", "Burbujas", SIN_ASIGNAR),
+            new Cosmetic("rune", "Runas", SIN_ASIGNAR),
             new Cosmetic("staff", "Autoridad", "Staff"));
 
     /** Efectos de muerte: se disparan una vez al morir. */
     public static final List<Cosmetic> MUERTES = List.of(
-            new Cosmetic("smoke", "Humo", "Hércules"),
-            new Cosmetic("totem", "Tótem", "Hermes"),
-            new Cosmetic("explosion", "Explosión", "Hefesto"),
-            new Cosmetic("lightning", "Rayo", "Zeus"),
-            new Cosmetic("souls", "Almas", "Anubis"),
-            new Cosmetic("implosion", "Implosión", "Titanes"),
+            new Cosmetic("totem", "Tótem", "Hestia"),
+            new Cosmetic("lightning", "Rayo", "Hefesto"),
+            new Cosmetic("explosion", "Explosión", "Zeus"),
+            new Cosmetic("smoke", "Humo", SIN_ASIGNAR),
+            new Cosmetic("souls", "Almas", SIN_ASIGNAR),
+            new Cosmetic("implosion", "Implosión", SIN_ASIGNAR),
             new Cosmetic("staff", "Retirada", "Staff"));
 
     public static List<Cosmetic> of(String tipo) {
