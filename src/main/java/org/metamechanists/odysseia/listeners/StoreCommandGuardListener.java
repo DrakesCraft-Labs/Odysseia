@@ -14,7 +14,8 @@ import java.util.UUID;
 public final class StoreCommandGuardListener implements Listener {
     private static final ThreadLocal<UUID> INTERNAL_DISPATCH = new ThreadLocal<>();
     private static final Set<String> LEGACY_STORE_COMMANDS = Set.of(
-            "shop", "ultimateshop", "sfmercado", "drakestienda", "mercado", "tiendaitems", "tiendamateriales", "tmateriales"
+            "shop", "shops", "store", "market", "ultimateshop", "sfmercado", "drakestienda",
+            "mercado", "tiendaitems", "tiendamateriales", "tmateriales"
     );
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -26,8 +27,11 @@ public final class StoreCommandGuardListener implements Listener {
         }
 
         event.setCancelled(true);
-        event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&6DrakesCraft &8· &7La tienda se abre con &e/tienda&7."));
+        org.bukkit.entity.Player player = event.getPlayer();
+        // Abrimos la tienda en vez de mandar a escribir otro comando. Un jugador que escribe
+        // /shop o /store quiere comprar; decirle que se dice distinto solo lo pierde, y para
+        // quien no habla espanol es una pared.
+        runInternal(player, () -> player.performCommand("drakestienda"));
     }
 
     /** Allows the unified menu to invoke a guarded destination on the same server thread. */

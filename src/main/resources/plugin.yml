@@ -21,10 +21,10 @@ softdepend:
 commands:
   survival:
     description: Te lleva a la modalidad principal (Survival).
-    aliases: [principal, polis]
+    aliases: [principal, polis, main]
   modalidades:
     description: Menu para saltar entre Survival, SkyBlock y OneBlock.
-    aliases: [modalidad, modos, hub]
+    aliases: [modalidad, modos, hub, modes, modalities]
   buy:
     # Reemplaza el /buy del plugin de Tebex, que hay que apagar en su config.yml.
     description: Enlace a la tienda oficial en web.drakescraft.cl.
