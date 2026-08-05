@@ -13,8 +13,27 @@ class DragonFlightPolicyTest {
     void clampsUnsafeSpeeds() {
         assertEquals(0.5, DragonFlightPolicy.clampSpeed(-20));
         assertEquals(1.0, DragonFlightPolicy.clampSpeed(1.0));
-        assertEquals(1.5, DragonFlightPolicy.clampSpeed(20));
+        assertEquals(2.2, DragonFlightPolicy.clampSpeed(20));
         assertEquals(0.5, DragonFlightPolicy.clampSpeed(Double.NaN));
+    }
+
+    @Test
+    void sprintAcceleratesAndSneakBrakes() {
+        assertEquals(1.36, DragonFlightPolicy.throttle(0.8, true, false), 0.0001);
+        assertEquals(0.5, DragonFlightPolicy.throttle(0.8, false, true), 0.0001);
+        assertEquals(0.8, DragonFlightPolicy.throttle(0.8, false, false), 0.0001);
+    }
+
+    @Test
+    void pressingBothKeysFallsBackToCruise() {
+        assertEquals(0.8, DragonFlightPolicy.throttle(0.8, true, true), 0.0001);
+    }
+
+    @Test
+    void throttleNeverEscapesTheHardLimits() {
+        assertEquals(2.2, DragonFlightPolicy.throttle(2.0, true, false), 0.0001);
+        assertEquals(0.5, DragonFlightPolicy.throttle(0.5, false, true), 0.0001);
+        assertEquals(0.5, DragonFlightPolicy.throttle(Double.NaN, false, false), 0.0001);
     }
 
     @Test

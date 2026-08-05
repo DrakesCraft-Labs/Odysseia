@@ -103,8 +103,8 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         EnderDragon dragon = session.dragon();
         Location current = dragon.getLocation();
         Vector direction = player.getEyeLocation().getDirection().normalize();
-        double speed = DragonFlightPolicy.clampSpeed(playerSpeeds.getOrDefault(
-                player.getUniqueId(), session.variant().defaultSpeed()));
+        double cruise = playerSpeeds.getOrDefault(player.getUniqueId(), session.variant().defaultSpeed());
+        double speed = DragonFlightPolicy.throttle(cruise, player.isSprinting(), player.isSneaking());
         Location target = current.clone().add(direction.clone().multiply(speed));
         World world = current.getWorld();
         if (world == null) return;
@@ -134,6 +134,33 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         dragon.setVelocity(velocity);
         session.setLastSafe(current);
         spawnTrail(session.variant(), current);
+        flapWings(session, world, current);
+        showFlightBar(player, speed, cruise, current.getY());
+    }
+
+    /** Aleteo audible, mas rapido cuanto mas alto vuela. Sin esto el vuelo era mudo. */
+    private void flapWings(FlightSession session, World world, Location location) {
+        if (!session.shouldFlap()) return;
+        DragonVariant variant = session.variant();
+        world.playSound(location, Sound.ENTITY_ENDER_DRAGON_FLAP, variant.volume() * 0.45F, variant.pitch());
+    }
+
+    /** Barra de estado: sin ella el jinete no sabe si va acelerando ni a que altura esta. */
+    private void showFlightBar(Player player, double speed, double cruise, double height) {
+        String estado;
+        if (player.isSprinting() == player.isSneaking()) {
+            estado = ChatColor.GRAY + "crucero";
+        } else if (player.isSprinting()) {
+            estado = ChatColor.GOLD + "acelerando";
+        } else {
+            estado = ChatColor.AQUA + "frenando";
+        }
+        player.sendActionBar(ChatColor.LIGHT_PURPLE + "✈ "
+                + ChatColor.WHITE + String.format(java.util.Locale.ROOT, "%.1f", speed)
+                + ChatColor.DARK_GRAY + "/" + String.format(java.util.Locale.ROOT, "%.1f", cruise)
+                + "  " + estado
+                + ChatColor.DARK_GRAY + "  ·  " + ChatColor.WHITE + "Y " + (int) height
+                + ChatColor.DARK_GRAY + "  ·  " + ChatColor.GRAY + "correr acelera, agacharse frena");
     }
 
     private void spawnTrail(DragonVariant variant, Location location) {
@@ -516,6 +543,7 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         private final EnderDragon dragon;
         private Location lastSafe;
         private long pendingChunk = Long.MIN_VALUE;
+        private int flapTicks;
 
         private FlightSession(DragonVariant variant, EnderDragon dragon, Location lastSafe) {
             this.variant = variant;
@@ -534,5 +562,11 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
             return true;
         }
         void clearPendingChunk() { pendingChunk = Long.MIN_VALUE; }
+
+        /** El bucle corre cada tick; el aleteo suena cada 25 para no saturar el audio. */
+        boolean shouldFlap() {
+            flapTicks = (flapTicks + 1) % 25;
+            return flapTicks == 0;
+        }
     }
 }
