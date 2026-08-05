@@ -764,8 +764,15 @@ automation-guard:
 # ─────────────────────────────────────────────
 # El catálogo usa las claves lógicas de aliases. Solo esta sección conoce
 # los aliases reales de ProtectionStones y su sintaxis de entrega.
+# Tienda oficial. Es la unica fuente de verdad del catalogo: /buy enlaza aqui en vez de abrir
+# el GUI de Tebex, que anunciaba "Duracion: 30 dias" en todos los paquetes por igual.
+tienda:
+  url-web: "https://web.drakescraft.cl/store.html"
+
 protectionstones:
-  give-command: "ps give {alias} {player} {amount}"
+  # Las piedras se entregan por la API de ProtectionStones usando el alias, tanto en las compras
+  # de Tebex como en los kits. No hay comando de consola: "/ps give" identifica el bloque por su
+  # MATERIAL y cuatro pares de bloques comparten material, asi que entregaria el equivocado.
   aliases:
     starter: novato
     hercules: viphercules
