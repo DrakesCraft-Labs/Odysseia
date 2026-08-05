@@ -716,6 +716,18 @@ sfmaster-audit:
 
 chat-filter:
   enabled: true
+  # Cuando la sancion se anuncia, el resto del chat entiende por que alguien dejo de hablar.
+  # La palabra no se repite en el anuncio: solo el staff la ve.
+  anuncio-global: true
+  # Warns acumulados que disparan cada sancion.
+  warns:
+    mute: 3
+    kick: 5
+    ban: 7
+  duracion:
+    mute: 10m
+    ban: 1d
+  # Se comparan como palabra completa y tras deshacer el leet: "m1erd4" cuenta, "diputado" no.
   words:
     - "ctm"
     - "conchetumare"
