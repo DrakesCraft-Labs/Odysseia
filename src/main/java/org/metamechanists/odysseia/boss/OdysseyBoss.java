@@ -37,6 +37,14 @@ public abstract class OdysseyBoss {
 
     // Sistema de fases y diálogos común a todos los jefes.
     protected int currentPhase = 1;
+
+    /**
+     * Como se mueve este jefe en combate. Se sobreescribe en una linea por jefe; el resto de la
+     * puesta en escena la hereda de {@link BossSpectacle} sin tocar nada mas.
+     */
+    protected BossSpectacle.Arquetipo arquetipo() {
+        return BossSpectacle.Arquetipo.ACOSADOR;
+    }
     private long lastDialogue = 0L;
     private boolean rebirthConsumed;
     private long rebirthInvulnerableUntil;
@@ -248,6 +256,9 @@ public abstract class OdysseyBoss {
         loc.getWorld().spawnParticle(Particle.FLAME, loc, 60, 1, 1.5, 1, 0.1);
         loc.getWorld().spawnParticle(Particle.LARGE_SMOKE, loc, 30, 1, 1, 1, 0.05);
         loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_SPAWN, 1.2f, phase == 3 ? 0.5f : 0.8f);
+        // Onda expansiva y temblor: el cambio de fase se siente, no solo se lee en el chat.
+        BossSpectacle.onda(loc, 6.0D + phase * 2, Particle.END_ROD);
+        BossSpectacle.temblor(loc, 24.0D, phase >= 3 ? 5.0F : 3.0F);
         emitPhaseRupture(loc, phase);
         speak(phase == 3
                 ? "¡No conocéis mi verdadero poder!"
@@ -288,7 +299,13 @@ public abstract class OdysseyBoss {
 
     /** Aura de partículas constante según la fase (lo llama el tick del manager). */
     public void tickAura() {
-        if (entity == null || entity.isDead() || currentPhase < 2) {
+        if (entity == null || entity.isDead()) {
+            return;
+        }
+        // El posicionamiento va aqui porque el manager ya llama este tick para todos los jefes:
+        // asi los 22 ganan comportamiento sin tocar sus archivos.
+        BossSpectacle.mantenerPosicion(entity, arquetipo());
+        if (currentPhase < 2) {
             return;
         }
 
@@ -308,6 +325,10 @@ public abstract class OdysseyBoss {
                 player.sendActionBar(message);
             }
         }
+        // Aviso visible en el suelo: el jugador ve venir el golpe y puede reaccionar.
+        BossSpectacle.telegrafiar(entity.getLocation(), 3.5D + currentPhase,
+                currentPhase >= 3 ? org.bukkit.Color.fromRGB(255, 40, 40)
+                                  : org.bukkit.Color.fromRGB(255, 170, 40));
     }
 
     public boolean isPhaseShielded() {

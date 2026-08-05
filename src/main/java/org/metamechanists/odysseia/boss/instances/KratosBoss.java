@@ -23,6 +23,11 @@ import java.util.UUID;
 
 public class KratosBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private static final String KRATOS_HEAD_BASE64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODY3YWNlZDhjNDRlMTU3ZTkzNTg0OTBiNTRkYWFiZDA3ZjQ2MjljNjU5YjdhNTE0NWRjNTYzYTQ5YTQ5ZTFjMyJ9fX0=";

@@ -25,6 +25,11 @@ import java.util.Random;
  */
 public class ArtemisaBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
+    }
+
     private final Random random = new Random();
 
     public ArtemisaBoss(LivingEntity entity) {

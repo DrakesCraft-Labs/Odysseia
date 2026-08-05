@@ -28,6 +28,11 @@ import java.util.Random;
  */
 public class PrometeoBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
+    }
+
     private final Random random = new Random();
     private boolean phoenixUsed = false;
     private boolean invulnerable = false;

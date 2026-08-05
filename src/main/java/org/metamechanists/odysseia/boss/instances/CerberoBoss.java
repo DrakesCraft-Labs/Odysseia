@@ -24,6 +24,11 @@ import java.util.Random;
  */
 public class CerberoBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
+    }
+
     private final Random random = new Random();
     private int headsFallen = 0;
 

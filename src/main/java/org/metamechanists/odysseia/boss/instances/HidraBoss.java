@@ -26,6 +26,11 @@ import java.util.UUID;
  */
 public class HidraBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
+    }
+
     private final Random random = new Random();
     private boolean phase66Triggered = false;
     private boolean phase33Triggered = false;

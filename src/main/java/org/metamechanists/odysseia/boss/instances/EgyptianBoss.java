@@ -21,6 +21,11 @@ import java.util.Random;
 /** Egyptian endgame bosses with bounded, distinct signatures. */
 public final class EgyptianBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
+    }
+
     public enum Kind { RA, ISIS, ANUBIS, SET }
 
     private final Kind kind;

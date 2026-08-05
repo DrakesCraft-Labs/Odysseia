@@ -24,6 +24,11 @@ import java.util.UUID;
 
 public final class LokiBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.EMBOSCADA;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private static final String LOKI_HEAD_BASE64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmM2NzNjODE5ODVlMTQ5MTU4ZjZiMDYzZTZiZTA5MGFlZjU0MTUxZjBmM2FmZDdhODMyMjMwM2FiOTkyODBlOSJ9fX0=";

@@ -28,6 +28,11 @@ import java.util.Random;
  */
 public class WitherStormBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
+    }
+
     private final Random random = new Random();
 
     public WitherStormBoss(LivingEntity entity) {

@@ -15,6 +15,11 @@ import java.util.Random;
 
 public class CirceBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.EMBOSCADA;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
 

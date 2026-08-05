@@ -28,6 +28,11 @@ import java.util.Random;
  */
 public class HeimdallBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
+    }
+
     private final Random random = new Random();
 
     public HeimdallBoss(LivingEntity entity) {

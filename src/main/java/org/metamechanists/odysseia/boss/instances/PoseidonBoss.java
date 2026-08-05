@@ -18,6 +18,11 @@ import java.util.Random;
 
 public class PoseidonBoss extends OdysseyBoss {
 
+    @Override
+    protected org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo arquetipo() {
+        return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
 
