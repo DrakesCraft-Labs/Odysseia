@@ -130,6 +130,8 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(chatFilter, this);
         Bukkit.getPluginManager().registerEvents(shopMenu, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
+        Bukkit.getPluginManager().registerEvents(
+                new org.metamechanists.odysseia.listeners.CorruptItemGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
 
         // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del

@@ -963,6 +963,18 @@ kits:
           fire_protection: 14
           blast_protection: 14
           projectile_protection: 14
+          hardened: 3
+          elemental_protection: 3
+          flare: 2
+          hardened: 3
+          elemental_protection: 3
+          flare: 2
+          hardened: 3
+          elemental_protection: 3
+          flare: 2
+          hardened: 3
+          elemental_protection: 3
+          flare: 2
         attributes:
           max_health: 4
         soulbound: true
@@ -1034,6 +1046,15 @@ kits:
           fire_aspect: 3
           mending: 1
           unbreaking: 15
+          thunder: 4
+          rage: 3
+          double_strike: 2
+          thunder: 4
+          rage: 3
+          double_strike: 2
+          thunder: 4
+          rage: 3
+          double_strike: 2
         attributes:
           attack_damage: 1.5
         soulbound: true
@@ -1050,6 +1071,10 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 15
+          haste: 3
+          telekinesis: 1
+          haste: 3
+          telekinesis: 1
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1133,6 +1158,18 @@ kits:
           fire_protection: 15
           blast_protection: 15
           projectile_protection: 15
+          hardened: 4
+          regrowth: 3
+          fire_shield: 3
+          hardened: 4
+          regrowth: 3
+          fire_shield: 3
+          hardened: 4
+          regrowth: 3
+          fire_shield: 3
+          hardened: 4
+          regrowth: 3
+          fire_shield: 3
         attributes:
           max_health: 6
         soulbound: true
@@ -1204,6 +1241,15 @@ kits:
           fire_aspect: 3
           mending: 1
           unbreaking: 16
+          vampire: 4
+          wither: 3
+          decapitator: 3
+          vampire: 4
+          wither: 3
+          decapitator: 3
+          vampire: 4
+          wither: 3
+          decapitator: 3
         attributes:
           attack_damage: 2.0
         soulbound: true
@@ -1220,6 +1266,12 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 16
+          haste: 3
+          telekinesis: 1
+          lucky_miner: 3
+          haste: 3
+          telekinesis: 1
+          lucky_miner: 3
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1303,6 +1355,18 @@ kits:
           fire_protection: 16
           blast_protection: 16
           projectile_protection: 16
+          hardened: 4
+          water_breathing: 3
+          ice_shield: 3
+          hardened: 4
+          water_breathing: 3
+          ice_shield: 3
+          hardened: 4
+          water_breathing: 3
+          ice_shield: 3
+          hardened: 4
+          water_breathing: 3
+          ice_shield: 3
         attributes:
           max_health: 8
         soulbound: true
@@ -1374,6 +1438,15 @@ kits:
           fire_aspect: 3
           mending: 1
           unbreaking: 17
+          ice_aspect: 4
+          cold_steel: 3
+          double_strike: 3
+          ice_aspect: 4
+          cold_steel: 3
+          double_strike: 3
+          ice_aspect: 4
+          cold_steel: 3
+          double_strike: 3
         attributes:
           attack_damage: 2.5
         soulbound: true
@@ -1390,6 +1463,12 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 17
+          haste: 4
+          telekinesis: 1
+          thrifty: 3
+          haste: 4
+          telekinesis: 1
+          thrifty: 3
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1473,6 +1552,22 @@ kits:
           fire_protection: 21
           blast_protection: 21
           projectile_protection: 21
+          hardened: 5
+          elemental_protection: 4
+          temper: 4
+          regrowth: 4
+          hardened: 5
+          elemental_protection: 4
+          temper: 4
+          regrowth: 4
+          hardened: 5
+          elemental_protection: 4
+          temper: 4
+          regrowth: 4
+          hardened: 5
+          elemental_protection: 4
+          temper: 4
+          regrowth: 4
         attributes:
           max_health: 12
         soulbound: true
@@ -1544,6 +1639,15 @@ kits:
           fire_aspect: 4
           mending: 1
           unbreaking: 20
+          rage: 4
+          double_strike: 3
+          exhaust: 3
+          rage: 4
+          double_strike: 3
+          exhaust: 3
+          rage: 4
+          double_strike: 3
+          exhaust: 3
         attributes:
           attack_damage: 4.0
         soulbound: true
@@ -1560,6 +1664,16 @@ kits:
           fortune: 6
           mending: 1
           unbreaking: 20
+          smelter: 3
+          veinminer: 4
+          blast_mining: 4
+          haste: 5
+          telekinesis: 1
+          smelter: 3
+          veinminer: 4
+          blast_mining: 4
+          haste: 5
+          telekinesis: 1
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1643,6 +1757,22 @@ kits:
           fire_protection: 24
           blast_protection: 24
           projectile_protection: 24
+          hardened: 5
+          ice_shield: 4
+          water_breathing: 3
+          regrowth: 4
+          hardened: 5
+          ice_shield: 4
+          water_breathing: 3
+          regrowth: 4
+          hardened: 5
+          ice_shield: 4
+          water_breathing: 3
+          regrowth: 4
+          hardened: 5
+          ice_shield: 4
+          water_breathing: 3
+          regrowth: 4
         attributes:
           max_health: 16
         soulbound: true
@@ -1714,6 +1844,15 @@ kits:
           fire_aspect: 4
           mending: 1
           unbreaking: 22
+          ice_aspect: 5
+          vampire: 4
+          paralyze: 3
+          ice_aspect: 5
+          vampire: 4
+          paralyze: 3
+          ice_aspect: 5
+          vampire: 4
+          paralyze: 3
         attributes:
           attack_damage: 5.0
         soulbound: true
@@ -1730,6 +1869,16 @@ kits:
           fortune: 7
           mending: 1
           unbreaking: 22
+          telekinesis: 1
+          thrifty: 4
+          veinminer: 5
+          silk_chest: 1
+          haste: 5
+          telekinesis: 1
+          thrifty: 4
+          veinminer: 5
+          silk_chest: 1
+          haste: 5
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1813,6 +1962,22 @@ kits:
           fire_protection: 27
           blast_protection: 27
           projectile_protection: 27
+          hardened: 6
+          fire_shield: 5
+          elemental_protection: 5
+          flare: 4
+          hardened: 6
+          fire_shield: 5
+          elemental_protection: 5
+          flare: 4
+          hardened: 6
+          fire_shield: 5
+          elemental_protection: 5
+          flare: 4
+          hardened: 6
+          fire_shield: 5
+          elemental_protection: 5
+          flare: 4
         attributes:
           max_health: 20
         soulbound: true
@@ -1884,6 +2049,15 @@ kits:
           fire_aspect: 4
           mending: 1
           unbreaking: 24
+          infernus: 5
+          thunder: 5
+          rage: 4
+          infernus: 5
+          thunder: 5
+          rage: 4
+          infernus: 5
+          thunder: 5
+          rage: 4
         attributes:
           attack_damage: 6.0
         soulbound: true
@@ -1900,6 +2074,16 @@ kits:
           fortune: 8
           mending: 1
           unbreaking: 24
+          smelter: 4
+          blast_mining: 5
+          haste: 6
+          telekinesis: 1
+          lucky_miner: 4
+          smelter: 4
+          blast_mining: 5
+          haste: 6
+          telekinesis: 1
+          lucky_miner: 4
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1983,6 +2167,26 @@ kits:
           fire_protection: 31
           blast_protection: 31
           projectile_protection: 31
+          hardened: 7
+          stopping_force: 5
+          rebound: 4
+          regrowth: 5
+          temper: 5
+          hardened: 7
+          stopping_force: 5
+          rebound: 4
+          regrowth: 5
+          temper: 5
+          hardened: 7
+          stopping_force: 5
+          rebound: 4
+          regrowth: 5
+          temper: 5
+          hardened: 7
+          stopping_force: 5
+          rebound: 4
+          regrowth: 5
+          temper: 5
         attributes:
           max_health: 26
         soulbound: true
@@ -2054,6 +2258,18 @@ kits:
           fire_aspect: 5
           mending: 1
           unbreaking: 26
+          paralyze: 5
+          exhaust: 4
+          confusion: 4
+          double_strike: 4
+          paralyze: 5
+          exhaust: 4
+          confusion: 4
+          double_strike: 4
+          paralyze: 5
+          exhaust: 4
+          confusion: 4
+          double_strike: 4
         attributes:
           attack_damage: 7.5
         soulbound: true
@@ -2070,6 +2286,16 @@ kits:
           fortune: 8
           mending: 1
           unbreaking: 26
+          haste: 7
+          veinminer: 6
+          telekinesis: 1
+          tunnel: 4
+          thrifty: 5
+          haste: 7
+          veinminer: 6
+          telekinesis: 1
+          tunnel: 4
+          thrifty: 5
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -2153,6 +2379,30 @@ kits:
           fire_protection: 36
           blast_protection: 36
           projectile_protection: 36
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
         attributes:
           max_health: 34
         soulbound: true
@@ -2224,6 +2474,27 @@ kits:
           fire_aspect: 6
           mending: 1
           unbreaking: 30
+          vampire: 6
+          thunder: 6
+          infernus: 6
+          paralyze: 6
+          wither: 5
+          decapitator: 5
+          rage: 5
+          vampire: 6
+          thunder: 6
+          infernus: 6
+          paralyze: 6
+          wither: 5
+          decapitator: 5
+          rage: 5
+          vampire: 6
+          thunder: 6
+          infernus: 6
+          paralyze: 6
+          wither: 5
+          decapitator: 5
+          rage: 5
         attributes:
           attack_damage: 10.0
         soulbound: true
@@ -2240,6 +2511,22 @@ kits:
           fortune: 10
           mending: 1
           unbreaking: 30
+          veinminer: 8
+          treefeller: 6
+          smelter: 5
+          blast_mining: 6
+          haste: 8
+          telekinesis: 1
+          lucky_miner: 5
+          thrifty: 6
+          veinminer: 8
+          treefeller: 6
+          smelter: 5
+          blast_mining: 6
+          haste: 8
+          telekinesis: 1
+          lucky_miner: 5
+          thrifty: 6
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -2955,6 +3242,8 @@ kits:
           protection: 13
           unbreaking: 9
           mending: 1
+          hardened: 1
+          flare: 1
         soulbound: true
       - material: NETHERITE_CHESTPLATE
         amount: 1
@@ -2966,6 +3255,8 @@ kits:
           protection: 13
           unbreaking: 9
           mending: 1
+          hardened: 1
+          flare: 1
         soulbound: true
       - material: NETHERITE_LEGGINGS
         amount: 1
@@ -2977,6 +3268,8 @@ kits:
           protection: 13
           unbreaking: 9
           mending: 1
+          hardened: 1
+          flare: 1
         soulbound: true
       - material: NETHERITE_BOOTS
         amount: 1
@@ -2990,6 +3283,8 @@ kits:
           mending: 1
           feather_falling: 16
           depth_strider: 4
+          hardened: 1
+          flare: 1
         soulbound: true
       - material: NETHERITE_SWORD
         amount: 1
@@ -3003,6 +3298,8 @@ kits:
           fire_aspect: 4
           unbreaking: 9
           mending: 1
+          double_strike: 1
+          sniper: 2
         soulbound: true
       - material: BOW
         amount: 1
@@ -3013,6 +3310,8 @@ kits:
           flame: 2
           infinity: 1
           unbreaking: 10
+          double_strike: 1
+          sniper: 2
       - material: NETHERITE_PICKAXE
         amount: 1
         name: "&2&lPico de Artemisa"
@@ -3021,6 +3320,8 @@ kits:
           fortune: 10
           unbreaking: 9
           mending: 1
+          telekinesis: 1
+          haste: 1
       - material: NETHERITE_AXE
         amount: 1
         name: "&2&lHacha de Artemisa"
@@ -3029,6 +3330,8 @@ kits:
           sharpness: 12
           unbreaking: 9
           mending: 1
+          double_strike: 1
+          sniper: 2
       - material: NETHERITE_SHOVEL
         amount: 1
         name: "&2&lPala de Artemisa"
@@ -3036,12 +3339,16 @@ kits:
           efficiency: 14
           unbreaking: 9
           mending: 1
+          telekinesis: 1
+          haste: 1
       - material: SHIELD
         amount: 1
         name: "&2&lEscudo de Artemisa"
         enchantments:
           unbreaking: 9
           mending: 1
+          hardened: 1
+          flare: 1
       - material: ARROW
         amount: 64
       - material: GOLDEN_CARROT
@@ -3073,6 +3380,8 @@ kits:
           protection: 14
           unbreaking: 10
           mending: 1
+          hardened: 2
+          regrowth: 1
         soulbound: true
       - material: NETHERITE_CHESTPLATE
         amount: 1
@@ -3084,6 +3393,8 @@ kits:
           protection: 14
           unbreaking: 10
           mending: 1
+          hardened: 2
+          regrowth: 1
         soulbound: true
       - material: NETHERITE_LEGGINGS
         amount: 1
@@ -3095,6 +3406,8 @@ kits:
           protection: 14
           unbreaking: 10
           mending: 1
+          hardened: 2
+          regrowth: 1
         soulbound: true
       - material: NETHERITE_BOOTS
         amount: 1
@@ -3108,6 +3421,8 @@ kits:
           mending: 1
           feather_falling: 18
           depth_strider: 4
+          hardened: 2
+          regrowth: 1
         soulbound: true
       - material: NETHERITE_SWORD
         amount: 1
@@ -3121,6 +3436,8 @@ kits:
           fire_aspect: 5
           unbreaking: 10
           mending: 1
+          vampire: 1
+          double_strike: 2
         soulbound: true
       - material: NETHERITE_PICKAXE
         amount: 1
@@ -3130,6 +3447,9 @@ kits:
           fortune: 11
           unbreaking: 10
           mending: 1
+          telekinesis: 1
+          haste: 2
+          thrifty: 1
       - material: NETHERITE_AXE
         amount: 1
         name: "&d&lHacha de Afrodita"
@@ -3138,6 +3458,8 @@ kits:
           sharpness: 13
           unbreaking: 10
           mending: 1
+          vampire: 1
+          double_strike: 2
       - material: NETHERITE_SHOVEL
         amount: 1
         name: "&d&lPala de Afrodita"
@@ -3145,12 +3467,17 @@ kits:
           efficiency: 15
           unbreaking: 10
           mending: 1
+          telekinesis: 1
+          haste: 2
+          thrifty: 1
       - material: SHIELD
         amount: 1
         name: "&d&lEscudo de Afrodita"
         enchantments:
           unbreaking: 10
           mending: 1
+          hardened: 2
+          regrowth: 1
       - material: GOLDEN_CARROT
         amount: 64
       - material: COOKED_BEEF
@@ -3180,6 +3507,9 @@ kits:
           protection: 15
           unbreaking: 12
           mending: 1
+          hardened: 2
+          elemental_protection: 2
+          regrowth: 2
         soulbound: true
       - material: NETHERITE_CHESTPLATE
         amount: 1
@@ -3191,6 +3521,9 @@ kits:
           protection: 15
           unbreaking: 12
           mending: 1
+          hardened: 2
+          elemental_protection: 2
+          regrowth: 2
         soulbound: true
       - material: NETHERITE_LEGGINGS
         amount: 1
@@ -3202,6 +3535,9 @@ kits:
           protection: 15
           unbreaking: 12
           mending: 1
+          hardened: 2
+          elemental_protection: 2
+          regrowth: 2
         soulbound: true
       - material: NETHERITE_BOOTS
         amount: 1
@@ -3215,6 +3551,9 @@ kits:
           mending: 1
           feather_falling: 20
           depth_strider: 4
+          hardened: 2
+          elemental_protection: 2
+          regrowth: 2
         soulbound: true
       - material: NETHERITE_SWORD
         amount: 1
@@ -3228,6 +3567,9 @@ kits:
           fire_aspect: 5
           unbreaking: 12
           mending: 1
+          thunder: 2
+          rage: 2
+          double_strike: 2
         soulbound: true
       - material: NETHERITE_PICKAXE
         amount: 1
@@ -3237,6 +3579,9 @@ kits:
           fortune: 13
           unbreaking: 12
           mending: 1
+          telekinesis: 1
+          haste: 2
+          veinminer: 2
       - material: NETHERITE_AXE
         amount: 1
         name: "&4&lHacha de Zeus"
@@ -3245,6 +3590,9 @@ kits:
           sharpness: 15
           unbreaking: 12
           mending: 1
+          thunder: 2
+          rage: 2
+          double_strike: 2
       - material: NETHERITE_SHOVEL
         amount: 1
         name: "&4&lPala de Zeus"
@@ -3252,12 +3600,18 @@ kits:
           efficiency: 18
           unbreaking: 12
           mending: 1
+          telekinesis: 1
+          haste: 2
+          veinminer: 2
       - material: SHIELD
         amount: 1
         name: "&4&lEscudo de Zeus"
         enchantments:
           unbreaking: 12
           mending: 1
+          hardened: 2
+          elemental_protection: 2
+          regrowth: 2
       - material: GOLDEN_CARROT
         amount: 64
       - material: COOKED_BEEF
@@ -3428,3 +3782,9 @@ modalidades:
     mensajes:
       ps-get: "&6DrakesCraft &8· &7Las protecciones solo se colocan en el &eSurvival&7. Aqui protege tu isla &eBentoBox&7, y tu terreno crece con tu rango."
       tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones es del &eSurvival&7. Vuelve con &e/survival&7 para comprar y colocar tu piedra."
+
+# Neutraliza items corruptos antes de que tumben la conexion. Nacio de un crash de paquete
+# provocado por una cabeza con perfil corrupto al abrir un contenedor: el item queda en el
+# mundo, asi que cualquiera que lo abra repite el crash.
+corrupt-item-guard:
+  enabled: true
