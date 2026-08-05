@@ -23,6 +23,16 @@ public class ThorBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "PIGLIN_BRUTE";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.5D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private boolean stormTriggered = false;

@@ -23,6 +23,16 @@ public class PoseidonBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "DROWNED";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.5D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
 

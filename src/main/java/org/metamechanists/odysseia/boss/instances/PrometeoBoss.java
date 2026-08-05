@@ -33,6 +33,16 @@ public class PrometeoBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "BLAZE";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.6D;
+    }
+
     private final Random random = new Random();
     private boolean phoenixUsed = false;
     private boolean invulnerable = false;

@@ -23,6 +23,16 @@ public class HadesBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.EMBOSCADA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "WITHER_SKELETON";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.5D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
 

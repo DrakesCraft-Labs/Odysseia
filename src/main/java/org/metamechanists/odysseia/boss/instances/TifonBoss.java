@@ -34,6 +34,16 @@ public class TifonBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "RAVAGER";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 2.5D;
+    }
+
     private final Random random = new Random();
     private boolean furyActive = false;
 

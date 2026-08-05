@@ -33,6 +33,16 @@ public class WitherStormBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "WITHER";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 2.0D;
+    }
+
     private final Random random = new Random();
 
     public WitherStormBoss(LivingEntity entity) {

@@ -23,6 +23,16 @@ public class ZeusBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "ILLUSIONER";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.4D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private long nextAttackAt;

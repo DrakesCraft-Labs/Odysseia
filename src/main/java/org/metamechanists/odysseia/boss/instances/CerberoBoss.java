@@ -29,6 +29,16 @@ public class CerberoBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
     }
 
+    @Override
+    protected String disfraz() {
+        return "WOLF";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 2.2D;
+    }
+
     private final Random random = new Random();
     private int headsFallen = 0;
 

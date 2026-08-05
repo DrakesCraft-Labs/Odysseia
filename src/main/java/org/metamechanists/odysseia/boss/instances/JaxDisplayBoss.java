@@ -35,6 +35,16 @@ public final class JaxDisplayBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "IRON_GOLEM";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.5D;
+    }
+
     private BlockDisplay visualRoot;
 
     public JaxDisplayBoss(LivingEntity entity) {

@@ -31,6 +31,16 @@ public class ColosoEndBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "ENDERMAN";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 2.4D;
+    }
+
     private final Random random = new Random();
 
     public ColosoEndBoss(LivingEntity entity) {

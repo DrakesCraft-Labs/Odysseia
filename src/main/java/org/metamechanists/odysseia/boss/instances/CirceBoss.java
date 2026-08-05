@@ -20,6 +20,16 @@ public class CirceBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.EMBOSCADA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "WITCH";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.3D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
 

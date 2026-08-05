@@ -30,6 +30,16 @@ public class ArtemisaBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "STRAY";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.1D;
+    }
+
     private final Random random = new Random();
 
     public ArtemisaBoss(LivingEntity entity) {

@@ -25,6 +25,16 @@ public class AresBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
     }
 
+    @Override
+    protected String disfraz() {
+        return "VINDICATOR";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.5D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private boolean rageActivated = false;

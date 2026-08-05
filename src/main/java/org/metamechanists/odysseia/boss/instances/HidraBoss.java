@@ -31,6 +31,16 @@ public class HidraBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.ACOSADOR;
     }
 
+    @Override
+    protected String disfraz() {
+        return "RAVAGER";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.8D;
+    }
+
     private final Random random = new Random();
     private boolean phase66Triggered = false;
     private boolean phase33Triggered = false;

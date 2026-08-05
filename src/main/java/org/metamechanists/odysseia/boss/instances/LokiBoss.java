@@ -29,6 +29,16 @@ public final class LokiBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.EMBOSCADA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "VEX";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.8D;
+    }
+
     private final List<BossSkill> skills = new ArrayList<>();
     private final Random random = new Random();
     private static final String LOKI_HEAD_BASE64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmM2NzNjODE5ODVlMTQ5MTU4ZjZiMDYzZTZiZTA5MGFlZjU0MTUxZjBmM2FmZDdhODMyMjMwM2FiOTkyODBlOSJ9fX0=";

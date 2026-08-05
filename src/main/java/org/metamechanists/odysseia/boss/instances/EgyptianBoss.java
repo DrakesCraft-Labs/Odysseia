@@ -26,6 +26,16 @@ public final class EgyptianBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "HUSK";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.6D;
+    }
+
     public enum Kind { RA, ISIS, ANUBIS, SET }
 
     private final Kind kind;

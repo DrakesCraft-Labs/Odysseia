@@ -30,6 +30,16 @@ public class DragonAncestralBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.TANQUE;
     }
 
+    @Override
+    protected String disfraz() {
+        return "ENDER_DRAGON";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.3D;
+    }
+
     private final Random random = new Random();
 
     public DragonAncestralBoss(LivingEntity entity) {

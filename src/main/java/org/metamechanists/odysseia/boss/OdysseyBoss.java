@@ -45,6 +45,21 @@ public abstract class OdysseyBoss {
     protected BossSpectacle.Arquetipo arquetipo() {
         return BossSpectacle.Arquetipo.ACOSADOR;
     }
+
+    /**
+     * Aspecto visible del jefe, como nombre de {@code DisguiseType}. Null deja el original.
+     *
+     * La entidad real se elige por mecanica --un esqueleto apunta con arco, un ravager embiste--
+     * y el disfraz arregla lo que ve el jugador. Se declara en una linea por jefe.
+     */
+    protected String disfraz() {
+        return null;
+    }
+
+    /** Tamano del disfraz. 1.0 deja el original. */
+    protected double escalaDisfraz() {
+        return 1.0D;
+    }
     private long lastDialogue = 0L;
     private boolean rebirthConsumed;
     private long rebirthInvulnerableUntil;
@@ -88,6 +103,9 @@ public abstract class OdysseyBoss {
 
         // Create BossBar
         this.bossBar = Bukkit.createBossBar(displayName, barColor, barStyle);
+        // Sin bando, dos jefes invocados a la vez se atacan entre ellos.
+        BossFaction.alistar(entity);
+        BossDisguise.aplicar(entity, disfraz(), escalaDisfraz());
         this.bossBar.setProgress(1.0);
     }
 
@@ -127,6 +145,8 @@ public abstract class OdysseyBoss {
         if (entity != null && !entity.isDead()) {
             BossSpectacle.muerte(entity.getLocation(), currentPhase);
         }
+        BossDisguise.quitar(entity);
+        BossFaction.licenciar(entity);
         bossBar.removeAll();
         playersWatching.clear();
         if (entity != null && !entity.isDead()) {
@@ -310,6 +330,22 @@ public abstract class OdysseyBoss {
         // El posicionamiento va aqui porque el manager ya llama este tick para todos los jefes:
         // asi los 22 ganan comportamiento sin tocar sus archivos.
         BossSpectacle.mantenerPosicion(entity, BossSpectacle.enFase(arquetipo(), currentPhase));
+
+        // Las invocaciones nacen fuera del bando: se alistan al vuelo y se les corrige el
+        // objetivo. Es lo que evitaba que los lobos de Artemisa la persiguieran a ella.
+        for (var cercana : entity.getNearbyEntities(24, 12, 24)) {
+            if (!(cercana instanceof org.bukkit.entity.Mob vecino) || vecino instanceof Player) continue;
+            if (!BossFaction.esAliado(vecino)) {
+                // Solo se alista lo que ya esta peleando de nuestro lado o nos apunta a nosotros.
+                if (vecino.getTarget() != null && BossFaction.esAliado(vecino.getTarget())) {
+                    BossFaction.alistar(vecino);
+                }
+            }
+            if (BossFaction.esAliado(vecino)) {
+                BossFaction.corregirObjetivo(vecino, 32.0D);
+            }
+        }
+        BossFaction.corregirObjetivo(entity, 32.0D);
         if (currentPhase < 2) {
             return;
         }

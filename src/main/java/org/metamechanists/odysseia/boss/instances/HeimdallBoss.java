@@ -33,6 +33,16 @@ public class HeimdallBoss extends OdysseyBoss {
         return org.metamechanists.odysseia.boss.BossSpectacle.Arquetipo.DISTANCIA;
     }
 
+    @Override
+    protected String disfraz() {
+        return "VINDICATOR";
+    }
+
+    @Override
+    protected double escalaDisfraz() {
+        return 1.4D;
+    }
+
     private final Random random = new Random();
 
     public HeimdallBoss(LivingEntity entity) {
