@@ -172,7 +172,14 @@ public final class KitDeliveryService {
         return stacks;
     }
 
-    /** Delivers only a configured ProtectionStones alias; arbitrary kit commands are never executed. */
+    /**
+     * Entrega la piedra del kit por la API de ProtectionStones, igual que las compras de Tebex.
+     *
+     * Antes despachaba {@code /ps give <alias>} por consola, pero ese comando identifica el
+     * bloque por su MATERIAL: respondía "Invalid protection block" y ningún kit entregaba su
+     * protección. La API resuelve por alias, que además es único cuando dos bloques comparten
+     * material.
+     */
     private ActionResult deliverConfiguredProtection(Player player, ConfigurationSection section) {
         String key = section.getString("protection-alias", "").trim();
         if (key.isEmpty()) return ActionResult.completed("no protection");
@@ -182,18 +189,8 @@ public final class KitDeliveryService {
         if (!key.matches("[A-Za-z0-9_-]+") || !alias.matches("[A-Za-z0-9_-]+") || amount < 1 || amount > 64) {
             return ActionResult.manual("Configuración de ProtectionStone inválida para el kit");
         }
-        if (!player.getName().matches("[A-Za-z0-9_.]{1,16}")) {
-            return ActionResult.manual("Nombre de jugador inválido para entregar la protección");
-        }
 
-        String command = plugin.getConfig().getString("protectionstones.give-command", "ps give {alias} {player} {amount}")
-                .replace("{alias}", alias)
-                .replace("{player}", player.getName())
-                .replace("{amount}", String.valueOf(amount));
-        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)) {
-            return ActionResult.retryable("ProtectionStones rechazó la entrega de " + alias);
-        }
-        return ActionResult.completed("protection=" + alias);
+        return ProtectionStoneDelivery.give(player, alias, amount);
     }
 
     private boolean containsTransaction(Player player, String transaction) {

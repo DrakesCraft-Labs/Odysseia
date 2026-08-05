@@ -174,42 +174,8 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
         return ActionResult.completed("guide=delivered");
     }
 
-    /**
-     * Usa la API real de ProtectionStones en vez de aceptar ciegamente un comando
-     * de consola. La reflexión mantiene el plugin opcional sin acoplar el JAR al
-     * classpath de compilación de Odysseia.
-     */
     private ActionResult giveProtectionStone(Player player, String alias, int amount) {
-        try {
-            Class<?> protectionStones = Class.forName("dev.espi.protectionstones.ProtectionStones");
-            Object block = protectionStones.getMethod("getProtectBlockFromAlias", String.class).invoke(null, alias);
-            if (block == null) return ActionResult.manual("Alias ProtectionStones inexistente: " + alias);
-            ItemStack prototype = (ItemStack) block.getClass().getMethod("createItem").invoke(block);
-            if (prototype == null || prototype.getType().isAir()) return ActionResult.manual("ProtectionStones no creó un ítem para " + alias);
-            if (!hasInventoryCapacity(player, prototype, amount)) return ActionResult.waiting("Inventario sin espacio para ProtectionStone " + alias);
-
-            int remaining = amount;
-            while (remaining > 0) {
-                ItemStack item = prototype.clone();
-                int stack = Math.min(remaining, item.getMaxStackSize());
-                item.setAmount(stack);
-                if (!player.getInventory().addItem(item).isEmpty()) return ActionResult.retryable("Inventario cambió durante la entrega de " + alias);
-                remaining -= stack;
-            }
-            return ActionResult.completed("alias=" + alias + ";amount=" + amount);
-        } catch (ReflectiveOperationException error) {
-            return ActionResult.retryable("API ProtectionStones no disponible: " + error.getClass().getSimpleName());
-        }
-    }
-
-    private boolean hasInventoryCapacity(Player player, ItemStack prototype, int amount) {
-        int capacity = 0;
-        for (ItemStack slot : player.getInventory().getStorageContents()) {
-            if (slot == null || slot.getType().isAir()) capacity += prototype.getMaxStackSize();
-            else if (slot.isSimilar(prototype)) capacity += Math.max(0, slot.getMaxStackSize() - slot.getAmount());
-            if (capacity >= amount) return true;
-        }
-        return false;
+        return ProtectionStoneDelivery.give(player, alias, amount);
     }
 
     private ActionResult weapon(ExecutionContext context, ProductAction action) {
