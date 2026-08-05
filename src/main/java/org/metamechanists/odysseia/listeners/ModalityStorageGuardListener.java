@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.metamechanists.odysseia.modalities.ModalityService;
 import org.metamechanists.odysseia.vaults.ModalityVaultService;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +33,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final ModalityService modalities;
     private final ModalityVaultService vaults;
     private final Set<String> vaultCommands = new HashSet<>();
-    private final Set<String> blockedCommands = new HashSet<>();
+    /** Patrones bloqueados ya tokenizados; cada uno se compara como prefijo del comando escrito. */
+    private final List<List<String>> blockedPatterns = new ArrayList<>();
     private boolean enabled;
 
     public ModalityStorageGuardListener(JavaPlugin plugin, ModalityService modalities, ModalityVaultService vaults) {
@@ -44,14 +46,40 @@ public final class ModalityStorageGuardListener implements Listener {
 
     public void reload() {
         vaultCommands.clear();
-        blockedCommands.clear();
+        blockedPatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
-        for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) blockedCommands.add(value);
+        for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) {
+            List<String> pattern = tokens(value);
+            if (!pattern.isEmpty()) blockedPatterns.add(pattern);
+        }
     }
 
     private static List<String> lower(List<String> values) {
         return values.stream().map(value -> value.toLowerCase(Locale.ROOT)).toList();
+    }
+
+    /**
+     * Parte un comando o patron en tokens normalizados. El primero pasa por {@link #label} para
+     * tolerar la forma plugin:comando; el resto son subcomandos ("team echest").
+     */
+    static List<String> tokens(String raw) {
+        List<String> result = new ArrayList<>();
+        for (String part : raw.trim().split("\\s+")) {
+            if (part.isBlank()) continue;
+            result.add(result.isEmpty() ? label(part) : part.toLowerCase(Locale.ROOT));
+        }
+        result.removeIf(String::isBlank);
+        return result;
+    }
+
+    /** True si el comando escrito empieza con alguno de los patrones bloqueados. */
+    static boolean matches(List<List<String>> patterns, List<String> written) {
+        for (List<String> pattern : patterns) {
+            if (pattern.size() > written.size()) continue;
+            if (written.subList(0, pattern.size()).equals(pattern)) return true;
+        }
+        return false;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -61,10 +89,10 @@ public final class ModalityStorageGuardListener implements Listener {
         if (player.hasPermission(BYPASS) || !modalities.isIsland(player)) return;
 
         String[] parts = event.getMessage().substring(1).trim().split("\\s+");
-        String label = label(parts[0]);
-        if (label.isBlank()) return;
+        List<String> written = tokens(String.join(" ", parts));
+        if (written.isEmpty()) return;
 
-        if (vaultCommands.contains(label)) {
+        if (vaultCommands.contains(written.get(0))) {
             event.setCancelled(true);
             int vault = 1;
             if (parts.length > 1) {
@@ -78,11 +106,11 @@ public final class ModalityStorageGuardListener implements Listener {
             return;
         }
 
-        if (blockedCommands.contains(label)) {
+        if (matches(blockedPatterns, written)) {
             event.setCancelled(true);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6DrakesCraft &8· &7Ese almacenamiento es del &eSurvival&7. "
-                            + "Aqui usa &e/pv&7, que es exclusivo de esta modalidad."));
+                    "&6DrakesCraft &8· &7Ese almacenamiento es del &eSurvival&7 y no cruza modalidades. "
+                            + "Aqui tienes &e/pv&7, exclusivo de &e" + modalities.resolve(player).displayName() + "&7."));
         }
     }
 

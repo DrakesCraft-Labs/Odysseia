@@ -3320,7 +3320,21 @@ modalidades:
       - vault
       - playervault
     # Comandos que quedan bloqueados dentro de las islas por dar acceso a almacenamiento
-    # del survival. Se deja vacio a proposito: /ec ya lo separa InvSwitcher y las mochilas de
-    # Slimefun viajan en el inventario, que tambien esta separado. Agregar aqui si aparece
-    # algun otro puente.
-    comandos-bloqueados: []
+    # global del survival. Admiten subcomando ("team echest"): se bloquea cualquier comando
+    # que empiece con el patron, asi que el resto de /team sigue funcionando.
+    # /ec no va aqui: InvSwitcher ya separa el cofre de ender, y las mochilas de Slimefun
+    # viajan en el inventario, que tambien esta separado.
+    comandos-bloqueados:
+      # CrazyAuctions: guardar un shulker en el survival y retirarlo en la isla era el puente
+      # mas usado. Se listan las cuatro etiquetas del plugin.yml, no solo /ah.
+      - crazyauctions
+      - crazyauction
+      - ah
+      - ca
+      # BetterTeams: el cofre de ender del equipo es una base global, no la del jugador.
+      - team echest
+      - teamadmin echest
+      - teama echest
+      # DrakesSlimeMarket: compra material Slimefun con dinero, que hoy es comun a las tres
+      # modalidades, asi que sirve de puente indirecto de items.
+      - sfmercado
