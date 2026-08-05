@@ -135,6 +135,51 @@ public final class BossSpectacle {
         }
     }
 
+
+    /**
+     * Como pelea el jefe en una fase concreta.
+     *
+     * Un jefe que se mueve igual con 100% de vida que con 10% se vuelve predecible a la tercera
+     * pelea. Al acorralarse cambia de actitud: el que guardaba distancia se lanza, el emboscador
+     * deja de huir, y el tanque acelera. Es lo que hace que la fase 3 se sienta distinta y no
+     * solo "lo mismo pero pega mas".
+     */
+    public static Arquetipo enFase(Arquetipo base, int fase) {
+        if (fase < 3) return base;
+        return switch (base) {
+            case DISTANCIA -> ACOSADOR;   // se le acabo la paciencia
+            case EMBOSCADA -> ACOSADOR;   // ya no puede permitirse huir
+            case TANQUE -> ACOSADOR;      // despierta
+            case ACOSADOR -> ACOSADOR;
+        };
+    }
+
+    /**
+     * Cierre del combate: implosion, onda y silencio antes del grito final.
+     *
+     * Un jefe que simplemente desaparece se siente anticlimatico despues de varios minutos de
+     * pelea. Esto no da recompensas ni toca el mundo; solo cierra la escena.
+     */
+    public static void muerte(Location centro, int fasesAlcanzadas) {
+        var mundo = centro.getWorld();
+        if (mundo == null) return;
+
+        // Implosion: las particulas caen hacia el centro en vez de salir.
+        for (int grados = 0; grados < 360; grados += 8) {
+            double rad = Math.toRadians(grados);
+            for (double radio = 6.0D; radio >= 0.5D; radio -= 1.5D) {
+                Location punto = centro.clone().add(Math.cos(rad) * radio, 0.6D, Math.sin(rad) * radio);
+                Vector hacia = centro.toVector().subtract(punto.toVector()).normalize().multiply(0.25D);
+                mundo.spawnParticle(Particle.SOUL_FIRE_FLAME, punto, 0,
+                        hacia.getX(), hacia.getY(), hacia.getZ(), 1);
+            }
+        }
+        mundo.playSound(centro, Sound.ENTITY_WITHER_DEATH, 1.4F, 0.6F);
+        onda(centro, 8.0D + fasesAlcanzadas * 3, Particle.END_ROD);
+        temblor(centro, 32.0D, 6.0F);
+        mundo.spawnParticle(Particle.EXPLOSION, centro, 3, 1.5D, 1.0D, 1.5D, 0);
+    }
+
     /**
      * Escala vida y dano segun cuanta gente hay peleando.
      *

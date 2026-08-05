@@ -122,6 +122,11 @@ public abstract class OdysseyBoss {
     }
 
     public void cleanup() {
+        // Cierre de escena antes de retirar la entidad: un jefe que solo desaparece se siente
+        // anticlimatico despues de varios minutos de pelea.
+        if (entity != null && !entity.isDead()) {
+            BossSpectacle.muerte(entity.getLocation(), currentPhase);
+        }
         bossBar.removeAll();
         playersWatching.clear();
         if (entity != null && !entity.isDead()) {
@@ -304,7 +309,7 @@ public abstract class OdysseyBoss {
         }
         // El posicionamiento va aqui porque el manager ya llama este tick para todos los jefes:
         // asi los 22 ganan comportamiento sin tocar sus archivos.
-        BossSpectacle.mantenerPosicion(entity, arquetipo());
+        BossSpectacle.mantenerPosicion(entity, BossSpectacle.enFase(arquetipo(), currentPhase));
         if (currentPhase < 2) {
             return;
         }
