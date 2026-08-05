@@ -146,12 +146,9 @@ public final class BossSpectacle {
      */
     public static Arquetipo enFase(Arquetipo base, int fase) {
         if (fase < 3) return base;
-        return switch (base) {
-            case DISTANCIA -> ACOSADOR;   // se le acabo la paciencia
-            case EMBOSCADA -> ACOSADOR;   // ya no puede permitirse huir
-            case TANQUE -> ACOSADOR;      // despierta
-            case ACOSADOR -> ACOSADOR;
-        };
+        // En fase 3 todos se lanzan: el que guardaba distancia pierde la paciencia, el
+        // emboscador ya no puede permitirse huir y el tanque despierta.
+        return Arquetipo.ACOSADOR;
     }
 
     /**
