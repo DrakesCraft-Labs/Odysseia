@@ -1072,9 +1072,7 @@ kits:
           mending: 1
           unbreaking: 15
           haste: 3
-          telekinesis: 1
           haste: 3
-          telekinesis: 1
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1267,10 +1265,8 @@ kits:
           mending: 1
           unbreaking: 16
           haste: 3
-          telekinesis: 1
           lucky_miner: 3
           haste: 3
-          telekinesis: 1
           lucky_miner: 3
         soulbound: true
         unbreakable: true
@@ -1464,10 +1460,8 @@ kits:
           mending: 1
           unbreaking: 17
           haste: 4
-          telekinesis: 1
           thrifty: 3
           haste: 4
-          telekinesis: 1
           thrifty: 3
         soulbound: true
         unbreakable: true
@@ -1668,12 +1662,10 @@ kits:
           veinminer: 4
           blast_mining: 4
           haste: 5
-          telekinesis: 1
           smelter: 3
           veinminer: 4
           blast_mining: 4
           haste: 5
-          telekinesis: 1
         soulbound: true
         unbreakable: true
         hide-flags: true
@@ -1869,12 +1861,10 @@ kits:
           fortune: 7
           mending: 1
           unbreaking: 22
-          telekinesis: 1
           thrifty: 4
           veinminer: 5
           silk_chest: 1
           haste: 5
-          telekinesis: 1
           thrifty: 4
           veinminer: 5
           silk_chest: 1
@@ -2077,12 +2067,10 @@ kits:
           smelter: 4
           blast_mining: 5
           haste: 6
-          telekinesis: 1
           lucky_miner: 4
           smelter: 4
           blast_mining: 5
           haste: 6
-          telekinesis: 1
           lucky_miner: 4
         soulbound: true
         unbreakable: true
@@ -2288,12 +2276,10 @@ kits:
           unbreaking: 26
           haste: 7
           veinminer: 6
-          telekinesis: 1
           tunnel: 4
           thrifty: 5
           haste: 7
           veinminer: 6
-          telekinesis: 1
           tunnel: 4
           thrifty: 5
         soulbound: true
@@ -2516,7 +2502,6 @@ kits:
           smelter: 5
           blast_mining: 6
           haste: 8
-          telekinesis: 1
           lucky_miner: 5
           thrifty: 6
           veinminer: 8
@@ -2524,7 +2509,6 @@ kits:
           smelter: 5
           blast_mining: 6
           haste: 8
-          telekinesis: 1
           lucky_miner: 5
           thrifty: 6
         soulbound: true
@@ -3320,7 +3304,6 @@ kits:
           fortune: 10
           unbreaking: 9
           mending: 1
-          telekinesis: 1
           haste: 1
       - material: NETHERITE_AXE
         amount: 1
@@ -3339,7 +3322,6 @@ kits:
           efficiency: 14
           unbreaking: 9
           mending: 1
-          telekinesis: 1
           haste: 1
       - material: SHIELD
         amount: 1
@@ -3447,7 +3429,6 @@ kits:
           fortune: 11
           unbreaking: 10
           mending: 1
-          telekinesis: 1
           haste: 2
           thrifty: 1
       - material: NETHERITE_AXE
@@ -3467,7 +3448,6 @@ kits:
           efficiency: 15
           unbreaking: 10
           mending: 1
-          telekinesis: 1
           haste: 2
           thrifty: 1
       - material: SHIELD
@@ -3579,7 +3559,6 @@ kits:
           fortune: 13
           unbreaking: 12
           mending: 1
-          telekinesis: 1
           haste: 2
           veinminer: 2
       - material: NETHERITE_AXE
@@ -3600,7 +3579,6 @@ kits:
           efficiency: 18
           unbreaking: 12
           mending: 1
-          telekinesis: 1
           haste: 2
           veinminer: 2
       - material: SHIELD
