@@ -50,4 +50,38 @@ class ModalityStorageGuardListenerTest {
         assertFalse(ModalityStorageGuardListener.matches(BLOCKED, ModalityStorageGuardListener.tokens("ahorcado")));
         assertFalse(ModalityStorageGuardListener.matches(BLOCKED, ModalityStorageGuardListener.tokens("spawn")));
     }
+
+    @Test
+    void blocksBuyingProtectionInsideAnIslandButKeepsTheRestOfPs() {
+        // Un jugador compro una piedra dentro de su isla de OneBlock y no la pudo colocar:
+        // el world_list_type de cada .toml solo admite los mundos del Survival.
+        List<List<String>> reales = new java.util.ArrayList<>();
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        for (String value : config.getStringList("modalidades.guard.comandos-bloqueados")) {
+            reales.add(ModalityStorageGuardListener.tokens(value));
+        }
+
+        assertTrue(ModalityStorageGuardListener.matches(reales, ModalityStorageGuardListener.tokens("ps get pnyx")));
+        assertTrue(ModalityStorageGuardListener.matches(reales, ModalityStorageGuardListener.tokens("tiendaprot")));
+        assertFalse(ModalityStorageGuardListener.matches(reales, ModalityStorageGuardListener.tokens("ps home")),
+                "el resto de /ps tiene que seguir funcionando dentro de la isla");
+        assertFalse(ModalityStorageGuardListener.matches(reales, ModalityStorageGuardListener.tokens("ps info")));
+    }
+
+    @Test
+    void everyBlockedPatternWithItsOwnMessageIsActuallyBlocked() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        List<List<String>> reales = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-bloqueados")) {
+            reales.add(ModalityStorageGuardListener.tokens(value));
+        }
+        var mensajes = config.getConfigurationSection("modalidades.guard.mensajes");
+        for (String key : mensajes.getKeys(false)) {
+            List<String> tokens = ModalityStorageGuardListener.tokens(key.replace('-', ' '));
+            assertTrue(ModalityStorageGuardListener.matches(reales, tokens),
+                    "hay un mensaje para '" + key + "' pero ese comando no esta bloqueado");
+        }
+    }
 }

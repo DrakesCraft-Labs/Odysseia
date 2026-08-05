@@ -3418,3 +3418,13 @@ modalidades:
       # DrakesSlimeMarket: compra material Slimefun con dinero, que hoy es comun a las tres
       # modalidades, asi que sirve de puente indirecto de items.
       - sfmercado
+      # Las piedras de ProtectionStones solo se pueden colocar en los mundos del Survival, por
+      # el world_list_type de cada .toml. Un jugador compro una dentro de su isla de OneBlock y
+      # descubrio que no la podia poner: se le cobro sin poder usarla ahi.
+      - tiendaprot
+      - ps get
+    # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
+    # se usa el generico de almacenamiento.
+    mensajes:
+      ps-get: "&6DrakesCraft &8· &7Las protecciones solo se colocan en el &eSurvival&7. Aqui protege tu isla &eBentoBox&7, y tu terreno crece con tu rango."
+      tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones es del &eSurvival&7. Vuelve con &e/survival&7 para comprar y colocar tu piedra."

@@ -73,6 +73,26 @@ public final class ModalityStorageGuardListener implements Listener {
         return result;
     }
 
+    /**
+     * Mensaje del bloqueo. Se busca el mas especifico en "modalidades.guard.mensajes" usando el
+     * patron como clave con guiones ("ps-get"); si no hay, se usa el generico de almacenamiento.
+     *
+     * Existe porque no todos los bloqueos son de almacenamiento: a un jugador que intento comprar
+     * una proteccion dentro de su isla decirle "aqui usa /pv" no le explica nada.
+     */
+    private String mensaje(List<String> written, Player player) {
+        var section = plugin.getConfig().getConfigurationSection("modalidades.guard.mensajes");
+        if (section != null) {
+            for (int size = Math.min(written.size(), 3); size >= 1; size--) {
+                String key = String.join("-", written.subList(0, size));
+                String texto = section.getString(key);
+                if (texto != null && !texto.isBlank()) return texto;
+            }
+        }
+        return "&6DrakesCraft &8· &7Ese almacenamiento es del &eSurvival&7 y no cruza modalidades. "
+                + "Aqui tienes &e/pv&7, exclusivo de &e" + modalities.resolve(player).displayName() + "&7.";
+    }
+
     /** True si el comando escrito empieza con alguno de los patrones bloqueados. */
     static boolean matches(List<List<String>> patterns, List<String> written) {
         for (List<String> pattern : patterns) {
@@ -108,9 +128,7 @@ public final class ModalityStorageGuardListener implements Listener {
 
         if (matches(blockedPatterns, written)) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6DrakesCraft &8· &7Ese almacenamiento es del &eSurvival&7 y no cruza modalidades. "
-                            + "Aqui tienes &e/pv&7, exclusivo de &e" + modalities.resolve(player).displayName() + "&7."));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensaje(written, player)));
         }
     }
 
