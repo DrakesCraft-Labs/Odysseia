@@ -157,23 +157,56 @@ public final class ServerAutomationListener implements Listener {
         player.getPersistentDataContainer().set(starterPendingKey, PersistentDataType.BYTE, (byte) 1);
         long delayTicks = Math.clamp(plugin.getConfig().getLong("starter-kit.delay-ticks", 400L), 20L, 2400L);
         Bukkit.getScheduler().runTaskLater(plugin,
-                () -> attemptStarterKit(player.getUniqueId(), kit, cooldown, 0), delayTicks);
+                () -> attemptStarterKit(player.getUniqueId(), kit, cooldown, 0, starterPendingKey, starterDeliveredKey), delayTicks);
     }
 
-    private void attemptStarterKit(UUID playerId, String kit, String cooldown, int attempt) {
-        Player player = Bukkit.getPlayer(playerId);
-        if (player == null || !player.isOnline() || !hasByte(player, starterPendingKey)) return;
+    /**
+     * Entrega el kit de bienvenida de SkyBlock y OneBlock la primera vez que el jugador pisa
+     * cada una. El kit de la modalidad base sigue su camino propio en
+     * {@link #scheduleStarterKit(Player)}, que es el que respeta {@code hasPlayedBefore}.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onModalityChange(org.bukkit.event.player.PlayerChangedWorldEvent event) {
+        if (!plugin.getConfig().getBoolean("starter-kit.enabled", true)) return;
+        var modalities = plugin.getModalityService();
+        if (modalities == null) return;
 
-        if (!kitClaims.state(playerId, kit, cooldown).available()) {
-            markStarterKitDelivered(player);
+        String modality = modalities.resolve(event.getPlayer()).id();
+        String kit = plugin.getConfig().getString("starter-kit.por-modalidad." + modality, "").toLowerCase(Locale.ROOT);
+        if (kit.isBlank() || plugin.getConfig().getConfigurationSection("kits." + kit) == null) return;
+
+        Player player = event.getPlayer();
+        NamespacedKey pendingKey = new NamespacedKey(plugin, "starter_kit_pending_" + modality);
+        NamespacedKey deliveredKey = new NamespacedKey(plugin, "starter_kit_delivered_" + modality);
+        String cooldown = plugin.getConfig().getString("kits." + kit + ".cooldown", "-1");
+        boolean claimed = !kitClaims.state(player.getUniqueId(), kit, cooldown).available();
+        if (!StarterKitPolicy.shouldEnrollInModality(
+                hasByte(player, pendingKey), hasByte(player, deliveredKey), claimed)) {
             return;
         }
 
-        String transaction = "starter-kit-" + playerId;
+        player.getPersistentDataContainer().set(pendingKey, PersistentDataType.BYTE, (byte) 1);
+        long delayTicks = Math.clamp(plugin.getConfig().getLong("starter-kit.delay-ticks", 400L), 20L, 2400L);
+        Bukkit.getScheduler().runTaskLater(plugin,
+                () -> attemptStarterKit(player.getUniqueId(), kit, cooldown, 0, pendingKey, deliveredKey), delayTicks);
+    }
+
+    private void attemptStarterKit(UUID playerId, String kit, String cooldown, int attempt,
+                                   NamespacedKey pendingKey, NamespacedKey deliveredKey) {
+        Player player = Bukkit.getPlayer(playerId);
+        if (player == null || !player.isOnline() || !hasByte(player, pendingKey)) return;
+
+        if (!kitClaims.state(playerId, kit, cooldown).available()) {
+            markStarterKitDelivered(player, pendingKey, deliveredKey);
+            return;
+        }
+
+        // La transaccion lleva el kit para que dos modalidades no compartan el mismo id.
+        String transaction = "starter-kit-" + kit + "-" + playerId;
         ActionResult result = kitDelivery.deliver(player, kit, transaction);
         if (result.status() == ActionResult.Status.COMPLETED) {
             boolean claimSaved = kitClaims.record(playerId, kit);
-            markStarterKitDelivered(player);
+            markStarterKitDelivered(player, pendingKey, deliveredKey);
             String message = plugin.getConfig().getString("starter-kit.welcome-message", "");
             if (message != null && !message.isBlank()) player.sendMessage(color(message));
             plugin.getLogger().info("[SUCCESS] Kit inicial " + kit + " entregado a " + player.getName());
@@ -189,7 +222,7 @@ public final class ServerAutomationListener implements Listener {
                 || result.status() == ActionResult.Status.RETRYABLE_FAILURE) && attempt < maxRetries) {
             long retryTicks = Math.clamp(plugin.getConfig().getLong("starter-kit.retry-delay-ticks", 200L), 20L, 1200L);
             Bukkit.getScheduler().runTaskLater(plugin,
-                    () -> attemptStarterKit(playerId, kit, cooldown, attempt + 1), retryTicks);
+                    () -> attemptStarterKit(playerId, kit, cooldown, attempt + 1, pendingKey, deliveredKey), retryTicks);
             return;
         }
 
@@ -197,9 +230,9 @@ public final class ServerAutomationListener implements Listener {
                 + " (" + result.status() + "): " + result.detail());
     }
 
-    private void markStarterKitDelivered(Player player) {
-        player.getPersistentDataContainer().remove(starterPendingKey);
-        player.getPersistentDataContainer().set(starterDeliveredKey, PersistentDataType.BYTE, (byte) 1);
+    private void markStarterKitDelivered(Player player, NamespacedKey pendingKey, NamespacedKey deliveredKey) {
+        player.getPersistentDataContainer().remove(pendingKey);
+        player.getPersistentDataContainer().set(deliveredKey, PersistentDataType.BYTE, (byte) 1);
     }
 
     private boolean hasByte(Player player, NamespacedKey key) {

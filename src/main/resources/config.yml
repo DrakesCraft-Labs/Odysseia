@@ -161,6 +161,13 @@ starter-kit:
   max-retries: 3
   retry-delay-ticks: 200
   welcome-message: "&8[&6&lDrakesCraft&8] &eKit de inicio entregado. ¡Bienvenido a la Odisea!"
+  # Kit de bienvenida propio de cada modalidad, entregado la primera vez que el jugador entra
+  # a ese mundo. Sin esto, quien ya recibio el kit inicial en Survival llegaba a la isla sin
+  # nada: la entrega era una sola vez por cuenta, no por modalidad.
+  # La clave es el id de la modalidad en "modalidades.modos". Dejar en blanco para no entregar.
+  por-modalidad:
+    skyblock: inicial-skyblock
+    oneblock: inicial-oneblock
 
 # ─────────────────────────────────────────────
 #  ChatGames Scheduler
@@ -2294,6 +2301,60 @@ kits:
       - material: COOKED_BEEF
         amount: 64
   # Reclamación única. Sustituye el bloque starter-kit heredado, que no tenía listener activo.
+  # Kit de bienvenida de SkyBlock. No lleva proteccion: en la isla protege BentoBox.
+  # Herramientas de hierro en vez de diamante porque la isla no tiene mineral propio hasta
+  # que el generador sube de nivel; el objetivo es poder arrancar, no saltarse la progresion.
+  inicial-skyblock:
+    cooldown: "-1"
+    permission: "odysseia.kit.inicial-skyblock"
+    vanilla-items:
+      - material: IRON_PICKAXE
+        name: "&b&lPico del Naufrago"
+        enchantments: {efficiency: 2, unbreaking: 3}
+      - material: IRON_AXE
+        name: "&b&lHacha del Naufrago"
+        enchantments: {efficiency: 2, unbreaking: 3}
+      - material: IRON_SHOVEL
+        name: "&b&lPala del Naufrago"
+        enchantments: {efficiency: 2, unbreaking: 3}
+      - material: IRON_SWORD
+        name: "&b&lEspada del Naufrago"
+        enchantments: {sharpness: 2, unbreaking: 3}
+      - material: WATER_BUCKET
+        amount: 2
+      - material: LAVA_BUCKET
+      - material: OAK_SAPLING
+        amount: 4
+      - material: BONE_MEAL
+        amount: 16
+      - material: COOKED_BEEF
+        amount: 32
+      - material: TORCH
+        amount: 32
+      - material: CHEST
+        amount: 2
+
+  # Kit de bienvenida de OneBlock. Aqui el bloque magico da los recursos, asi que el kit solo
+  # cubre lo que hace falta para no morir en las primeras fases.
+  inicial-oneblock:
+    cooldown: "-1"
+    permission: "odysseia.kit.inicial-oneblock"
+    vanilla-items:
+      - material: STONE_PICKAXE
+        name: "&d&lPico del Primer Bloque"
+        enchantments: {efficiency: 2, unbreaking: 3}
+      - material: STONE_SWORD
+        name: "&d&lEspada del Primer Bloque"
+        enchantments: {sharpness: 2, unbreaking: 3}
+      - material: COOKED_BEEF
+        amount: 32
+      - material: TORCH
+        amount: 32
+      - material: CHEST
+      - material: SCAFFOLDING
+        amount: 32
+      - material: WATER_BUCKET
+
   inicial:
     cooldown: "-1"
     permission: "odysseia.kit.inicial"

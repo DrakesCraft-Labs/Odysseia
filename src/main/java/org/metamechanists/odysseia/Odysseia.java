@@ -220,6 +220,11 @@ public final class Odysseia extends JavaPlugin {
         return kitClaimService;
     }
 
+    /** Puede ser null si el plugin aun no termino de habilitarse. */
+    public org.metamechanists.odysseia.modalities.ModalityService getModalityService() {
+        return modalityService;
+    }
+
     public String getInstanceId() {
         return instanceId;
     }
