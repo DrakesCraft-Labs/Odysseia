@@ -62,6 +62,7 @@ public final class Odysseia extends JavaPlugin {
     @Getter
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
+    private org.metamechanists.odysseia.papa.PapaDeMarService papaService;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -138,6 +139,11 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.VaultBackpackGuardListener(this), this);
         this.deathMessages = new org.metamechanists.odysseia.listeners.DeathMessageListener(this);
         Bukkit.getPluginManager().registerEvents(deathMessages, this);
+        this.papaService = new org.metamechanists.odysseia.papa.PapaDeMarService(this);
+        var papaMenu = new org.metamechanists.odysseia.papa.PapaTraderMenu(this, papaService);
+        registerDynamicCommand("papatrueque", papaMenu);
+        registerDynamicCommand("papaequipo", new org.metamechanists.odysseia.papa.PapaEquipoCommand(this));
+        Bukkit.getPluginManager().registerEvents(papaMenu, this);
 
         // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del
         // plugin sigue funcionando: solo se pierde la separacion de /pv dentro de las islas.
@@ -322,6 +328,7 @@ public final class Odysseia extends JavaPlugin {
         startStarTelemetry();
         if (discordTranslationBridge != null) discordTranslationBridge.reload();
         if (deathMessages != null) deathMessages.reload();
+        if (papaService != null) papaService.reload();
         // Si acaban de configurar el webhook, el aviso debe poder volver a salir.
         org.metamechanists.odysseia.utils.StoreManager.resetDiscordWarning();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, modalidades, schedulers y purchase engine.");
@@ -697,7 +704,10 @@ public final class Odysseia extends JavaPlugin {
             }
             item.setItemMeta(meta);
         }
-        return item;
+        // La marca interna va aqui, en el unico sitio por donde salen todas las papas del
+        // servidor: el reparto automatico y /papademar. Sin ella el trueque no la acepta, y con
+        // ella no se puede falsificar con un yunque.
+        return org.metamechanists.odysseia.papa.PapaDeMarItem.marcar(this, item);
     }
 
     private void startHeartbeatScheduler() {

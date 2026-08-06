@@ -1,0 +1,153 @@
+# ─────────────────────────────────────────────────────────────
+#  Trueque de la Papa de mar
+# ─────────────────────────────────────────────────────────────
+#
+# El NPC del spawn solo ejecuta /papatrueque; toda la lógica vive aquí, para poder comprobar que
+# la papa es auténtica y registrar cada canje.
+#
+# Se recarga con /odysseia reload, sin reiniciar.
+#
+# SOLO cuentan las papas con marca interna. Las repartidas antes de que existiera la marca se
+# convierten solas al abrir el menú, así que nadie pierde lo que tenía guardado.
+#
+# RITMO: el servidor reparte 1 papa cada 15 minutos a cada jugador conectado = 4 por hora.
+#   1 stack   =  64 papas  =  16 horas de juego
+#   1 inventario = 2304 papas = 576 horas
+#   2 inventarios = 4608 papas = 1152 horas
+# Como en un inventario no caben más de 2304, todo lo que pase de ahí se paga con la ALCANCÍA:
+# se deposita con el botón del menú y se acumula sin techo.
+#
+# En "comandos", {jugador} se sustituye por el nombre. Se ejecutan como consola.
+
+enabled: true
+titulo-menu: "&6&l✦ Trueque de la Papa de mar ✦"
+
+niveles:
+
+  # ── Lo mínimo: algo por empezar a juntar ──────────────────
+  cosmetico:
+    nombre: "&aRastro de Salitre"
+    coste: 8
+    icono: "PRISMARINE_CRYSTALS"
+    descripcion:
+      - "&7Un cosmético del mar para presumir."
+      - "&7Nada de poder: pura pinta."
+    comandos:
+      - "lp user {jugador} permission settemp odysseia.cosmetico.salitre true 30d"
+    unica: false
+
+  titulo_papero:
+    nombre: "&eTítulo: &6Papero"
+    coste: 32
+    icono: "NAME_TAG"
+    descripcion:
+      - "&7Un título que dice lo que eres:"
+      - "&7alguien que junta papas."
+    comandos:
+      - "lp user {jugador} permission settemp odysseia.titulo.papero true 30d"
+    unica: false
+
+  # ── Cheques: los Dragmas que firma Jack ───────────────────
+  cheque_pequeno:
+    nombre: "&2Cheque de &a5.000 Dragmas"
+    coste: 64
+    icono: "PAPER"
+    descripcion:
+      - "&7Un stack entero de papas."
+      - "&7Firmado por la casa."
+    comandos:
+      - "eco give {jugador} 5000"
+    unica: false
+
+  cheque_grande:
+    nombre: "&2Cheque de &a30.000 Dragmas"
+    coste: 320
+    icono: "PAPER"
+    descripcion:
+      - "&7Cinco stacks. Ya es una fortuna en papas."
+    comandos:
+      - "eco give {jugador} 30000"
+    unica: false
+
+  # ── Kits de oficio ────────────────────────────────────────
+  kit_minero:
+    nombre: "&7Kit del &fMinero de las Profundidades"
+    coste: 192
+    icono: "DIAMOND_PICKAXE"
+    descripcion:
+      - "&7Herramienta y provisiones para bajar hondo."
+    comandos:
+      - "kitgive {jugador} minero"
+    unica: false
+
+  kit_lenador:
+    nombre: "&6Kit del &eLeñador"
+    coste: 192
+    icono: "DIAMOND_AXE"
+    descripcion:
+      - "&7Para el que tumba bosques enteros."
+    comandos:
+      - "kitgive {jugador} lenador"
+    unica: false
+
+  kit_pescador:
+    nombre: "&bKit del &3Pescador"
+    coste: 192
+    icono: "FISHING_ROD"
+    descripcion:
+      - "&7Caña, cebo y paciencia."
+      - "&7El oficio que más pega con la papa de mar."
+    comandos:
+      - "kitgive {jugador} pescador"
+    unica: false
+
+  # ── Llaves y rangos ───────────────────────────────────────
+  llaves:
+    nombre: "&d3 Llaves de Cofre"
+    coste: 480
+    icono: "TRIPWIRE_HOOK"
+    descripcion:
+      - "&7Tres tiradas a los cofres del spawn."
+    comandos:
+      - "crates key give {jugador} comun 3"
+    unica: false
+
+  hermes_temporal:
+    nombre: "&b&lHERMES &fpor 5 días"
+    coste: 1280
+    icono: "FEATHER"
+    descripcion:
+      - "&7El rango Hermes completo, gratis,"
+      - "&7durante cinco días."
+      - "&820 stacks de papa. Unas 320 horas."
+    comandos:
+      - "lp user {jugador} parent addtemp hermes 5d"
+    unica: false
+
+  # ── El equipo legendario ──────────────────────────────────
+  herramientas_papa:
+    nombre: "&6&lHerramientas de la Papa de mar"
+    coste: 2304
+    icono: "NETHERITE_PICKAXE"
+    descripcion:
+      - "&7Pico, hacha y pala de diamante"
+      - "&7con encantamientos que no salen de una mesa."
+      - "&8Un inventario entero de papas."
+    comandos:
+      - "papaequipo {jugador} herramientas"
+    unica: true
+
+  armadura_papa:
+    nombre: "&6&l✦ ARMADURA DE LA PAPA DE MAR ✦"
+    coste: 4608
+    icono: "DIAMOND_CHESTPLATE"
+    descripcion:
+      - "&7Diamante que aguanta como la netherita."
+      - "&7Encantada muy por encima de lo posible."
+      - "&7No arde, no se rompe, no se explica."
+      - ""
+      - "&c&lDOS INVENTARIOS DE PAPAS."
+      - "&8Se paga con la alcancía. Una sola vez."
+    comandos:
+      - "papaequipo {jugador} armadura"
+    unica: true
