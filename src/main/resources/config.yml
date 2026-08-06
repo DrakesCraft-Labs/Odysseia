@@ -974,6 +974,62 @@ native-menus:
 # ítems vanilla de minecraft (con encantamientos y soulbound) e ítems de Slimefun por ID.
 # Cooldowns soportados: "-1" (único reclamo por vida), "30d" (días), "24h" (horas), "30m" (minutos).
 kits:
+  # ── Kits de oficio del Trueque de la Papa de mar ──────────────
+  # No son de rango: se canjean con papas en /papatrueque.
+  minero:
+    cooldown: "-1"
+    permission: "odysseia.kit.minero"
+    vanilla-items:
+      - material: DIAMOND_PICKAXE
+        name: "&f&lPico del Minero de las Profundidades"
+        enchantments: {efficiency: 6, unbreaking: 8, mending: 1, fortune: 4}
+      - material: DIAMOND_SHOVEL
+        name: "&f&lPala del Minero"
+        enchantments: {efficiency: 6, unbreaking: 8, mending: 1}
+      - material: TORCH
+        amount: 64
+      - material: GOLDEN_APPLE
+        amount: 8
+      - material: COOKED_BEEF
+        amount: 32
+      - material: POTION
+        amount: 3
+        name: "&bPocion de Vision Nocturna"
+
+  lenador:
+    cooldown: "-1"
+    permission: "odysseia.kit.lenador"
+    vanilla-items:
+      - material: DIAMOND_AXE
+        name: "&6&lHacha del Lenador"
+        enchantments: {efficiency: 6, unbreaking: 8, mending: 1, fortune: 3}
+      - material: SHEARS
+        name: "&aTijeras del Lenador"
+        enchantments: {efficiency: 5, unbreaking: 8, mending: 1}
+      - material: OAK_SAPLING
+        amount: 64
+      - material: BONE_MEAL
+        amount: 64
+      - material: COOKED_BEEF
+        amount: 32
+
+  pescador:
+    cooldown: "-1"
+    permission: "odysseia.kit.pescador"
+    vanilla-items:
+      - material: FISHING_ROD
+        name: "&3&lCana de la Papa de mar"
+        enchantments: {luck_of_the_sea: 5, lure: 5, unbreaking: 8, mending: 1}
+      - material: DIAMOND_HELMET
+        name: "&3Yelmo del Pescador"
+        enchantments: {respiration: 5, aqua_affinity: 1, unbreaking: 6, mending: 1}
+      - material: DIAMOND_BOOTS
+        name: "&3Botas del Pescador"
+        enchantments: {depth_strider: 3, unbreaking: 6, mending: 1}
+      - material: COOKED_SALMON
+        amount: 32
+      - material: BOAT
+        amount: 1
   # Kit de Thor — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.

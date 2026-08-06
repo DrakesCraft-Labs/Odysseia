@@ -26,25 +26,28 @@ niveles:
 
   # ── Lo mínimo: algo por empezar a juntar ──────────────────
   cosmetico:
-    nombre: "&aRastro de Salitre"
+    nombre: "&aRastro del Dragon &7(7 dias)"
     coste: 8
     icono: "PRISMARINE_CRYSTALS"
     descripcion:
-      - "&7Un cosmético del mar para presumir."
+      - "&7El rastro que llevan los Hermes,"
+      - "&7prestado durante una semana."
       - "&7Nada de poder: pura pinta."
     comandos:
-      - "lp user {jugador} permission settemp odysseia.cosmetico.salitre true 30d"
+      - "lp user {jugador} permission settemp drakes.cosmetics.trail.dragon true 7d"
     unica: false
 
-  titulo_papero:
-    nombre: "&eTítulo: &6Papero"
+  provisiones:
+    nombre: "&fSaco de Provisiones del Mar"
     coste: 32
-    icono: "NAME_TAG"
+    icono: "COOKED_SALMON"
     descripcion:
-      - "&7Un título que dice lo que eres:"
-      - "&7alguien que junta papas."
+      - "&7Comida, antorchas y algo de suerte"
+      - "&7para el siguiente viaje."
     comandos:
-      - "lp user {jugador} permission settemp odysseia.titulo.papero true 30d"
+      - "minecraft:give {jugador} minecraft:cooked_salmon 64"
+      - "minecraft:give {jugador} minecraft:torch 64"
+      - "minecraft:give {jugador} minecraft:golden_apple 4"
     unica: false
 
   # ── Cheques: los Dragmas que firma Jack ───────────────────
@@ -102,16 +105,6 @@ niveles:
     unica: false
 
   # ── Llaves y rangos ───────────────────────────────────────
-  llaves:
-    nombre: "&d3 Llaves de Cofre"
-    coste: 480
-    icono: "TRIPWIRE_HOOK"
-    descripcion:
-      - "&7Tres tiradas a los cofres del spawn."
-    comandos:
-      - "crates key give {jugador} comun 3"
-    unica: false
-
   hermes_temporal:
     nombre: "&b&lHERMES &fpor 5 días"
     coste: 1280
