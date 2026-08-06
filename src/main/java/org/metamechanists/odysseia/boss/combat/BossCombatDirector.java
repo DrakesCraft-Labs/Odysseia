@@ -362,7 +362,9 @@ public final class BossCombatDirector {
     private void solarFlare(OdysseyBoss boss, Player target) {
         Location center = target.getLocation().clone();
         telegraph(boss, "Llamarada solar", center, RANGED_DUST, Sound.ITEM_TOTEM_USE, () -> {
-            center.getWorld().spawnParticle(Particle.FLASH, center.clone().add(0, 1, 0), 1, 0, 0, 0, 0);
+            // FLASH exige un Color en 1.21.11 y sin el revienta la tarea entera del ataque.
+            org.metamechanists.odysseia.util.ParticleCompat.spawnFlash(
+                    center.getWorld(), center.clone().add(0, 1, 0), 1);
             center.getWorld().spawnParticle(Particle.FIREWORK, center.clone().add(0, 1, 0), 80, 3.5, 1.5, 3.5, 0.15);
             for (Player player : playersNear(center, 8.0D)) {
                 player.damage(boss.scaleArenaDamage(11.0D), boss.getEntity());

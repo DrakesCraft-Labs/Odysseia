@@ -207,7 +207,8 @@ public final class CosmeticService implements Listener {
                 world.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.8F, 1.0F);
             }
             case "staff" -> {
-                world.spawnParticle(Particle.FLASH, loc.clone().add(0, 1, 0), 3);
+                // FLASH exige un Color en 1.21.11; va por la capa de compatibilidad.
+                org.metamechanists.odysseia.util.ParticleCompat.spawnFlash(world, loc.clone().add(0, 1, 0), 3);
                 world.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8F, 1.2F);
             }
             default -> { /* cosmetico retirado del catalogo */ }
