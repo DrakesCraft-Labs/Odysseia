@@ -252,8 +252,7 @@ public final class StoreManager {
         // 2. Reproducir sonido global si está activado
         if (config.getBoolean("purchase-engine.announcements.global-sound.enabled", true)) {
             String soundName = config.getString("purchase-engine.announcements.global-sound.sound", "UI_TOAST_CHALLENGE_COMPLETE");
-            NamespacedKey soundKey = NamespacedKey.fromString(soundName.toLowerCase(Locale.ROOT));
-            Sound sound = soundKey == null ? null : Registry.SOUNDS.get(soundKey);
+            Sound sound = resolverSonido(soundName);
             if (sound != null) {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.playSound(p.getLocation(), sound, 1.0f, 1.0f);
@@ -295,6 +294,38 @@ public final class StoreManager {
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
         plugin.getLogger().info("[Purchase] Anuncio encolado para " + nick + " (" + productName + ").");
         return true;
+    }
+
+    /**
+     * Busca un sonido aceptando las dos formas con que se escribe en un config.
+     *
+     * El valor por defecto de la config, {@code UI_TOAST_CHALLENGE_COMPLETE}, es el nombre de la
+     * constante de Bukkit; la clave del registro es {@code ui.toast.challenge_complete}. Pasar la
+     * primera en minusculas a {@link NamespacedKey#fromString} da una clave que no existe, asi que
+     * el sonido del anuncio nunca sono. No se notaba porque el metodo salia antes de llegar aqui.
+     *
+     * No se puede convertir una forma en otra a ciegas --{@code challenge_complete} lleva guion
+     * bajo dentro de la propia palabra--, asi que se compara contra el registro real.
+     */
+    static Sound resolverSonido(String nombre) {
+        if (nombre == null || nombre.isBlank()) return null;
+        String limpio = nombre.trim().toLowerCase(Locale.ROOT);
+
+        NamespacedKey clave = NamespacedKey.fromString(limpio);
+        if (clave != null) {
+            Sound directo = Registry.SOUNDS.get(clave);
+            if (directo != null) return directo;
+        }
+
+        for (Sound candidato : Registry.SOUNDS) {
+            if (esElMismoSonido(candidato.getKey().getKey(), limpio)) return candidato;
+        }
+        return null;
+    }
+
+    /** True si la clave del registro y lo escrito en el config nombran el mismo sonido. */
+    static boolean esElMismoSonido(String claveRegistro, String nombreConfig) {
+        return claveRegistro.replace('.', '_').equals(nombreConfig.replace('.', '_'));
     }
 
     /**
