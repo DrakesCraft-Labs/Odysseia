@@ -471,6 +471,16 @@ purchase-engine:
       enabled: true
       sound: "UI_TOAST_CHALLENGE_COMPLETE"
 
+  # Tebex solo entrega en su ciclo de sondeo: quien compra y entra recién pasado un ciclo espera
+  # hasta el siguiente (a Rojo le tocaron 14 minutos el 2026-08-06). Al entrar alguien se le pide a
+  # Tebex que revise ya. Varias entradas seguidas comparten una sola revisión.
+  tebex-forcecheck:
+    enabled: true
+    # Margen tras la entrada, para que el jugador ya esté cargado si le toca un kit al inventario.
+    delay-ticks: 60
+    # Mínimo entre dos revisiones, para no golpear la API de Tebex. Mínimo aceptado: 30.
+    cooldown-seconds: 90
+
 natural-spawn:
   # Activar/desactivar el spawn natural automático
   enabled: false
