@@ -132,7 +132,7 @@ public final class ModalityVaultService implements Listener {
     }
 
     /** Identifica a que boveda pertenece un inventario abierto. */
-    private static final class VaultHolder implements InventoryHolder {
+    private static final class VaultHolder implements VaultInventory {
         private final UUID owner;
         private final String modality;
         private final int vault;

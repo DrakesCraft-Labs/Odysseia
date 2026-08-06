@@ -481,6 +481,21 @@ purchase-engine:
     # Mínimo entre dos revisiones, para no golpear la API de Tebex. Mínimo aceptado: 30.
     cooldown-seconds: 90
 
+#  Bóvedas: qué no puede entrar
+# ─────────────────────────────────────────────
+# Aplica a las dos bóvedas del servidor: PlayerVaultZ en el survival y las de modalidad en islas.
+bovedas:
+  # Una mochila de Slimefun no guarda sus ítems dentro del ítem: guarda un ID, y el contenido vive
+  # en el almacén de Slimefun. Metida en una bóveda ocupa un slot y da acceso a todo lo que tiene.
+  # 27 mochilas en una shulker, y la shulker en la bóveda, hacen que un slot valga cientos de stacks.
+  bloquear-mochilas:
+    enabled: true
+    # También mira dentro de shulkers y bundles, que es como se intenta colar.
+    revisar-contenedores: true
+    # Niveles de anidamiento a revisar (shulker dentro de shulker dentro de...).
+    profundidad-maxima: 3
+    mensaje: "&6DrakesCraft &8· &7Las &emochilas de Slimefun&7 no entran en la bóveda: guardan un ID, no los ítems, y una sola valdría por cientos de slots. &7Usa la mochila directamente o un cofre."
+
 natural-spawn:
   # Activar/desactivar el spawn natural automático
   enabled: false
