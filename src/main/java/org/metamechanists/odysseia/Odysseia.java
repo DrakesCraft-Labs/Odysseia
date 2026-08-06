@@ -291,6 +291,8 @@ public final class Odysseia extends JavaPlugin {
         startSchedulers();
         startStarTelemetry();
         if (discordTranslationBridge != null) discordTranslationBridge.reload();
+        // Si acaban de configurar el webhook, el aviso debe poder volver a salir.
+        org.metamechanists.odysseia.utils.StoreManager.resetDiscordWarning();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, modalidades, schedulers y purchase engine.");
         return errors;
     }

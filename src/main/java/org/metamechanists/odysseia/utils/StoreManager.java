@@ -34,6 +34,8 @@ public final class StoreManager {
             .build();
 
     private static StoreManager instance;
+    /** Ver {@link #warnDiscordOnce}: evita repetir el mismo aviso en cada compra. */
+    private static volatile boolean discordWarningShown;
     private final Odysseia plugin;
     private final Set<String> inFlightTransactions = ConcurrentHashMap.newKeySet();
     private BukkitTask task;
@@ -223,22 +225,19 @@ public final class StoreManager {
     /**
      * Dispara el anuncio público de Discord, el anuncio en chat in-game y el sonido global.
      * Estático para poder invocarse desde un comando (entregas vía Tebex) sin depender del hilo de polling.
+     *
+     * Los tres canales son independientes a proposito. Antes se validaba el webhook de Discord al
+     * principio y se cortaba con {@code return}, asi que un webhook sin configurar dejaba al jugador
+     * sin su anuncio en el chat aunque el producto se hubiera entregado bien. Discord es el canal
+     * prescindible; el que el jugador ve es el del juego.
      */
     public static boolean announcePurchase(Odysseia plugin, String nick, String productName) {
         FileConfiguration config = plugin.getConfig();
 
-        // Purchase Engine owns this endpoint. Generic Discord integrations must never
-        // receive commerce events because they have different retention and permissions.
+        // Apagado a proposito: no hay nada que anunciar y no es un fallo, asi que la accion se da
+        // por cumplida. Devolver false aqui la dejaba reintentando para siempre.
         if (!config.getBoolean("purchase-engine.announcements.enabled", false)) {
-            plugin.getLogger().warning("[Purchase] El anuncio de compra esta desactivado en purchase-engine.announcements.");
-            return false;
-        }
-
-        String webhookUrl = config.getString("purchase-engine.announcements.webhook-url", "");
-        if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.startsWith("REPLACE_ME")
-                || !WebhookSender.isDiscordWebhookUrl(webhookUrl) || !WebhookSender.isAllowedHttpsUrl(webhookUrl)) {
-            plugin.getLogger().warning("[Purchase] Webhook de compras invalido o no configurado; el anuncio queda pendiente de reintento.");
-            return false;
+            return true;
         }
 
         // 1. Anuncio en el chat local
@@ -264,12 +263,18 @@ public final class StoreManager {
             }
         }
 
-        // 3. Webhook de Discord
+        // 3. Webhook de Discord (opcional)
+        //
+        // A partir de aqui nada puede devolver false: el jugador y quienes estaban conectados ya
+        // vieron el anuncio, asi que la accion esta cumplida. Que Discord no este configurado es un
+        // problema del dueño del servidor, no motivo para reintentar la entrega en bucle.
+        String webhookUrl = config.getString("purchase-engine.announcements.webhook-url", "");
         String discordAnnounce = config.getString("purchase-engine.announcements.discord-announcement", "");
 
-        if (discordAnnounce == null || discordAnnounce.isBlank()) {
-            plugin.getLogger().warning("[Purchase] Falta purchase-engine.announcements.discord-announcement; el anuncio queda pendiente de reintento.");
-            return false;
+        String motivo = motivoDiscordNoDisponible(webhookUrl, discordAnnounce);
+        if (motivo != null) {
+            warnDiscordOnce(plugin, motivo);
+            return true;
         }
 
         String cleanText = discordAnnounce.replace("{player}", nick).replace("{product}", productName);
@@ -290,5 +295,42 @@ public final class StoreManager {
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
         plugin.getLogger().info("[Purchase] Anuncio encolado para " + nick + " (" + productName + ").");
         return true;
+    }
+
+    /**
+     * Por que no se puede copiar el anuncio a Discord, o {@code null} si si se puede.
+     *
+     * Separado de {@link #announcePurchase} para poder comprobarlo sin levantar un servidor: es la
+     * unica parte de la decision que no toca Bukkit.
+     */
+    static String motivoDiscordNoDisponible(String webhookUrl, String texto) {
+        if (webhookUrl == null || webhookUrl.isBlank() || webhookUrl.startsWith("REPLACE_ME")) {
+            return "webhook-url sin configurar";
+        }
+        if (!WebhookSender.isAllowedHttpsUrl(webhookUrl) || !WebhookSender.isDiscordWebhookUrl(webhookUrl)) {
+            return "webhook-url no es una URL de webhook de Discord por HTTPS";
+        }
+        if (texto == null || texto.isBlank()) {
+            return "falta discord-announcement";
+        }
+        return null;
+    }
+
+    /**
+     * Avisa una sola vez de que el espejo en Discord no esta configurado.
+     *
+     * Sin esto el aviso salia en cada compra y se volvia ruido que se ignora. Una vez por arranque
+     * basta para que se note, y se reinicia al recargar la config por si se acaba de corregir.
+     */
+    private static void warnDiscordOnce(Odysseia plugin, String motivo) {
+        if (discordWarningShown) return;
+        discordWarningShown = true;
+        plugin.getLogger().warning("[Purchase] El anuncio salio en el chat del juego, pero no se copiara a Discord: "
+                + motivo + " (purchase-engine.announcements). Se avisa una sola vez.");
+    }
+
+    /** Permite que el aviso de Discord vuelva a salir tras un /odysseia reload. */
+    public static void resetDiscordWarning() {
+        discordWarningShown = false;
     }
 }
