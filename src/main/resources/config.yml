@@ -1028,7 +1028,7 @@ kits:
         enchantments: {depth_strider: 3, unbreaking: 6, mending: 1}
       - material: COOKED_SALMON
         amount: 32
-      - material: BOAT
+      - material: OAK_BOAT
         amount: 1
   # Kit de Thor — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
