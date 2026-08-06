@@ -221,6 +221,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Send startup webhook
         sendStartupWebhook();
+        avisarClavesMuertas();
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " habilitado correctamente.");
     }
@@ -236,6 +237,20 @@ public final class Odysseia extends JavaPlugin {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    /**
+     * Avisa al arrancar si el config desplegado conserva claves que el codigo ya no lee.
+     *
+     * Sin esto son invisibles: Bukkit no se queja de una clave que nadie consulta, asi que quien la
+     * configure se queda esperando un efecto que no llega.
+     */
+    private void avisarClavesMuertas() {
+        var avisos = org.metamechanists.odysseia.util.ConfigLegacyKeys.avisos(
+                getConfig().getKeys(true));
+        for (String aviso : avisos) {
+            getLogger().warning("[Config] " + aviso);
+        }
     }
 
     /**
