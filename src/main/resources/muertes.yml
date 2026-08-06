@@ -44,6 +44,9 @@ mensajes:
     - "&c{asesino} &7le recordó a &e{jugador} &7por qué se llama jefe."
     - "&e{jugador} &7duró exactamente lo que &c{asesino} &7quiso que durara."
     - "&e{jugador} &7trajo un plan. &c{asesino} &7trajo el resultado."
+    - "&c{asesino} &7bostezó y &e{jugador} &7dejó de estar."
+    - "&e{jugador} &7llegó hasta aquí. Justo hasta aquí."
+    - "&e{jugador} &7fue una anécdota corta en la vida de &c{asesino}&7."
 
   pvp:
     - "&c{asesino} &7mandó a &e{jugador} &7de vuelta al spawn con &f{arma}&7."
@@ -52,6 +55,10 @@ mensajes:
     - "&e{jugador} &7ahora sabe que &c{asesino} &7no estaba bromeando."
     - "&c{asesino} &7usó &f{arma}&7. Fue muy efectivo contra &e{jugador}&7."
     - "&e{jugador} &7pidió pelea. &c{asesino} &7trajo &f{arma}&7."
+    - "&c{asesino} &7le explicó a &e{jugador} &7cómo funciona el PvP, con &f{arma}&7."
+    - "&e{jugador} &7se llevó una lección de &c{asesino}&7 y la lección pesaba."
+    - "&c{asesino} &7hizo respawnear a &e{jugador} &7sin pedirle permiso."
+    - "&e{jugador} &7apostó a que le ganaba a &c{asesino}&7. Perdió la apuesta y todo lo demás."
 
   autogol:
     - "&e{jugador} &7se mató solo. Que quede en actas."
@@ -71,6 +78,13 @@ mensajes:
     - "&7Alguien avísele a &e{jugador} &7que las escaleras existen."
     - "&e{jugador} &7se estrelló contra el planeta a toda velocidad."
     - "&e{jugador} &7calculó el salto. Se equivocó en un cero."
+    - "&e{jugador} &7le tenía fe al salto. El salto no le tenía fe a él."
+    - "&e{jugador} &7bajó los &f{y}&7 bloques en tiempo récord."
+    - "&e{jugador} &7pensó que abajo había agua. No había agua."
+    - "&e{jugador} &7hizo un vuelo sin escalas y sin alas."
+    - "&e{jugador} &7se despidió del suelo desde arriba y lo saludó desde muy cerca."
+    - "&7La caída no mató a &e{jugador}&7. Fue la parada."
+    - "&e{jugador} &7comprobó experimentalmente que 9.8 m/s² es real."
 
   lava:
     - "&e{jugador} &7pensó que la lava se veía más fría de cerca."
@@ -79,12 +93,21 @@ mensajes:
     - "&e{jugador} &7descubrió que el naranja significa &cno&7."
     - "&e{jugador} &7se fue a nadar donde no se nada."
     - "&e{jugador} &7se derritió con estilo, eso hay que reconocerlo."
+    - "&e{jugador} &7se bañó en el lugar más caro del mapa."
+    - "&e{jugador} &7dejó de existir en formato líquido."
+    - '&e{jugador} &7pensó "total, son dos bloquecitos".'
+    - "&e{jugador} &7quiso ver la lava de cerca. La vio por dentro."
+    - "&7Se busca el inventario de &e{jugador}&7. Última vez visto: derritiéndose."
 
   drowning:
     - "&e{jugador} &7olvidó que respirar formaba parte del plan."
     - "&e{jugador} &7se quedó admirando el fondo del mar. Demasiado rato."
     - "&e{jugador} &7no encontró el botón de subir."
     - "&e{jugador} &7confirmó que las branquias no venían de fábrica."
+    - "&e{jugador} &7se quedó sin aire y sin ideas."
+    - "&e{jugador} &7le faltó exactamente un bloque para llegar arriba."
+    - "&e{jugador} &7se hundió con todo y armadura. La armadura no ayudó."
+    - "&e{jugador} &7confundió el océano con una piscina."
 
   fire:
     - "&e{jugador} &7ardió como una vela de cumpleaños."
@@ -94,6 +117,8 @@ mensajes:
     - "&e{jugador} &7siguió ardiendo un rato más, por si acaso."
     - "&e{jugador} &7se olvidó de apagarse."
     - "&e{jugador} &7corrió en llamas. No ayudó."
+    - "&e{jugador} &7se apagó solo. Del todo."
+    - "&e{jugador} &7corrió, gritó y ardió. En ese orden."
 
   entity_attack:
     - "&e{jugador} &7fue desarmado, desordenado y desaparecido por &c{asesino}&7."
@@ -103,6 +128,12 @@ mensajes:
     - "&e{jugador} &7le hizo cosquillas a &c{asesino}&7. Salió pésimo."
     - "&c{asesino} &7hizo lo que hacen los &c{asesino}&7, y &e{jugador} &7ahí estaba."
     - "&e{jugador} &7subestimó a &c{asesino}&7 exactamente una vez."
+    - "&c{asesino} &7hizo su trabajo y &e{jugador} &7era el trabajo."
+    - "&e{jugador} &7se acercó a &c{asesino} &7con confianza. Mal."
+    - "&c{asesino} &7no leyó el guion donde &e{jugador} &7ganaba."
+    - "&e{jugador} &7pensó que &c{asesino} &7era decorativo."
+    - "&c{asesino} &7le quitó a &e{jugador} &7las ganas y la vida."
+    - "&e{jugador} &7dio el primer golpe. &c{asesino} &7dio el último."
 
   entity_sweep_attack:
     - "&c{asesino} &7barrió con &e{jugador} &7y con todo lo que había alrededor."
@@ -112,6 +143,10 @@ mensajes:
     - "&e{jugador} &7escuchó un &fsssss&7 y no corrió lo suficiente."
     - "&c{asesino} &7explotó de emoción justo encima de &e{jugador}&7."
     - "&e{jugador} &7fue redistribuido por el vecindario."
+    - "&e{jugador} &7y &c{asesino} &7se separaron en muy malos términos."
+    - "&c{asesino} &7hizo lo único que sabe hacer, encima de &e{jugador}&7."
+    - "&e{jugador} &7fue desarmado, literalmente."
+    - "&7Quedaron partes de &e{jugador} &7en tres chunks distintos."
 
   block_explosion:
     - "&e{jugador} &7encendió algo que no debía y se enteró rápido."
@@ -123,16 +158,23 @@ mensajes:
     - "&e{jugador} &7fue a ver qué había abajo. No había nada."
     - "&e{jugador} &7encontró el borde del universo. Con la cara."
     - "&e{jugador} &7sigue cayendo, en algún sentido."
+    - "&e{jugador} &7bajó de Y=0 sin permiso."
+    - "&e{jugador} &7se fue donde no hay ni bloques."
+    - "&e{jugador} &7cayó tanto que dejó de contar."
 
   suffocation:
     - "&e{jugador} &7se quedó sin espacio personal. Del todo."
     - "&e{jugador} &7intentó ocupar el mismo lugar que un bloque."
     - "&e{jugador} &7descubrió que la piedra no se corre."
+    - "&e{jugador} &7intentó atravesar una pared por la fuerza de voluntad."
+    - "&e{jugador} &7se quedó dentro del bloque. El bloque no se movió."
 
   starvation:
     - "&e{jugador} &7murió de hambre teniendo un inventario lleno de cosas que no se comen."
     - "&e{jugador} &7se olvidó de almorzar. Y de cenar. Y de vivir."
     - "&e{jugador} &7confirmó que no se puede comer redstone."
+    - "&e{jugador} &7murió con la despensa vacía y el inventario lleno de piedra."
+    - "&e{jugador} &7descubrió que el hambre también mata en este juego."
 
   poison:
     - "&e{jugador} &7se tomó algo que no debía."
@@ -167,6 +209,8 @@ mensajes:
     - "&c{asesino} &7le acertó a &e{jugador} &7desde lejos y sin despeinarse."
     - "&e{jugador} &7fue alcanzado por algo que venía volando de parte de &c{asesino}&7."
     - "&e{jugador} &7no vio venir el disparo de &c{asesino}&7. Nadie lo ve."
+    - "&c{asesino} &7apuntó, disparó y se fue a hacer otra cosa. &e{jugador} &7se quedó."
+    - "&e{jugador} &7escuchó un silbido y ya era tarde."
 
   thorns:
     - "&e{jugador} &7se hirió pegándole a &c{asesino}&7. Poético."
@@ -202,3 +246,6 @@ mensajes:
     - "&e{jugador} &7dejó de existir en &f{mundo}&7, a la altura &f{y}&7."
     - "&e{jugador} &7se murió. Los detalles se perdieron en el camino."
     - "&e{jugador} &7encontró una forma nueva de morir. Enhorabuena."
+    - "&e{jugador} &7se murió de una forma que ni el servidor entendió."
+    - "&e{jugador} &7dejó de existir por motivos personales."
+    - "&e{jugador} &7se fue sin dar explicaciones."

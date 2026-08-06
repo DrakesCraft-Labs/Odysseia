@@ -101,8 +101,15 @@ public final class DeathMessageListener implements Listener {
             texto.append(" ").append(coletilla.replace("{veces}", String.valueOf(seguidas)));
         }
 
-        event.deathMessage(LegacyComponentSerializer.legacySection()
-                .deserialize(ChatColor.translateAlternateColorCodes('&', texto.toString())));
+        String coloreado = ChatColor.translateAlternateColorCodes('&', texto.toString());
+        event.deathMessage(LegacyComponentSerializer.legacySection().deserialize(coloreado));
+        // Y tambien el de Bukkit, que devuelve String.
+        //
+        // No es redundante: DiscordSRV lee 'getDeathMessage()' --el legacy-- desde MONITOR, y
+        // escribiendo solo el de Adventure se llevaba el mensaje de vanilla. En el juego salia el
+        // bueno y en Discord el aburrido. Escribir los dos no depende de si Paper los tiene
+        // enlazados en esa direccion, que cambia entre versiones.
+        event.setDeathMessage(coloreado);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
