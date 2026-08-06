@@ -30,9 +30,13 @@ public final class ProtectionBorderListener implements Listener, org.bukkit.comm
     /** Marca en el jugador que apago el borde. Va en el PDC para sobrevivir a la reconexion. */
     private static final String DISABLED_KEY = "protection_border_off";
 
+    /** Minimo entre repintados completos del perimetro, en milisegundos. */
+    private static final long RENDER_COOLDOWN_MS = 500L;
+
     private final Odysseia plugin;
     private final org.bukkit.NamespacedKey disabledKey;
     private final Map<UUID, RenderedBorder> rendered = new HashMap<>();
+    private final Map<UUID, Long> lastRender = new HashMap<>();
     private final Method regionFromLocation;
     private final Method regionIsOwner;
     private final Method regionIsMember;
@@ -87,12 +91,36 @@ public final class ProtectionBorderListener implements Listener, org.bukkit.comm
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockChange(BlockPlaceEvent event) {
+        if (!affectsBorder(event.getPlayer(), event.getBlock().getLocation())) return;
         plugin.getServer().getScheduler().runTask(plugin, () -> refresh(event.getPlayer(), true));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!affectsBorder(event.getPlayer(), event.getBlock().getLocation())) return;
         plugin.getServer().getScheduler().runTask(plugin, () -> refresh(event.getPlayer(), true));
+    }
+
+    /**
+     * True solo si el bloque cae en la linea que ya se le dibujo al jugador.
+     *
+     * Antes se redibujaba el perimetro entero en cada bloque roto o puesto. Con el limite de
+     * 2048 bloques eso son hasta 4096 paquetes de block change por golpe de pica --uno para
+     * restaurar y otro para pintar--, y minando rapido el cliente se desincroniza: bloques que
+     * quedan invisibles, "interferencia en pantalla" y cosas que no aparecen. Se arreglaba al
+     * reconectar porque el cliente volvia a recibir los chunks limpios.
+     */
+    private boolean affectsBorder(Player player, Location location) {
+        RenderedBorder actual = rendered.get(player.getUniqueId());
+        if (actual == null) return false;
+        if (location.getBlockY() != actual.y) return false;
+        for (Location dibujado : actual.locations) {
+            if (dibujado.getBlockX() == location.getBlockX()
+                    && dibujado.getBlockZ() == location.getBlockZ()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -108,6 +136,7 @@ public final class ProtectionBorderListener implements Listener, org.bukkit.comm
     public void onQuit(PlayerQuitEvent event) {
         clear(event.getPlayer());
         rendered.remove(event.getPlayer().getUniqueId());
+        lastRender.remove(event.getPlayer().getUniqueId());
     }
 
     /**
@@ -167,6 +196,15 @@ public final class ProtectionBorderListener implements Listener, org.bukkit.comm
             int y = player.getLocation().getBlockY();
             RenderedBorder previous = rendered.get(player.getUniqueId());
             if (!force && previous != null && previous.regionKey.equals(regionKey) && previous.y == y) return;
+
+            // El borde se dibuja a la altura del jugador, asi que minar en vertical cambia la Y
+            // en cada bloque y dispara un repintado completo. Se limita a uno cada medio segundo
+            // mientras siga en la misma region; al cambiar de region se repinta al instante.
+            long ahora = System.currentTimeMillis();
+            boolean mismaRegion = previous != null && previous.regionKey.equals(regionKey);
+            Long ultimo = lastRender.get(player.getUniqueId());
+            if (mismaRegion && ultimo != null && ahora - ultimo < RENDER_COOLDOWN_MS) return;
+            lastRender.put(player.getUniqueId(), ahora);
 
             clear(player);
             List<Location> border = buildBorder(region, y);
