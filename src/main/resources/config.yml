@@ -2680,7 +2680,7 @@ kits:
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    money: 100000
+    money: 25000
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
