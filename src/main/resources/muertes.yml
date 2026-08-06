@@ -1,0 +1,204 @@
+# ─────────────────────────────────────────────────────────────
+#  Mensajes de muerte de DrakesCraft
+# ─────────────────────────────────────────────────────────────
+#
+# Vive aparte de config.yml porque Odysseia reescribe ese archivo al arrancar y se lleva los
+# comentarios por delante. Este no lo toca nadie: se puede editar tranquilo.
+#
+# Se recarga con /odysseia reload, sin reiniciar.
+#
+# MARCADORES disponibles en cualquier mensaje:
+#   {jugador}  quien murió
+#   {asesino}  quien lo mató, con su nombre visible — aquí es donde entra la gracia:
+#              "SUPER Infernal ENDERMAN", "Lvl 100 | Zombie"...
+#   {arma}     el arma que llevaba el asesino (sobre todo útil en pvp)
+#   {mundo}    el mundo
+#   {y}        la altura donde murió
+#
+# Nunca sale dos veces seguidas el mismo mensaje del mismo grupo.
+# Si una causa no tiene mensajes, se usa "generico". Si "generico" está vacío, se deja el de
+# vanilla, que al menos informa.
+
+enabled: true
+
+# Coletilla que se añade cuando alguien lleva varias muertes en poco rato.
+racha:
+  minimo: 3
+  ventana-minutos: 10
+  coletillas:
+    - "&8(van &c{veces}&8 en un rato, tómate un tecito)"
+    - "&8(&c{veces}&8 veces ya, esto dejó de ser mala suerte)"
+    - "&8(&c{veces}&8 seguidas — alguien escóndale la armadura)"
+    - "&8(&c{veces}&8 muertes, va camino al récord)"
+    - "&8(&c{veces}&8 en diez minutos, impresionante en el mal sentido)"
+
+mensajes:
+
+  # ── Quién te mató manda sobre cómo te mató ──────────────────
+
+  jefe:
+    - "&e{jugador} &7retó a &c{asesino}&7. &c{asesino} &7aceptó el reto."
+    - "&c{asesino} &7ni siquiera lo consideró un combate. &e{jugador} &7sí."
+    - "&e{jugador} &7fue borrado del mapa por &c{asesino}&7 sin derecho a réplica."
+    - "&7Los dioses vieron a &e{jugador} &7caer ante &c{asesino}&7. Aplaudieron."
+    - "&c{asesino} &7le recordó a &e{jugador} &7por qué se llama jefe."
+    - "&e{jugador} &7duró exactamente lo que &c{asesino} &7quiso que durara."
+    - "&e{jugador} &7trajo un plan. &c{asesino} &7trajo el resultado."
+
+  pvp:
+    - "&c{asesino} &7mandó a &e{jugador} &7de vuelta al spawn con &f{arma}&7."
+    - "&e{jugador} &7perdió una discusión contra &c{asesino} &7y contra &f{arma}&7."
+    - "&c{asesino} &7le hizo el favor a &e{jugador} &7de acortarle el camino a casa."
+    - "&e{jugador} &7ahora sabe que &c{asesino} &7no estaba bromeando."
+    - "&c{asesino} &7usó &f{arma}&7. Fue muy efectivo contra &e{jugador}&7."
+    - "&e{jugador} &7pidió pelea. &c{asesino} &7trajo &f{arma}&7."
+
+  autogol:
+    - "&e{jugador} &7se mató solo. Que quede en actas."
+    - "&e{jugador} &7fue traicionado por &c{asesino}&7… que era de los suyos."
+    - "&e{jugador} &7confirmó que el peor enemigo de uno va con uno."
+    - "&e{jugador} &7no necesitó ayuda de nadie para esto."
+
+  # ── Cómo te mataste ─────────────────────────────────────────
+
+  fall:
+    - "&e{jugador} &7descubrió que la gravedad no negocia."
+    - "&e{jugador} &7intentó bajar por el camino corto. Funcionó demasiado bien."
+    - "&e{jugador} &7cayó desde Y={y} y el suelo no perdonó."
+    - "&e{jugador} &7confundió el suelo con una sugerencia."
+    - "&e{jugador} &7probó si podía volar. No podía."
+    - "&e{jugador} &7aterrizó. Mal, pero aterrizó."
+    - "&7Alguien avísele a &e{jugador} &7que las escaleras existen."
+    - "&e{jugador} &7se estrelló contra el planeta a toda velocidad."
+    - "&e{jugador} &7calculó el salto. Se equivocó en un cero."
+
+  lava:
+    - "&e{jugador} &7pensó que la lava se veía más fría de cerca."
+    - "&e{jugador} &7se metió al jacuzzi equivocado."
+    - "&e{jugador} &7ahora forma parte del paisaje."
+    - "&e{jugador} &7descubrió que el naranja significa &cno&7."
+    - "&e{jugador} &7se fue a nadar donde no se nada."
+    - "&e{jugador} &7se derritió con estilo, eso hay que reconocerlo."
+
+  drowning:
+    - "&e{jugador} &7olvidó que respirar formaba parte del plan."
+    - "&e{jugador} &7se quedó admirando el fondo del mar. Demasiado rato."
+    - "&e{jugador} &7no encontró el botón de subir."
+    - "&e{jugador} &7confirmó que las branquias no venían de fábrica."
+
+  fire:
+    - "&e{jugador} &7ardió como una vela de cumpleaños."
+    - "&e{jugador} &7se puso a tono con el ambiente. Literalmente."
+    - "&e{jugador} &7ahora es humo y un mal recuerdo."
+  fire_tick:
+    - "&e{jugador} &7siguió ardiendo un rato más, por si acaso."
+    - "&e{jugador} &7se olvidó de apagarse."
+    - "&e{jugador} &7corrió en llamas. No ayudó."
+
+  entity_attack:
+    - "&e{jugador} &7fue desarmado, desordenado y desaparecido por &c{asesino}&7."
+    - "&c{asesino} &7le enseñó modales a &e{jugador}&7."
+    - "&e{jugador} &7quiso conversar con &c{asesino}&7. No hubo diálogo."
+    - "&c{asesino} &7no estaba de humor y &e{jugador} &7se enteró tarde."
+    - "&e{jugador} &7le hizo cosquillas a &c{asesino}&7. Salió pésimo."
+    - "&c{asesino} &7hizo lo que hacen los &c{asesino}&7, y &e{jugador} &7ahí estaba."
+    - "&e{jugador} &7subestimó a &c{asesino}&7 exactamente una vez."
+
+  entity_sweep_attack:
+    - "&c{asesino} &7barrió con &e{jugador} &7y con todo lo que había alrededor."
+
+  entity_explosion:
+    - "&e{jugador} &7recibió un abrazo muy caluroso de &c{asesino}&7."
+    - "&e{jugador} &7escuchó un &fsssss&7 y no corrió lo suficiente."
+    - "&c{asesino} &7explotó de emoción justo encima de &e{jugador}&7."
+    - "&e{jugador} &7fue redistribuido por el vecindario."
+
+  block_explosion:
+    - "&e{jugador} &7encendió algo que no debía y se enteró rápido."
+    - "&e{jugador} &7hizo minería explosiva. Fue el mineral."
+    - "&e{jugador} &7voló por los aires en varias direcciones a la vez."
+
+  void:
+    - "&e{jugador} &7se cayó del mundo. Literalmente."
+    - "&e{jugador} &7fue a ver qué había abajo. No había nada."
+    - "&e{jugador} &7encontró el borde del universo. Con la cara."
+    - "&e{jugador} &7sigue cayendo, en algún sentido."
+
+  suffocation:
+    - "&e{jugador} &7se quedó sin espacio personal. Del todo."
+    - "&e{jugador} &7intentó ocupar el mismo lugar que un bloque."
+    - "&e{jugador} &7descubrió que la piedra no se corre."
+
+  starvation:
+    - "&e{jugador} &7murió de hambre teniendo un inventario lleno de cosas que no se comen."
+    - "&e{jugador} &7se olvidó de almorzar. Y de cenar. Y de vivir."
+    - "&e{jugador} &7confirmó que no se puede comer redstone."
+
+  poison:
+    - "&e{jugador} &7se tomó algo que no debía."
+    - "&e{jugador} &7fue derrotado lentamente y con mucho color verde."
+
+  magic:
+    - "&e{jugador} &7fue víctima de magia que no entendía."
+    - "&e{jugador} &7recibió una poción con muy malas intenciones."
+    - "&c{asesino} &7hizo magia. &e{jugador} &7desapareció."
+
+  wither:
+    - "&e{jugador} &7se marchitó como planta sin regar."
+    - "&e{jugador} &7se puso negro y luego se puso a descansar."
+
+  contact:
+    - "&e{jugador} &7abrazó un cactus. El cactus ganó."
+    - "&e{jugador} &7aprendió que las plantas también se defienden."
+
+  lightning:
+    - "&e{jugador} &7fue elegido por el cielo. Para nada bueno."
+    - "&e{jugador} &7recibió un rayo. No pidió ninguno."
+
+  hot_floor:
+    - "&e{jugador} &7pisó donde no había que pisar."
+    - "&e{jugador} &7descubrió que el suelo estaba al rojo. Con los pies."
+
+  falling_block:
+    - "&e{jugador} &7fue aplastado por algo que venía de arriba."
+    - "&e{jugador} &7miró hacia arriba justo a tiempo para no hacer nada."
+
+  projectile:
+    - "&c{asesino} &7le acertó a &e{jugador} &7desde lejos y sin despeinarse."
+    - "&e{jugador} &7fue alcanzado por algo que venía volando de parte de &c{asesino}&7."
+    - "&e{jugador} &7no vio venir el disparo de &c{asesino}&7. Nadie lo ve."
+
+  thorns:
+    - "&e{jugador} &7se hirió pegándole a &c{asesino}&7. Poético."
+    - "&e{jugador} &7atacó a &c{asesino} &7y se lo devolvieron con intereses."
+
+  dragon_breath:
+    - "&e{jugador} &7respiró donde no había que respirar."
+    - "&e{jugador} &7se quedó parado en la nube morada. Error clásico."
+
+  fly_into_wall:
+    - "&e{jugador} &7iba volando espectacular hasta que apareció una pared."
+    - "&e{jugador} &7confirmó que las élitras no traen frenos."
+    - "&e{jugador} &7se estampó a velocidad de crucero."
+
+  cramming:
+    - "&e{jugador} &7fue comprimido por la multitud."
+    - "&e{jugador} &7descubrió que había demasiada gente en muy poco espacio."
+
+  sonic_boom:
+    - "&e{jugador} &7fue gritado hasta la muerte. Por &c{asesino}&7."
+    - "&e{jugador} &7hizo ruido cerca de algo que odia el ruido."
+
+  freeze:
+    - "&e{jugador} &7se congeló entero. Quedó decorativo."
+    - "&e{jugador} &7subestimó el frío. El frío no."
+
+  kill:
+    - "&e{jugador} &7fue retirado de la existencia por orden superior."
+
+  # ── Cuando no encaja en nada de lo anterior ─────────────────
+  generico:
+    - "&e{jugador} &7murió de una forma que nadie supo explicar."
+    - "&e{jugador} &7dejó de existir en &f{mundo}&7, a la altura &f{y}&7."
+    - "&e{jugador} &7se murió. Los detalles se perdieron en el camino."
+    - "&e{jugador} &7encontró una forma nueva de morir. Enhorabuena."

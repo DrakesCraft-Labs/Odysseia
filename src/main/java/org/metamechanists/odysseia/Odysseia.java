@@ -61,6 +61,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.ModalityStorageGuardListener modalityStorageGuard;
     @Getter
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
+    private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -135,6 +136,8 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.TebexForcecheckListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.VaultBackpackGuardListener(this), this);
+        this.deathMessages = new org.metamechanists.odysseia.listeners.DeathMessageListener(this);
+        Bukkit.getPluginManager().registerEvents(deathMessages, this);
 
         // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del
         // plugin sigue funcionando: solo se pierde la separacion de /pv dentro de las islas.
@@ -318,6 +321,7 @@ public final class Odysseia extends JavaPlugin {
         startSchedulers();
         startStarTelemetry();
         if (discordTranslationBridge != null) discordTranslationBridge.reload();
+        if (deathMessages != null) deathMessages.reload();
         // Si acaban de configurar el webhook, el aviso debe poder volver a salir.
         org.metamechanists.odysseia.utils.StoreManager.resetDiscordWarning();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, modalidades, schedulers y purchase engine.");
