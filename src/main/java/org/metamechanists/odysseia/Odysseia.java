@@ -238,6 +238,16 @@ public final class Odysseia extends JavaPlugin {
         return instanceId;
     }
 
+    /**
+     * Vuelca a disco las bovedas de modalidad que sigan abiertas.
+     *
+     * Viven en su propia base SQLite, asi que {@code save-all} no las toca: sin esto, un reinicio
+     * con alguien mirando su boveda le pierde lo que hubiera movido.
+     */
+    public void flushModalityVaults() {
+        if (modalityVaults != null) modalityVaults.flushOpen();
+    }
+
     public int getPurchaseEngineProductCount() {
         return purchaseEngine == null ? 0 : purchaseEngine.catalogProductCount();
     }

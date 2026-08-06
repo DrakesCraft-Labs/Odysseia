@@ -481,6 +481,15 @@ purchase-engine:
     # Mínimo entre dos revisiones, para no golpear la API de Tebex. Mínimo aceptado: 30.
     cooldown-seconds: 90
 
+#  Reinicio avisado (/restart30)
+# ─────────────────────────────────────────────
+# Pterodactyl no deja que el servidor se reinicie a sí mismo, así que Odysseia avisa, guarda y deja
+# una petición en plugins/Odysseia/restart-request.json. Star la recoge cada 20s y llama al panel.
+# La API key vive en Star a propósito: no debe estar en la caja donde corren 130 plugins.
+reinicio:
+  segundos-por-defecto: 30
+  motivo-por-defecto: "mantenimiento"
+
 #  Bóvedas: qué no puede entrar
 # ─────────────────────────────────────────────
 # Aplica a las dos bóvedas del servidor: PlayerVaultZ en el survival y las de modalidad en islas.

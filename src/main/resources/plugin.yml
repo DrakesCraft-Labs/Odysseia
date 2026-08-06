@@ -68,8 +68,10 @@ commands:
   daily:
     description: Muestra la racha de recompensa diaria.
   restart30:
-    description: Reinicio seguro con guardado y respaldo de inventarios.
+    description: Reinicio avisado con cuenta atras, guardado y peticion a Star.
+    usage: /restart30 [segundos] [motivo...] | /restart30 cancelar
     permission: drakes.admin
+    aliases: [reiniciar, reinicio]
   cosmeticos:
     description: Menú de auras, rastros y efectos visuales de muerte.
     aliases: [cosmetico, cosmetics]
