@@ -141,6 +141,13 @@ papa-de-mar:
     # Formato: ENCHANTMENT:LEVEL. Dejar [] para no encantar.
     enchantments:
       - VANISHING_CURSE:1
+  # Trueque con el NPC del spawn (/papatrueque)
+  trueque:
+    # Porcentaje de papas que se pierde al DEPOSITAR en la alcancía.
+    # La papa se reparte sola cada 15 min y no se gasta en nada más: sin una fuga, la cantidad en
+    # circulación solo puede subir. Nunca se lleva la última: depositar 1 siempre guarda 1.
+    merma-porcentaje: 5.0
+
   delivery:
     enabled: true
     # Tiempo de entrega automática a todos los jugadores (minutos).

@@ -114,6 +114,34 @@ class PapaLadderTest {
                 PapaDeMarItem.sinColores("§6§l✦ Papa de mar ✦"));
     }
 
+    /**
+     * El agujero mas serio que aparecio al auditar: un yunque renombra una patata cocida a
+     * "✦ Papa de mar ✦" en diez segundos. Si la migracion solo mirase el nombre, eso seria una
+     * impresora de papas autenticas. El lore no se puede poner desde el juego, asi que es lo que
+     * separa una papa de verdad de una falsificada.
+     */
+    @Test
+    void elNombreSoloNoPuedeBastarParaDarPorBuenaUnaPapa() {
+        List<String> loreReal = List.of("&7Relicario legendario de Drakes.", "&7Segunda linea.");
+        // Mismo nombre, sin lore: es lo que sale de un yunque.
+        assertFalse(loreCoincide(List.of(), loreReal));
+        // Lore a medias tampoco vale.
+        assertFalse(loreCoincide(List.of("&7Relicario legendario de Drakes."), loreReal));
+        // El lore entero, aunque cambien los colores, si.
+        assertTrue(loreCoincide(List.of("§7Relicario legendario de Drakes.", "§7Segunda linea."), loreReal));
+    }
+
+    /** Reproduce la comparacion de lore de PapaDeMarItem sin depender de Bukkit. */
+    private static boolean loreCoincide(List<String> tiene, List<String> esperado) {
+        if (tiene.size() != esperado.size()) return false;
+        for (int i = 0; i < tiene.size(); i++) {
+            if (!PapaDeMarItem.sinColores(tiene.get(i)).equals(PapaDeMarItem.sinColores(esperado.get(i)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Test
     void unNombreDistintoNoSeConfunde() {
         assertFalse(PapaDeMarItem.sinColores("&6Papa de mar")

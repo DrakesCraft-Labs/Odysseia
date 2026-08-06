@@ -59,12 +59,24 @@ public final class PapaDeMarItem {
      * Se compara el nombre ya sin codigos de color, porque en el archivo van con '&' y en el item
      * con seccion.
      */
-    public static boolean pareceAntigua(ItemStack item, String materialEsperado, String nombreEsperado) {
+    public static boolean pareceAntigua(ItemStack item, String materialEsperado,
+                                        String nombreEsperado, List<String> loreEsperado) {
         if (item == null || !item.hasItemMeta()) return false;
         if (!item.getType().name().equalsIgnoreCase(materialEsperado)) return false;
         ItemMeta meta = item.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return false;
-        return sinColores(meta.getDisplayName()).equals(sinColores(nombreEsperado));
+        if (!sinColores(meta.getDisplayName()).equals(sinColores(nombreEsperado))) return false;
+
+        // El nombre por si solo NO basta: un yunque renombra una patata cocida a "✦ Papa de mar ✦"
+        // en diez segundos, y con eso se fabricarian papas autenticas a voluntad. El lore es lo que
+        // no se puede poner desde el juego, asi que tiene que coincidir entero.
+        if (loreEsperado == null || loreEsperado.isEmpty()) return false;
+        List<String> lore = meta.getLore();
+        if (lore == null || lore.size() != loreEsperado.size()) return false;
+        for (int i = 0; i < lore.size(); i++) {
+            if (!sinColores(lore.get(i)).equals(sinColores(loreEsperado.get(i)))) return false;
+        }
+        return true;
     }
 
     /** Quita codigos de color, tanto los de '&' como los de seccion, y los espacios de los bordes. */

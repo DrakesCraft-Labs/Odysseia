@@ -131,10 +131,34 @@ public final class PapaDeMarService {
         int llevaba = enInventario(jugador);
         if (llevaba <= 0) return 0;
         int quitadas = quitarDelInventario(jugador, llevaba);
-        canjes.set("alcancia." + jugador.getUniqueId(), enAlcancia(jugador.getUniqueId()) + quitadas);
+        int guardadas = quitadas - merma(quitadas);
+        canjes.set("alcancia." + jugador.getUniqueId(), enAlcancia(jugador.getUniqueId()) + guardadas);
         guardarCanjes();
-        plugin.getLogger().info("[Papa] " + jugador.getName() + " deposito " + quitadas + " papas.");
-        return quitadas;
+        plugin.getLogger().info("[Papa] " + jugador.getName() + " deposito " + quitadas
+                + " papas y guardo " + guardadas + ".");
+        return guardadas;
+    }
+
+    /**
+     * Cuantas papas se pierden al depositar {@code cuantas}.
+     *
+     * La papa se reparte sola cada 15 minutos y no se gasta en nada mas, asi que sin una fuga la
+     * cantidad en circulacion solo puede subir. Una merma pequena al guardar hace que acumular
+     * cueste algo y que la economia de papas no se infle sola.
+     *
+     * Se redondea hacia abajo y **nunca se lleva la ultima**: depositar 1 papa siempre guarda 1,
+     * porque perder lo poco que tienes desanima mas de lo que regula.
+     */
+    public int merma(int cuantas) {
+        double porcentaje = plugin.getConfig().getDouble("papa-de-mar.trueque.merma-porcentaje", 5.0);
+        if (porcentaje <= 0 || cuantas <= 1) return 0;
+        int perdidas = (int) Math.floor(cuantas * porcentaje / 100.0);
+        return Math.min(perdidas, cuantas - 1);
+    }
+
+    /** El porcentaje configurado, para poder ensenarlo en el menu. */
+    public double porcentajeMerma() {
+        return plugin.getConfig().getDouble("papa-de-mar.trueque.merma-porcentaje", 5.0);
     }
 
     public Set<String> canjeados(UUID jugador) {
@@ -152,11 +176,12 @@ public final class PapaDeMarService {
     public int migrar(Player jugador) {
         String material = plugin.getConfig().getString("papa-de-mar.item.material", "BAKED_POTATO");
         String nombre = plugin.getConfig().getString("papa-de-mar.item.name", "&6&l✦ Papa de mar ✦");
+        List<String> lore = plugin.getConfig().getStringList("papa-de-mar.item.lore");
         int convertidas = 0;
         ItemStack[] contenido = jugador.getInventory().getContents();
         for (ItemStack item : contenido) {
             if (item == null || PapaDeMarItem.marcada(plugin, item)) continue;
-            if (!PapaDeMarItem.pareceAntigua(item, material, nombre)) continue;
+            if (!PapaDeMarItem.pareceAntigua(item, material, nombre, lore)) continue;
             PapaDeMarItem.marcar(plugin, item);
             convertidas += item.getAmount();
         }

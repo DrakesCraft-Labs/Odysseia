@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -100,8 +101,11 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
                 color("&7Llevas encima: &e" + llevaba),
                 color("&7En la alcancia: &6" + servicio.enAlcancia(jugador.getUniqueId())),
                 color(""),
-                llevaba > 0 ? color("&a▶ Click para depositar " + llevaba)
-                            : color("&8No llevas papas encima.")));
+                llevaba > 0
+                        ? color("&a▶ Click para depositar " + llevaba
+                                + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")
+                        : color("&8No llevas papas encima."),
+                color("&8El mar se queda un " + (int) servicio.porcentajeMerma() + "% de lo que guardas.")));
         item.setItemMeta(meta);
         return item;
     }
@@ -150,6 +154,16 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         return item;
     }
 
+    /**
+     * Los iconos del menu son items de verdad --uno es un pico de netherita--, asi que arrastrar
+     * dentro de el sacaria objetos gratis. Clic y arrastre son eventos distintos: cancelar solo el
+     * primero deja la puerta abierta.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDrag(InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof Holder) event.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onClick(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof Holder holder)) return;
@@ -161,7 +175,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
             jugador.sendMessage(color(depositadas > 0
                     ? "&aDepositaste &e" + depositadas + "&a papas en la alcancia."
                     : "&7No llevas papas que depositar."));
-            abrir(jugador);
+            repintar(jugador);
             return;
         }
 
@@ -173,7 +187,20 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         if (resultado.startsWith("&c") || resultado.startsWith("&7")) {
             jugador.playSound(jugador.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0F, 1.0F);
         }
-        abrir(jugador);   // se repinta: cambian las papas y lo que ya se puede
+        repintar(jugador);
+    }
+
+    /**
+     * Vuelve a pintar el menu en el tick siguiente.
+     *
+     * Abrir un inventario desde dentro de InventoryClickEvent deja al cliente descolocado --el
+     * servidor cree que hay una ventana y el jugador ve otra--, y ese desajuste es de donde salen
+     * la mitad de los dupes de menus. Se aplaza un tick.
+     */
+    private void repintar(Player jugador) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (jugador.isOnline()) abrir(jugador);
+        });
     }
 
     private static String color(String texto) {
