@@ -187,7 +187,10 @@ public final class Odysseia extends JavaPlugin {
         this.maintenanceGuard = new org.metamechanists.odysseia.listeners.MaintenanceGuardListener(this);
         Bukkit.getPluginManager().registerEvents(maintenanceGuard, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.ProtectionBorderListener(this), this);
+        org.metamechanists.odysseia.listeners.ProtectionBorderListener protectionBorder =
+                new org.metamechanists.odysseia.listeners.ProtectionBorderListener(this);
+        Bukkit.getPluginManager().registerEvents(protectionBorder, this);
+        getCommand("borde").setExecutor(protectionBorder);
         Bukkit.getPluginManager().registerEvents(automation, this);
         this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
         Bukkit.getPluginManager().registerEvents(automationGuard, this);

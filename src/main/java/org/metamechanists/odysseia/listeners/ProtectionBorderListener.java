@@ -25,9 +25,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /** Renders ProtectionStones limits client-side without changing world blocks. */
-public final class ProtectionBorderListener implements Listener {
+public final class ProtectionBorderListener implements Listener, org.bukkit.command.CommandExecutor {
+
+    /** Marca en el jugador que apago el borde. Va en el PDC para sobrevivir a la reconexion. */
+    private static final String DISABLED_KEY = "protection_border_off";
 
     private final Odysseia plugin;
+    private final org.bukkit.NamespacedKey disabledKey;
     private final Map<UUID, RenderedBorder> rendered = new HashMap<>();
     private final Method regionFromLocation;
     private final Method regionIsOwner;
@@ -39,6 +43,7 @@ public final class ProtectionBorderListener implements Listener {
 
     public ProtectionBorderListener(Odysseia plugin) {
         this.plugin = plugin;
+        this.disabledKey = new org.bukkit.NamespacedKey(plugin, DISABLED_KEY);
         Method from = null;
         Method owner = null;
         Method member = null;
@@ -105,8 +110,48 @@ public final class ProtectionBorderListener implements Listener {
         rendered.remove(event.getPlayer().getUniqueId());
     }
 
+    /**
+     * Alterna el borde para quien lo ejecuta.
+     *
+     * Dos jugadores preguntaron el mismo dia como quitar "los bloques de cristal que delimitan
+     * la proteccion" y no habia forma: el borde es un bloque fantasma enviado solo a su cliente,
+     * asi que ni siquiera se puede romper. Solo desaparecia al salir de la region.
+     */
+    @Override
+    public boolean onCommand(org.bukkit.command.CommandSender sender, org.bukkit.command.Command command,
+                             String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Solo un jugador puede cambiar su borde de protección.");
+            return true;
+        }
+        boolean apagado = isDisabled(player);
+        if (apagado) {
+            player.getPersistentDataContainer().remove(disabledKey);
+            player.sendMessage(color("&6DrakesCraft &8· &7Borde de protección &aactivado&7."));
+            refresh(player, true);
+        } else {
+            player.getPersistentDataContainer().set(disabledKey,
+                    org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1);
+            clear(player);
+            rendered.remove(player.getUniqueId());
+            player.sendMessage(color("&6DrakesCraft &8· &7Borde de protección &cdesactivado&7. "
+                    + "Vuelve a encenderlo con &e/" + label + "&7."));
+        }
+        return true;
+    }
+
+    private boolean isDisabled(Player player) {
+        return player.getPersistentDataContainer().has(disabledKey,
+                org.bukkit.persistence.PersistentDataType.BYTE);
+    }
+
+    private static String color(String texto) {
+        return org.bukkit.ChatColor.translateAlternateColorCodes('&', texto);
+    }
+
     private void refresh(Player player, boolean force) {
-        if (!plugin.getConfig().getBoolean("protection-border.enabled", true) || !available()) {
+        if (!plugin.getConfig().getBoolean("protection-border.enabled", true)
+                || isDisabled(player) || !available()) {
             clear(player);
             return;
         }
