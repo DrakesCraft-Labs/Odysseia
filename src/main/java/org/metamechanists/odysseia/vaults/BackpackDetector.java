@@ -23,6 +23,12 @@ import java.util.List;
  *
  * La deteccion prefiere la API de Slimefun, que es la autoridad. Solo si Slimefun no esta cargado
  * se cae al lore, que es como el propio Slimefun identifica una mochila ya vinculada.
+ *
+ * <p><b>La Ender Backpack queda fuera a proposito.</b> No extiende {@code SlimefunBackpack}, y no
+ * por descuido de Slimefun: no es un almacen propio sino una puerta al cofre de ender del jugador,
+ * que es uno solo. Guardarla en una boveda no multiplica nada, asi que bloquearla seria molestar
+ * sin ganar seguridad. Si algun dia se quiere bloquear, hay que añadirla por nombre de clase, no
+ * esperando que herede.</p>
  */
 public final class BackpackDetector {
 
