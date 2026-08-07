@@ -204,6 +204,7 @@ public final class Odysseia extends JavaPlugin {
         getCommand("borde").setExecutor(protectionBorder);
         Bukkit.getPluginManager().registerEvents(automation, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BedrockRangeGuardListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SlimefunSpawnerLimitListener(this), this);
         this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
         Bukkit.getPluginManager().registerEvents(automationGuard, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.AntiAltListener(this), this);

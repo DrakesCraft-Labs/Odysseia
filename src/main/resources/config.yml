@@ -157,6 +157,19 @@ papa-de-mar:
   delivery-interval-minutes: 15
 
 # ─────────────────────────────────────────────
+#  Densidad de spawners de Slimefun
+# ─────────────────────────────────────────────
+# ElectricSpawners ya limita a 6 las entidades vivas de CADA spawner, y por eso uno solo no molesta.
+# Lo que no controla es cuantos se pueden pegar unos a otros: apilar seis en una columna multiplica
+# ese tope por seis. Con LevelledMobs poniendoles nivel 105, esos mobs tardan muchisimo en morir y
+# se acumulan. Se cuenta por distancia, no por chunk: el problema es la densidad.
+slimefun-spawners:
+  enabled: true
+  # Cuantos caben dentro del radio, contando el que se intenta colocar.
+  max-por-zona: 2
+  radio: 8
+
+# ─────────────────────────────────────────────
 #  Limite de coordenadas para jugadores Bedrock
 # ─────────────────────────────────────────────
 # El cliente de Minecraft Bedrock pierde precision mas alla de ~150.000 bloques: el terreno

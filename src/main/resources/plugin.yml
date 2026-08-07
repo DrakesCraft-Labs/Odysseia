@@ -192,6 +192,9 @@ permissions:
   odysseia.owner.aura:
     description: Permite usar el aura destructiva absoluta del dueño.
     default: op
+  odysseia.spawners.bypass:
+    description: Permite colocar spawners de Slimefun sin respetar el limite de densidad.
+    default: op
   odysseia.rtp.others:
     description: Permite ejecutar /rtp <jugador> para reubicarlo aleatoriamente en el mundo principal.
     default: op
