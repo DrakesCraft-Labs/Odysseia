@@ -43,9 +43,38 @@ public final class ProtectionStoneDelivery {
                 }
                 remaining -= stack;
             }
-            return ActionResult.completed("alias=" + alias + ";amount=" + amount);
+            String permiso = grantPlacePermission(player, block);
+            return ActionResult.completed("alias=" + alias + ";amount=" + amount
+                    + (permiso.isEmpty() ? "" : ";permiso=" + permiso));
         } catch (ReflectiveOperationException error) {
             return ActionResult.retryable("API ProtectionStones no disponible: " + error.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Concede el permiso que exige el bloque para poder colocarse, y devuelve cual fue.
+     *
+     * Cada .toml declara su propio nodo en el campo {@code permission}. Entregar solo el item
+     * dejaba al comprador con la piedra en el inventario y un "You don't have permission to place
+     * this protection block type" al intentar ponerla: pago y no pudo usarla. Paso en produccion
+     * con la piedra de Hercules.
+     *
+     * Se otorga por consola de LuckPerms para no acoplar Odysseia a su API. Si el bloque no exige
+     * permiso, no se hace nada.
+     */
+    private static String grantPlacePermission(Player player, Object block) {
+        try {
+            Object valor = block.getClass().getField("permission").get(block);
+            String permiso = valor == null ? "" : valor.toString().trim();
+            if (permiso.isEmpty()) return "";
+            if (player.hasPermission(permiso)) return permiso;
+
+            org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(),
+                    "lp user " + player.getName() + " permission set " + permiso + " true");
+            return permiso;
+        } catch (ReflectiveOperationException | RuntimeException error) {
+            // No romper la entrega por esto: el item ya esta en el inventario.
+            return "";
         }
     }
 

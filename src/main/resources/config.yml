@@ -157,6 +157,32 @@ papa-de-mar:
   delivery-interval-minutes: 15
 
 # ─────────────────────────────────────────────
+#  Limite de coordenadas para jugadores Bedrock
+# ─────────────────────────────────────────────
+# El cliente de Minecraft Bedrock pierde precision mas alla de ~150.000 bloques: el terreno
+# tiembla, el jugador no puede caminar y los bloques dejan de responder. No se arregla desde el
+# servidor. BedrockRangeGuardListener aplica un borde de mundo personal a cada cuenta Bedrock
+# (Floodgate las nombra con un punto delante) y cancela cualquier teletransporte que la deje
+# fuera. Los jugadores de Java no se ven afectados y pueden viajar hasta donde este el Bedrock.
+bedrock-guard:
+  enabled: true
+  limite: 150000
+  # El nether comprime coordenadas 8:1, asi que su limite equivale al del overworld.
+  limite-nether: 18750
+  # Solo mundos de exploracion libre. Las islas y el hub ya son pequenos de por si.
+  mundos:
+    - world
+    - world_nether
+    - world_the_end
+    - world_galactifun_earth_orbit
+    - world_galactifun_the_moon
+    - world_galactifun_mars
+    - world_galactifun_venus
+    - world_galactifun_io
+    - world_galactifun_titan
+    - world_galactifun_enceladus
+
+# ─────────────────────────────────────────────
 #  Kit de Inicio (StarterKit)
 # ─────────────────────────────────────────────
 starter-kit:

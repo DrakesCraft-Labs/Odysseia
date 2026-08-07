@@ -74,7 +74,10 @@ public final class ServerAutomationListener implements Listener {
         event.setCancelled(true);
         boolean nether = player.getWorld().getName().equalsIgnoreCase("world_nether");
         String world = nether ? "world_nether" : "world";
-        int maximum = nether ? 100_000 : 150_000;
+        // Mismos limites que BedrockRangeGuardListener: si difirieran, el guard cancelaria este RTP.
+        int maximum = nether
+                ? plugin.getConfig().getInt("bedrock-guard.limite-nether", 18_750)
+                : plugin.getConfig().getInt("bedrock-guard.limite", 150_000);
         player.sendMessage(color("&c[!] &eRTP Bedrock limitado a " + maximum + " bloques para evitar fallos de renderizado."));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "customrtp " + player.getName() + " " + world + " 5000 " + maximum + " 0 0");
     }
