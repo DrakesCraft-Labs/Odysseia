@@ -80,12 +80,20 @@ public final class PapaEquipoCommand implements CommandExecutor {
         return true;
     }
 
+    /**
+     * Los cuatro valores son los de la netherita, pieza por pieza.
+     *
+     * La armadura base coincide con la del diamante (3/8/6/3); lo que de verdad separa a la
+     * netherita es la dureza --3 en las cuatro piezas, frente a 2-- y su resistencia al empuje.
+     * El yelmo y las botas llevaban 2.0 de dureza, que es el valor del diamante: prometian
+     * netherita y aguantaban como diamante.
+     */
     private List<ItemStack> armadura() {
         return List.of(
-                pieza(Material.DIAMOND_HELMET, "Yelmo", 3.0D, 2.0D, 0.1D),
+                pieza(Material.DIAMOND_HELMET, "Yelmo", 3.0D, 3.0D, 0.1D),
                 pieza(Material.DIAMOND_CHESTPLATE, "Coraza", 8.0D, 3.0D, 0.1D),
                 pieza(Material.DIAMOND_LEGGINGS, "Grebas", 6.0D, 3.0D, 0.1D),
-                pieza(Material.DIAMOND_BOOTS, "Botas", 3.0D, 2.0D, 0.1D));
+                pieza(Material.DIAMOND_BOOTS, "Botas", 3.0D, 3.0D, 0.1D));
     }
 
     /**
@@ -164,9 +172,15 @@ public final class PapaEquipoCommand implements CommandExecutor {
                 valor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ARMOR));
     }
 
-    /** Los detalles comunes: brillo limpio, sin numeros feos y a prueba de fuego. */
+    /**
+     * Los detalles comunes: sin la lista fea de atributos, y a prueba de fuego.
+     *
+     * Los encantamientos SI se ven. Se ocultaban junto con los atributos, y en el premio mas caro
+     * del servidor eso lo dejaba con el aspecto de una pieza de diamante cualquiera: quien paga
+     * 4608 papas tiene que poder ver por que.
+     */
     private void rematar(ItemMeta meta) {
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.setUnbreakable(true);
         meta.setFireResistant(true);
         meta.getPersistentDataContainer().set(

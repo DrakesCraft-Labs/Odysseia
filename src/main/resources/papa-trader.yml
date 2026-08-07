@@ -34,6 +34,10 @@ niveles:
       - "&7prestado durante una semana."
       - "&7Nada de poder: pura pinta."
     comandos:
+      # Los dos nodos, no solo el del rastro: sin drakes.cosmetics.use el menu /cosmeticos rechaza
+      # al jugador y el rastro tampoco se dibuja, asi que quien no fuera VIP pagaba 8 papas por
+      # algo que no podia usar. Mismo fallo que tuvo la piedra de proteccion de la tienda.
+      - "lp user {jugador} permission settemp drakes.cosmetics.use true 7d"
       - "lp user {jugador} permission settemp drakes.cosmetics.trail.dragon true 7d"
     unica: false
 
