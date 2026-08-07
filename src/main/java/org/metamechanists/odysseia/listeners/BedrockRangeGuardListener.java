@@ -65,11 +65,14 @@ public final class BedrockRangeGuardListener implements Listener {
         return base;
     }
 
-    /** Los mundos acotados —islas, hub, arenas— no necesitan borde propio. */
+    /** Mundo de exploracion libre; los acotados —islas, hub, arenas— no necesitan borde propio. */
     private boolean mundoAmplio(World world) {
         String nombre = world.getName().toLowerCase(Locale.ROOT);
-        return plugin.getConfig().getStringList("bedrock-guard.mundos").stream()
-                .anyMatch(m -> nombre.equals(m.toLowerCase(Locale.ROOT)));
+        List<String> configurados = plugin.getConfig().getStringList("bedrock-guard.mundos");
+        // Si la seccion no llego a produccion, vigilar al menos el mundo principal en vez de
+        // quedarse inerte sin ningun aviso.
+        if (configurados.isEmpty()) return nombre.equals("world");
+        return configurados.stream().anyMatch(m -> nombre.equals(m.toLowerCase(Locale.ROOT)));
     }
 
     private boolean fueraDeRango(Location location) {
