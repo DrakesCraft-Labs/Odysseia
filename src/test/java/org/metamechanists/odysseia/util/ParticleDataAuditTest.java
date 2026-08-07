@@ -46,7 +46,11 @@ class ParticleDataAuditTest {
     private static final Pattern ES_DATO = Pattern.compile(
             "new\\s+(Particle\\.)?(DustOptions|DustTransition)|createBlockData|getBlockData"
                     + "|Color\\.|fromRGB|ItemStack|\\d+\\.?\\d*[fF]\\b"
-                    + "|\\b(data|dato|options|dust|polvo|blockData|particleData|color|velocity)\\b",
+                    // El codigo esta en castellano, asi que la lista incluye las dos formas: por
+                    // ejemplo 'options' y 'opciones'. Faltaba esta ultima y marcaba como rota una
+                    // llamada correcta de CosmeticService.
+                    + "|\\b(data|dato|datos|options|opciones|dust|polvo|blockData|particleData"
+                    + "|color|colour|velocity)\\b",
             Pattern.CASE_INSENSITIVE);
 
     @Test

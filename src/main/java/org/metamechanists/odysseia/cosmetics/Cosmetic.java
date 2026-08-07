@@ -35,7 +35,16 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("abyss", "Abismo", SIN_ASIGNAR),
             new Cosmetic("solar", "Solar", SIN_ASIGNAR),
             new Cosmetic("void", "Vacío", SIN_ASIGNAR),
-            new Cosmetic("staff", "Cetro", "Staff"));
+            new Cosmetic("staff", "Cetro", "Staff"),
+            // ── Con forma: geometria de verdad, no una nube sobre la cabeza ──
+            new Cosmetic("alas", "Alas Doradas", SIN_ASIGNAR),
+            new Cosmetic("alas_moradas", "Alas de Ocaso", SIN_ASIGNAR),
+            new Cosmetic("halo", "Halo", SIN_ASIGNAR),
+            new Cosmetic("halo_morado", "Halo de Ocaso", SIN_ASIGNAR),
+            new Cosmetic("cola", "Cola Espectral", SIN_ASIGNAR),
+            new Cosmetic("orbita", "Luciérnagas", SIN_ASIGNAR),
+            new Cosmetic("orbita_dorada", "Órbita Dorada", SIN_ASIGNAR),
+            new Cosmetic("star", "★ Star", SIN_ASIGNAR));
 
     /** Rastros: particulas que quedan al caminar. */
     public static final List<Cosmetic> RASTROS = List.of(
@@ -50,7 +59,11 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("snow", "Escarcha", SIN_ASIGNAR),
             new Cosmetic("bubble", "Burbujas", SIN_ASIGNAR),
             new Cosmetic("rune", "Runas", SIN_ASIGNAR),
-            new Cosmetic("staff", "Autoridad", "Staff"));
+            new Cosmetic("staff", "Autoridad", "Staff"),
+            new Cosmetic("star", "★ Star", SIN_ASIGNAR),
+            new Cosmetic("dorado", "Polvo Dorado", SIN_ASIGNAR),
+            new Cosmetic("morado", "Polvo de Ocaso", SIN_ASIGNAR),
+            new Cosmetic("plumas", "Plumas", SIN_ASIGNAR));
 
     /** Efectos de muerte: se disparan una vez al morir. */
     public static final List<Cosmetic> MUERTES = List.of(

@@ -40,13 +40,21 @@ public final class CosmeticService implements Listener {
     private final Map<UUID, String> activeAuras = new HashMap<>();
     private final Map<UUID, String> activeTrails = new HashMap<>();
     private final Map<UUID, String> activeDeathEffects = new HashMap<>();
+    /** Reloj de las formas animadas: alas que baten, orbitas que giran, colas que ondulan. */
+    private long fase;
+
+    /** Dorado y morado, los colores de la casa. */
+    private static final Color DORADO = Color.fromRGB(255, 196, 0);
+    private static final Color MORADO = Color.fromRGB(163, 53, 238);
+    private static final Color BLANCO_CALIDO = Color.fromRGB(255, 245, 200);
 
     public CosmeticService(JavaPlugin plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "cosmetics.yml");
         this.data = YamlConfiguration.loadConfiguration(file);
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        Bukkit.getScheduler().runTaskTimer(plugin, this::tickAuras, 20L, 10L);
+        // Cada 4 ticks (5 veces/s) en vez de cada 10: un ala que bate a 2 fps se ve a saltos.
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tickAuras, 20L, 4L);
     }
 
     public void setAura(Player player, String aura) {
@@ -114,6 +122,8 @@ public final class CosmeticService implements Listener {
     }
 
     private void tickAuras() {
+        fase++;
+
         for (Map.Entry<UUID, String> entry : Map.copyOf(activeAuras).entrySet()) {
             Player p = Bukkit.getPlayer(entry.getKey());
             if (p == null || !p.isOnline()) continue;
@@ -147,6 +157,19 @@ public final class CosmeticService implements Listener {
                 }
                 case "staff" -> world.spawnParticle(Particle.DUST, loc, 8, 0.4, 0.6, 0.4,
                         new Particle.DustOptions(Color.fromRGB(0, 200, 255), 1.2F));
+                // ── Cosmeticos con forma ──────────────────────────────
+                case "alas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, 9), DORADO, 1.0F);
+                case "alas_moradas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, 9), MORADO, 1.0F);
+                case "halo" -> dibujar(p, CosmeticShapes.halo(0.45D, 2.35D, 14), DORADO, 0.9F);
+                case "halo_morado" -> dibujar(p, CosmeticShapes.halo(0.45D, 2.35D, 14), MORADO, 0.9F);
+                case "cola" -> dibujar(p, CosmeticShapes.cola(yaw(p), fase, 10), MORADO, 0.9F);
+                case "orbita" -> dibujar(p, CosmeticShapes.orbita(fase, 5, 0.9D), BLANCO_CALIDO, 0.8F);
+                case "orbita_dorada" -> dibujar(p, CosmeticShapes.orbita(fase, 5, 0.9D), DORADO, 0.8F);
+                case "star" -> {
+                    // La marca de la casa: espiral morada que asciende con destellos dorados.
+                    dibujar(p, CosmeticShapes.espiral(fase, 18, 0.8D, 2.2D), MORADO, 1.0F);
+                    dibujar(p, CosmeticShapes.orbita(fase * 1.4D, 3, 1.1D), DORADO, 0.7F);
+                }
                 default -> { /* cosmetico retirado del catalogo: no se dibuja nada */ }
             }
         }
@@ -181,7 +204,42 @@ public final class CosmeticService implements Listener {
             case "rune" -> world.spawnParticle(Particle.ENCHANT, loc, 6, 0.2, 0.3, 0.2, 0.5);
             case "staff" -> world.spawnParticle(Particle.DUST, loc, 3, 0.2, 0.1, 0.2,
                     new Particle.DustOptions(Color.fromRGB(0, 200, 255), 1.0F));
+            case "star" -> {
+                world.spawnParticle(Particle.DUST, loc, 4, 0.2, 0.1, 0.2,
+                        new Particle.DustOptions(MORADO, 1.0F));
+                world.spawnParticle(Particle.DUST, loc, 2, 0.15, 0.05, 0.15,
+                        new Particle.DustOptions(DORADO, 0.7F));
+            }
+            case "dorado" -> world.spawnParticle(Particle.DUST, loc, 4, 0.2, 0.1, 0.2,
+                    new Particle.DustOptions(DORADO, 1.0F));
+            case "morado" -> world.spawnParticle(Particle.DUST, loc, 4, 0.2, 0.1, 0.2,
+                    new Particle.DustOptions(MORADO, 1.0F));
+            case "plumas" -> world.spawnParticle(Particle.END_ROD, loc, 2, 0.15, 0.05, 0.15, 0.005);
             default -> { /* cosmetico retirado del catalogo */ }
+        }
+    }
+
+    /** Hacia donde mira el jugador, en radianes, para orientar alas y colas. */
+    private static double yaw(Player player) {
+        return Math.toRadians(-player.getLocation().getYaw());
+    }
+
+    /**
+     * Pinta una forma alrededor del jugador.
+     *
+     * Se usa DUST con conteo 0 y velocidad 0 para que cada particula caiga **exactamente** donde
+     * dice la geometria. Con conteo mayor Minecraft las dispersa al azar y la forma se deshace.
+     */
+    private void dibujar(Player player, java.util.List<org.bukkit.util.Vector> puntos,
+                         Color color, float tamano) {
+        Location base = player.getLocation();
+        var world = base.getWorld();
+        if (world == null) return;
+        var opciones = new Particle.DustOptions(color, tamano);
+        for (var punto : puntos) {
+            world.spawnParticle(Particle.DUST,
+                    base.getX() + punto.getX(), base.getY() + punto.getY(), base.getZ() + punto.getZ(),
+                    1, 0, 0, 0, 0, opciones);
         }
     }
 
