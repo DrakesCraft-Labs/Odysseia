@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlotGroup;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -90,10 +89,10 @@ public final class PapaEquipoCommand implements CommandExecutor {
      */
     private List<ItemStack> armadura() {
         return List.of(
-                pieza(Material.DIAMOND_HELMET, "Yelmo", 3.0D, 3.0D, 0.1D),
-                pieza(Material.DIAMOND_CHESTPLATE, "Coraza", 8.0D, 3.0D, 0.1D),
-                pieza(Material.DIAMOND_LEGGINGS, "Grebas", 6.0D, 3.0D, 0.1D),
-                pieza(Material.DIAMOND_BOOTS, "Botas", 3.0D, 3.0D, 0.1D));
+                pieza(Material.DIAMOND_HELMET, "Yelmo", EquipmentSlotGroup.HEAD, 3.0D, 3.0D, 0.1D),
+                pieza(Material.DIAMOND_CHESTPLATE, "Coraza", EquipmentSlotGroup.CHEST, 8.0D, 3.0D, 0.1D),
+                pieza(Material.DIAMOND_LEGGINGS, "Grebas", EquipmentSlotGroup.LEGS, 6.0D, 3.0D, 0.1D),
+                pieza(Material.DIAMOND_BOOTS, "Botas", EquipmentSlotGroup.FEET, 3.0D, 3.0D, 0.1D));
     }
 
     /**
@@ -103,8 +102,8 @@ public final class PapaEquipoCommand implements CommandExecutor {
      * empuje-- porque en cuanto se anade un modificador manual, Minecraft deja de aplicar los
      * valores por defecto de la pieza. Si solo se sumara la diferencia, quedaria en calzoncillos.
      */
-    private ItemStack pieza(Material material, String nombre, double armadura,
-                            double dureza, double empuje) {
+    private ItemStack pieza(Material material, String nombre, EquipmentSlotGroup hueco,
+                            double armadura, double dureza, double empuje) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
@@ -117,9 +116,9 @@ public final class PapaEquipoCommand implements CommandExecutor {
                 color("&8Forjada con dos inventarios de papas."),
                 color("&8Nadie sabe como. Nadie pregunta.")));
 
-        aplicar(meta, Attribute.ARMOR, "papa_armadura", armadura);
-        aplicar(meta, Attribute.ARMOR_TOUGHNESS, "papa_dureza", dureza);
-        aplicar(meta, Attribute.KNOCKBACK_RESISTANCE, "papa_empuje", empuje);
+        aplicar(meta, Attribute.ARMOR, "papa_armadura", armadura, hueco);
+        aplicar(meta, Attribute.ARMOR_TOUGHNESS, "papa_dureza", dureza, hueco);
+        aplicar(meta, Attribute.KNOCKBACK_RESISTANCE, "papa_empuje", empuje, hueco);
 
         meta.addEnchant(Enchantment.PROTECTION, 6, true);
         meta.addEnchant(Enchantment.UNBREAKING, 10, true);
@@ -165,22 +164,29 @@ public final class PapaEquipoCommand implements CommandExecutor {
         return item;
     }
 
-    /** Un modificador de atributo fijo, sin depender del hueco donde se lleve. */
-    private void aplicar(ItemMeta meta, Attribute atributo, String nombre, double valor) {
+    /**
+     * Un modificador atado al hueco propio de la pieza.
+     *
+     * Antes iban todos a ARMOR --cualquier ranura de armadura--, y el tooltip lo anunciaba tal
+     * cual: "en cualquier ranura de armadura". Con el hueco exacto se lee como el de una pieza
+     * normal: "en el cuerpo, +8 de armadura".
+     */
+    private void aplicar(ItemMeta meta, Attribute atributo, String nombre, double valor,
+                         EquipmentSlotGroup hueco) {
         meta.addAttributeModifier(atributo, new AttributeModifier(
                 new NamespacedKey(plugin, nombre + "_" + UUID.randomUUID()),
-                valor, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ARMOR));
+                valor, AttributeModifier.Operation.ADD_NUMBER, hueco));
     }
 
     /**
-     * Los detalles comunes: sin la lista fea de atributos, y a prueba de fuego.
+     * Los detalles comunes: a prueba de fuego y sin desgaste.
      *
-     * Los encantamientos SI se ven. Se ocultaban junto con los atributos, y en el premio mas caro
-     * del servidor eso lo dejaba con el aspecto de una pieza de diamante cualquiera: quien paga
-     * 4608 papas tiene que poder ver por que.
+     * No se oculta nada. Encantamientos y atributos iban los dos escondidos, y eso dejaba al
+     * premio mas caro del servidor con el aspecto de una pieza de diamante cualquiera. La dureza
+     * de netherita sobre una armadura azul es justamente lo que hay que poder leer en el tooltip:
+     * si no se ve, no existe para quien la lleva.
      */
     private void rematar(ItemMeta meta) {
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.setUnbreakable(true);
         meta.setFireResistant(true);
         meta.getPersistentDataContainer().set(
