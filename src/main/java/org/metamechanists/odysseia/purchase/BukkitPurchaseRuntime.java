@@ -46,6 +46,7 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
             return switch (action.type()) {
                 case LUCKPERMS_TEMPORARY, SFMASTER_PASS -> temporaryGroup(context, action);
                 case SFMASTER_GUIDE -> online(context, this::giveSfMasterGuide);
+                case SLIMEFUN_RESEARCH -> online(context, player -> unlockAllSlimefunResearch(player));
                 case LUCKPERMS_PERMANENT -> permanentGroup(context, action);
                 case TEMPORARY_PERMISSION, AURA, POWER, COSMETIC -> permission(context, action);
                 case ECONOMY -> economy(context, action);
@@ -172,6 +173,21 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
             return ActionResult.waiting("Inventario sin espacio para la guía SFMaster");
         }
         return ActionResult.completed("guide=delivered");
+    }
+
+    /** Unlocks only the canonical Slimefun research set for an online buyer. */
+    private ActionResult unlockAllSlimefunResearch(Player player) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("Slimefun")) {
+            return ActionResult.retryable("Slimefun no disponible");
+        }
+
+        boolean accepted = Bukkit.dispatchCommand(
+                Bukkit.getConsoleSender(),
+                "slimefun research " + player.getName() + " all"
+        );
+        return accepted
+                ? ActionResult.completed("slimefun-research=all")
+                : ActionResult.retryable("Slimefun rechazó el desbloqueo de investigaciones");
     }
 
     private ActionResult giveProtectionStone(Player player, String alias, int amount) {
