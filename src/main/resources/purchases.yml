@@ -1,7 +1,5 @@
-# IDs 9000001+ son PLACEHOLDERS: esos paquetes todavia no existen en Tebex.
-# Al crearlos en el panel hay que reemplazar el tebex-package-id por el real y
-# cambiar verification a VERIFIED_PRODUCTION. Estan fuera del rango real (75xxxxx)
-# a proposito, para que ningun webhook de Tebex pueda activarlos por accidente.
+# El rango 9000000-9000099 esta reservado para placeholders invalidos.
+# ProductCatalog y la suite de integridad rechazan cualquier reintroduccion.
 catalog-version: 1
 expected-product-count: 35
 source: "DrakesCraft production audit 2026-07-10"
@@ -121,13 +119,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Zeus"}}
 
   vip_thor:
-    tebex-package-id: 9000001
+    tebex-package-id: 7610512
     name: "Thor"
     category: ranks
     description: "Rango VIP mensual Thor."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -139,13 +137,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Thor"}}
 
   vip_anubis:
-    tebex-package-id: 9000002
+    tebex-package-id: 7610520
     name: "Anubis"
     category: ranks
     description: "Rango VIP mensual Anubis."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -157,13 +155,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Anubis"}}
 
   vip_poseidon:
-    tebex-package-id: 9000003
+    tebex-package-id: 7610523
     name: "Poseidón"
     category: ranks
     description: "Rango VIP mensual Poseidón."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
