@@ -175,7 +175,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Poseidón"}}
 
   titan_japeto:
-    tebex-package-id: 9000004
+    tebex-package-id: 7609642
     name: "Titán Japeto"
     category: ranks
     description: "Rango Titán mensual Japeto (5x Favor Guerra)."
@@ -193,7 +193,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Japeto"}}
 
   titan_oceanus:
-    tebex-package-id: 9000005
+    tebex-package-id: 7609645
     name: "Titán Oceanus"
     category: ranks
     description: "Rango Titán mensual Oceanus (5x Favor Abismo)."
@@ -211,7 +211,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Oceanus"}}
 
   titan_hiperion:
-    tebex-package-id: 9000006
+    tebex-package-id: 7609646
     name: "Titán Hiperión"
     category: ranks
     description: "Rango Titán mensual Hiperión (5x Favor Solar)."
@@ -229,7 +229,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Hiperión"}}
 
   titan_cronos:
-    tebex-package-id: 9000007
+    tebex-package-id: 7609648
     name: "Titán Cronos"
     category: ranks
     description: "Rango Titán mensual Cronos (5x Favor Tiempo + Fly)."
@@ -247,7 +247,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Cronos"}}
 
   titan_caos:
-    tebex-package-id: 9000008
+    tebex-package-id: 7609649
     name: "Titán Caos"
     category: ranks
     description: "Rango Titán mensual Caos (Top Primordial 5x)."
@@ -263,6 +263,20 @@ products:
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titancaos, amount: "1"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Caos entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Caos"}}
+
+  slimefun_research_all:
+    tebex-package-id: 7609650
+    name: "Conocimiento Total de Slimefun"
+    category: utility
+    description: "Desbloqueo permanente de las investigaciones actuales de Slimefun, sin ítems ni permisos SFMaster."
+    source: "Odysseia + Slimefun"
+    version: 1
+    verification: UNVERIFIED_PRODUCTION
+    dependencies: [Slimefun]
+    actions:
+      - {id: research, type: SLIMEFUN_RESEARCH, requires-online: true, refund: NOT_REVOCABLE}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aTodas tus investigaciones de Slimefun fueron desbloqueadas."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Conocimiento Total de Slimefun"}}
 
   role_minero: &role_minero
     tebex-package-id: 7510361
