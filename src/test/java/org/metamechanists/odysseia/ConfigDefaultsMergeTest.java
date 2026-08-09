@@ -26,7 +26,7 @@ class ConfigDefaultsMergeTest {
         assertTrue(config.getConfigurationSection("starter-kit.items") == null);
         assertTrue(config.getStringList("starter-kit.commands").isEmpty());
         assertTrue(config.getBoolean("discord-translator.translate-discord-to-mc"));
-        assertTrue(!config.getBoolean("discord-translator.translate-mc-to-discord"));
+        assertTrue(config.getBoolean("discord-translator.translate-mc-to-discord"));
         assertEquals("https://translate.drakescraft.cl", config.getString("discord-translator.api-url"));
         assertTrue(config.getStringList("sfmaster-audit.approved-addons").contains("SLIMEFUN"));
         assertTrue(config.getStringList("sfmaster-audit.blocked-addons").contains("INFINITYEXPANSION"));
@@ -87,7 +87,7 @@ class ConfigDefaultsMergeTest {
         assertTrue(config.getConfigurationSection("starter-kit.items") == null);
         assertTrue(config.getStringList("starter-kit.commands").isEmpty());
         assertEquals(400L, config.getLong("translation.join-delay-ticks"));
-        assertTrue(!config.getBoolean("discord-translator.translate-mc-to-discord"));
+        assertTrue(config.getBoolean("discord-translator.translate-mc-to-discord"));
         assertEquals(40, config.getInt("automation-guard.redstone.fast-pulse-limit"));
         assertEquals(120, config.getInt("automation-guard.redstone.long-window-seconds"));
         assertEquals(180, config.getInt("automation-guard.redstone.long-pulse-limit"));

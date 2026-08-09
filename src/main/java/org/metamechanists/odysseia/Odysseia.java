@@ -427,10 +427,6 @@ public final class Odysseia extends JavaPlugin {
             config.set("translation.join-delay-ticks", 400L);
             changed = true;
         }
-        if (config.getBoolean("discord-translator.translate-mc-to-discord", false)) {
-            config.set("discord-translator.translate-mc-to-discord", false);
-            changed = true;
-        }
         if (config.getInt("automation-guard.redstone.fast-pulse-limit", 40) == 12) {
             config.set("automation-guard.redstone.fast-pulse-limit", 40);
             changed = true;

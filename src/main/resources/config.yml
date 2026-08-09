@@ -3861,7 +3861,7 @@ discord-translator:
   # Traducir mensajes de Discord al español en Minecraft
   translate-discord-to-mc: true
   # Traducir mensajes de Minecraft al inglés en Discord
-  translate-mc-to-discord: false
+  translate-mc-to-discord: true
   # Idioma al que se traducen los mensajes recibidos en Minecraft
   mc-target-language: "es"
   # Idioma al que se traducen los mensajes de MC para Discord
