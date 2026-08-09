@@ -3,7 +3,7 @@
 # cambiar verification a VERIFIED_PRODUCTION. Estan fuera del rango real (75xxxxx)
 # a proposito, para que ningun webhook de Tebex pueda activarlos por accidente.
 catalog-version: 1
-expected-product-count: 34
+expected-product-count: 35
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
