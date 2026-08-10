@@ -178,9 +178,19 @@ public final class ChatFilterListener implements Listener, CommandExecutor {
                 default -> current;
             });
         }
-        // "mierdaaa" y "mieeerda" son la misma palabra. Se colapsa toda repeticion porque la
-        // lista tambien pasa por aqui, asi que ambos lados quedan en la misma forma.
-        return builder.toString().replaceAll("(.)\\1+", "$1");
+        /*
+         * "mierdaaa" y "mieeerda" son la misma palabra, asi que se colapsan los alargamientos.
+         *
+         * Pero solo a partir de TRES repeticiones. Colapsar tambien las dobles destrozaba el
+         * filtro: la lista pasa por aqui igual, asi que "coon" quedaba en "con" --y "con" es la
+         * preposicion mas comun del castellano--. El resultado era que cualquiera que escribiera
+         * "con" se comia un warn. ZurielWiz junto dos en un minuto deseandole suerte a Rojo.
+         *
+         * Con el limite en tres, las dobles legitimas se respetan ("con" != "coon", "zora" !=
+         * "zorra") y los alargamientos de verdad se siguen pillando, porque quien alarga una
+         * palabra para colarla no escribe dos letras, escribe seis.
+         */
+        return builder.toString().replaceAll("(.)\\1{2,}", "$1");
     }
 
     private String color(String value) {
