@@ -3993,3 +3993,17 @@ modalidades:
 # mundo, asi que cualquiera que lo abra repite el crash.
 corrupt-item-guard:
   enabled: true
+
+# ---------------------------------------------
+#  Anuncio de sanciones dentro del juego
+# ---------------------------------------------
+# El aviso de expulsiones y baneos solo salia por Discord, asi que quien estaba jugando veia
+# desaparecer a alguien sin saber por que. Enterarse dentro es lo que hace que una sancion
+# tenga efecto sobre los demas.
+moderacion:
+  anuncio-ingame:
+    enabled: true
+    # Los kicks por inactividad son automaticos y diarios; se anuncian con otro tono.
+    # Ponlo en false si ensucian el chat.
+    incluir-afk: true
+
