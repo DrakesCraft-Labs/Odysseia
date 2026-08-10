@@ -148,3 +148,150 @@ niveles:
     comandos:
       - "papaequipo {jugador} armadura"
     unica: true
+
+  # ── Ampliación: lo bizarro de verdad ──────────────────────
+  semillas_raras:
+    nombre: "&aPuñado de Semillas Imposibles"
+    coste: 48
+    icono: "PITCHER_POD"
+    descripcion:
+      - "&7Semillas que no deberían germinar aquí."
+      - "&7Y sin embargo."
+    comandos:
+      - "minecraft:give {jugador} minecraft:pitcher_pod 8"
+      - "minecraft:give {jugador} minecraft:torchflower_seeds 8"
+    unica: false
+
+  iman:
+    nombre: "&eImán Infundido"
+    coste: 128
+    icono: "IRON_INGOT"
+    descripcion:
+      - "&7Recoge lo que caiga cerca de ti."
+      - "&8Slimefun. Se acabó agacharse."
+    comandos:
+      - "papasf {jugador} INFUSED_MAGNET 1"
+    unica: false
+
+  paracaidas:
+    nombre: "&fParacaídas del Náufrago"
+    coste: 160
+    icono: "WHITE_BANNER"
+    descripcion:
+      - "&7Para el que se cae de sitios altos"
+      - "&7más veces de las que admite."
+    comandos:
+      - "papasf {jugador} PARACHUTE 1"
+    unica: false
+
+  gancho:
+    nombre: "&6Gancho de Abordaje"
+    coste: 256
+    icono: "FISHING_ROD"
+    descripcion:
+      - "&7Un pescador que aprendió a volar."
+      - "&8Slimefun."
+    comandos:
+      - "papasf {jugador} GRAPPLING_HOOK 1"
+    unica: false
+
+  casco_solar:
+    nombre: "&eCasco Solar"
+    coste: 384
+    icono: "GOLDEN_HELMET"
+    descripcion:
+      - "&7Alimenta tu equipo con la luz del día."
+      - "&8Slimefun."
+    comandos:
+      - "papasf {jugador} SOLAR_HELMET 1"
+    unica: false
+
+  pico_fundidor:
+    nombre: "&fPico Fundidor"
+    coste: 512
+    icono: "IRON_PICKAXE"
+    descripcion:
+      - "&7Funde el mineral mientras lo picas."
+      - "&8Slimefun. Ahorra un horno entero."
+    comandos:
+      - "papasf {jugador} SMELTERS_PICKAXE 1"
+    unica: false
+
+  baston_agua:
+    nombre: "&bBastón Elemental del Agua"
+    coste: 768
+    icono: "PRISMARINE_SHARD"
+    descripcion:
+      - "&7La papa vino del mar."
+      - "&7Algo se le pegó."
+      - "&8Slimefun."
+    comandos:
+      - "papasf {jugador} STAFF_ELEMENTAL_WATER 1"
+    unica: false
+
+  vetas:
+    nombre: "&dPico de Vetas"
+    coste: 960
+    icono: "DIAMOND_PICKAXE"
+    descripcion:
+      - "&7Toda la veta de un solo golpe."
+      - "&8Slimefun."
+    comandos:
+      - "papasf {jugador} PICKAXE_OF_VEIN_MINING 1"
+    unica: false
+
+  elytra_alma:
+    nombre: "&5Élitros Vinculados"
+    coste: 1600
+    icono: "ELYTRA"
+    descripcion:
+      - "&7No se pierden al morir."
+      - "&8Slimefun. 25 stacks de papa."
+    comandos:
+      - "papasf {jugador} SOULBOUND_ELYTRA 1"
+    unica: true
+
+  jetpack:
+    nombre: "&c&lJetpack Acorazado"
+    coste: 1920
+    icono: "ELYTRA"
+    descripcion:
+      - "&7Un cohete a la espalda."
+      - "&7Nadie preguntó si era buena idea."
+      - "&8Slimefun. 30 stacks."
+    comandos:
+      - "papasf {jugador} ARMORED_JETPACK 1"
+    unica: true
+
+  espada_alma:
+    nombre: "&4Espada Vinculada"
+    coste: 2048
+    icono: "NETHERITE_SWORD"
+    descripcion:
+      - "&7Te sigue al otro lado de la muerte."
+      - "&8Slimefun. 32 stacks."
+    comandos:
+      - "papasf {jugador} SOULBOUND_SWORD 1"
+    unica: true
+
+  # ── El disparate final ────────────────────────────────────
+  corona_papa:
+    nombre: "&6&l✦ CORONA DEL REY PAPA ✦"
+    coste: 9216
+    icono: "GOLDEN_HELMET"
+    descripcion:
+      - "&7Cuatro inventarios enteros de papas."
+      - "&7Nadie ha llegado. Nadie llegará."
+      - "&7Y si llegas, el servidor entero lo sabrá."
+      - ""
+      - "&8Corona, título permanente y un aura"
+      - "&8que nadie más puede llevar."
+      - ""
+      - "&c&lCUATRO INVENTARIOS. 9.216 PAPAS."
+    comandos:
+      - "papaequipo {jugador} corona"
+      - "lp user {jugador} permission set drakes.cosmetics.aura.papa true"
+      - "lp user {jugador} permission set drakes.cosmetics.use true"
+      - "broadcast &6&l✦ &e{jugador} &6ha reunido CUATRO INVENTARIOS de Papas de mar. &6&l✦"
+      - "broadcast &7El mar reconoce a su rey."
+    unica: true

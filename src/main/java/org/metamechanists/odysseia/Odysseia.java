@@ -143,6 +143,7 @@ public final class Odysseia extends JavaPlugin {
         var papaMenu = new org.metamechanists.odysseia.papa.PapaTraderMenu(this, papaService);
         registerDynamicCommand("papatrueque", papaMenu);
         registerDynamicCommand("papaequipo", new org.metamechanists.odysseia.papa.PapaEquipoCommand(this));
+        registerDynamicCommand("papasf", new org.metamechanists.odysseia.papa.PapaSlimefunCommand(this));
         Bukkit.getPluginManager().registerEvents(papaMenu, this);
 
         // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del

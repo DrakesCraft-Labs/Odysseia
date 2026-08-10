@@ -37,14 +37,15 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("void", "Vacío", SIN_ASIGNAR),
             new Cosmetic("staff", "Cetro", "Staff"),
             // ── Con forma: geometria de verdad, no una nube sobre la cabeza ──
-            new Cosmetic("alas", "Alas Doradas", SIN_ASIGNAR),
-            new Cosmetic("alas_moradas", "Alas de Ocaso", SIN_ASIGNAR),
-            new Cosmetic("halo", "Halo", SIN_ASIGNAR),
-            new Cosmetic("halo_morado", "Halo de Ocaso", SIN_ASIGNAR),
-            new Cosmetic("cola", "Cola Espectral", SIN_ASIGNAR),
-            new Cosmetic("orbita", "Luciérnagas", SIN_ASIGNAR),
-            new Cosmetic("orbita_dorada", "Órbita Dorada", SIN_ASIGNAR),
-            new Cosmetic("star", "★ Star", SIN_ASIGNAR));
+            new Cosmetic("alas", "Alas Doradas", "Hermes"),
+            new Cosmetic("alas_moradas", "Alas de Ocaso", "Anubis"),
+            new Cosmetic("halo", "Halo", "Hestia"),
+            new Cosmetic("halo_morado", "Halo de Ocaso", "Afrodita"),
+            new Cosmetic("cola", "Cola Espectral", "Artemisa"),
+            new Cosmetic("orbita", "Luciérnagas", "Zeus"),
+            new Cosmetic("orbita_dorada", "Órbita Dorada", "Titanes"),
+            new Cosmetic("star", "★ Star", "Staff"),
+            new Cosmetic("papa", "Corona del Rey Papa", "Trueque de la Papa"));
 
     /** Rastros: particulas que quedan al caminar. */
     public static final List<Cosmetic> RASTROS = List.of(
@@ -60,10 +61,10 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("bubble", "Burbujas", SIN_ASIGNAR),
             new Cosmetic("rune", "Runas", SIN_ASIGNAR),
             new Cosmetic("staff", "Autoridad", "Staff"),
-            new Cosmetic("star", "★ Star", SIN_ASIGNAR),
-            new Cosmetic("dorado", "Polvo Dorado", SIN_ASIGNAR),
-            new Cosmetic("morado", "Polvo de Ocaso", SIN_ASIGNAR),
-            new Cosmetic("plumas", "Plumas", SIN_ASIGNAR));
+            new Cosmetic("star", "★ Star", "Staff"),
+            new Cosmetic("dorado", "Polvo Dorado", "Titanes"),
+            new Cosmetic("morado", "Polvo de Ocaso", "Titán Caos"),
+            new Cosmetic("plumas", "Plumas", "Hermes"));
 
     /** Efectos de muerte: se disparan una vez al morir. */
     public static final List<Cosmetic> MUERTES = List.of(

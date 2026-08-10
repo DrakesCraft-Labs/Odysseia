@@ -1041,6 +1041,11 @@ kits:
       - material: POTION
         amount: 3
         name: "&bPocion de Vision Nocturna"
+      - slimefun-item: SMELTERS_PICKAXE
+        name: "&f&lPico Fundidor del Minero"
+      - slimefun-item: PICKAXE_OF_VEIN_MINING
+      - slimefun-item: INFUSED_MAGNET
+      - slimefun-item: SOLAR_HELMET
 
   lenador:
     cooldown: "-1"
@@ -1058,6 +1063,10 @@ kits:
         amount: 64
       - material: COOKED_BEEF
         amount: 32
+      - slimefun-item: LUMBER_AXE
+        name: "&6&lHacha Taladora"
+      - slimefun-item: EXPLOSIVE_SHOVEL
+      - slimefun-item: INFUSED_MAGNET
 
   pescador:
     cooldown: "-1"
@@ -1076,6 +1085,10 @@ kits:
         amount: 32
       - material: OAK_BOAT
         amount: 1
+      - slimefun-item: WATER_TALISMAN
+      - slimefun-item: GRAPPLING_HOOK
+      - slimefun-item: PARACHUTE
+      - slimefun-item: FISH_JERKY
   # Kit de Thor — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -1269,6 +1282,8 @@ kits:
         amount: 7
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: STAFF_ELEMENTAL_STORM
+      - slimefun-item: SEISMIC_AXE
   # Kit de Anubis — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -1464,6 +1479,8 @@ kits:
         amount: 8
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: BLADE_OF_VAMPIRES
+      - slimefun-item: SOULBOUND_SWORD
   # Kit de Poseidon — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -1659,6 +1676,9 @@ kits:
         amount: 8
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: STAFF_ELEMENTAL_WATER
+      - slimefun-item: WATER_TALISMAN
+      - slimefun-item: SOULBOUND_TRIDENT
   # Kit de Titan Japeto — banda Titanes.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -1862,6 +1882,9 @@ kits:
         amount: 9
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: SEISMIC_AXE
+      - slimefun-item: SOULBOUND_AXE
+      - slimefun-item: EXPLOSIVE_PICKAXE
   # Kit de Titan Oceanus — banda Titanes.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -2065,6 +2088,9 @@ kits:
         amount: 9
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: STAFF_ELEMENTAL_WATER
+      - slimefun-item: SOULBOUND_TRIDENT
+      - slimefun-item: WATER_TALISMAN
   # Kit de Titan Hiperion — banda Titanes.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -2268,6 +2294,9 @@ kits:
         amount: 10
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: SOLAR_HELMET
+      - slimefun-item: STAFF_ELEMENTAL_FIRE
+      - slimefun-item: CARBONADO_JETPACK
   # Kit de Titan Cronos — banda Titanes.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -2478,6 +2507,9 @@ kits:
         amount: 10
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: ARMORED_JETBOOTS
+      - slimefun-item: SOULBOUND_PICKAXE
+      - slimefun-item: INFUSED_MAGNET
   # Kit de Titan Caos — banda Titanes.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -2707,6 +2739,10 @@ kits:
         amount: 11
       - material: COOKED_BEEF
         amount: 64
+      - slimefun-item: ARMORED_JETPACK
+      - slimefun-item: SOULBOUND_SWORD
+      - slimefun-item: STAFF_ELEMENTAL
+      - slimefun-item: INFUSED_ELYTRA
   # Reclamación única. Sustituye el bloque starter-kit heredado, que no tenía listener activo.
   # Kit de bienvenida de SkyBlock. No lleva proteccion: en la isla protege BentoBox.
   # Herramientas de hierro en vez de diamante porque la isla no tiene mineral propio hasta

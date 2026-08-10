@@ -170,6 +170,11 @@ public final class CosmeticService implements Listener {
                     dibujar(p, CosmeticShapes.espiral(fase, 18, 0.8D, 2.2D), MORADO, 1.0F);
                     dibujar(p, CosmeticShapes.orbita(fase * 1.4D, 3, 1.1D), DORADO, 0.7F);
                 }
+                case "papa" -> {
+                    // Halo dorado y luciernagas: se reconoce de lejos, que es todo el punto.
+                    dibujar(p, CosmeticShapes.halo(0.5D, 2.4D, 16), DORADO, 1.1F);
+                    dibujar(p, CosmeticShapes.orbita(fase, 6, 1.0D), DORADO, 0.8F);
+                }
                 default -> { /* cosmetico retirado del catalogo: no se dibuja nada */ }
             }
         }

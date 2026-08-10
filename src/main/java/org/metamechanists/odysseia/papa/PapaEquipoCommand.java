@@ -50,7 +50,7 @@ public final class PapaEquipoCommand implements CommandExecutor {
             return true;
         }
         if (args.length < 2) {
-            sender.sendMessage("Uso: /papaequipo <jugador> <armadura|herramientas>");
+            sender.sendMessage("Uso: /papaequipo <jugador> <armadura|herramientas|corona>");
             return true;
         }
         Player jugador = plugin.getServer().getPlayerExact(args[0]);
@@ -62,6 +62,7 @@ public final class PapaEquipoCommand implements CommandExecutor {
         List<ItemStack> entrega = switch (args[1].toLowerCase(java.util.Locale.ROOT)) {
             case "armadura" -> armadura();
             case "herramientas" -> herramientas();
+            case "corona" -> corona();
             default -> List.of();
         };
         if (entrega.isEmpty()) {
@@ -133,6 +134,43 @@ public final class PapaEquipoCommand implements CommandExecutor {
         rematar(meta);
         item.setItemMeta(meta);
         return item;
+    }
+
+    /**
+     * La Corona del Rey Papa: cuatro inventarios enteros de papas.
+     *
+     * Un yelmo de oro, no de netherita, a proposito: el oro es el material que peor protege del
+     * juego, y esta corona no se lleva para aguantar golpes sino para que se vea. Los atributos la
+     * ponen por encima de cualquier casco de todas formas.
+     */
+    private List<ItemStack> corona() {
+        ItemStack item = new ItemStack(Material.GOLDEN_HELMET);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return List.of(item);
+
+        meta.setDisplayName(color("&6&l✦ Corona del Rey Papa ✦"));
+        meta.setLore(List.of(
+                color("&7Cuatro inventarios de Papas de mar."),
+                color("&7Nueve mil doscientas dieciseis."),
+                color(""),
+                color("&7Quien la lleva no tiene que demostrar nada."),
+                color("&8Ya lo demostro.")));
+
+        aplicar(meta, Attribute.ARMOR, "papa_corona_armadura", 5.0D, EquipmentSlotGroup.HEAD);
+        aplicar(meta, Attribute.ARMOR_TOUGHNESS, "papa_corona_dureza", 4.0D, EquipmentSlotGroup.HEAD);
+        aplicar(meta, Attribute.KNOCKBACK_RESISTANCE, "papa_corona_empuje", 0.2D, EquipmentSlotGroup.HEAD);
+        aplicar(meta, Attribute.MAX_HEALTH, "papa_corona_vida", 4.0D, EquipmentSlotGroup.HEAD);
+
+        meta.addEnchant(Enchantment.PROTECTION, 8, true);
+        meta.addEnchant(Enchantment.UNBREAKING, 10, true);
+        meta.addEnchant(Enchantment.MENDING, 1, true);
+        meta.addEnchant(Enchantment.THORNS, 5, true);
+        meta.addEnchant(Enchantment.RESPIRATION, 5, true);
+        meta.addEnchant(Enchantment.AQUA_AFFINITY, 1, true);
+
+        rematar(meta);
+        item.setItemMeta(meta);
+        return List.of(item);
     }
 
     private List<ItemStack> herramientas() {
