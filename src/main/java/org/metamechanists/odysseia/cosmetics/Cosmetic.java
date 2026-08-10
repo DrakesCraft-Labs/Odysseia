@@ -33,7 +33,7 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("heart", "Encanto", SIN_ASIGNAR),
             new Cosmetic("sand", "Arena", SIN_ASIGNAR),
             new Cosmetic("abyss", "Abismo", SIN_ASIGNAR),
-            new Cosmetic("solar", "Solar", SIN_ASIGNAR),
+            new Cosmetic("solar", "Solar", "Titán Hiperión"),
             new Cosmetic("void", "Vacío", SIN_ASIGNAR),
             new Cosmetic("staff", "Cetro", "Staff"),
             // ── Con forma: geometria de verdad, no una nube sobre la cabeza ──
