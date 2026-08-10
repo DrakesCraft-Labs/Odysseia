@@ -1,6 +1,7 @@
 package org.metamechanists.odysseia.listeners;
 
 import java.util.Locale;
+import java.util.Map;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,8 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.metamechanists.odysseia.Odysseia;
 import org.metamechanists.odysseia.utils.WebhookSender;
 
@@ -66,6 +69,74 @@ public final class ModerationListener implements Listener {
                         + "\"footer\":{\"text\":\"%s\"}}]}",
                 Odysseia.escapeJson(title), color, Odysseia.escapeJson(player.getName()), action,
                 Odysseia.escapeJson(reason), Odysseia.escapeJson(serverLabel));
+        WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+    }
+
+    /**
+     * Sanciones que no expulsan a nadie y por eso no llegaban a Discord.
+     *
+     * Un mute o un jail no disparan PlayerKickEvent, asi que el canal de moderacion solo
+     * recogia expulsiones y baneos: silenciar a alguien no dejaba rastro en ningun sitio salvo
+     * la consola. Se leen los comandos ya ejecutados, tanto de consola como de staff en juego,
+     * en vez de acoplarse a la API de Essentials.
+     */
+    private static final Map<String, String> SANCIONES = Map.ofEntries(
+            Map.entry("mute", "SILENCIADO"), Map.entry("tempmute", "SILENCIADO TEMPORALMENTE"),
+            Map.entry("unmute", "DESILENCIADO"), Map.entry("jail", "ENCARCELADO"),
+            Map.entry("unjail", "LIBERADO"), Map.entry("tempban", "BANEADO TEMPORALMENTE"),
+            Map.entry("banip", "BANEADO POR IP"), Map.entry("unban", "DESBANEADO"),
+            Map.entry("warn", "ADVERTIDO"), Map.entry("drakeswarn", "ADVERTIDO"),
+            Map.entry("dwarn", "ADVERTIDO"));
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onConsoleCommand(ServerCommandEvent event) {
+        registrarSancion("CONSOLA", event.getCommand());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onStaffCommand(PlayerCommandPreprocessEvent event) {
+        registrarSancion(event.getPlayer().getName(), event.getMessage().substring(1));
+    }
+
+    /** Reconoce el comando, saca a quien va dirigido y lo reporta. */
+    private void registrarSancion(String autor, String comandoCompleto) {
+        String[] partes = comandoCompleto.trim().split("\\s+");
+        if (partes.length < 2) return;
+
+        String etiqueta = partes[0].toLowerCase(Locale.ROOT);
+        int separador = etiqueta.lastIndexOf(':');
+        if (separador >= 0) etiqueta = etiqueta.substring(separador + 1);
+
+        String accion = SANCIONES.get(etiqueta);
+        if (accion == null) return;
+
+        String objetivo = partes[1];
+        String motivo = partes.length > 2
+                ? String.join(" ", java.util.Arrays.copyOfRange(partes, 2, partes.length))
+                : "Sin motivo indicado";
+
+        reportarSancion(autor, objetivo, accion, motivo);
+    }
+
+    /** Manda la sancion al canal de moderacion, con quien la aplico. */
+    private void reportarSancion(String autor, String objetivo, String accion, String motivo) {
+        if (!plugin.getConfig().getBoolean("discord.enabled", true)) return;
+        String webhookUrl = moderationWebhook();
+        if (webhookUrl == null) return;
+
+        String jsonPayload = String.format(
+                "{\"username\":\"Odysseia Moderación\",\"embeds\":[{"
+                        + "\"title\":\"Sanción aplicada · %s\","
+                        + "\"description\":\"Se registró una acción de moderación en DrakesCraft.\","
+                        + "\"color\":16750848,\"fields\":["
+                        + "{\"name\":\"Jugador\",\"value\":\"`%s`\",\"inline\":true},"
+                        + "{\"name\":\"Acción\",\"value\":\"%s\",\"inline\":true},"
+                        + "{\"name\":\"Aplicada por\",\"value\":\"`%s`\",\"inline\":true},"
+                        + "{\"name\":\"Motivo\",\"value\":\"%s\",\"inline\":false}],"
+                        + "\"footer\":{\"text\":\"%s\"}}]}",
+                Odysseia.escapeJson(accion), Odysseia.escapeJson(objetivo),
+                Odysseia.escapeJson(accion), Odysseia.escapeJson(autor),
+                Odysseia.escapeJson(motivo), Odysseia.escapeJson(serverLabel()));
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
 
