@@ -1089,6 +1089,97 @@ kits:
       - slimefun-item: GRAPPLING_HOOK
       - slimefun-item: PARACHUTE
       - slimefun-item: FISH_JERKY
+
+  # ── Kits de los roles comprados ─────────────────────────────
+  # Se entregan una vez por compra mediante Purchase Engine. No se habilitan
+  # como /kit público: el rango dura 30 días, el paquete de inicio no se repite.
+  rol_minero:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.minero"
+    vanilla-items:
+      - material: DIAMOND_PICKAXE
+        name: "&7&lPico del Minero"
+        enchantments: {efficiency: 5, unbreaking: 3, fortune: 3}
+      - material: DIAMOND_SHOVEL
+        name: "&7&lPala del Minero"
+        enchantments: {efficiency: 4, unbreaking: 3}
+      - {material: TORCH, amount: 64}
+      - {material: LADDER, amount: 32}
+      - {material: GOLDEN_CARROT, amount: 16}
+
+  rol_constructor:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.constructor"
+    vanilla-items:
+      - material: DIAMOND_AXE
+        name: "&e&lHacha del Constructor"
+        enchantments: {efficiency: 4, unbreaking: 3}
+      - {material: STONE, amount: 128}
+      - {material: OAK_PLANKS, amount: 128}
+      - {material: SPRUCE_PLANKS, amount: 128}
+      - {material: GLASS, amount: 64}
+      - {material: WHITE_CONCRETE, amount: 64}
+      - {material: SCAFFOLDING, amount: 64}
+
+  rol_cazador:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.cazador"
+    vanilla-items:
+      - material: DIAMOND_HELMET
+        enchantments: {protection: 4, unbreaking: 3}
+      - material: DIAMOND_CHESTPLATE
+        enchantments: {protection: 4, unbreaking: 3}
+      - material: DIAMOND_LEGGINGS
+        enchantments: {protection: 4, unbreaking: 3}
+      - material: DIAMOND_BOOTS
+        enchantments: {protection: 4, feather_falling: 4, unbreaking: 3}
+      - material: DIAMOND_SWORD
+        name: "&c&lEspada del Cazador"
+        enchantments: {sharpness: 5, looting: 3, unbreaking: 3}
+      - material: BOW
+        enchantments: {power: 4, punch: 1, unbreaking: 3}
+      - {material: ARROW, amount: 64}
+      - {material: GOLDEN_APPLE, amount: 12}
+      - {material: COOKED_BEEF, amount: 64}
+
+  rol_lenador:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.lenador"
+    vanilla-items:
+      - material: DIAMOND_AXE
+        name: "&6&lHacha del Leñador"
+        enchantments: {efficiency: 5, unbreaking: 3, fortune: 3}
+      - material: SHEARS
+        enchantments: {efficiency: 4, unbreaking: 3}
+      - {material: OAK_SAPLING, amount: 64}
+      - {material: SPRUCE_SAPLING, amount: 64}
+      - {material: BONE_MEAL, amount: 64}
+      - {material: COOKED_BEEF, amount: 32}
+
+  rol_alquimista:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.alquimista"
+    vanilla-items:
+      - {material: BREWING_STAND, amount: 1}
+      - {material: BLAZE_POWDER, amount: 64}
+      - {material: NETHER_WART, amount: 64}
+      - {material: GLASS_BOTTLE, amount: 64}
+      - {material: GLOWSTONE_DUST, amount: 32}
+      - {material: REDSTONE, amount: 32}
+      - {material: MAGMA_CREAM, amount: 16}
+
+  rol_nomada:
+    cooldown: "-1"
+    permission: "odysseia.kit.purchase.nomada"
+    vanilla-items:
+      - material: DIAMOND_BOOTS
+        name: "&a&lBotas del Nómada"
+        enchantments: {feather_falling: 4, depth_strider: 3, unbreaking: 3}
+      - {material: COMPASS, amount: 1}
+      - {material: ENDER_PEARL, amount: 16}
+      - {material: FIREWORK_ROCKET, amount: 32}
+      - {material: COOKED_BEEF, amount: 64}
+      - {material: WHITE_BED, amount: 1}
   # Kit de Thor — banda Panteones.
   # Para subirlo de nivel se le agregan items de Slimefun con la clave slimefun-item.
   # Verificar cada id en el juego con /sf search antes de ponerlo aqui.
@@ -3806,7 +3897,7 @@ discord-translator:
   # Traducir mensajes de Discord al español en Minecraft
   translate-discord-to-mc: true
   # Traducir mensajes de Minecraft al inglés en Discord
-  translate-mc-to-discord: false
+  translate-mc-to-discord: true
   # Idioma al que se traducen los mensajes recibidos en Minecraft
   mc-target-language: "es"
   # Idioma al que se traducen los mensajes de MC para Discord
@@ -3938,3 +4029,17 @@ modalidades:
 # mundo, asi que cualquiera que lo abra repite el crash.
 corrupt-item-guard:
   enabled: true
+
+# ---------------------------------------------
+#  Anuncio de sanciones dentro del juego
+# ---------------------------------------------
+# El aviso de expulsiones y baneos solo salia por Discord, asi que quien estaba jugando veia
+# desaparecer a alguien sin saber por que. Enterarse dentro es lo que hace que una sancion
+# tenga efecto sobre los demas.
+moderacion:
+  anuncio-ingame:
+    enabled: true
+    # Los kicks por inactividad son automaticos y diarios; se anuncian con otro tono.
+    # Ponlo en false si ensucian el chat.
+    incluir-afk: true
+

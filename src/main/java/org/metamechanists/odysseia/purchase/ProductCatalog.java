@@ -9,6 +9,8 @@ import java.util.*;
 
 /** Carga y valida la fuente canónica de productos entregables. */
 public final class ProductCatalog {
+    private static final int PLACEHOLDER_TEBEX_ID_MIN = 9_000_000;
+    private static final int PLACEHOLDER_TEBEX_ID_MAX = 9_000_099;
     private final Map<String, ProductDefinition> products;
     private final int expectedCount;
 
@@ -18,6 +20,7 @@ public final class ProductCatalog {
         this.products = Collections.unmodifiableMap(load(file));
         this.expectedCount = expectedCount(file);
         ensureValid();
+        reportPlaceholderPackageIds(plugin);
     }
 
     public ProductCatalog(File file) {
@@ -37,6 +40,24 @@ public final class ProductCatalog {
     private void ensureValid() {
         List<String> errors = validate();
         if (!errors.isEmpty()) throw new IllegalStateException("Catálogo inválido: " + String.join("; ", errors));
+    }
+
+    /**
+     * Keeps production online while making unshippable placeholder IDs impossible to miss.
+     * CI enforces their removal before a release is accepted.
+     */
+    private void reportPlaceholderPackageIds(Odysseia plugin) {
+        products.values().stream()
+                .filter(product -> isPlaceholderTebexPackageId(product.tebexPackageId()))
+                .forEach(product -> plugin.getLogger().severe(
+                        "[Purchase Engine] Producto bloqueado '" + product.id()
+                                + "' usa tebex-package-id placeholder " + product.tebexPackageId()
+                                + ". Cree el paquete real en Tebex y reemplace el ID antes de habilitar ventas."));
+    }
+
+    /** Returns whether an ID belongs to DrakesCraft's reserved fake Tebex range. */
+    public static boolean isPlaceholderTebexPackageId(int packageId) {
+        return packageId >= PLACEHOLDER_TEBEX_ID_MIN && packageId <= PLACEHOLDER_TEBEX_ID_MAX;
     }
 
     private Map<String, ProductDefinition> load(File file) {

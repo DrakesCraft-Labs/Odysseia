@@ -1,9 +1,7 @@
-# IDs 9000001+ son PLACEHOLDERS: esos paquetes todavia no existen en Tebex.
-# Al crearlos en el panel hay que reemplazar el tebex-package-id por el real y
-# cambiar verification a VERIFIED_PRODUCTION. Estan fuera del rango real (75xxxxx)
-# a proposito, para que ningun webhook de Tebex pueda activarlos por accidente.
+# El rango 9000000-9000099 esta reservado para placeholders invalidos.
+# ProductCatalog y la suite de integridad rechazan cualquier reintroduccion.
 catalog-version: 1
-expected-product-count: 34
+expected-product-count: 35
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -121,13 +119,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Zeus"}}
 
   vip_thor:
-    tebex-package-id: 9000001
+    tebex-package-id: 7610512
     name: "Thor"
     category: ranks
     description: "Rango VIP mensual Thor."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -139,13 +137,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Thor"}}
 
   vip_anubis:
-    tebex-package-id: 9000002
+    tebex-package-id: 7610520
     name: "Anubis"
     category: ranks
     description: "Rango VIP mensual Anubis."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -157,13 +155,13 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Anubis"}}
 
   vip_poseidon:
-    tebex-package-id: 9000003
+    tebex-package-id: 7610523
     name: "Poseidón"
     category: ranks
     description: "Rango VIP mensual Poseidón."
     source: "LuckPerms + Odysseia + ProtectionStones"
     version: 1
-    verification: UNVERIFIED_PRODUCTION
+    verification: VERIFIED_PRODUCTION
     dependencies: [LuckPerms, Vault, ProtectionStones]
     actions:
       - {id: base-rank, type: LUCKPERMS_PERMANENT, refund: NOT_REVOCABLE, parameters: {group: polis}}
@@ -175,7 +173,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Poseidón"}}
 
   titan_japeto:
-    tebex-package-id: 9000004
+    tebex-package-id: 7609642
     name: "Titán Japeto"
     category: ranks
     description: "Rango Titán mensual Japeto (5x Favor Guerra)."
@@ -193,7 +191,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Japeto"}}
 
   titan_oceanus:
-    tebex-package-id: 9000005
+    tebex-package-id: 7609645
     name: "Titán Oceanus"
     category: ranks
     description: "Rango Titán mensual Oceanus (5x Favor Abismo)."
@@ -211,7 +209,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Oceanus"}}
 
   titan_hiperion:
-    tebex-package-id: 9000006
+    tebex-package-id: 7609646
     name: "Titán Hiperión"
     category: ranks
     description: "Rango Titán mensual Hiperión (5x Favor Solar)."
@@ -229,7 +227,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Hiperión"}}
 
   titan_cronos:
-    tebex-package-id: 9000007
+    tebex-package-id: 7609648
     name: "Titán Cronos"
     category: ranks
     description: "Rango Titán mensual Cronos (5x Favor Tiempo + Fly)."
@@ -247,7 +245,7 @@ products:
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Cronos"}}
 
   titan_caos:
-    tebex-package-id: 9000008
+    tebex-package-id: 7609649
     name: "Titán Caos"
     category: ranks
     description: "Rango Titán mensual Caos (Top Primordial 5x)."
@@ -264,6 +262,20 @@ products:
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Caos entregada."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Caos"}}
 
+  slimefun_research_all:
+    tebex-package-id: 7609650
+    name: "Conocimiento Total de Slimefun"
+    category: utility
+    description: "Desbloqueo permanente de las investigaciones actuales de Slimefun, sin ítems ni permisos SFMaster."
+    source: "Odysseia + Slimefun"
+    version: 1
+    verification: UNVERIFIED_PRODUCTION
+    dependencies: [Slimefun]
+    actions:
+      - {id: research, type: SLIMEFUN_RESEARCH, requires-online: true, refund: NOT_REVOCABLE}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aTodas tus investigaciones de Slimefun fueron desbloqueadas."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Conocimiento Total de Slimefun"}}
+
   role_minero: &role_minero
     tebex-package-id: 7510361
     name: "Rol: Minero"
@@ -275,6 +287,7 @@ products:
     dependencies: [LuckPerms]
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: minero, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_minero}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Minero activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Minero"}}
   role_cazador:
@@ -284,6 +297,7 @@ products:
     description: "Rol mensual Cazador."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: cazador, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_cazador}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Cazador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Cazador"}}
   role_constructor:
@@ -293,6 +307,8 @@ products:
     description: "Rol mensual Constructor."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: constructor, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_constructor}}
+      - {id: flight, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: essentials.fly, duration: 7d}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Constructor activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Constructor"}}
   role_lenador:
@@ -302,6 +318,7 @@ products:
     description: "Rol mensual Leñador."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: lenador, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_lenador}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Leñador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Leñador"}}
   role_alquimista:
@@ -311,6 +328,7 @@ products:
     description: "Rol mensual Alquimista."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: alquimista, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_alquimista}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Alquimista activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Alquimista"}}
   role_nomada:
@@ -320,6 +338,7 @@ products:
     description: "Rol mensual Nómada."
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: nomada, duration: 30d}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_nomada}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Nómada activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Nómada"}}
 

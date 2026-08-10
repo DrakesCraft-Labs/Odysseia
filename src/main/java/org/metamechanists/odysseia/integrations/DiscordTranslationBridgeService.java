@@ -17,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -236,20 +237,23 @@ public class DiscordTranslationBridgeService {
 
         if (!translateMcToDiscord) return;
 
-        // Detectar idioma y enriquecer mensaje para Discord
-        detectLanguage(messageContent).thenAccept(detectedLang -> {
+        try {
+            // DiscordSRV publica el mensaje al finalizar este evento. Esperamos solo en
+            // su hilo de puente, con timeout, para que la traduccion llegue a Discord.
+            String detectedLang = detectLanguage(messageContent).get(3, TimeUnit.SECONDS);
             if (detectedLang.isEmpty() || detectedLang.equalsIgnoreCase(discordTargetLanguage)) {
-                return; // Ya está en inglés (o no se pudo detectar)
+                return;
             }
 
-            translateText(messageContent, detectedLang, discordTargetLanguage).thenAccept(translatedText -> {
-                if (translatedText.isEmpty() || translatedText.equalsIgnoreCase(messageContent)) return;
-
-                // Enriquecer el mensaje que DiscordSRV enviará a Discord
-                String enrichedMessage = messageContent + " *(EN: " + translatedText + ")*";
-                event.setMessage(enrichedMessage);
-            });
-        });
+            String translatedText = translateText(messageContent, detectedLang, discordTargetLanguage)
+                    .get(3, TimeUnit.SECONDS);
+            if (!translatedText.isEmpty() && !translatedText.equalsIgnoreCase(messageContent)) {
+                event.setMessage(messageContent + " *(EN: " + translatedText + ")*");
+            }
+        } catch (Exception error) {
+            // Fallback limpio: DiscordSRV conserva el mensaje original si Star falla.
+            log.fine("Traduccion Minecraft a Discord omitida: " + error.getClass().getSimpleName());
+        }
     }
 
 

@@ -46,6 +46,7 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
             return switch (action.type()) {
                 case LUCKPERMS_TEMPORARY, SFMASTER_PASS -> temporaryGroup(context, action);
                 case SFMASTER_GUIDE -> online(context, this::giveSfMasterGuide);
+                case SLIMEFUN_RESEARCH -> online(context, player -> unlockAllSlimefunResearch(player));
                 case LUCKPERMS_PERMANENT -> permanentGroup(context, action);
                 case TEMPORARY_PERMISSION, AURA, POWER, COSMETIC -> permission(context, action);
                 case ECONOMY -> economy(context, action);
@@ -121,16 +122,43 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
         String permission = action.parameters().get("permission");
         if (permission == null) return ActionResult.manual("Permiso no configurado para " + action.type());
         LuckPerms api = luckPerms(); if (api == null) return ActionResult.retryable("LuckPerms no disponible");
-        User user = api.getUserManager().loadUser(context.uuid()).join(); Node node = PermissionNode.builder(permission).build();
-        boolean existed = user.getNodes().contains(node); if (!existed) { user.data().add(node); api.getUserManager().saveUser(user).join(); }
-        return ActionResult.completed("permission=" + permission + ";preexisting=" + existed);
+        User user = api.getUserManager().loadUser(context.uuid()).join();
+        List<PermissionNode> existing = user.getNodes().stream().filter(PermissionNode.class::isInstance)
+                .map(PermissionNode.class::cast).filter(node -> node.getPermission().equalsIgnoreCase(permission)).toList();
+        for (PermissionNode node : existing) {
+            if (!node.hasExpiry()) return ActionResult.completed("permission=" + permission + ";permanent=true");
+        }
+
+        long now = Instant.now().getEpochSecond();
+        long previous = existing.stream().mapToLong(node -> node.getExpiry().getEpochSecond()).max().orElse(0L);
+        existing.forEach(node -> user.data().remove(node));
+        String durationText = action.parameters().get("duration");
+        if (durationText == null || durationText.isBlank()) {
+            user.data().add(PermissionNode.builder(permission).build());
+            api.getUserManager().saveUser(user).join();
+            return ActionResult.completed("permission=" + permission + ";previous=" + previous + ";permanent=true");
+        }
+
+        long expiry = Math.max(now, previous) + duration(durationText).getSeconds();
+        user.data().add(PermissionNode.builder(permission).expiry(Instant.ofEpochSecond(expiry)).build());
+        api.getUserManager().saveUser(user).join();
+        return ActionResult.completed("permission=" + permission + ";previous=" + previous + ";new=" + expiry);
     }
 
     private ActionResult revokePermission(ExecutionContext context, ProductAction action, String result) {
-        if (result != null && result.contains("preexisting=true")) return ActionResult.completed("Permiso previo conservado");
+        if (result != null && result.contains("permanent=true")) return ActionResult.completed("Permiso permanente previo conservado");
         LuckPerms api = luckPerms(); if (api == null) return ActionResult.retryable("LuckPerms no disponible");
-        User user = api.getUserManager().loadUser(context.uuid()).join(); user.data().remove(PermissionNode.builder(action.parameters().get("permission")).build());
-        api.getUserManager().saveUser(user).join(); return ActionResult.completed("Permiso revocado");
+        User user = api.getUserManager().loadUser(context.uuid()).join();
+        String permission = action.parameters().get("permission");
+        long created = value(result, "new");
+        long previous = value(result, "previous");
+        user.getNodes().stream().filter(PermissionNode.class::isInstance).map(PermissionNode.class::cast)
+                .filter(node -> node.getPermission().equalsIgnoreCase(permission) && node.hasExpiry()
+                        && node.getExpiry().getEpochSecond() == created).toList().forEach(node -> user.data().remove(node));
+        if (previous > Instant.now().getEpochSecond()) {
+            user.data().add(PermissionNode.builder(permission).expiry(Instant.ofEpochSecond(previous)).build());
+        }
+        api.getUserManager().saveUser(user).join(); return ActionResult.completed("Permiso temporal revertido");
     }
 
     private ActionResult economy(ExecutionContext context, ProductAction action) {
@@ -172,6 +200,21 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
             return ActionResult.waiting("Inventario sin espacio para la guía SFMaster");
         }
         return ActionResult.completed("guide=delivered");
+    }
+
+    /** Unlocks only the canonical Slimefun research set for an online buyer. */
+    private ActionResult unlockAllSlimefunResearch(Player player) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("Slimefun")) {
+            return ActionResult.retryable("Slimefun no disponible");
+        }
+
+        boolean accepted = Bukkit.dispatchCommand(
+                Bukkit.getConsoleSender(),
+                "slimefun research " + player.getName() + " all"
+        );
+        return accepted
+                ? ActionResult.completed("slimefun-research=all")
+                : ActionResult.retryable("Slimefun rechazó el desbloqueo de investigaciones");
     }
 
     private ActionResult giveProtectionStone(Player player, String alias, int amount) {

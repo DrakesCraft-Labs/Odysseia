@@ -55,6 +55,18 @@ niveles:
     unica: false
 
   # ── Cheques: los Dragmas que firma Jack ───────────────────
+  carbon_comprimido:
+    nombre: "&8Bloques de carbón del Papero"
+    coste: 128
+    icono: "COAL_BLOCK"
+    descripcion:
+      - "&7Dos stacks de Papa de mar."
+      - "&7Combustible básico, no energía endgame."
+      - "&8Equivale a unas 32 horas de juego activo."
+    comandos:
+      - "give {jugador} coal_block 64"
+    unica: false
+
   cheque_pequeno:
     nombre: "&2Cheque de &a5.000 Dragmas"
     coste: 64
