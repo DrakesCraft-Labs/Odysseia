@@ -292,23 +292,12 @@ vipalerts:
 #  Entrega Automática de Tienda (StoreManager)
 # ─────────────────────────────────────────────
 store:
-  enabled: true
   # URL base de la API de la tienda (Fastify)
   api-url: "https://web.drakescraft.cl/api/store"
   # Clave API secreta (debe coincidir con STORE_API_KEY en el .env)
   api-key: "REPLACE_ME_STORE_API_KEY"
   # Frecuencia de verificación en segundos
   poll-interval-seconds: 60
-  # Compatibilidad con el flujo antiguo. Purchase Engine usa purchase-engine.announcements.
-  announcement-webhook-url: "REPLACE_ME_LEGACY_WEBHOOK"
-  # Mensaje de felicitaciones en el chat in-game (Soporta códigos de color '&')
-  chat-announcement: "&6&l⚡ &e¡Felicidades &b{player} &eha adquirido &a{product} &een la tienda! ¡Gracias por apoyar al servidor! &6&l⚡"
-  # Mensaje del webhook de Discord
-  discord-announcement: "🎉 **¡Felicidades {player} ha comprado {product} en el servidor! ¡Gracias por mantener el servidor vivo!** 🎉"
-  # Sonido global emitido en el servidor ante compras
-  global-sound:
-    enabled: true
-    sound: "UI_TOAST_CHALLENGE_COMPLETE"
 
   # Comandos a ejecutar por cada producto de la tienda
   # {player} se reemplazará por el nick exacto del jugador

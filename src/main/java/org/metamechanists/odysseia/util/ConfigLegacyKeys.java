@@ -42,6 +42,27 @@ public final class ConfigLegacyKeys {
     }
 
     /**
+     * Las claves muertas que hay que borrar de un config, en orden.
+     *
+     * Avisar no bastaba: {@code mergeMissingConfig} vuelve a meter cualquier clave que este en los
+     * valores por defecto del jar y falte en el archivo desplegado, asi que borrarlas a mano las
+     * resucitaba en el siguiente arranque. Se quitan tambien del recurso del jar, pero eso no
+     * limpia los archivos ya desplegados: de eso se encarga esto.
+     *
+     * @param presentes rutas que existen en el config desplegado
+     * @return las claves muertas encontradas; lista vacia si esta todo limpio
+     */
+    public static List<String> aBorrar(Set<String> presentes) {
+        List<String> resultado = new ArrayList<>();
+        for (String clave : REEMPLAZOS.keySet()) {
+            if (presentes.contains(clave)) {
+                resultado.add(clave);
+            }
+        }
+        return resultado;
+    }
+
+    /**
      * @param presentes rutas que existen en el config desplegado
      * @return un aviso por cada clave muerta encontrada; lista vacia si esta todo limpio
      */

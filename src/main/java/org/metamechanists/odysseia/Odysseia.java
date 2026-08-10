@@ -263,6 +263,25 @@ public final class Odysseia extends JavaPlugin {
         for (String aviso : avisos) {
             getLogger().warning("[Config] " + aviso);
         }
+
+        /*
+         * Y ademas se borran. Solo avisar no servia de nada: mergeMissingConfig() repone cualquier
+         * clave que este en los valores por defecto del jar y falte en el archivo, asi que quitarlas
+         * a mano las resucitaba en el arranque siguiente. Se quitaron tambien del recurso del jar,
+         * pero eso no toca los archivos ya desplegados.
+         *
+         * Se anuncia lo que se borra en vez de hacerlo callando: el archivo es de Jack, no mio.
+         */
+        var muertas = org.metamechanists.odysseia.util.ConfigLegacyKeys.aBorrar(
+                getConfig().getKeys(true));
+        if (!muertas.isEmpty()) {
+            for (String clave : muertas) {
+                getConfig().set(clave, null);
+            }
+            saveConfig();
+            getLogger().info("[Config] Borradas " + muertas.size()
+                    + " clave(s) muerta(s) del config: " + String.join(", ", muertas));
+        }
     }
 
     /**

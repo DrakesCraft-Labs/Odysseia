@@ -53,4 +53,42 @@ class ConfigLegacyKeysTest {
             assertEquals(1, ConfigLegacyKeys.avisos(Set.of(clave)).size(), clave);
         }
     }
+
+    @Test
+    void unConfigLimpioNoTieneNadaQueBorrar() {
+        assertTrue(ConfigLegacyKeys.aBorrar(Set.of("purchase-engine.announcements.enabled")).isEmpty());
+    }
+
+    @Test
+    void seBorranTodasLasMuertasQueHaya() {
+        assertEquals(ConfigLegacyKeys.vigiladas().size(),
+                ConfigLegacyKeys.aBorrar(ConfigLegacyKeys.vigiladas()).size());
+    }
+
+    /**
+     * Lo que se avisa y lo que se borra tiene que ser exactamente lo mismo. Si se separaran,
+     * quedarian claves de las que se avisa para siempre porque nadie las quita, que es justo el
+     * problema que esto viene a resolver.
+     */
+    @Test
+    void seBorraExactamenteLoQueSeAvisa() {
+        Set<String> todas = ConfigLegacyKeys.vigiladas();
+        assertEquals(ConfigLegacyKeys.avisos(todas).size(), ConfigLegacyKeys.aBorrar(todas).size());
+
+        for (String clave : todas) {
+            assertEquals(List.of(clave), ConfigLegacyKeys.aBorrar(Set.of(clave)), clave);
+        }
+    }
+
+    /**
+     * Borrar no puede llevarse por delante una clave viva: 'store.api-key' vive pegada a las
+     * muertas y sin ella la tienda deja de entregar compras.
+     */
+    @Test
+    void noSeBorranClavesVivas() {
+        Set<String> config = Set.of("store.api-key", "store.api-url",
+                "store.poll-interval-seconds", "store.enabled");
+
+        assertEquals(List.of("store.enabled"), ConfigLegacyKeys.aBorrar(config));
+    }
 }
