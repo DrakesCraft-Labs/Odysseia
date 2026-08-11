@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.metamechanists.odysseia.vaults.VaultClickPolicy.Origen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Las formas de meter un item en una boveda.
@@ -74,5 +76,17 @@ class VaultClickPolicyTest {
         // Bukkit usa -999 para el clic fuera de la ventana.
         assertEquals(Origen.NINGUNO,
                 VaultClickPolicy.origen(-999, BOVEDA, ClickType.LEFT, InventoryAction.PLACE_ALL));
+    }
+
+    @Test
+    void bloqueaSoloTransaccionesAtomicasPeligrosas() {
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.COLLECT_TO_CURSOR));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.CLONE_STACK));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.UNKNOWN));
+
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PICKUP_ALL));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PLACE_ALL));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.MOVE_TO_OTHER_INVENTORY));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_SWAP));
     }
 }
