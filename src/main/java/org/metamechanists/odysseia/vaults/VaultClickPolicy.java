@@ -58,4 +58,15 @@ public final class VaultClickPolicy {
             default -> Origen.NINGUNO;
         };
     }
+
+    /**
+     * Indica si Bukkit intentaria resolver varios slots como una unica transaccion no serializable.
+     * Los sorters normales conservan PICKUP, PLACE, MOVE y SWAP; solo se rechazan las operaciones
+     * que pueden trabajar sobre una instantanea obsoleta de una GUI virtual.
+     */
+    public static boolean esAccionInsegura(InventoryAction action) {
+        return action == InventoryAction.COLLECT_TO_CURSOR
+                || action == InventoryAction.CLONE_STACK
+                || action == InventoryAction.UNKNOWN;
+    }
 }

@@ -30,7 +30,7 @@ import org.metamechanists.odysseia.vaults.VaultInventory;
 public final class VaultBackpackGuardListener implements Listener {
 
     /** Holder de las bovedas de PlayerVaultZ. Se compara por nombre: no dependemos del plugin. */
-    private static final String HOLDER_PLAYERVAULTZ = "com.rugzy.playervaultz.core.vault.VaultHolder";
+    private static final String HOLDER_PLAYERVAULTZ = "com.rugzy.playervaultz.ui.VaultGUI";
     private static final String BYPASS = "odysseia.bovedas.mochilas-bypass";
 
     private final JavaPlugin plugin;
@@ -57,6 +57,14 @@ public final class VaultBackpackGuardListener implements Listener {
 
         Inventory arriba = event.getView().getTopInventory();
         if (!esBoveda(arriba) || player.hasPermission(BYPASS)) return;
+
+        if (VaultClickPolicy.esAccionInsegura(event.getAction())) {
+            event.setCancelled(true);
+            plugin.getServer().getScheduler().runTask(plugin, player::updateInventory);
+            plugin.getLogger().warning("[Bovedas] Accion atomica insegura bloqueada en /pv para "
+                    + player.getName() + ": " + event.getAction());
+            return;
+        }
 
         ItemStack candidato = switch (VaultClickPolicy.origen(
                 event.getRawSlot(), arriba.getSize(), event.getClick(), event.getAction())) {
