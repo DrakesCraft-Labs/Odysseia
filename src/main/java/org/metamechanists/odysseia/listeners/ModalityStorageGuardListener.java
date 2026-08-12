@@ -104,16 +104,30 @@ public final class ModalityStorageGuardListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
-        if (!enabled) return;
-        Player player = event.getPlayer();
-        if (player.hasPermission(BYPASS) || !modalities.isIsland(player)) return;
+        if (intercept(event.getPlayer(), event.getMessage())) {
+            event.setCancelled(true);
+        }
+    }
 
-        String[] parts = event.getMessage().substring(1).trim().split("\\s+");
+    /**
+     * Applies the modality boundary to commands launched by menus as well as commands typed in
+     * chat. Bukkit.dispatchCommand does not fire PlayerCommandPreprocessEvent, so every native
+     * menu must pass its player actions through this method before dispatching them.
+     *
+     * @return true when the command was consumed and must not be dispatched
+     */
+    public boolean intercept(Player player, String rawCommand) {
+        if (!enabled || player.hasPermission(BYPASS) || !modalities.isIsland(player)) return false;
+
+        String command = rawCommand == null ? "" : rawCommand.trim();
+        if (command.startsWith("/")) command = command.substring(1).trim();
+        if (command.isBlank()) return false;
+
+        String[] parts = command.split("\\s+");
         List<String> written = tokens(String.join(" ", parts));
-        if (written.isEmpty()) return;
+        if (written.isEmpty()) return false;
 
         if (vaultCommands.contains(written.get(0))) {
-            event.setCancelled(true);
             int vault = 1;
             if (parts.length > 1) {
                 try {
@@ -123,13 +137,14 @@ public final class ModalityStorageGuardListener implements Listener {
                 }
             }
             vaults.open(player, vault);
-            return;
+            return true;
         }
 
         if (matches(blockedPatterns, written)) {
-            event.setCancelled(true);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensaje(written, player)));
+            return true;
         }
+        return false;
     }
 
     /** Extrae la etiqueta del comando, tolerando la forma plugin:comando. */

@@ -888,12 +888,13 @@ protectionstones:
     end_501: endcolossus
     overworld_1001: atlas
 
-# Hub único de comercio. Las categorías se navegan con clic, sin comandos extra.
+# Menu principal. /menu es el nombre publico; /tienda y /shop se conservan como aliases
+# de compatibilidad para no dejar perdidos a jugadores que ya los conocen.
 # Cada destino se despacha como jugador; no se elevan permisos desde el menú.
 native-menus:
   shop:
     enabled: true
-    title: "&6⚡ &lMercado &8· &fDrakesCraft &6⚡"
+    title: "&6⚡ &lMenú Principal &8· &fDrakesCraft &6⚡"
     rows: 6
     entries:
       # --- FILA 1: MERCADO Y COMERCIO ---
@@ -914,9 +915,10 @@ native-menus:
         lore:
           - "&7Mercado global de la comunidad."
           - "&8Vende y compra ítems a otros usuarios."
+          - "&cDisponible únicamente en Survival."
           - ""
           - "&e➤ Clic para abrir &f/ca"
-        commands: ["ca"]
+        commands: ["odysseia:survival-command:ca"]
       slimefun:
         slot: 14
         material: AMETHYST_SHARD
@@ -4010,6 +4012,10 @@ modalidades:
     # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
     # se usa el generico de almacenamiento.
     mensajes:
+      ah: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      ca: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      crazyauction: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      crazyauctions: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
       ps-get: "&6DrakesCraft &8· &7Las protecciones solo se colocan en el &eSurvival&7. Aqui protege tu isla &eBentoBox&7, y tu terreno crece con tu rango."
       tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones es del &eSurvival&7. Vuelve con &e/survival&7 para comprar y colocar tu piedra."
 
@@ -4031,4 +4037,3 @@ moderacion:
     # Los kicks por inactividad son automaticos y diarios; se anuncian con otro tono.
     # Ponlo en false si ensucian el chat.
     incluir-afk: true
-

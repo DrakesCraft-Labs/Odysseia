@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
-/** Keeps the public commerce entry point to a single, documented command. */
+/** Keeps legacy store aliases routed to the single, documented main menu. */
 public final class StoreCommandGuardListener implements Listener {
     private static final ThreadLocal<UUID> INTERNAL_DISPATCH = new ThreadLocal<>();
     private static final Set<String> LEGACY_STORE_COMMANDS = Set.of(
@@ -29,8 +29,8 @@ public final class StoreCommandGuardListener implements Listener {
         event.setCancelled(true);
         org.bukkit.entity.Player player = event.getPlayer();
         // Abrimos la tienda en vez de mandar a escribir otro comando. Un jugador que escribe
-        // /shop o /store quiere comprar; decirle que se dice distinto solo lo pierde, y para
-        // quien no habla espanol es una pared.
+        // /shop o /store buscan el menu; corregir al jugador en vez de abrirlo solo agrega friccion.
+        // /menu es el nombre canonico, pero estos aliases siguen funcionando por compatibilidad.
         runInternal(player, () -> player.performCommand("drakestienda"));
     }
 

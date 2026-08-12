@@ -138,10 +138,25 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
                 openKits(player);
             } else if (command.startsWith("odysseia:claim:")) {
                 Bukkit.dispatchCommand(player, "kit " + command.substring("odysseia:claim:".length()));
+            } else if (command.startsWith("odysseia:survival-command:")) {
+                String survivalCommand = command.substring("odysseia:survival-command:".length()).trim();
+                var modalityGuard = plugin.getModalityStorageGuard();
+                if (modalityGuard != null && modalityGuard.intercept(player, survivalCommand)) {
+                    player.closeInventory();
+                    break;
+                }
+                if (!survivalCommand.isBlank()) {
+                    Bukkit.dispatchCommand(player, survivalCommand);
+                }
             } else if (command.startsWith("odysseia:message:")) {
                 player.sendMessage(color(command.substring("odysseia:message:".length())));
             } else if (!command.isBlank()) {
                 String dispatchedCommand = command.startsWith("/") ? command.substring(1) : command;
+                var modalityGuard = plugin.getModalityStorageGuard();
+                if (modalityGuard != null && modalityGuard.intercept(player, dispatchedCommand)) {
+                    player.closeInventory();
+                    break;
+                }
                 StoreCommandGuardListener.runInternal(player,
                         () -> Bukkit.dispatchCommand(player, dispatchedCommand));
             }

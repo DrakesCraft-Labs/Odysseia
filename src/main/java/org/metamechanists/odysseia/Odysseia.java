@@ -247,6 +247,11 @@ public final class Odysseia extends JavaPlugin {
         return modalityService;
     }
 
+    /** Guard shared by typed commands and native-menu actions. */
+    public org.metamechanists.odysseia.listeners.ModalityStorageGuardListener getModalityStorageGuard() {
+        return modalityStorageGuard;
+    }
+
     public String getInstanceId() {
         return instanceId;
     }

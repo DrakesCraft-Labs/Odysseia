@@ -54,7 +54,7 @@ public final class BuyCommand implements CommandExecutor {
         player.spigot().sendMessage(link);
 
         player.sendMessage("");
-        player.sendMessage(color("&8Tambien puedes ver el catalogo dentro del juego con &7/tienda&8."));
+        player.sendMessage(color("&8Abre el menú principal del servidor con &7/menu&8."));
         player.sendMessage(color("&8&m                                                    "));
         return true;
     }

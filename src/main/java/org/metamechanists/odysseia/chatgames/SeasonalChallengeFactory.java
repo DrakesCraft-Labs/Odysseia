@@ -7,7 +7,7 @@ import java.util.Random;
 final class SeasonalChallengeFactory {
     private static final List<String> RUNES = List.of("SLIMEFUN", "ODYSSEIA", "DRAGMAS", "NETHERITE", "CONVERGENCIA", "AUTOMATIZACION", "BOSSWARP", "PROTECCION");
     private static final List<String[]> TRIVIA = List.of(
-            new String[]{"Que comando abre la tienda unica del servidor?", "/tienda", "La tienda publica se abre con /tienda."},
+            new String[]{"Que comando abre el menu principal del servidor?", "/menu", "El menu principal se abre con /menu."},
             new String[]{"Que comando abre la guia de Slimefun?", "/sf guide", "La guia se abre con /sf guide."},
             new String[]{"Que moneda usa DrakesCraft?", "dragmas", "La moneda del servidor se llama Dragmas."},
             new String[]{"Que dios gobierna los mares en el Olimpo?", "poseidon", "Poseidon es el patron de mares y terremotos."},

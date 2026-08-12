@@ -84,4 +84,23 @@ class ModalityStorageGuardListenerTest {
                     "hay un mensaje para '" + key + "' pero ese comando no esta bloqueado");
         }
     }
+
+    @Test
+    void nativeAuctionButtonTargetsACommandBlockedOutsideSurvival() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        List<List<String>> blocked = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-bloqueados")) {
+            blocked.add(ModalityStorageGuardListener.tokens(value));
+        }
+
+        List<String> auctionActions = config.getStringList("native-menus.shop.entries.subastas.commands");
+        assertFalse(auctionActions.isEmpty(), "el boton de subastas debe tener una accion");
+        assertTrue(auctionActions.stream().allMatch(action -> {
+                    String target = action.startsWith("odysseia:survival-command:")
+                            ? action.substring("odysseia:survival-command:".length()) : action;
+                    return ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens(target));
+                }),
+                "toda accion de subastas debe estar cubierta por el guard de modalidades");
+    }
 }
