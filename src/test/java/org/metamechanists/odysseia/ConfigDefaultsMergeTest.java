@@ -106,6 +106,7 @@ class ConfigDefaultsMergeTest {
         YamlConfiguration produccion = new YamlConfiguration();
         produccion.set("modalidades.guard.comandos-bloqueados", new java.util.ArrayList<String>());
         produccion.set("modalidades.guard.comandos-boveda", java.util.List.of("pv"));
+        produccion.set("modalidades.guard.modalidades-aisladas", new java.util.ArrayList<String>());
 
         assertTrue(Odysseia.adoptEmptyListDefaults(produccion, defaults));
         assertTrue(produccion.getStringList("modalidades.guard.comandos-bloqueados").contains("ah"),
@@ -113,6 +114,9 @@ class ConfigDefaultsMergeTest {
         assertEquals(java.util.List.of("pv"),
                 produccion.getStringList("modalidades.guard.comandos-boveda"),
                 "una lista ya configurada no se pisa");
+        assertEquals(java.util.List.of("skyblock", "oneblock"),
+                produccion.getStringList("modalidades.guard.modalidades-aisladas"),
+                "las modalidades aisladas no pueden quedar abiertas por una lista vacia");
     }
 
     @Test

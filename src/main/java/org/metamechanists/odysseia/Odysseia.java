@@ -393,7 +393,8 @@ public final class Odysseia extends JavaPlugin {
      */
     private static final List<String> ADOPT_IF_EMPTY = List.of(
             "modalidades.guard.comandos-bloqueados",
-            "modalidades.guard.comandos-boveda");
+            "modalidades.guard.comandos-boveda",
+            "modalidades.guard.modalidades-aisladas");
 
     static boolean adoptEmptyListDefaults(ConfigurationSection current, ConfigurationSection defaults) {
         boolean changed = false;

@@ -3,6 +3,7 @@ package org.metamechanists.odysseia.listeners;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,6 +50,16 @@ class ModalityStorageGuardListenerTest {
     void doesNotBlockUnrelatedCommandsThatSharePrefix() {
         assertFalse(ModalityStorageGuardListener.matches(BLOCKED, ModalityStorageGuardListener.tokens("ahorcado")));
         assertFalse(ModalityStorageGuardListener.matches(BLOCKED, ModalityStorageGuardListener.tokens("spawn")));
+    }
+
+    @Test
+    void isolatesIslandModesButNotClassic() {
+        Set<String> isolated = Set.of("skyblock", "oneblock");
+
+        assertTrue(ModalityStorageGuardListener.isIsolatedModality(isolated, "skyblock"));
+        assertTrue(ModalityStorageGuardListener.isIsolatedModality(isolated, "ONEBLOCK"));
+        assertFalse(ModalityStorageGuardListener.isIsolatedModality(isolated, "clasico"));
+        assertFalse(ModalityStorageGuardListener.isIsolatedModality(isolated, "survival"));
     }
 
     @Test

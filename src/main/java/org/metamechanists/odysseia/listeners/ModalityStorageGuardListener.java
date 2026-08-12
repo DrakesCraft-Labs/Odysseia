@@ -33,6 +33,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final ModalityService modalities;
     private final ModalityVaultService vaults;
     private final Set<String> vaultCommands = new HashSet<>();
+    /** Modalidades cuyo inventario aislado tambien exige bloquear almacenes globales. */
+    private final Set<String> isolatedModalities = new HashSet<>();
     /** Patrones bloqueados ya tokenizados; cada uno se compara como prefijo del comando escrito. */
     private final List<List<String>> blockedPatterns = new ArrayList<>();
     private boolean enabled;
@@ -46,9 +48,11 @@ public final class ModalityStorageGuardListener implements Listener {
 
     public void reload() {
         vaultCommands.clear();
+        isolatedModalities.clear();
         blockedPatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
+        isolatedModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-aisladas")));
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) {
             List<String> pattern = tokens(value);
             if (!pattern.isEmpty()) blockedPatterns.add(pattern);
@@ -117,7 +121,8 @@ public final class ModalityStorageGuardListener implements Listener {
      * @return true when the command was consumed and must not be dispatched
      */
     public boolean intercept(Player player, String rawCommand) {
-        if (!enabled || player.hasPermission(BYPASS) || !modalities.isIsland(player)) return false;
+        if (!enabled || player.hasPermission(BYPASS)
+                || !isIsolatedModality(isolatedModalities, modalities.resolve(player).id())) return false;
 
         String command = rawCommand == null ? "" : rawCommand.trim();
         if (command.startsWith("/")) command = command.substring(1).trim();
@@ -152,5 +157,10 @@ public final class ModalityStorageGuardListener implements Listener {
         String value = raw.toLowerCase(Locale.ROOT);
         int separator = value.lastIndexOf(':');
         return separator >= 0 ? value.substring(separator + 1) : value;
+    }
+
+    /** Evita tratar como isla cualquier modalidad nueva que simplemente no sea la base. */
+    static boolean isIsolatedModality(Set<String> isolated, String modalityId) {
+        return modalityId != null && isolated.contains(modalityId.toLowerCase(Locale.ROOT));
     }
 }

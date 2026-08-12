@@ -187,6 +187,9 @@ bedrock-guard:
     - world
     - world_nether
     - world_the_end
+    - clasico
+    - clasico_nether
+    - clasico_the_end
     - world_galactifun_earth_orbit
     - world_galactifun_the_moon
     - world_galactifun_mars
@@ -552,8 +555,11 @@ natural-spawn:
   # Distancia (en bloques) a la que aparece respecto al jugador elegido
   min-distance: 40
   max-distance: 80
-  # Mundos permitidos (vacío = todos los mundos)
-  worlds: []
+  # Mundos permitidos. Clasico queda fuera: alli solo aparecen mobs vanilla.
+  worlds:
+    - world
+    - world_nether
+    - world_the_end
   # Jefes elegibles (vacío = todos). Ej: [thor, hidra, cerbero, tifon]
   bosses: []
 
@@ -3950,14 +3956,23 @@ exploit-guard:
 # inventario (via InvSwitcher) y el almacenamiento personal (via las bovedas de aqui abajo).
 modalidades:
   modos:
-    # La base es Survival: cualquier mundo no declarado en otra modalidad cae aqui, asi que
+    # La base es Slimefun: cualquier mundo no declarado en otra modalidad cae aqui, asi que
     # los mundos de galactifun, las arenas de jefes, el hub y el limbo siguen igual que siempre.
     survival:
-      nombre: "&aSurvival"
-      descripcion: "Slimefun, magia, jefes y progresion clasica."
+      nombre: "&aSlimefun"
+      descripcion: "Maquinas, magia, jefes y progresion completa."
       icono: GRASS_BLOCK
       comando: survival
       mundos: []
+    clasico:
+      nombre: "&2Clasico"
+      descripcion: "Minecraft de siempre con Terralith, sin maquinas."
+      icono: OAK_SAPLING
+      comando: clasico
+      mundos:
+        - clasico
+        - clasico_nether
+        - clasico_the_end
     skyblock:
       nombre: "&bSkyBlock"
       descripcion: "Tu isla en el vacio. Crece segun tu rango."
@@ -3980,6 +3995,11 @@ modalidades:
     cantidad-base: 3
   guard:
     enabled: true
+    # Solo estas modalidades usan las bovedas aisladas y bloquean almacenes globales. Clasico
+    # comparte economia y protecciones, pero mantiene su inventario separado mediante InvSwitcher.
+    modalidades-aisladas:
+      - skyblock
+      - oneblock
     # Dentro de una isla estos comandos abren la boveda de esa modalidad en vez de la global.
     comandos-boveda:
       - pv
@@ -4004,7 +4024,7 @@ modalidades:
       # DrakesSlimeMarket: compra material Slimefun con dinero, que hoy es comun a las tres
       # modalidades, asi que sirve de puente indirecto de items.
       - sfmercado
-      # Las piedras de ProtectionStones solo se pueden colocar en los mundos del Survival, por
+      # Las piedras de ProtectionStones no se pueden colocar dentro de las islas, por
       # el world_list_type de cada .toml. Un jugador compro una dentro de su isla de OneBlock y
       # descubrio que no la podia poner: se le cobro sin poder usarla ahi.
       - tiendaprot
@@ -4012,12 +4032,12 @@ modalidades:
     # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
     # se usa el generico de almacenamiento.
     mensajes:
-      ah: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      ca: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      crazyauction: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      crazyauctions: "&6DrakesCraft &8· &7Las subastas son exclusivas del &eSurvival&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      ps-get: "&6DrakesCraft &8· &7Las protecciones solo se colocan en el &eSurvival&7. Aqui protege tu isla &eBentoBox&7, y tu terreno crece con tu rango."
-      tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones es del &eSurvival&7. Vuelve con &e/survival&7 para comprar y colocar tu piedra."
+      ah: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      ca: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      crazyauction: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      crazyauctions: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
+      ps-get: "&6DrakesCraft &8· &7No puedes comprar protecciones dentro de una isla. Aqui protege tu terreno con &eBentoBox&7."
+      tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones no esta disponible dentro de las islas."
 
 # Neutraliza items corruptos antes de que tumben la conexion. Nacio de un crash de paquete
 # provocado por una cabeza con perfil corrupto al abrir un contenedor: el item queda en el
