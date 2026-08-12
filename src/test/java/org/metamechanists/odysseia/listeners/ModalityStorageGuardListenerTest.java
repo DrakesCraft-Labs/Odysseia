@@ -63,6 +63,24 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
+    void classicGameplayRestrictionsCoverShortcutsButKeepProtectionsAndRtp() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        List<List<String>> classic = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-restringidos.clasico")) {
+            classic.add(ModalityStorageGuardListener.tokens(value));
+        }
+
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("sf guide")));
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("essentials:warp spawn")));
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("kit hermes")));
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("home base")));
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("sethome base")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("ps get pnyx")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("rtp")));
+    }
+
+    @Test
     void blocksBuyingProtectionInsideAnIslandButKeepsTheRestOfPs() {
         // Un jugador compro una piedra dentro de su isla de OneBlock y no la pudo colocar:
         // el world_list_type de cada .toml solo admite los mundos del Survival.

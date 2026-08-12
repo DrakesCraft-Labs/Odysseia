@@ -4000,6 +4000,37 @@ modalidades:
     modalidades-aisladas:
       - skyblock
       - oneblock
+    # Clásico conserva economía, ProtectionStones y un hogar, pero evita atajos que conviertan
+    # la modalidad vanilla en otra entrada al survival tecnológico.
+    comandos-restringidos:
+      clasico:
+        - sf
+        - slimefun
+        - tpa
+        - tpahere
+        - tpaccept
+        - tpyes
+        - back
+        - home
+        - homes
+        - sethome
+        - delhome
+        - warp
+        - warps
+        - pwarp
+        - pwarps
+        - playerwarp
+        - playerwarps
+        - kit
+        - kits
+        - fly
+        - speed
+        - god
+        - ec
+        - enderchest
+        - workbench
+        - anvil
+    mensaje-restringido: "&6DrakesCraft &8· &7Ese comando está desactivado en &2Clásico&7. Explora, protege tu base y progresa sin atajos."
     # Dentro de una isla estos comandos abren la boveda de esa modalidad en vez de la global.
     comandos-boveda:
       - pv

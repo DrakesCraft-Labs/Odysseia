@@ -11,9 +11,11 @@ import org.metamechanists.odysseia.modalities.ModalityService;
 import org.metamechanists.odysseia.vaults.ModalityVaultService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,6 +30,7 @@ import java.util.Set;
 public final class ModalityStorageGuardListener implements Listener {
 
     private static final String BYPASS = "odysseia.modalidades.storage-bypass";
+    private static final String GAMEPLAY_BYPASS = "odysseia.modalidades.gameplay-bypass";
 
     private final JavaPlugin plugin;
     private final ModalityService modalities;
@@ -37,6 +40,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final Set<String> isolatedModalities = new HashSet<>();
     /** Patrones bloqueados ya tokenizados; cada uno se compara como prefijo del comando escrito. */
     private final List<List<String>> blockedPatterns = new ArrayList<>();
+    /** Restricciones de jugabilidad por modalidad, independientes del aislamiento de items. */
+    private final Map<String, List<List<String>>> gameplayPatterns = new HashMap<>();
     private boolean enabled;
 
     public ModalityStorageGuardListener(JavaPlugin plugin, ModalityService modalities, ModalityVaultService vaults) {
@@ -50,12 +55,24 @@ public final class ModalityStorageGuardListener implements Listener {
         vaultCommands.clear();
         isolatedModalities.clear();
         blockedPatterns.clear();
+        gameplayPatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
         isolatedModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-aisladas")));
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) {
             List<String> pattern = tokens(value);
             if (!pattern.isEmpty()) blockedPatterns.add(pattern);
+        }
+        var restrictions = plugin.getConfig().getConfigurationSection("modalidades.guard.comandos-restringidos");
+        if (restrictions != null) {
+            for (String modality : restrictions.getKeys(false)) {
+                List<List<String>> patterns = new ArrayList<>();
+                for (String value : lower(restrictions.getStringList(modality))) {
+                    List<String> pattern = tokens(value);
+                    if (!pattern.isEmpty()) patterns.add(pattern);
+                }
+                gameplayPatterns.put(modality.toLowerCase(Locale.ROOT), patterns);
+            }
         }
     }
 
@@ -121,8 +138,7 @@ public final class ModalityStorageGuardListener implements Listener {
      * @return true when the command was consumed and must not be dispatched
      */
     public boolean intercept(Player player, String rawCommand) {
-        if (!enabled || player.hasPermission(BYPASS)
-                || !isIsolatedModality(isolatedModalities, modalities.resolve(player).id())) return false;
+        if (!enabled) return false;
 
         String command = rawCommand == null ? "" : rawCommand.trim();
         if (command.startsWith("/")) command = command.substring(1).trim();
@@ -131,6 +147,18 @@ public final class ModalityStorageGuardListener implements Listener {
         String[] parts = command.split("\\s+");
         List<String> written = tokens(String.join(" ", parts));
         if (written.isEmpty()) return false;
+
+        String modalityId = modalities.resolve(player).id().toLowerCase(Locale.ROOT);
+        List<List<String>> gameplay = gameplayPatterns.getOrDefault(modalityId, List.of());
+        if (!player.hasPermission(GAMEPLAY_BYPASS) && matches(gameplay, written)) {
+            String message = plugin.getConfig().getString(
+                    "modalidades.guard.mensaje-restringido",
+                    "&6DrakesCraft &8· &7Ese comando no forma parte de esta modalidad.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+            return true;
+        }
+
+        if (player.hasPermission(BYPASS) || !isIsolatedModality(isolatedModalities, modalityId)) return false;
 
         if (vaultCommands.contains(written.get(0))) {
             int vault = 1;
