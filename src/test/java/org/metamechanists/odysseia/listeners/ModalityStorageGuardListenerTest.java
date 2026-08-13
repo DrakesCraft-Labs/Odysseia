@@ -63,7 +63,7 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
-    void classicGameplayRestrictionsCoverShortcutsButKeepProtectionsAndRtp() {
+    void classicGameplayRestrictionsCoverShortcutsButKeepHomesProtectionsAndRtp() {
         var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
                 new java.io.File("src/main/resources/config.yml"));
         List<List<String>> classic = new java.util.ArrayList<>();
@@ -74,9 +74,12 @@ class ModalityStorageGuardListenerTest {
         assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("sf guide")));
         assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("essentials:warp spawn")));
         assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("kit hermes")));
-        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("home base")));
-        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("sethome base")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("home base")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("homes")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("sethome base")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("delhome base")));
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("ps get pnyx")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("ps home")));
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("rtp")));
     }
 

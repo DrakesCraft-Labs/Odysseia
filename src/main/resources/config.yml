@@ -4000,7 +4000,7 @@ modalidades:
     modalidades-aisladas:
       - skyblock
       - oneblock
-    # Clásico conserva economía, ProtectionStones y un hogar, pero evita atajos que conviertan
+    # Clásico conserva economía, ProtectionStones y hogares, pero evita atajos que conviertan
     # la modalidad vanilla en otra entrada al survival tecnológico.
     comandos-restringidos:
       clasico:
@@ -4011,10 +4011,6 @@ modalidades:
         - tpaccept
         - tpyes
         - back
-        - home
-        - homes
-        - sethome
-        - delhome
         - warp
         - warps
         - pwarp
