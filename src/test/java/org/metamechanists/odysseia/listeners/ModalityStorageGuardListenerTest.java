@@ -80,6 +80,11 @@ class ModalityStorageGuardListenerTest {
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("delhome base")));
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("ps get pnyx")));
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("ps home")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("tpa jugador")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("tpaccept")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("tpyes")));
+        assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("tpdeny")));
+        assertTrue(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("tpahere jugador")));
         assertFalse(ModalityStorageGuardListener.matches(classic, ModalityStorageGuardListener.tokens("rtp")));
     }
 

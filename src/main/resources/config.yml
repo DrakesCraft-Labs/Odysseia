@@ -4006,10 +4006,7 @@ modalidades:
       clasico:
         - sf
         - slimefun
-        - tpa
         - tpahere
-        - tpaccept
-        - tpyes
         - back
         - warp
         - warps
