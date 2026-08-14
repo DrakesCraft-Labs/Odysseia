@@ -42,6 +42,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final List<List<String>> blockedPatterns = new ArrayList<>();
     /** Restricciones de jugabilidad por modalidad, independientes del aislamiento de items. */
     private final Map<String, List<List<String>>> gameplayPatterns = new HashMap<>();
+    /** Excepciones concretas a los patrones globales bloqueados, por modalidad. */
+    private final Map<String, List<List<String>>> allowedStoragePatterns = new HashMap<>();
     private boolean enabled;
 
     public ModalityStorageGuardListener(JavaPlugin plugin, ModalityService modalities, ModalityVaultService vaults) {
@@ -56,6 +58,7 @@ public final class ModalityStorageGuardListener implements Listener {
         isolatedModalities.clear();
         blockedPatterns.clear();
         gameplayPatterns.clear();
+        allowedStoragePatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
         isolatedModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-aisladas")));
@@ -72,6 +75,17 @@ public final class ModalityStorageGuardListener implements Listener {
                     if (!pattern.isEmpty()) patterns.add(pattern);
                 }
                 gameplayPatterns.put(modality.toLowerCase(Locale.ROOT), patterns);
+            }
+        }
+        var allowed = plugin.getConfig().getConfigurationSection("modalidades.guard.comandos-permitidos");
+        if (allowed != null) {
+            for (String modality : allowed.getKeys(false)) {
+                List<List<String>> patterns = new ArrayList<>();
+                for (String value : lower(allowed.getStringList(modality))) {
+                    List<String> pattern = tokens(value);
+                    if (!pattern.isEmpty()) patterns.add(pattern);
+                }
+                allowedStoragePatterns.put(modality.toLowerCase(Locale.ROOT), patterns);
             }
         }
     }
@@ -173,7 +187,8 @@ public final class ModalityStorageGuardListener implements Listener {
             return true;
         }
 
-        if (matches(blockedPatterns, written)) {
+        List<List<String>> allowed = allowedStoragePatterns.getOrDefault(modalityId, List.of());
+        if (matches(blockedPatterns, written) && !matches(allowed, written)) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensaje(written, player)));
             return true;
         }

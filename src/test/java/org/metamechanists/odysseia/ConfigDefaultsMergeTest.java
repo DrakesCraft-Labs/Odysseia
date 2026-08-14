@@ -114,7 +114,7 @@ class ConfigDefaultsMergeTest {
         assertEquals(java.util.List.of("pv"),
                 produccion.getStringList("modalidades.guard.comandos-boveda"),
                 "una lista ya configurada no se pisa");
-        assertEquals(java.util.List.of("skyblock", "oneblock"),
+        assertEquals(java.util.List.of("skyblock", "oneblock", "clasico"),
                 produccion.getStringList("modalidades.guard.modalidades-aisladas"),
                 "las modalidades aisladas no pueden quedar abiertas por una lista vacia");
     }
@@ -129,5 +129,18 @@ class ConfigDefaultsMergeTest {
         assertTrue(Odysseia.adoptEmptyListDefaults(produccion, defaults));
         assertFalse(Odysseia.adoptEmptyListDefaults(produccion, defaults),
                 "una segunda pasada no debe marcar cambios");
+    }
+
+    @Test
+    void addsClassicToAnExistingProductionIsolationList() throws Exception {
+        YamlConfiguration defaults = new YamlConfiguration();
+        defaults.load(new File("src/main/resources/config.yml"));
+        YamlConfiguration production = new YamlConfiguration();
+        production.set("modalidades.guard.modalidades-aisladas", java.util.List.of("skyblock", "oneblock", "evento"));
+
+        assertTrue(Odysseia.ensureRequiredModalityDefaults(production, defaults));
+        assertEquals(java.util.List.of("skyblock", "oneblock", "evento", "clasico"),
+                production.getStringList("modalidades.guard.modalidades-aisladas"));
+        assertFalse(Odysseia.ensureRequiredModalityDefaults(production, defaults));
     }
 }

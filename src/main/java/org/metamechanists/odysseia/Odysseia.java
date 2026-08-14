@@ -372,6 +372,7 @@ public final class Odysseia extends JavaPlugin {
                     new InputStreamReader(stream, StandardCharsets.UTF_8));
             boolean changed = mergeMissingConfig(getConfig(), defaults);
             changed |= adoptEmptyListDefaults(getConfig(), defaults);
+            changed |= ensureRequiredModalityDefaults(getConfig(), defaults);
             changed |= migrateUnsafeLegacyDefaults(getConfig());
             if (changed) {
                 saveConfig();
@@ -409,6 +410,23 @@ public final class Odysseia extends JavaPlugin {
             }
             current.set(path, porDefecto);
             changed = true;
+        }
+        return changed;
+    }
+
+    /** Adds newly isolated modalities without replacing any production-only entries. */
+    static boolean ensureRequiredModalityDefaults(ConfigurationSection current, ConfigurationSection defaults) {
+        String path = "modalidades.guard.modalidades-aisladas";
+        List<String> configured = new ArrayList<>(current.getStringList(path));
+        boolean changed = false;
+        for (String required : defaults.getStringList(path)) {
+            if (configured.stream().noneMatch(value -> value.equalsIgnoreCase(required))) {
+                configured.add(required);
+                changed = true;
+            }
+        }
+        if (changed) {
+            current.set(path, configured);
         }
         return changed;
     }

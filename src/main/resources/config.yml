@@ -3995,11 +3995,12 @@ modalidades:
     cantidad-base: 3
   guard:
     enabled: true
-    # Solo estas modalidades usan las bovedas aisladas y bloquean almacenes globales. Clasico
-    # comparte economia y protecciones, pero mantiene su inventario separado mediante InvSwitcher.
+    # Estas modalidades usan bovedas aisladas y bloquean almacenes globales. Clasico comparte
+    # economia y protecciones, pero no inventarios, subastas ni cofres globales.
     modalidades-aisladas:
       - skyblock
       - oneblock
+      - clasico
     # Clásico conserva economía, ProtectionStones y hogares, pero evita atajos que conviertan
     # la modalidad vanilla en otra entrada al survival tecnológico.
     comandos-restringidos:
@@ -4053,6 +4054,12 @@ modalidades:
       # descubrio que no la podia poner: se le cobro sin poder usarla ahi.
       - tiendaprot
       - ps get
+    # Clásico sí permite comprar y usar ProtectionStones. Estas excepciones no abren /ah,
+    # cofres de equipo, SFMarket ni ningún otro puente global de objetos.
+    comandos-permitidos:
+      clasico:
+        - tiendaprot
+        - ps get
     # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
     # se usa el generico de almacenamiento.
     mensajes:

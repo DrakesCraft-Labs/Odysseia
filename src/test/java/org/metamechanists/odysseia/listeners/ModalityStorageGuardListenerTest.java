@@ -53,13 +53,33 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
-    void isolatesIslandModesButNotClassic() {
-        Set<String> isolated = Set.of("skyblock", "oneblock");
+    void isolatesEveryModeWithASeparateInventory() {
+        Set<String> isolated = Set.of("skyblock", "oneblock", "clasico");
 
         assertTrue(ModalityStorageGuardListener.isIsolatedModality(isolated, "skyblock"));
         assertTrue(ModalityStorageGuardListener.isIsolatedModality(isolated, "ONEBLOCK"));
-        assertFalse(ModalityStorageGuardListener.isIsolatedModality(isolated, "clasico"));
+        assertTrue(ModalityStorageGuardListener.isIsolatedModality(isolated, "clasico"));
         assertFalse(ModalityStorageGuardListener.isIsolatedModality(isolated, "survival"));
+    }
+
+    @Test
+    void classicBlocksGlobalAuctionsButKeepsProtectionShop() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        List<List<String>> blocked = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-bloqueados")) {
+            blocked.add(ModalityStorageGuardListener.tokens(value));
+        }
+        List<List<String>> allowed = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-permitidos.clasico")) {
+            allowed.add(ModalityStorageGuardListener.tokens(value));
+        }
+
+        assertTrue(ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens("ah")));
+        assertFalse(ModalityStorageGuardListener.matches(allowed, ModalityStorageGuardListener.tokens("ah")));
+        assertTrue(ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens("ps get pnyx")));
+        assertTrue(ModalityStorageGuardListener.matches(allowed, ModalityStorageGuardListener.tokens("ps get pnyx")));
+        assertTrue(ModalityStorageGuardListener.matches(allowed, ModalityStorageGuardListener.tokens("tiendaprot")));
     }
 
     @Test
