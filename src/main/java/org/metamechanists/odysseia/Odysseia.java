@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.metamechanists.odysseia.commands.LenadorCommand;
 import org.metamechanists.odysseia.commands.PapaDeMarCommand;
 import org.metamechanists.odysseia.commands.ReloadCommand;
+import org.metamechanists.odysseia.commands.UltraGodCommand;
 import org.metamechanists.odysseia.commands.VanishCommand;
 import org.metamechanists.odysseia.kits.KitClaimService;
 import org.metamechanists.odysseia.listeners.ArmorEffectsListener;
@@ -41,6 +42,7 @@ public final class Odysseia extends JavaPlugin {
     private static Odysseia instance;
 
     private VanishCommand vanishCommand;
+    private UltraGodCommand ultraGodCommand;
     private KitClaimService kitClaimService;
     private boolean ownerFlip = false;
     private String instanceId = "";
@@ -78,9 +80,12 @@ public final class Odysseia extends JavaPlugin {
         this.kitClaimService = new KitClaimService(this);
 
         // Register commands
-        VanishCommand vanishCommand = new VanishCommand(this);
+        this.vanishCommand = new VanishCommand(this);
         getCommand("vani").setExecutor(vanishCommand);
         getCommand("vani").setTabCompleter(vanishCommand);
+        this.ultraGodCommand = new UltraGodCommand();
+        getCommand("ultragod").setExecutor(ultraGodCommand);
+        getCommand("ultragod").setTabCompleter(ultraGodCommand);
 
         org.metamechanists.odysseia.commands.TrollCommand trollCmd = new org.metamechanists.odysseia.commands.TrollCommand(this);
         getCommand("troll").setExecutor(trollCmd);
@@ -184,6 +189,7 @@ public final class Odysseia extends JavaPlugin {
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
+        Bukkit.getPluginManager().registerEvents(ultraGodCommand, this);
         vanishCommand.startReminder();
         Bukkit.getPluginManager().registerEvents(bloodMoonManager, this);
         Bukkit.getPluginManager().registerEvents(new ArmorEffectsListener(this), this);
@@ -487,6 +493,9 @@ public final class Odysseia extends JavaPlugin {
     public void onDisable() {
         if (discordTranslationBridge != null) {
             discordTranslationBridge.unregisterDiscordSRV();
+        }
+        if (ultraGodCommand != null) {
+            ultraGodCommand.disableAll();
         }
         if (vanishCommand != null) {
             vanishCommand.revealAll();

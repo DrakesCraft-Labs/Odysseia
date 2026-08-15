@@ -44,6 +44,11 @@ commands:
     description: Desvanecimiento creativo para moderadores.
     permission: odysseia.vanish
     aliases: [odysseiavanish]
+  ultragod:
+    description: Invulnerabilidad administrativa reforzada e independiente de Essentials.
+    permission: odysseia.ultragod
+    aliases: [ug, diosabsoluto]
+    usage: /ultragod [on|off|toggle] [jugador]
   bloodmoon:
     description: Gestiona la Luna de Sangre de Odysseia.
     permission: odysseia.bloodmoon.admin
@@ -191,6 +196,12 @@ permissions:
     default: op
   odysseia.owner.aura:
     description: Permite usar el aura destructiva absoluta del dueño.
+    default: op
+  odysseia.ultragod:
+    description: Permite activar la invulnerabilidad administrativa reforzada.
+    default: op
+  odysseia.ultragod.others:
+    description: Permite activar UltraGod para otro miembro del staff.
     default: op
   odysseia.spawners.bypass:
     description: Permite colocar spawners de Slimefun sin respetar el limite de densidad.

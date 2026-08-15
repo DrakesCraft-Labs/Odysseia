@@ -35,6 +35,7 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("abyss", "Abismo", SIN_ASIGNAR),
             new Cosmetic("solar", "Solar", "Titán Hiperión"),
             new Cosmetic("void", "Vacío", SIN_ASIGNAR),
+            new Cosmetic("singularidad", "Singularidad", "Titán Caos"),
             new Cosmetic("staff", "Cetro", "Staff"),
             // ── Con forma: geometria de verdad, no una nube sobre la cabeza ──
             new Cosmetic("alas", "Alas Doradas", "Hermes"),
@@ -64,6 +65,7 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("star", "★ Star", "Staff"),
             new Cosmetic("dorado", "Polvo Dorado", "Titanes"),
             new Cosmetic("morado", "Polvo de Ocaso", "Titán Caos"),
+            new Cosmetic("residuo", "Imágenes Residuales", "Titán Caos"),
             new Cosmetic("plumas", "Plumas", "Hermes"));
 
     /** Efectos de muerte: se disparan una vez al morir. */

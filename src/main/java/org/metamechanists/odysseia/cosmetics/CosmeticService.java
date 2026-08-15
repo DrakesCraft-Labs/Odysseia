@@ -150,6 +150,12 @@ public final class CosmeticService implements Listener {
                 case "solar" -> world.spawnParticle(Particle.DUST, loc, 10, 0.5, 0.8, 0.5,
                         new Particle.DustOptions(Color.fromRGB(255, 196, 0), 1.5F));
                 case "void" -> world.spawnParticle(Particle.REVERSE_PORTAL, loc, 12, 0.5, 0.8, 0.5, 0.06);
+                case "singularidad" -> {
+                    // Espiral de particulas, sin entidades Display ni coste de pathfinding.
+                    dibujar(p, CosmeticShapes.espiral(fase * 1.45D, 20, 0.9D, 2.35D), MORADO, 1.05F);
+                    dibujar(p, CosmeticShapes.orbita(-fase * 2.1D, 4, 1.15D),
+                            Color.fromRGB(18, 8, 42), 1.25F);
+                }
                 case "caos" -> {
                     world.spawnParticle(Particle.DUST, loc, 10, 0.5, 0.8, 0.5,
                             new Particle.DustOptions(Color.fromRGB(255, 0, 85), 1.5F));
@@ -219,6 +225,11 @@ public final class CosmeticService implements Listener {
                     new Particle.DustOptions(DORADO, 1.0F));
             case "morado" -> world.spawnParticle(Particle.DUST, loc, 4, 0.2, 0.1, 0.2,
                     new Particle.DustOptions(MORADO, 1.0F));
+            case "residuo" -> {
+                world.spawnParticle(Particle.DUST, loc, 5, 0.28, 0.12, 0.28,
+                        new Particle.DustOptions(MORADO, 1.1F));
+                world.spawnParticle(Particle.REVERSE_PORTAL, loc, 2, 0.18, 0.08, 0.18, 0.01);
+            }
             case "plumas" -> world.spawnParticle(Particle.END_ROD, loc, 2, 0.15, 0.05, 0.15, 0.005);
             default -> { /* cosmetico retirado del catalogo */ }
         }
