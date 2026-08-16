@@ -59,6 +59,23 @@ public final class OdysseiaPlaceholderExpansion extends PlaceholderExpansion {
                 };
             }
         }
+        // Modalidad en la que esta jugando, para mostrarla en el TAB.
+        // El nombre lleva colores porque asi se define en config.yml; la variante _plain los
+        // quita para quien necesite el texto suelto.
+        if (params.equalsIgnoreCase("modalidad") || params.equalsIgnoreCase("modalidad_plain")) {
+            Player online = player == null ? null : player.getPlayer();
+            if (online == null || plugin.getModalityService() == null) {
+                return "";
+            }
+            var modalidad = plugin.getModalityService().resolve(online);
+            if (modalidad == null) {
+                return "";
+            }
+            String nombre = org.bukkit.ChatColor.translateAlternateColorCodes('&', modalidad.displayName());
+            return params.equalsIgnoreCase("modalidad_plain")
+                    ? org.bukkit.ChatColor.stripColor(nombre)
+                    : nombre;
+        }
         if (params.equalsIgnoreCase("owner_prefix_odiseo")) {
             return plugin.getCurrentOdiseoPrefix();
         }
