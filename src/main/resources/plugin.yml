@@ -46,7 +46,6 @@ commands:
     aliases: [odysseiavanish]
   ultragod:
     description: Invulnerabilidad administrativa reforzada e independiente de Essentials.
-    permission: odysseia.ultragod
     aliases: [ug, diosabsoluto]
     usage: /ultragod [on|off|toggle] [jugador]
   bloodmoon:
@@ -203,6 +202,9 @@ permissions:
   odysseia.ultragod.others:
     description: Permite activar UltraGod para otro miembro del staff.
     default: op
+  odysseia.ultragod.titan:
+    description: Permite activar la variante temporal y personal de UltraGod para Titán Caos.
+    default: false
   odysseia.spawners.bypass:
     description: Permite colocar spawners de Slimefun sin respetar el limite de densidad.
     default: op

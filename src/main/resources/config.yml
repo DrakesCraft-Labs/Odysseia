@@ -26,6 +26,12 @@ star-monitor:
   signing-secret-file: "star-monitor.secret"
   heartbeat-interval-seconds: 60
 
+# Titán Caos reutiliza la protección absoluta sin recibir controles administrativos.
+ultragod:
+  titan:
+    duration-seconds: 45
+    cooldown-minutes: 30
+
 # ─────────────────────────────────────────────
 # Eventos de terror limitados a mundos explícitos con jugadores presentes.
 horror-night:
@@ -2467,10 +2473,15 @@ kits:
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
-        name: '&5&lCasco de Titan Caos'
+        name: '&5&lCasco del Origen sin Forma'
         lore:
-          - '&7Origen sin Forma'
+          - '&8&m-----------------------------'
+          - '&5&lLEGADO PRIMORDIAL DEL CAOS'
+          - '&7Forjado antes de que existiera el orden.'
+          - '&dSet completo: Soberania del Vacio.'
           - '&c[Vinculo Divino] Soulbound'
+        trim-material: amethyst
+        trim-pattern: silence
         enchantments:
           protection: 40
           mending: 1
@@ -2491,10 +2502,15 @@ kits:
         hide-flags: true
       - material: NETHERITE_CHESTPLATE
         amount: 1
-        name: '&5&lPeto de Titan Caos'
+        name: '&5&lCoraza del Origen sin Forma'
         lore:
-          - '&7Origen sin Forma'
+          - '&8&m-----------------------------'
+          - '&5&lLEGADO PRIMORDIAL DEL CAOS'
+          - '&7La realidad se curva alrededor de su portador.'
+          - '&dSet completo: Soberania del Vacio.'
           - '&c[Vinculo Divino] Soulbound'
+        trim-material: amethyst
+        trim-pattern: silence
         enchantments:
           protection: 40
           mending: 1
@@ -2502,6 +2518,12 @@ kits:
           fire_protection: 36
           blast_protection: 36
           projectile_protection: 36
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
         attributes:
           max_health: 34
         soulbound: true
@@ -2509,10 +2531,15 @@ kits:
         hide-flags: true
       - material: NETHERITE_LEGGINGS
         amount: 1
-        name: '&5&lGrebas de Titan Caos'
+        name: '&5&lGrebas del Origen sin Forma'
         lore:
-          - '&7Origen sin Forma'
+          - '&8&m-----------------------------'
+          - '&5&lLEGADO PRIMORDIAL DEL CAOS'
+          - '&7Cada paso fractura el destino impuesto.'
+          - '&dSet completo: Soberania del Vacio.'
           - '&c[Vinculo Divino] Soulbound'
+        trim-material: amethyst
+        trim-pattern: silence
         enchantments:
           protection: 40
           mending: 1
@@ -2520,6 +2547,12 @@ kits:
           fire_protection: 36
           blast_protection: 36
           projectile_protection: 36
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
         attributes:
           max_health: 34
         soulbound: true
@@ -2527,10 +2560,15 @@ kits:
         hide-flags: true
       - material: NETHERITE_BOOTS
         amount: 1
-        name: '&5&lBotas de Titan Caos'
+        name: '&5&lBotas del Origen sin Forma'
         lore:
-          - '&7Origen sin Forma'
+          - '&8&m-----------------------------'
+          - '&5&lLEGADO PRIMORDIAL DEL CAOS'
+          - '&7Ni el vacio puede detener su avance.'
+          - '&dSet completo: Soberania del Vacio.'
           - '&c[Vinculo Divino] Soulbound'
+        trim-material: amethyst
+        trim-pattern: silence
         enchantments:
           protection: 40
           mending: 1
@@ -2538,6 +2576,12 @@ kits:
           fire_protection: 36
           blast_protection: 36
           projectile_protection: 36
+          hardened: 10
+          fire_shield: 6
+          ice_shield: 6
+          elemental_protection: 6
+          regrowth: 6
+          temper: 6
         attributes:
           max_health: 34
         soulbound: true
@@ -2545,9 +2589,11 @@ kits:
         hide-flags: true
       - material: NETHERITE_SWORD
         amount: 1
-        name: '&5&lEspada de Titan Caos'
+        name: '&5&lSingularidad del Caos'
         lore:
-          - '&7Origen sin Forma'
+          - '&8&m-----------------------------'
+          - '&dUna voluntad anterior al tiempo.'
+          - '&7Clic derecho: Espada Voladora Autonoma.'
           - '&c[Vinculo Divino] Soulbound'
         enchantments:
           sharpness: 40
@@ -2590,9 +2636,9 @@ kits:
         hide-flags: true
       - material: NETHERITE_AXE
         amount: 1
-        name: '&5&lHacha de Titan Caos'
+        name: '&5&lHacha de la Entropia'
         lore:
-          - '&7Origen sin Forma'
+          - '&7La materia recuerda cada golpe.'
           - '&c[Vinculo Divino] Soulbound'
         enchantments:
           sharpness: 40
@@ -2600,6 +2646,13 @@ kits:
           fire_aspect: 6
           mending: 1
           unbreaking: 30
+          vampire: 6
+          thunder: 6
+          infernus: 6
+          paralyze: 6
+          wither: 5
+          decapitator: 5
+          rage: 5
         attributes:
           attack_damage: 10.0
         soulbound: true
@@ -2621,9 +2674,9 @@ kits:
         hide-flags: true
       - material: MACE
         amount: 1
-        name: '&5&lMazo de Titan Caos'
+        name: '&5&lMazo del Fin Inefable'
         lore:
-          - '&7Origen sin Forma'
+          - '&7El ultimo sonido antes del silencio.'
           - '&c[Vinculo Divino] Soulbound'
         enchantments:
           sharpness: 40
@@ -2631,6 +2684,13 @@ kits:
           fire_aspect: 6
           mending: 1
           unbreaking: 30
+          vampire: 6
+          thunder: 6
+          infernus: 6
+          paralyze: 6
+          wither: 5
+          decapitator: 5
+          rage: 5
         attributes:
           attack_damage: 10.0
         soulbound: true

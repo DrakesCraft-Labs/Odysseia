@@ -83,7 +83,7 @@ public final class Odysseia extends JavaPlugin {
         this.vanishCommand = new VanishCommand(this);
         getCommand("vani").setExecutor(vanishCommand);
         getCommand("vani").setTabCompleter(vanishCommand);
-        this.ultraGodCommand = new UltraGodCommand();
+        this.ultraGodCommand = new UltraGodCommand(this);
         getCommand("ultragod").setExecutor(ultraGodCommand);
         getCommand("ultragod").setTabCompleter(ultraGodCommand);
 
