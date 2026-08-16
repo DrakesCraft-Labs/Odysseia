@@ -3873,8 +3873,8 @@ modalidades:
     cantidad-base: 3
   guard:
     enabled: true
-    # Estas modalidades usan bovedas aisladas y bloquean almacenes globales. Clasico comparte
-    # economia y protecciones, pero no inventarios, subastas ni cofres globales.
+    # Estas modalidades usan bovedas y mercados aislados. Clasico comparte economia y
+    # protecciones, pero no inventarios ni cofres globales.
     modalidades-aisladas:
       - skyblock
       - oneblock
@@ -3914,12 +3914,6 @@ modalidades:
     # /ec no va aqui: InvSwitcher ya separa el cofre de ender, y las mochilas de Slimefun
     # viajan en el inventario, que tambien esta separado.
     comandos-bloqueados:
-      # CrazyAuctions: guardar un shulker en el survival y retirarlo en la isla era el puente
-      # mas usado. Se listan las cuatro etiquetas del plugin.yml, no solo /ah.
-      - crazyauctions
-      - crazyauction
-      - ah
-      - ca
       # BetterTeams: el cofre de ender del equipo es una base global, no la del jugador.
       - team echest
       - teamadmin echest
@@ -3932,8 +3926,9 @@ modalidades:
       # descubrio que no la podia poner: se le cobro sin poder usarla ahi.
       - tiendaprot
       - ps get
-    # Clásico sí permite comprar y usar ProtectionStones. Estas excepciones no abren /ah,
-    # cofres de equipo, SFMarket ni ningún otro puente global de objetos.
+    # Clásico sí permite comprar y usar ProtectionStones. CrazyAuctions se permite porque
+    # su fork Drake mantiene mercados separados; estas excepciones no abren cofres de equipo
+    # ni SFMarket.
     comandos-permitidos:
       clasico:
         - tiendaprot
@@ -3941,10 +3936,6 @@ modalidades:
     # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
     # se usa el generico de almacenamiento.
     mensajes:
-      ah: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      ca: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      crazyauction: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
-      crazyauctions: "&6DrakesCraft &8· &7Las subastas son exclusivas de &eSlimefun&7 para impedir que los ítems crucen modalidades. Vuelve con &e/survival&7."
       ps-get: "&6DrakesCraft &8· &7No puedes comprar protecciones dentro de una isla. Aqui protege tu terreno con &eBentoBox&7."
       tiendaprot: "&6DrakesCraft &8· &7La tienda de protecciones no esta disponible dentro de las islas."
 

@@ -109,8 +109,10 @@ class ConfigDefaultsMergeTest {
         produccion.set("modalidades.guard.modalidades-aisladas", new java.util.ArrayList<String>());
 
         assertTrue(Odysseia.adoptEmptyListDefaults(produccion, defaults));
-        assertTrue(produccion.getStringList("modalidades.guard.comandos-bloqueados").contains("ah"),
-                "la lista vacia debe adoptar el default del JAR");
+        assertTrue(produccion.getStringList("modalidades.guard.comandos-bloqueados").contains("team echest"),
+                "la lista vacia debe adoptar el default seguro del JAR");
+        assertFalse(produccion.getStringList("modalidades.guard.comandos-bloqueados").contains("ah"),
+                "CrazyAuctions ya separa sus mercados por modalidad");
         assertEquals(java.util.List.of("pv"),
                 produccion.getStringList("modalidades.guard.comandos-boveda"),
                 "una lista ya configurada no se pisa");

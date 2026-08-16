@@ -63,7 +63,7 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
-    void classicBlocksGlobalAuctionsButKeepsProtectionShop() {
+    void classicAllowsIsolatedAuctionsAndKeepsProtectionShop() {
         var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
                 new java.io.File("src/main/resources/config.yml"));
         List<List<String>> blocked = new java.util.ArrayList<>();
@@ -75,7 +75,7 @@ class ModalityStorageGuardListenerTest {
             allowed.add(ModalityStorageGuardListener.tokens(value));
         }
 
-        assertTrue(ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens("ah")));
+        assertFalse(ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens("ah")));
         assertFalse(ModalityStorageGuardListener.matches(allowed, ModalityStorageGuardListener.tokens("ah")));
         assertTrue(ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens("ps get pnyx")));
         assertTrue(ModalityStorageGuardListener.matches(allowed, ModalityStorageGuardListener.tokens("ps get pnyx")));
@@ -143,7 +143,7 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
-    void nativeAuctionButtonTargetsACommandBlockedOutsideSurvival() {
+    void nativeAuctionButtonTargetsACommandAllowedInEveryModality() {
         var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
                 new java.io.File("src/main/resources/config.yml"));
         List<List<String>> blocked = new java.util.ArrayList<>();
@@ -153,11 +153,11 @@ class ModalityStorageGuardListenerTest {
 
         List<String> auctionActions = config.getStringList("native-menus.shop.entries.subastas.commands");
         assertFalse(auctionActions.isEmpty(), "el boton de subastas debe tener una accion");
-        assertTrue(auctionActions.stream().allMatch(action -> {
+        assertTrue(auctionActions.stream().noneMatch(action -> {
                     String target = action.startsWith("odysseia:survival-command:")
                             ? action.substring("odysseia:survival-command:".length()) : action;
                     return ModalityStorageGuardListener.matches(blocked, ModalityStorageGuardListener.tokens(target));
                 }),
-                "toda accion de subastas debe estar cubierta por el guard de modalidades");
+                "el boton de subastas no debe quedar bloqueado por el guard de modalidades");
     }
 }
