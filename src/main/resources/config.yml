@@ -1203,15 +1203,6 @@ kits:
           hardened: 3
           elemental_protection: 3
           flare: 2
-          hardened: 3
-          elemental_protection: 3
-          flare: 2
-          hardened: 3
-          elemental_protection: 3
-          flare: 2
-          hardened: 3
-          elemental_protection: 3
-          flare: 2
         attributes:
           max_health: 4
         soulbound: true
@@ -1286,12 +1277,6 @@ kits:
           thunder: 4
           rage: 3
           double_strike: 2
-          thunder: 4
-          rage: 3
-          double_strike: 2
-          thunder: 4
-          rage: 3
-          double_strike: 2
         attributes:
           attack_damage: 1.5
         soulbound: true
@@ -1308,7 +1293,6 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 15
-          haste: 3
           haste: 3
         soulbound: true
         unbreakable: true
@@ -1398,15 +1382,6 @@ kits:
           hardened: 4
           regrowth: 3
           fire_shield: 3
-          hardened: 4
-          regrowth: 3
-          fire_shield: 3
-          hardened: 4
-          regrowth: 3
-          fire_shield: 3
-          hardened: 4
-          regrowth: 3
-          fire_shield: 3
         attributes:
           max_health: 6
         soulbound: true
@@ -1481,12 +1456,6 @@ kits:
           vampire: 4
           wither: 3
           decapitator: 3
-          vampire: 4
-          wither: 3
-          decapitator: 3
-          vampire: 4
-          wither: 3
-          decapitator: 3
         attributes:
           attack_damage: 2.0
         soulbound: true
@@ -1503,8 +1472,6 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 16
-          haste: 3
-          lucky_miner: 3
           haste: 3
           lucky_miner: 3
         soulbound: true
@@ -1595,15 +1562,6 @@ kits:
           hardened: 4
           water_breathing: 3
           ice_shield: 3
-          hardened: 4
-          water_breathing: 3
-          ice_shield: 3
-          hardened: 4
-          water_breathing: 3
-          ice_shield: 3
-          hardened: 4
-          water_breathing: 3
-          ice_shield: 3
         attributes:
           max_health: 8
         soulbound: true
@@ -1678,12 +1636,6 @@ kits:
           ice_aspect: 4
           cold_steel: 3
           double_strike: 3
-          ice_aspect: 4
-          cold_steel: 3
-          double_strike: 3
-          ice_aspect: 4
-          cold_steel: 3
-          double_strike: 3
         attributes:
           attack_damage: 2.5
         soulbound: true
@@ -1700,8 +1652,6 @@ kits:
           fortune: 5
           mending: 1
           unbreaking: 17
-          haste: 4
-          thrifty: 3
           haste: 4
           thrifty: 3
         soulbound: true
@@ -1794,18 +1744,6 @@ kits:
           elemental_protection: 4
           temper: 4
           regrowth: 4
-          hardened: 5
-          elemental_protection: 4
-          temper: 4
-          regrowth: 4
-          hardened: 5
-          elemental_protection: 4
-          temper: 4
-          regrowth: 4
-          hardened: 5
-          elemental_protection: 4
-          temper: 4
-          regrowth: 4
         attributes:
           max_health: 12
         soulbound: true
@@ -1880,12 +1818,6 @@ kits:
           rage: 4
           double_strike: 3
           exhaust: 3
-          rage: 4
-          double_strike: 3
-          exhaust: 3
-          rage: 4
-          double_strike: 3
-          exhaust: 3
         attributes:
           attack_damage: 4.0
         soulbound: true
@@ -1902,10 +1834,6 @@ kits:
           fortune: 6
           mending: 1
           unbreaking: 20
-          smelter: 3
-          veinminer: 4
-          blast_mining: 4
-          haste: 5
           smelter: 3
           veinminer: 4
           blast_mining: 4
@@ -2000,18 +1928,6 @@ kits:
           ice_shield: 4
           water_breathing: 3
           regrowth: 4
-          hardened: 5
-          ice_shield: 4
-          water_breathing: 3
-          regrowth: 4
-          hardened: 5
-          ice_shield: 4
-          water_breathing: 3
-          regrowth: 4
-          hardened: 5
-          ice_shield: 4
-          water_breathing: 3
-          regrowth: 4
         attributes:
           max_health: 16
         soulbound: true
@@ -2086,12 +2002,6 @@ kits:
           ice_aspect: 5
           vampire: 4
           paralyze: 3
-          ice_aspect: 5
-          vampire: 4
-          paralyze: 3
-          ice_aspect: 5
-          vampire: 4
-          paralyze: 3
         attributes:
           attack_damage: 5.0
         soulbound: true
@@ -2108,10 +2018,6 @@ kits:
           fortune: 7
           mending: 1
           unbreaking: 22
-          thrifty: 4
-          veinminer: 5
-          silk_chest: 1
-          haste: 5
           thrifty: 4
           veinminer: 5
           silk_chest: 1
@@ -2206,18 +2112,6 @@ kits:
           fire_shield: 5
           elemental_protection: 5
           flare: 4
-          hardened: 6
-          fire_shield: 5
-          elemental_protection: 5
-          flare: 4
-          hardened: 6
-          fire_shield: 5
-          elemental_protection: 5
-          flare: 4
-          hardened: 6
-          fire_shield: 5
-          elemental_protection: 5
-          flare: 4
         attributes:
           max_health: 20
         soulbound: true
@@ -2292,12 +2186,6 @@ kits:
           infernus: 5
           thunder: 5
           rage: 4
-          infernus: 5
-          thunder: 5
-          rage: 4
-          infernus: 5
-          thunder: 5
-          rage: 4
         attributes:
           attack_damage: 6.0
         soulbound: true
@@ -2314,10 +2202,6 @@ kits:
           fortune: 8
           mending: 1
           unbreaking: 24
-          smelter: 4
-          blast_mining: 5
-          haste: 6
-          lucky_miner: 4
           smelter: 4
           blast_mining: 5
           haste: 6
@@ -2413,21 +2297,6 @@ kits:
           rebound: 4
           regrowth: 5
           temper: 5
-          hardened: 7
-          stopping_force: 5
-          rebound: 4
-          regrowth: 5
-          temper: 5
-          hardened: 7
-          stopping_force: 5
-          rebound: 4
-          regrowth: 5
-          temper: 5
-          hardened: 7
-          stopping_force: 5
-          rebound: 4
-          regrowth: 5
-          temper: 5
         attributes:
           max_health: 26
         soulbound: true
@@ -2503,14 +2372,6 @@ kits:
           exhaust: 4
           confusion: 4
           double_strike: 4
-          paralyze: 5
-          exhaust: 4
-          confusion: 4
-          double_strike: 4
-          paralyze: 5
-          exhaust: 4
-          confusion: 4
-          double_strike: 4
         attributes:
           attack_damage: 7.5
         soulbound: true
@@ -2527,10 +2388,6 @@ kits:
           fortune: 8
           mending: 1
           unbreaking: 26
-          haste: 7
-          veinminer: 6
-          tunnel: 4
-          thrifty: 5
           haste: 7
           veinminer: 6
           tunnel: 4
@@ -2627,24 +2484,6 @@ kits:
           elemental_protection: 6
           regrowth: 6
           temper: 6
-          hardened: 10
-          fire_shield: 6
-          ice_shield: 6
-          elemental_protection: 6
-          regrowth: 6
-          temper: 6
-          hardened: 10
-          fire_shield: 6
-          ice_shield: 6
-          elemental_protection: 6
-          regrowth: 6
-          temper: 6
-          hardened: 10
-          fire_shield: 6
-          ice_shield: 6
-          elemental_protection: 6
-          regrowth: 6
-          temper: 6
         attributes:
           max_health: 34
         soulbound: true
@@ -2723,20 +2562,6 @@ kits:
           wither: 5
           decapitator: 5
           rage: 5
-          vampire: 6
-          thunder: 6
-          infernus: 6
-          paralyze: 6
-          wither: 5
-          decapitator: 5
-          rage: 5
-          vampire: 6
-          thunder: 6
-          infernus: 6
-          paralyze: 6
-          wither: 5
-          decapitator: 5
-          rage: 5
         attributes:
           attack_damage: 10.0
         soulbound: true
@@ -2753,13 +2578,6 @@ kits:
           fortune: 10
           mending: 1
           unbreaking: 30
-          veinminer: 8
-          treefeller: 6
-          smelter: 5
-          blast_mining: 6
-          haste: 8
-          lucky_miner: 5
-          thrifty: 6
           veinminer: 8
           treefeller: 6
           smelter: 5
