@@ -3957,3 +3957,23 @@ moderacion:
     # Los kicks por inactividad son automaticos y diarios; se anuncian con otro tono.
     # Ponlo en false si ensucian el chat.
     incluir-afk: true
+
+# ---------------------------------------------
+#  Quemar muertos vivientes al sol
+# ---------------------------------------------
+# Los jugadores reportaron que zombies y phantoms sobreviven al amanecer a cielo abierto. La
+# combustion de vanilla depende de la hora del mundo, y aqui el ciclo esta alterado
+# (daylight-cycle-ticks en purpur.yml) ademas de haber plugins que manipulan la hora, asi que el
+# juego deja de considerar que es de dia y nunca los enciende.
+# Se comprueba la condicion real --cielo despejado y luz de sol-- en vez de tocar el ciclo, que
+# afectaria a las granjas y al ritmo del servidor entero.
+quemar-al-sol:
+  enabled: true
+  # Cada cuantos ticks se revisa. Subelo si hace falta aliviar el hilo principal.
+  intervalo-ticks: 60
+  # Radio alrededor de cada jugador conectado. No se recorre el mundo entero.
+  radio: 48
+  segundos-de-fuego: 8
+  # Vacio = todos los mundos. Las islas y el hub no suelen necesitarlo.
+  mundos:
+    - world
