@@ -196,7 +196,21 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ItemConsumeListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ModerationListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.WorldChangeSafetyListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
+        // BossItemListener vive por duplicado: cuando se separo DrakesBosses se llevo una copia
+        // identica de esta clase -- misma logica y la misma NamespacedKey 'odysseia:odyssey_item_type',
+        // asi que reconoce exactamente los mismos objetos.
+        //
+        // Registrar los dos hacia que cada efecto de arma de jefe se aplicara dos veces, y ademas
+        // encadenaba: el daño sintetico de uno reentraba por el manejador del otro, porque el guardia
+        // de reentrada es una lista propia de cada instancia y no se ven entre ellas. En los logs del
+        // 16 salieron once niveles alternando los dos plugins dentro de un StackOverflowError.
+        //
+        // DrakesBosses es el sitio donde vive esto ahora. Odysseia solo lo registra si no esta.
+        if (Bukkit.getPluginManager().getPlugin("DrakesBosses") != null) {
+            getLogger().info("DrakesBosses esta instalado: los efectos de las armas de jefe los lleva el.");
+        } else {
+            Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
+        }
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
         org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
         Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
