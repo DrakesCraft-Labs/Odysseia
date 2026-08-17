@@ -17,7 +17,7 @@
 
 [🌐 Official Portal](https://web.drakescraft.cl) ·
 [📖 Command Guide](https://web.drakescraft.cl/guia-comandos.html) ·
-[🛒 Store Catalog](https://tienda.drakescraft.cl) ·
+[🛒 Store Catalog](https://web.drakescraft.cl/store.html) ·
 [🏛️ Ecosystem Repositories](https://github.com/DrakesCraft-Labs)
 
 </div>
