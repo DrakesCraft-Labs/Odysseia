@@ -1,124 +1,218 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/Odysseia/main/odysseia_banner.svg" width="100%" alt="Odysseia animated banner" />
-</p>
+<div align="center">
 
-# Odysseia
+<img src="odysseia_banner.svg" alt="Odysseia" width="100%">
 
-**The operational Paper/Purpur suite behind DrakesCraft.** Odysseia centralises the server-side systems that need consistent permissions, protected-world behaviour, durable purchase delivery, and clear staff controls.
+# ✦ Odysseia Core Engine ✦
 
-> Runtime target: Java 21, Paper/Purpur 1.21.11. The shipped Minecraft plugin is the Java Maven artifact. This repository also contains a Rust workspace for research and future services; it is not required to boot the current Bukkit JAR.
+### The sovereign operational engine, transactional commerce gateway & server administration suite for DrakesCraft
 
-<p align="center">
-  <strong>Motor Mítico, Sistemas Core, Tienda, Cosméticos, Kits y Administración para Purpur/Paper 1.21.11</strong><br>
-  Arquitectura modular desacoplada: Core Odysseia + Módulos Autónomos (DiosesDrakes, DrakesBosses, DrakesArcana).
-</p>
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-7C4DFF?logo=minecraft&logoColor=white)](https://papermc.io/)
+[![Purpur](https://img.shields.io/badge/Purpur-1.21.11-FFA000?logo=purpur)](https://purpurmc.org/)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Rust](https://img.shields.io/badge/Rust-2021_Workspace-DEA584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![License](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
+[![Platform](https://img.shields.io/badge/Server-Star_Production-00E5FF)](https://drakescraft.cl)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Language-Java_21_|_Rust_2021-orange.svg" alt="Java 21 + Rust" />
-  <img src="https://img.shields.io/badge/Minecraft-Paper_/_Purpur_1.21.11-brightgreen.svg" alt="Minecraft 1.21.11" />
-  <img src="https://img.shields.io/badge/Server-Star_Production-blue.svg" alt="Star Production" />
-</p>
+**A high-performance Paper/Purpur 1.21.11 production core that centralizes transactional store fulfillment, cross-modality inventory isolation, multi-tier kit progression, automated server maintenance windows, anti-exploit rate limiters, and horror night environmental events.**
 
-## 🏛️ Ecosistema Canónico de Plugins DrakesCraft
+[🌐 Official Portal](https://drakescraft.cl) ·
+[📖 Command Guide](https://drakescraft.cl/guia-comandos.html) ·
+[🛒 Store Catalog](https://tienda.drakescraft.cl) ·
+[🏛️ Ecosystem Repositories](https://github.com/DrakesCraft-Labs)
 
-Odysseia fue desacoplado en una arquitectura limpia y modular de 4 plugins autónomos:
-
-1. **`Odysseia` (Este Repositorio)**: Motor central de DrakesCraft. Gestiona la pasarela Tebex, entrega de compras, sistema de kits, cosméticos visuales (/cosmeticos), recompensas diarias, guardias de seguridad/automatización, juegos de chat, `/restart30` con guardado preventivo, y avisos de seguridad de inventario al cambiar de mundo/modalidad.
-2. **`DiosesDrakes`**: Sistema divino y panteones (Greco-Romano, Nórdico, Céltico, Egipcio, Hindú). Gestiona bendiciones, habilidad de dioses, favor acumulado y anclas de Convergencia pública.
-3. **`DrakesBosses`**: Arenas aisladas de Jefes en la dimensión `drakes_bosses`. Cobro de entradas con Dragmas, entrega segura de botín por buzón `/buzon`, e invocación aislada (`/bosswarp`).
-4. **`DrakesArcana`**: Sistema elemental (Fuego, Agua, Aire, Tierra, Hielo, Electro). Habilidades PvE, meditación, códice y sintonía espiritual con dioses.
+</div>
 
 ---
 
-## Alcance real de Odysseia
+## 🏛️ What is Odysseia?
 
-Odysseia no es solamente un plugin de bosses ni un conjunto de comandos. Es el
-plano de ejecucion de DrakesCraft: coordina sistemas que deben compartir una
-misma identidad de jugador, reglas economicas, seguridad y trazabilidad.
+**Odysseia is the central execution plane of the DrakesCraft network.** Rather than a mere collection of utility commands or standalone mechanics, Odysseia orchestrates the critical server-side systems that require unified player identity (Java & Bedrock via Floodgate), strict economic security, zero-regression purchase fulfillment, and audit logging.
 
-| Dominio | Capacidades activas |
-| --- | --- |
-| Compras | Catalogo canonico, recepcion Tebex, idempotencia por transaccion, acciones con estado, reintentos, historial, `dry-run`, refund y chargeback. |
-| Identidad | Resolucion Java/Bedrock por nombre y UUID, soporte del prefijo Floodgate y entregas online/offline. |
-| Rangos y kits | Kits inicial, mensuales y administrativos; entregas pendientes; validacion de catalogo; SFMaster temporal y vigilancia de expiracion. |
-| Modalidades | Menu y rutas entre Survival, SkyBlock y OneBlock; bovedas aisladas; bloqueo de almacenamientos y objetos entre modalidades. |
-| Economia | Tienda principal, venta de inventario, Papa de Mar y comercio controlado; rate limits y guardias contra automatizacion/exploits. |
-| Operacion | Reinicio seguro con cuenta regresiva, guardado preventivo, maintenance window, telemetria a Star y alertas de expiracion VIP. |
-| Seguridad | Anti-alt configurable, deteccion AFK/automatizacion, limites de spawners, proteccion de Fast Machines, items corruptos, mochilas y capturas de bosses. |
-| Protecciones | Entrega de ProtectionStones, bordes visuales, aliases compatibles y controles de mundo/proteccion. |
-| Comunidad | Cosméticos, recompensas diarias, juegos de chat estacionales, filtro de chat, mensajes de muerte y anuncios de compras. |
-| Eventos | Luna de Sangre, Horror Night, niebla, meteoritos, dragones privados, trolls inocuos y herramientas del dueño. |
-| Compatibilidad | LuckPerms, Vault, Essentials, Slimefun, ProtectionStones, DiscordSRV, WorldwideChat, nLogin, Floodgate y PlaceholderAPI. |
+Built with a hybrid **Java 21 Bukkit Core** and an accompanying **Rust 2021 high-throughput calculation workspace**, Odysseia ensures that heavy processing, transaction persistence, and scheduled maintenance occur without dropping ticks on live production servers.
 
-### Purchase Engine
+---
 
-El motor de compras es transaccional, no una lista de comandos Tebex. El
-catalogo `purchases.yml` define productos y acciones; SQLite conserva cada
-transaccion y cada accion de manera independiente. Una repeticion del mismo
-evento no duplica beneficios, una entrega parcial puede reintentarse y
-refund/chargeback siguen una politica auditable. Los tests rechazan IDs Tebex
-placeholder o duplicados, kits inexistentes y conteos de productos incoherentes.
+## ✨ Core Highlights
 
-Tebex cobra. Odysseia valida, decide y entrega. La web refleja el catalogo, pero
-no reemplaza al motor de ejecucion.
+- **💳 Idempotent Purchase & Delivery Engine** — State-machine commerce processor connected to Tebex Headless API. Backed by transactional SQLite WAL storage; prevents double-claims, supports dry-run validation, offline queues, and automatic chargeback audits.
+- **🎒 Cross-Modality & Inventory Isolation** — Enforces strict economic boundaries across Survival, SkyBlock, and OneBlock. Prevents cross-world storage exploits, item smuggling, and unauthorized backpack transfer.
+- **👑 4-Band VIP Kit Architecture** — Granular progression for Mortal, Divine (Apollo, Athena, Ares, Poseidon, Hades, Zeus), and Titan ranks (Cronos, Atlas, Oceanus, Hyperion). Delivers production means (GEO drills, generators, ProtectionStones) without destabilizing the Slimefun economy.
+- **🛡️ Anti-Exploit & Commerce Rate Limiters** — Protects against spawner hoarding, automatic clickers, rapid chest transaction duping, and market flooding through `CommerceCommandLimiter` and `CommerceRateLimiter`.
+- **🔄 Safe Maintenance Windows (`/restart30`)** — 30-second automated countdown with global broadcast warnings, world flush, data persistence locks, and maintenance protection preventing player data loss during deployment.
+- **🌫️ Horror Nights & Atmospheric Events** — Dynamically scheduled horror nights with ultra-dense custom fog (`/niebla`), Blood Moon celestial phases, screen screamers, and custom ambient soundtracks.
+- **🐉 Private Dragon Mounts & Custom Cosmetics** — High-tier cosmetic particle wings, dragon mounts (JackStar Supreme, Kika Emerald), chat tags, visual claim borders, and interactive chat mini-games.
+- **🦀 Rust Off-JVM Workspace** — Seven specialized native crates for pure rule processing, store primitives, horror algorithms, and telemetry to Star without garbage collection pauses.
 
-### Seguridad economica y de inventarios
+---
 
-- `CommerceCommandLimiter` y `CommerceRateLimiter` limitan spam y volumen.
-- Los guardias de modalidad impiden mover storages u objetos entre economias.
-- SFMaster se controla por rango, tiempo, cantidad, tipo y propiedad del item.
-- Los kits administrativos pueden probarse sin entregar dinero, rango o claim.
-- Los reinicios abren una ventana de mantenimiento que bloquea interacciones
-  peligrosas mientras los plugins persisten sus datos.
-- Las auditorias separan errores operativos de intentos de abuso reproducibles.
+## 🗺️ Canonical DrakesCraft Plugin Ecosystem
 
-### Experiencia del jugador y del staff
+Odysseia operates as the foundational core of a decoupled 4-pillar architectural ecosystem:
 
-Los comandos publicos cubren modalidades, kits, recompensas, tienda,
-cosmeticos, venta, bordes y compra. El namespace administrativo cubre compras,
-entregas pendientes, mantenimiento, SFMaster, alertas VIP y recarga segura.
-Los comandos destructivos o de espectaculo (`/meteorito`, `/auradueno`,
-`/ultragod`, `/troll`) permanecen detras de permisos explicitos.
+```
+                      ┌─────────────────────────────────────────┐
+                      │             ODYSSEIA CORE               │
+                      │  (Tebex Engine, Kits, Isolation, Ops)  │
+                      └───────┬─────────────┬─────────────┬─────┘
+                              │             │             │
+            ┌─────────────────┴─┐   ┌───────┴─────────┐   └─────────────────┐
+            ▼                   ▼   ▼                 ▼                     ▼
+ ┌───────────────────────┐ ┌───────────────────┐ ┌───────────────────┐ ┌────────────────────┐
+ │     DIOSESDRAKES      │ │   DRAKESBOSSES    │ │   DRAKESARCANA    │ │  SLIMEFUN4-DRAKE   │
+ │ Divine pantheons,     │ │ Instanced arenas, │ │ 6 elemental magic │ │ Hardened technical │
+ │ favor accumulation &  │ │ Dragmas entry fee │ │ trees, meditation │ │ core, SQL storage  │
+ │ convergence anchors   │ │ & mailbox delivery│ │ & spiritual codex │ │ & Networks backend │
+ └───────────────────────┘ └───────────────────┘ └───────────────────┘ └────────────────────┘
+```
 
-## Arquitectura interna
+| Plugin Repository | Role & Responsibilities |
+|---|---|
+| **`Odysseia`** *(This Repo)* | Central execution plane: Tebex gateway, kit deliveries, cross-modality security, `/restart30`, cosmetics, and admin tools. |
+| **[`DiosesDrakes`](https://github.com/DrakesCraft-Labs/DiosesDrakes)** | Divine pantheon progression (Greek, Norse, Celtic, Egyptian, Hindu), favor mechanics, and public Convergence altars. |
+| **[`DrakesBosses`](https://github.com/DrakesCraft-Labs/DrakesBosses)** | Isolated multi-phase boss arenas in `drakes_bosses`, Dragmas economy entry fees, and secure reward mailbox (`/buzon`). |
+| **[`ArcanaDrakes`](https://github.com/DrakesCraft-Labs/ArcanaDrakes)** | Elemental magic paths (Fire, Water, Earth, Air, Ice, Lightning), meditation shrines, spell grimoire, and deity tuning. |
 
-El JAR Java se divide por dominio: `purchase`, `kits`, `modalities`, `vaults`,
-`economy`, `listeners`, `integrations`, `restart`, `chatgames`, `cosmetics`,
-`dragon`, `events`, `papa` y `services`. Los sistemas de combate aun presentes
-son compatibilidad de transicion; la autoridad nueva de encuentros es
-DrakesBosses y la progresion divina pertenece a DiosesDrakes.
+---
 
-El workspace Rust contiene siete crates especializados:
+## 📊 Comprehensive Domain Capabilities
 
-- `odysseia-core`: reglas puras de bosses, chat, items, moderacion y calculos.
-- `odysseia-store`: primitivas del dominio comercial.
-- `odysseia-automation`: logica de automatizacion.
-- `odysseia-horror`: reglas de eventos de terror.
-- `odysseia-telemetry`: contratos de observabilidad.
-- `odysseia-ffi`: frontera nativa para Java.
-- `odysseia-server`: proceso experimental independiente.
+| Domain | Production Capabilities & Active Systems |
+|---|---|
+| **E-Commerce & Store** | Canonical catalog (`purchases.yml`), Tebex webhooks, transactional SQLite logging, stateful actions, dry-run preview, manual redeliveries, refund/chargeback audit logs. |
+| **Player Identity** | Dual Java & Bedrock UUID/name resolution, Floodgate prefix support, offline player queuing, and multi-session tracking. |
+| **Ranks & VIP Kits** | Tiered delivery (Initial, Monthly, One-Time), administrative testing mode, temporary SFMaster permissions with automated expiration monitoring. |
+| **World & Modality** | Seamless routing between Survival, SkyBlock, and OneBlock; isolated player vaults; automated transfer locks on shulker boxes, backpacks, and Slimefun storages. |
+| **Economic Guardrails** | Main GUI shop, `/sell` inventory evaluator, Papa de Mar merchant, dynamic rate limiters, anti-macro transaction throttling. |
+| **Server Operations** | Zero-downtime maintenance windows, `/restart30` atomic saving protocol, Star backend telemetry reporting, VIP expiration Discord notices. |
+| **Security & Auditing** | Anti-alt IP fingerprinting, AFK machine detection, spawner stacking limits, Fast Machines protection, corrupted item quarantines. |
+| **Land Claims** | Direct API dispatch of ProtectionStones (from 49x49 to 2500x2500 blocks), visual claim boundary particles, alias resolution, WorldGuard flag enforcement. |
+| **Community & Events** | Particle cosmetics (`/cosmeticos`), daily reward streaks, trivia chat games, custom death messages, store broadcast fanfare, private dragon summoning. |
 
-El servidor Bukkit funciona sin estos binarios nativos. El fallback Java sigue
-siendo la autoridad y evita que una biblioteca faltante impida arrancar.
+---
 
-## Calidad y verificaciones
+## 💳 The Purchase & Delivery Engine
 
-La suite cubre Purchase Engine, catalogo Tebex, identidad Bedrock, kits,
-modalidades, comercio, automatizacion, anti-alt, reinicios, cosméticos,
-chatgames, dragones, protecciones y compatibilidad de particulas. La validacion
-normal es:
+Odysseia treats store transactions as **strict state machines**, not arbitrary console commands:
+
+```
+[Tebex Webhook] ──> [Odysseia Gateway] ──> [Signature & Catalog Validation]
+                                                       │
+                                      ┌────────────────┴────────────────┐
+                                      ▼                                 ▼
+                             [Online Dispatch]                 [Offline SQLite Queue]
+                                      │                                 │
+                                      ▼                                 ▼
+                         [Atomic Benefit Delivery]             [Player Join Listener]
+                                      │                                 │
+                                      └────────────────┬────────────────┘
+                                                       ▼
+                                         [Audit Log & Star Telemetry]
+```
+
+- **Idempotency**: Every transaction ID is recorded in SQLite WAL mode. Duplicate webhooks cannot grant rewards twice.
+- **Atomic Actions**: Deliveries are decomposed into individual action records (e.g., `GIVE_RANK`, `DELIVER_KIT`, `CLAIM_STONE`). Partial failures can be retried independently without re-granting completed steps.
+- **Fail-Safe Testing**: Administrators can execute `/drakestore testbuy <player> <product>` in `dry-run` mode to inspect all actions and permission trees before going live.
+
+---
+
+## 🛠️ Complete Command Reference
+
+### Public Commands
+
+| Command | Permission | Description |
+|---|---|---|
+| `/modalidad` | *Default* | Open the cross-modality travel menu (Survival, SkyBlock, OneBlock). |
+| `/tienda` | *Default* | Access the server GUI shop and categories. |
+| `/sell` | *Default* | Open the instant inventory sell chest. |
+| `/kit [name]` | `odysseia.kit.<name>` | Claim available mortal, divine, or titan rank kits. |
+| `/recompensa` | *Default* | Claim the daily login reward streak. |
+| `/cosmeticos` | `odysseia.cosmetics` | Open the cosmetic wardrobe (particle trails, wings, crowns). |
+| `/comprar` | *Default* | Display the official Tebex store link and promotion announcements. |
+| `/ps bordes` | `odysseia.ps.borders` | Render glowing particle outlines around the current claim. |
+
+### Staff & Administrative Commands
+
+| Command | Permission | Description |
+|---|---|---|
+| `/restart30` | `odysseia.admin.restart` | Initiate the 30-second safe server reboot sequence with data flush. |
+| `/drakestore redeliver <id>` | `odysseia.admin.store` | Force retry a pending or interrupted transaction. |
+| `/drakestore testbuy <user> <item>` | `odysseia.admin.store` | Simulate a purchase delivery in dry-run mode without charging. |
+| `/sfmaster <user> <duration>` | `odysseia.admin.sfmaster` | Grant timed temporary access to Slimefun Master cheat mode with logging. |
+| `/niebla <on|off|toggle> [user]` | `odysseia.admin.events` | Toggle ultra-dense cinematic atmospheric fog. |
+| `/meteorito <x> <z>` | `odysseia.admin.events` | Spawn a celestial meteor impact event with custom ores. |
+| `/auradueno` | `odysseia.owner` | Activate the sovereign golden aura and invulnerability state. |
+| `/odysseia reload` | `odysseia.admin` | Hot-reload YAML configurations and validate catalog integrity. |
+
+---
+
+## 🦀 Rust Workspace Architecture
+
+In addition to the Java 21 plugin JAR, Odysseia features an experimental high-performance Rust 2021 workspace in `crates/`:
+
+```
+Odysseia-Rust/
+├── Cargo.toml
+├── crates/
+│   ├── odysseia-core/        # Pure game rules, math, item hashing & calculations
+│   ├── odysseia-store/       # Transaction state machine primitives & validation
+│   ├── odysseia-automation/  # Off-JVM machine ticking and network topology
+│   ├── odysseia-horror/      # Horror Night procedural algorithms & fog physics
+│   ├── odysseia-telemetry/   # Star backend observability & metrics contracts
+│   ├── odysseia-ffi/         # Native Java 21 Project Panama / FFM bindings
+│   └── odysseia-server/      # Standalone microservice daemon (Tokio + Axum)
+```
+
+> **Runtime Safety Note**: The production Paper server runs 100% on the native Java engine. The Rust layer operates as an off-JVM sidecar/FFI calculation layer; if native binaries are absent, Odysseia automatically runs its pure Java fallback routines.
+
+---
+
+## 📦 Building & Testing
+
+### Prerequisites
+- **Java**: OpenJDK 21 or GraalVM 21
+- **Maven**: 3.9+
+- **Rust** *(Optional, for native crates)*: Rust 1.78+ / Cargo
+
+### Build Commands
 
 ```bash
+# 1. Clone repository
+git clone https://github.com/DrakesCraft-Labs/Odysseia.git
+cd Odysseia
+
+# 2. Build Java Bukkit Plugin JAR
 mvn clean package
+
+# 3. Test Rust Workspace (Optional)
 cargo test --workspace
 ```
 
-Compilar no despliega. Los cambios de `config.yml` productivo se fusionan de
-forma quirurgica y los JAR se activan solamente en una ventana de reinicio.
+The compiled plugin JAR will be located at `target/Odysseia-1.1.0.jar`.
 
-## Runtime integrations
+---
 
-- **LuckPerms**: Group and permission management for divine and titan ranks.
-- **ProtectionStones**: Land claim integration from 49x49 to 2500x2500 blocks.
-- **EssentialsX**: Economy, user management, warp, and 30-day kit delivery.
-- **Tebex**: Idempotent purchase delivery engine with SQLite WAL logging.
+## 🔌 Runtime Integrations
+
+Odysseia bridges and synchronizes with industry-standard server components:
+
+- **LuckPerms**: Group hierarchy inheritance, temporary parent expirations, and permission validation.
+- **ProtectionStones & WorldGuard**: Territorial claim delivery, dimension flags, and boundary rendering.
+- **EssentialsX**: Currency hooks, user meta, warp triggers, and legacy kit scheduling.
+- **Slimefun4-Drake**: Research checks, SFMaster runtime oversight, and protected machine ticking.
+- **Floodgate 2.0**: Seamless Bedrock Edition UUID translation and prefix handling.
+- **DiscordSRV**: Live synchronization of staff alerts, store broadcasts, and server maintenance countdowns.
+- **PlaceholderAPI**: Rich placeholders for rank tier, daily streaks, claim counts, and active events.
+
+---
+
+## 📜 License & Credits
+
+- **Author & Maintainer**: **DrakesCraft Labs**
+- **License**: [GPL-3.0](./LICENSE) — Open source, robust, and built for production.
+- **Minecraft**: Compatible with Paper / Purpur 1.21.11.
+
+<div align="center">
+
+**Built with ☕, 🦀, and architectural rigor for DrakesCraft.**
+
+</div>
