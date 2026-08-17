@@ -5,3 +5,6 @@ staging/
 *.iml
 *.log
 .DS_Store
+
+build/
+.gradle/
