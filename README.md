@@ -11,7 +11,7 @@
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Rust](https://img.shields.io/badge/Rust-2021_Workspace-DEA584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
-[![Platform](https://img.shields.io/badge/Server-Star_Production-00E5FF)](https://web.drakescraft.cl)
+[![Platform](https://img.shields.io/badge/Network-DrakesCraft_Production-00E5FF)](https://web.drakescraft.cl)
 
 **A high-performance Paper/Purpur 1.21.11 production core that centralizes transactional store fulfillment, cross-modality inventory isolation, multi-tier kit progression, automated server maintenance windows, anti-exploit rate limiters, and horror night environmental events.**
 
@@ -41,7 +41,7 @@ Built with a hybrid **Java 21 Bukkit Core** and an accompanying **Rust 2021 high
 - **🔄 Safe Maintenance Windows (`/restart30`)** — 30-second automated countdown with global broadcast warnings, world flush, data persistence locks, and maintenance protection preventing player data loss during deployment.
 - **🌫️ Horror Nights & Atmospheric Events** — Dynamically scheduled horror nights with ultra-dense custom fog (`/niebla`), Blood Moon celestial phases, screen screamers, and custom ambient soundtracks.
 - **🐉 Private Dragon Mounts & Custom Cosmetics** — High-tier cosmetic particle wings, dragon mounts (JackStar Supreme, Kika Emerald), chat tags, visual claim borders, and interactive chat mini-games.
-- **🦀 Rust Off-JVM Workspace** — Seven specialized native crates for pure rule processing, store primitives, horror algorithms, and telemetry to Star without garbage collection pauses.
+- **🦀 Rust Off-JVM Workspace** — Seven specialized native crates for pure rule processing, store primitives, horror algorithms, and operational telemetry without garbage collection pauses.
 
 ---
 
@@ -83,7 +83,7 @@ Odysseia operates as the foundational core of a decoupled 4-pillar architectural
 | **Ranks & VIP Kits** | Tiered delivery (Initial, Monthly, One-Time), administrative testing mode, temporary SFMaster permissions with automated expiration monitoring. |
 | **World & Modality** | Seamless routing between Survival, SkyBlock, and OneBlock; isolated player vaults; automated transfer locks on shulker boxes, backpacks, and Slimefun storages. |
 | **Economic Guardrails** | Main GUI shop, `/sell` inventory evaluator, Papa de Mar merchant, dynamic rate limiters, anti-macro transaction throttling. |
-| **Server Operations** | Zero-downtime maintenance windows, `/restart30` atomic saving protocol, Star backend telemetry reporting, VIP expiration Discord notices. |
+| **Server Operations** | Zero-downtime maintenance windows, `/restart30` atomic saving protocol, internal operational telemetry reporting, VIP expiration Discord notices. |
 | **Security & Auditing** | Anti-alt IP fingerprinting, AFK machine detection, spawner stacking limits, Fast Machines protection, corrupted item quarantines. |
 | **Land Claims** | Direct API dispatch of ProtectionStones (from 49x49 to 2500x2500 blocks), visual claim boundary particles, alias resolution, WorldGuard flag enforcement. |
 | **Community & Events** | Particle cosmetics (`/cosmeticos`), daily reward streaks, trivia chat games, custom death messages, store broadcast fanfare, private dragon summoning. |
@@ -157,7 +157,7 @@ Odysseia-Rust/
 │   ├── odysseia-store/       # Transaction state machine primitives & validation
 │   ├── odysseia-automation/  # Off-JVM machine ticking and network topology
 │   ├── odysseia-horror/      # Horror Night procedural algorithms & fog physics
-│   ├── odysseia-telemetry/   # Star backend observability & metrics contracts
+│   ├── odysseia-telemetry/   # internal observability & metrics contracts
 │   ├── odysseia-ffi/         # Native Java 21 Project Panama / FFM bindings
 │   └── odysseia-server/      # Standalone microservice daemon (Tokio + Axum)
 ```
