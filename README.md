@@ -11,12 +11,12 @@
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Rust](https://img.shields.io/badge/Rust-2021_Workspace-DEA584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
-[![Platform](https://img.shields.io/badge/Server-Star_Production-00E5FF)](https://drakescraft.cl)
+[![Platform](https://img.shields.io/badge/Server-Star_Production-00E5FF)](https://web.drakescraft.cl)
 
 **A high-performance Paper/Purpur 1.21.11 production core that centralizes transactional store fulfillment, cross-modality inventory isolation, multi-tier kit progression, automated server maintenance windows, anti-exploit rate limiters, and horror night environmental events.**
 
-[🌐 Official Portal](https://drakescraft.cl) ·
-[📖 Command Guide](https://drakescraft.cl/guia-comandos.html) ·
+[🌐 Official Portal](https://web.drakescraft.cl) ·
+[📖 Command Guide](https://web.drakescraft.cl/guia-comandos.html) ·
 [🛒 Store Catalog](https://tienda.drakescraft.cl) ·
 [🏛️ Ecosystem Repositories](https://github.com/DrakesCraft-Labs)
 
