@@ -39,30 +39,51 @@ public final class CosmeticShapes {
         return salida;
     }
 
+    /** Plumas que cuelgan de cada punto del hueso. Da grosor al ala en vez de dejarla en un trazo. */
+    private static final int PLUMAS_POR_FILA = 4;
+
     /**
      * Dos alas simetricas a la espalda, que baten con el tiempo.
      *
-     * La forma de cada ala es media parabola: ancha arriba y estrecha abajo, como una pluma. El
-     * batido no mueve las alas enteras sino que abre y cierra el angulo, que es lo que se lee como
+     * Antes cada ala era una sola curva de puntos, asi que en el juego se veia una raya y no un ala.
+     * Ahora se reparte la misma cantidad de puntos sobre una superficie: un hueso que sale del
+     * hombro hacia arriba y afuera, y plumas que cuelgan de el. El largo de las plumas es corto en
+     * el hombro, maximo pasado el medio y vuelve a acortarse en la punta, que es el perfil que hace
+     * que la silueta se lea como un ala de verdad.
+     *
+     * El batido no mueve las alas enteras sino que abre y cierra el angulo, que es lo que se lee como
      * aleteo y no como un objeto rigido sacudiendose.
      *
-     * @param yawRadianes hacia donde mira el jugador; las alas van detras
-     * @param fase        contador de ticks
+     * @param yawRadianes  hacia donde mira el jugador; las alas van detras
+     * @param fase         contador de ticks
+     * @param puntosPorAla cuantos puntos dibuja cada ala; a mas puntos, membrana mas densa
      */
     public static List<Vector> alas(double yawRadianes, double fase, int puntosPorAla) {
         List<Vector> salida = new ArrayList<>(puntosPorAla * 2);
         // El batido oscila entre casi cerrado y bien abierto.
         double apertura = 0.55D + 0.35D * Math.sin(fase * 0.15D);
+        // Los puntos se reparten en filas a lo largo del hueso; cada fila cuelga sus plumas.
+        int filas = Math.max(1, (int) Math.ceil(puntosPorAla / (double) PLUMAS_POR_FILA));
 
         for (int lado = -1; lado <= 1; lado += 2) {
             for (int i = 0; i < puntosPorAla; i++) {
-                double t = i / (double) puntosPorAla;      // 0 en el hombro, 1 en la punta
-                double ancho = t * 1.3D * apertura;
-                double alto = 1.1D - (t * t * 1.4D);        // parabola: sube y luego cae
+                int fila = i / PLUMAS_POR_FILA;
+                int pluma = i % PLUMAS_POR_FILA;
+                // t recorre el hueso del hombro (0) a la punta (1); s baja por la pluma.
+                double t = filas > 1 ? fila / (double) (filas - 1) : 0.0D;
+                double s = PLUMAS_POR_FILA > 1 ? pluma / (double) (PLUMAS_POR_FILA - 1) : 0.0D;
+
+                // Borde superior del ala: nace junto al hombro y se aleja subiendo.
+                double huesoX = (0.22D + t * 1.25D) * apertura;
+                double huesoY = 1.45D + 0.5D * Math.sin(t * Math.PI * 0.55D);
+                // Perfil de las plumas: nunca llega a cero, para que la punta no se deshilache.
+                double largo = 1.2D * Math.sin(Math.PI * (0.12D + 0.8D * t));
+
                 // Coordenadas locales: X hacia el lado, Z hacia atras.
-                double x = ancho * lado;
-                double z = -0.25D - t * 0.35D;
-                salida.add(rotarY(new Vector(x, alto, z), yawRadianes));
+                double x = (huesoX + s * largo * 0.3D) * lado;
+                double y = huesoY - s * largo;
+                double z = -0.28D - t * 0.42D - s * 0.12D;
+                salida.add(rotarY(new Vector(x, y, z), yawRadianes));
             }
         }
         return salida;
@@ -117,6 +138,81 @@ public final class CosmeticShapes {
             // El radio se estrecha arriba: da sensacion de que la espiral se cierra en punta.
             double r = radio * (1.0D - t * 0.55D);
             salida.add(new Vector(Math.cos(angulo) * r, t * altura, Math.sin(angulo) * r));
+        }
+        return salida;
+    }
+
+    /**
+     * Una corona de picos sobre la cabeza.
+     *
+     * Los picos alternan alto y bajo como una corona de verdad, y el aro de la base se dibuja
+     * entero: sin el, los picos sueltos parecen particulas al azar y no una pieza.
+     *
+     * @param picos  cuantas puntas tiene la corona
+     * @param radio  cuanto se separa de la cabeza
+     * @param altura donde se apoya la base
+     */
+    public static List<Vector> corona(double fase, int picos, double radio, double altura) {
+        List<Vector> salida = new ArrayList<>(picos * 3);
+        // Un latido lento que sube y baja la corona entera, para que no parezca pegada.
+        double flote = Math.sin(fase * 0.06D) * 0.05D;
+
+        for (int i = 0; i < picos; i++) {
+            double angulo = 2 * Math.PI * i / picos;
+            double cos = Math.cos(angulo);
+            double sin = Math.sin(angulo);
+            // Picos alternos: los pares son las puntas largas.
+            double alto = (i % 2 == 0) ? 0.34D : 0.18D;
+
+            salida.add(new Vector(cos * radio, altura + flote, sin * radio));
+            salida.add(new Vector(cos * radio, altura + flote + alto * 0.55D, sin * radio));
+            salida.add(new Vector(cos * radio * 0.88D, altura + flote + alto, sin * radio * 0.88D));
+        }
+        return salida;
+    }
+
+    /**
+     * Un anillo inclinado que gira alrededor del jugador, tipo Saturno.
+     *
+     * La inclinacion es fija respecto al mundo y el giro se aplica dentro del propio anillo, no
+     * rotando la lista entera: asi el aro mantiene su plano y lo que se mueve son los puntos sobre
+     * el, que es lo que se lee como un anillo girando y no como un aro bailando.
+     *
+     * @param inclinacion cuanto se levanta un lado del anillo, en bloques
+     */
+    public static List<Vector> anilloInclinado(double fase, int puntos, double radio, double altura,
+                                               double inclinacion) {
+        List<Vector> salida = new ArrayList<>(puntos);
+        for (int i = 0; i < puntos; i++) {
+            double angulo = 2 * Math.PI * i / puntos + fase * 0.05D;
+            double cos = Math.cos(angulo);
+            double sin = Math.sin(angulo);
+            salida.add(new Vector(cos * radio, altura + sin * inclinacion, sin * radio));
+        }
+        return salida;
+    }
+
+    /**
+     * Un remolino a los pies: varios brazos que giran y se cierran hacia arriba.
+     *
+     * Cada brazo arranca desfasado y el radio se estrecha con la altura, de modo que el conjunto
+     * se lee como agua succionada y no como un cilindro de particulas.
+     *
+     * @param brazos      cuantas lineas forman el remolino
+     * @param puntosBrazo puntos de cada linea
+     */
+    public static List<Vector> vortice(double fase, int brazos, int puntosBrazo, double radio,
+                                       double altura) {
+        List<Vector> salida = new ArrayList<>(brazos * puntosBrazo);
+        for (int brazo = 0; brazo < brazos; brazo++) {
+            double desfase = 2 * Math.PI * brazo / brazos;
+            for (int i = 0; i < puntosBrazo; i++) {
+                double t = puntosBrazo > 1 ? i / (double) (puntosBrazo - 1) : 0.0D;
+                // El giro se acelera arriba: es lo que da la sensacion de succion.
+                double angulo = desfase + fase * 0.16D + t * Math.PI * 1.6D;
+                double r = radio * (1.0D - t * 0.7D);
+                salida.add(new Vector(Math.cos(angulo) * r, t * altura, Math.sin(angulo) * r));
+            }
         }
         return salida;
     }

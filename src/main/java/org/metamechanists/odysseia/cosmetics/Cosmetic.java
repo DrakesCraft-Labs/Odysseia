@@ -46,7 +46,18 @@ public record Cosmetic(String id, String nombre, String rango) {
             new Cosmetic("orbita", "Luciérnagas", "Zeus"),
             new Cosmetic("orbita_dorada", "Órbita Dorada", "Titanes"),
             new Cosmetic("star", "★ Star", "Staff"),
-            new Cosmetic("papa", "Corona del Rey Papa", "Trueque de la Papa"));
+            new Cosmetic("papa", "Corona del Rey Papa", "Trueque de la Papa"),
+            // ── Piezas grandes: pensadas para que se reconozcan de lejos ──
+            new Cosmetic("alas_abisales", "Alas Abisales", "Poseidón"),
+            new Cosmetic("alas_infernales", "Alas Infernales", "Titán Caos"),
+            new Cosmetic("alas_glaciares", "Alas Glaciares", "Artemisa"),
+            new Cosmetic("alas_solares", "Alas Solares", "Titán Hiperión"),
+            new Cosmetic("corona_dorada", "Corona de Titán", "Titanes"),
+            new Cosmetic("corona_abisal", "Corona de Coral", "Poseidón"),
+            new Cosmetic("saturno", "Anillo de Saturno", "Titán Hiperión"),
+            new Cosmetic("voragine", "Vorágine", "Poseidón"),
+            new Cosmetic("tempestad", "Tempestad", "Thor"),
+            new Cosmetic("constelacion", "Constelación", "Zeus"));
 
     /** Rastros: particulas que quedan al caminar. */
     public static final List<Cosmetic> RASTROS = List.of(

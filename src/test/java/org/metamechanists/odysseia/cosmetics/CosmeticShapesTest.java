@@ -124,6 +124,85 @@ class CosmeticShapesTest {
         assertTrue(radioArriba < radioAbajo, "debe cerrarse en punta");
     }
 
+    // ── Alas: que sean superficie y no un trazo ─────────────────
+
+    @Test
+    void elAlaOcupaAnchoYAltoYNoUnaSolaLinea() {
+        // El fallo que se veia en el juego era exactamente este: todos los puntos caian sobre una
+        // curva, asi que el ala se leia como una raya. Una superficie repite alturas en distintas
+        // distancias al hombro y viceversa.
+        List<Vector> alas = CosmeticShapes.alas(0, 0, 28);
+        List<Vector> unAla = alas.subList(0, 28);
+
+        long distanciasDistintas = unAla.stream().map(v -> Math.round(v.getX() * 100)).distinct().count();
+        long alturasDistintas = unAla.stream().map(v -> Math.round(v.getY() * 100)).distinct().count();
+        assertTrue(distanciasDistintas > 4, "el ala no se extiende a lo ancho");
+        assertTrue(alturasDistintas > 4, "el ala no se extiende a lo alto");
+
+        // Y sobre todo: varios puntos comparten fila, que es lo que no pasaba antes.
+        long puntosEnLaFilaDelHombro = unAla.stream()
+                .filter(v -> Math.abs(v.getZ() - unAla.get(0).getZ()) < 0.13D)
+                .count();
+        assertTrue(puntosEnLaFilaDelHombro > 1, "cada fila debe colgar varias plumas");
+    }
+
+    @Test
+    void lasPlumasCuelganDelBordeSuperior() {
+        List<Vector> unAla = CosmeticShapes.alas(0, 0, 28).subList(0, 28);
+        // Dentro de una fila, el primer punto es el hueso y el ultimo la punta de la pluma.
+        assertTrue(unAla.get(3).getY() < unAla.get(0).getY(), "las plumas deben caer, no subir");
+    }
+
+    // ── Corona ──────────────────────────────────────────────────
+
+    @Test
+    void laCoronaAlternaPicosAltosYBajos() {
+        List<Vector> corona = CosmeticShapes.corona(0, 8, 0.36D, 2.25D);
+        assertEquals(24, corona.size(), "tres puntos por pico");
+        // La punta de cada pico es el tercer punto de su grupo.
+        double primerPico = corona.get(2).getY();
+        double segundoPico = corona.get(5).getY();
+        assertTrue(primerPico > segundoPico, "sin alternancia no parece una corona");
+    }
+
+    @Test
+    void laCoronaSeMantieneSobreLaCabeza() {
+        for (Vector punto : CosmeticShapes.corona(0, 8, 0.36D, 2.25D)) {
+            assertTrue(punto.getY() > 2.0D, "una corona a la altura del pecho no es una corona");
+        }
+    }
+
+    // ── Anillo inclinado ────────────────────────────────────────
+
+    @Test
+    void elAnilloEstaInclinadoYGira() {
+        List<Vector> anillo = CosmeticShapes.anilloInclinado(0, 16, 1.2D, 1.1D, 0.4D);
+        long alturas = anillo.stream().map(v -> Math.round(v.getY() * 100)).distinct().count();
+        assertTrue(alturas > 1, "un anillo plano no es un anillo inclinado");
+        assertNotEquals(anillo.get(0).getX(), CosmeticShapes.anilloInclinado(20, 16, 1.2D, 1.1D, 0.4D)
+                .get(0).getX(), "el anillo no gira");
+    }
+
+    // ── Vortice ─────────────────────────────────────────────────
+
+    @Test
+    void elVorticeSeEstrechaAlSubir() {
+        List<Vector> brazo = CosmeticShapes.vortice(0, 1, 8, 1.2D, 1.9D);
+        double abajo = Math.hypot(brazo.get(0).getX(), brazo.get(0).getZ());
+        double arriba = Math.hypot(brazo.get(7).getX(), brazo.get(7).getZ());
+        assertTrue(arriba < abajo, "sin estrecharse es un cilindro, no un remolino");
+        assertTrue(brazo.get(7).getY() > brazo.get(0).getY(), "el remolino debe ascender");
+    }
+
+    @Test
+    void losBrazosDelVorticeArrancanSeparados() {
+        List<Vector> vortice = CosmeticShapes.vortice(0, 4, 6, 1.2D, 1.9D);
+        // El primer punto de cada brazo debe estar en un angulo distinto.
+        long angulos = List.of(vortice.get(0), vortice.get(6), vortice.get(12), vortice.get(18))
+                .stream().map(v -> Math.round(Math.atan2(v.getZ(), v.getX()) * 100)).distinct().count();
+        assertEquals(4, angulos, "los brazos superpuestos parecen uno solo");
+    }
+
     // ── Rotacion ────────────────────────────────────────────────
 
     @Test

@@ -47,6 +47,17 @@ public final class CosmeticService implements Listener {
     private static final Color DORADO = Color.fromRGB(255, 196, 0);
     private static final Color MORADO = Color.fromRGB(163, 53, 238);
     private static final Color BLANCO_CALIDO = Color.fromRGB(255, 245, 200);
+    private static final Color ABISAL = Color.fromRGB(0, 180, 220);
+    private static final Color CARMESI = Color.fromRGB(255, 40, 60);
+    private static final Color HIELO = Color.fromRGB(170, 235, 255);
+
+    /**
+     * Puntos que dibuja cada ala.
+     *
+     * Es multiplo de las plumas por fila, de modo que todas las filas salen completas y el borde
+     * inferior del ala no queda escalonado.
+     */
+    private static final int PUNTOS_ALA = 28;
 
     public CosmeticService(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -164,8 +175,45 @@ public final class CosmeticService implements Listener {
                 case "staff" -> world.spawnParticle(Particle.DUST, loc, 8, 0.4, 0.6, 0.4,
                         new Particle.DustOptions(Color.fromRGB(0, 200, 255), 1.2F));
                 // ── Cosmeticos con forma ──────────────────────────────
-                case "alas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, 9), DORADO, 1.0F);
-                case "alas_moradas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, 9), MORADO, 1.0F);
+                // PUNTOS_ALA reparte la membrana; con menos se veia un trazo y no un ala.
+                case "alas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), DORADO, 1.0F);
+                case "alas_moradas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), MORADO, 1.0F);
+                case "alas_abisales" -> {
+                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), ABISAL, 1.0F);
+                    world.spawnParticle(Particle.DRIPPING_WATER, loc, 3, 0.6, 0.5, 0.4, 0.0);
+                }
+                case "alas_infernales" -> {
+                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), CARMESI, 1.0F);
+                    world.spawnParticle(Particle.SMALL_FLAME, loc, 4, 0.6, 0.5, 0.4, 0.01);
+                }
+                case "alas_glaciares" -> {
+                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), HIELO, 1.0F);
+                    world.spawnParticle(Particle.SNOWFLAKE, loc, 3, 0.6, 0.5, 0.4, 0.01);
+                }
+                case "alas_solares" -> {
+                    // Dos capas: el nucleo blanco recorta la silueta contra el dorado exterior.
+                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), DORADO, 1.15F);
+                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA / 2), BLANCO_CALIDO, 0.6F);
+                }
+                case "corona_dorada" -> dibujar(p, CosmeticShapes.corona(fase, 8, 0.36D, 2.25D), DORADO, 0.75F);
+                case "corona_abisal" -> dibujar(p, CosmeticShapes.corona(fase, 8, 0.36D, 2.25D), ABISAL, 0.75F);
+                case "saturno" -> {
+                    dibujar(p, CosmeticShapes.anilloInclinado(fase, 26, 1.25D, 1.15D, 0.45D), DORADO, 0.8F);
+                    dibujar(p, CosmeticShapes.anilloInclinado(fase, 14, 0.95D, 1.15D, 0.34D), BLANCO_CALIDO, 0.55F);
+                }
+                case "voragine" -> {
+                    dibujar(p, CosmeticShapes.vortice(fase, 4, 7, 1.2D, 1.9D), ABISAL, 0.85F);
+                    world.spawnParticle(Particle.BUBBLE_POP, p.getLocation(), 4, 0.6, 0.1, 0.6, 0.0);
+                }
+                case "tempestad" -> {
+                    dibujar(p, CosmeticShapes.vortice(fase, 3, 6, 1.1D, 2.1D), BLANCO_CALIDO, 0.8F);
+                    world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 6, 0.5, 0.7, 0.5, 0.06);
+                }
+                case "constelacion" -> {
+                    // Anillo lento arriba y luciernagas debajo: se lee como un cielo propio.
+                    dibujar(p, CosmeticShapes.anilloInclinado(-fase, 18, 1.05D, 1.95D, 0.3D), BLANCO_CALIDO, 0.7F);
+                    dibujar(p, CosmeticShapes.orbita(fase, 5, 0.8D), DORADO, 0.6F);
+                }
                 case "halo" -> dibujar(p, CosmeticShapes.halo(0.45D, 2.35D, 14), DORADO, 0.9F);
                 case "halo_morado" -> dibujar(p, CosmeticShapes.halo(0.45D, 2.35D, 14), MORADO, 0.9F);
                 case "cola" -> dibujar(p, CosmeticShapes.cola(yaw(p), fase, 10), MORADO, 0.9F);
