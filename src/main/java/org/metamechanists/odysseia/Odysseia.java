@@ -213,6 +213,10 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BedrockRangeGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SlimefunSpawnerLimitListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.SunlightBurnListener(this), this);
+        this.legacyCombat = new org.metamechanists.odysseia.listeners.LegacyCombatListener(this);
+        Bukkit.getPluginManager().registerEvents(legacyCombat, this);
+        // Quien ya estaba dentro cuando se recarga el plugin no dispara PlayerJoinEvent.
+        legacyCombat.aplicarATodos();
         this.automationGuard = new org.metamechanists.odysseia.listeners.AutomationGuardListener(this);
         Bukkit.getPluginManager().registerEvents(automationGuard, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.AntiAltListener(this), this);
@@ -490,8 +494,14 @@ public final class Odysseia extends JavaPlugin {
         return changed;
     }
 
+    /** Combate 1.8: se guarda para poder retirar el modificador al apagar el plugin. */
+    private org.metamechanists.odysseia.listeners.LegacyCombatListener legacyCombat;
+
     @Override
     public void onDisable() {
+        if (legacyCombat != null) {
+            legacyCombat.retirarDeTodos();
+        }
         if (discordTranslationBridge != null) {
             discordTranslationBridge.unregisterDiscordSRV();
         }

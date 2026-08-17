@@ -3977,3 +3977,16 @@ quemar-al-sol:
   # Vacio = todos los mundos. Las islas y el hub no suelen necesitarlo.
   mundos:
     - world
+
+# ─────────────────────────────────────────────
+#  Combate clásico (PvP 1.8)
+# ─────────────────────────────────────────────
+# Cada click pega con el 100% del daño, sin esperar a que se recargue la barra.
+# Se consigue subiendo la velocidad de ataque con un modificador propio: es la única
+# palanca que tiene el juego para eso, no hay una opción de "desactivar el cooldown".
+combate-clasico:
+  activado: true
+  # El ataque en barrido reparte daño a quien pasaba cerca; en 1.8 no existía.
+  anular-barrido: true
+  # Vacío = todos los mundos.
+  mundos: []
