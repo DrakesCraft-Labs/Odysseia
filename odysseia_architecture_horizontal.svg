@@ -53,12 +53,12 @@
   <path d="M 570 230 L 620 230" stroke="#f43f5e" stroke-width="3" stroke-dasharray="6,6"/>
   <path d="M 860 230 L 910 230" stroke="#10b981" stroke-width="3" stroke-dasharray="6,6"/>
 
-  <!-- MODULE 1: CORE & STAFF HUB -->
+  <!-- MODULE 1: CORE &amp; STAFF HUB -->
   <g transform="translate(40, 100)">
     <rect width="240" height="320" rx="12" fill="#1e1b4b" stroke="#6366f1" stroke-width="2" filter="url(#glow)"/>
     <rect width="240" height="42" rx="12" fill="url(#coreGrad)"/>
     <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
-      1. ADMIN & STAFF HUB
+      1. ADMIN &amp; STAFF HUB
     </text>
 
     <!-- Cards Inside -->
@@ -67,7 +67,7 @@
     <text x="25" y="98" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">JackStar (Supreme) / Kika (Emerald)</text>
 
     <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
-    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#818cf8">👻 Vanish & Target Control</text>
+    <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#818cf8">👻 Vanish &amp; Target Control</text>
     <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/vani [on|off|toggle] [jugador]</text>
 
     <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
@@ -75,16 +75,16 @@
     <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/troll (8 subcomandos inofensivos)</text>
 
     <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#4338ca"/>
-    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#38bdf8">🛒 Tienda & Auto-Kits</text>
-    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Delivery Tebex & Kits Mensuales</text>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#38bdf8">🛒 Tienda &amp; Auto-Kits</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Delivery Tebex &amp; Kits Mensuales</text>
   </g>
 
-  <!-- MODULE 2: BOSSES & MYTHOLOGY -->
+  <!-- MODULE 2: BOSSES &amp; MYTHOLOGY -->
   <g transform="translate(330, 100)">
     <rect width="240" height="320" rx="12" fill="#450a0a" stroke="#ef4444" stroke-width="2" filter="url(#glow)"/>
     <rect width="240" height="42" rx="12" fill="url(#bossGrad)"/>
     <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
-      2. JEFES & RELIQUIAS
+      2. JEFES &amp; RELIQUIAS
     </text>
 
     <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
@@ -100,11 +100,11 @@
     <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Rugido, Ráfaga Fuego, Aliento Vacío</text>
 
     <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#991b1b"/>
-    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fbbf24">🎁 Drops & Loot Anti-Robo</text>
-    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Paper Item Lock setOwner & 5k XP</text>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fbbf24">🎁 Drops &amp; Loot Anti-Robo</text>
+    <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Paper Item Lock setOwner &amp; 5k XP</text>
   </g>
 
-  <!-- MODULE 3: HORROR & ENVIRONMENT -->
+  <!-- MODULE 3: HORROR &amp; ENVIRONMENT -->
   <g transform="translate(620, 100)">
     <rect width="240" height="320" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2" filter="url(#glow)"/>
     <rect width="240" height="42" rx="12" fill="url(#terrorGrad)"/>
@@ -118,23 +118,23 @@
 
     <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
     <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#a7f3d0">🌫️ Niebla Ultra Densa</text>
-    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/niebla <on|off|toggle> [jugador]</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">/niebla &lt;on|off|toggle&gt; [jugador]</text>
 
     <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
-    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#34d399">😱 Screamers & Sombra Ghost</text>
-    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Maldición Guardian & Ecos Cueva</text>
+    <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#34d399">😱 Screamers &amp; Sombra Ghost</text>
+    <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Maldición Guardian &amp; Ecos Cueva</text>
 
     <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#047857"/>
     <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#f87171">🩸 Luna de Sangre System</text>
     <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Eventos Ambientales y BloodMoon</text>
   </g>
 
-  <!-- MODULE 4: INTEGRATIONS & ECOSYSTEM -->
+  <!-- MODULE 4: INTEGRATIONS &amp; ECOSYSTEM -->
   <g transform="translate(910, 100)">
     <rect width="240" height="320" rx="12" fill="#78350f" stroke="#f59e0b" stroke-width="2" filter="url(#glow)"/>
     <rect width="240" height="42" rx="12" fill="url(#ecoGrad)"/>
     <text x="120" y="27" font-family="'Inter', sans-serif" font-weight="700" font-size="15" fill="#ffffff" text-anchor="middle">
-      4. INTEGRACIÓN & SERVIDOR
+      4. INTEGRACIÓN &amp; SERVIDOR
     </text>
 
     <rect x="15" y="58" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
@@ -143,14 +143,14 @@
 
     <rect x="15" y="123" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
     <text x="25" y="143" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#fef08a">💎 DrakesSlimeMarket</text>
-    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Dusts/Ingots OK & Heavy Blocked</text>
+    <text x="25" y="163" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Dusts/Ingots OK &amp; Heavy Blocked</text>
 
     <rect x="15" y="188" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
     <text x="25" y="208" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#facc15">⚡ DiosesDrakes Bridge</text>
     <text x="25" y="228" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Favor Divino asíncrono y Cache</text>
 
     <rect x="15" y="253" width="210" height="55" rx="8" fill="#0f172a" stroke="#b45309"/>
-    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#eab308">📊 LuckPerms & PAPI</text>
+    <text x="25" y="273" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#eab308">📊 LuckPerms &amp; PAPI</text>
     <text x="25" y="293" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8">Permisos finos y Expansiones</text>
   </g>
 
