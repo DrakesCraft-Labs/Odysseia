@@ -169,7 +169,11 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "3000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: poseidon}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: vipposeidon, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Poseidón entregada."}}
+      # Pase SFMaster incluido en el rango. Va aparte del rango porque dura horas y no el mes
+      # entero: si se colgase del grupo poseidon expiraria a los 30 dias junto con todo lo demas.
+      - {id: sfmaster, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 24h}}
+      - {id: sfmaster-guide, type: SFMASTER_GUIDE, requires-online: true, refund: NOT_REVOCABLE}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Poseidón entregada. &bIncluye 24 h de SFMaster."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Poseidón"}}
 
   titan_japeto:
@@ -259,7 +263,10 @@ products:
       - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "10000000"}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: titancaos}}
       - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: titancaos, amount: "1"}}
-      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Caos entregada."}}
+      # El pase del Titán dura mas que el de Poseidon: es el escalon de arriba y tiene que notarse.
+      - {id: sfmaster, type: SFMASTER_PASS, refund: AUTO_REVOKE, parameters: {group: sfmaster, duration: 72h}}
+      - {id: sfmaster-guide, type: SFMASTER_GUIDE, requires-online: true, refund: NOT_REVOCABLE}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aCompra Titán Caos entregada. &bIncluye 72 h de SFMaster."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Titán Caos"}}
 
   slimefun_research_all:
