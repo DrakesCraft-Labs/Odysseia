@@ -34,7 +34,7 @@ class ConfigDefaultsMergeTest {
         assertEquals("nethercolossus", config.getString("protectionstones.aliases.nether_501"));
         assertTrue(config.getConfigurationSection("sfmaster-policy") == null);
         assertTrue(config.getConfigurationSection("restart") == null);
-        assertTrue(config.getString("kits.oldschool.protection-alias", "").isBlank());
+        assertEquals("oldschool", config.getString("kits.oldschool.protection-alias", ""));
         for (String kit : config.getConfigurationSection("kits").getKeys(false)) {
             String protectionKey = config.getString("kits." + kit + ".protection-alias", "").trim();
             if (!protectionKey.isEmpty()) {

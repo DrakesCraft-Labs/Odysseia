@@ -875,6 +875,7 @@ protectionstones:
   # MATERIAL y cuatro pares de bloques comparten material, asi que entregaria el equivocado.
   aliases:
     starter: novato
+    oldschool: viphercules
     hercules: viphercules
     hestia: viphestia
     hermes: viphermes
@@ -2818,7 +2819,9 @@ kits:
   oldschool:
     cooldown: "30d"
     permission: "drakes.kit.oldschool"
-    money: 25000
+    protection-alias: oldschool
+    protection-amount: 1
+    money: 100000
     vanilla-items:
       - material: NETHERITE_HELMET
         amount: 1
