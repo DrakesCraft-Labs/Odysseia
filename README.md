@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="odysseia_banner.svg" alt="Odysseia" width="100%">
+<img src="https://raw.githubusercontent.com/DrakesCraft-Labs/Odysseia/main/banner.svg" alt="Odysseia" width="100%">
 
 # ✦ Odysseia Core Engine ✦
 
