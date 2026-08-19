@@ -57,6 +57,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher;
     private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
+    private org.metamechanists.odysseia.services.ServerChangelogService changelogService;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     @Getter
     private org.metamechanists.odysseia.modalities.ModalityService modalityService;
@@ -218,6 +219,11 @@ public final class Odysseia extends JavaPlugin {
         sfMasterWatcher.startGuideCleanup();
         this.maintenanceGuard = new org.metamechanists.odysseia.listeners.MaintenanceGuardListener(this);
         Bukkit.getPluginManager().registerEvents(maintenanceGuard, this);
+
+        // Servicio de auditoría y changelog automático a Discord
+        this.changelogService = new org.metamechanists.odysseia.services.ServerChangelogService(this);
+        this.changelogService.scheduleBootAudit();
+        registerDynamicCommand("serverchangelog", new org.metamechanists.odysseia.commands.ChangelogCommand(this, changelogService));
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.FastMachinesProtectionListener(this), this);
         org.metamechanists.odysseia.listeners.ProtectionBorderListener protectionBorder =
                 new org.metamechanists.odysseia.listeners.ProtectionBorderListener(this);
@@ -894,6 +900,10 @@ public final class Odysseia extends JavaPlugin {
 
     public org.metamechanists.odysseia.listeners.MaintenanceGuardListener getMaintenanceGuard() {
         return maintenanceGuard;
+    }
+
+    public org.metamechanists.odysseia.services.ServerChangelogService getChangelogService() {
+        return changelogService;
     }
 
     public void registerDynamicCommand(String name, org.bukkit.command.CommandExecutor executor) {

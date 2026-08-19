@@ -10,6 +10,8 @@ discord:
   # Canal de moderación: baneos, expulsiones reales y accesos bloqueados.
   # Nunca hace fallback al canal de actualizaciones.
   webhook-moderation-url: "REPLACE_ME_MODLOGS"
+  # Canal de changelog y parches automáticos.
+  webhook-changelog-url: "REPLACE_ME_CHANGELOG"
 
 # Integraciones opcionales. Odysseia sigue funcionando aunque el plugin externo no exista.
 integrations:
