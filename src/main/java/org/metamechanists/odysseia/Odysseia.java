@@ -186,6 +186,7 @@ public final class Odysseia extends JavaPlugin {
         getCommand("niebla").setTabCompleter(fogCmd);
 
         this.dragonMountService = new org.metamechanists.odysseia.dragon.DragonMountService(this);
+        new org.metamechanists.odysseia.listeners.RankWalkerAbilitiesListener(this);
         getCommand("mountdragon").setExecutor(dragonMountService);
         getCommand("mountdragon").setTabCompleter(dragonMountService);
         Bukkit.getPluginManager().registerEvents(dragonMountService, this);
