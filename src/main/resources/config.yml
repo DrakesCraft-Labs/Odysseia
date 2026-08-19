@@ -6,10 +6,10 @@
 discord:
   enabled: true
   # Canal de actualizaciones: solo estado operativo y eventos relevantes del servidor.
-  webhook-url: "REPLACE_ME"
+  webhook-url: "https://discord.com/api/webhooks/1539652444462780448/0NBmHXP0psvs5oz0JFdPpnRLLezsknoxxouYr42gbT_DBOEFH03Ee0pJzPM7cXK846wG"
   # Canal de moderación: baneos, expulsiones reales y accesos bloqueados.
   # Nunca hace fallback al canal de actualizaciones.
-  webhook-moderation-url: "REPLACE_ME"
+  webhook-moderation-url: "https://discord.com/api/webhooks/1539652272714289373/E6G-qLhXbBg6zai-DYvsmEsvPqzPfAafNv-DuSkwbD6ivo8HwI9PcW-SFnQUdafQR_VE"
 
 # Integraciones opcionales. Odysseia sigue funcionando aunque el plugin externo no exista.
 integrations:
