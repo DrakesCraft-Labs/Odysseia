@@ -26,6 +26,7 @@ import org.metamechanists.odysseia.purchase.PurchaseEngine;
 import org.metamechanists.odysseia.integrations.StarTelemetryPublisher;
 import org.metamechanists.odysseia.events.BloodMoonManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,7 +73,8 @@ public final class Odysseia extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Save default config
+        // Save and backup configuration files
+        backupConfigurationFiles();
         saveDefaultConfig();
         mergeDefaultConfig();
 
@@ -391,6 +393,33 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.utils.StoreManager.resetDiscordWarning();
         getLogger().info("[Reload] Runtime recargado: config.yml, purchases.yml, modalidades, schedulers y purchase engine.");
         return errors;
+    }
+
+    /** Crea una copia de respaldo con fecha y hora de los archivos de configuración para no perder ajustes. */
+    private void backupConfigurationFiles() {
+        try {
+            File dataFolder = getDataFolder();
+            if (!dataFolder.exists()) {
+                dataFolder.mkdirs();
+            }
+            File backupsDir = new File(dataFolder, "backups");
+            if (!backupsDir.exists()) {
+                backupsDir.mkdirs();
+            }
+
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss");
+            String timestamp = sdf.format(new java.util.Date());
+
+            for (String fileName : List.of("config.yml", "purchases.yml")) {
+                File target = new File(dataFolder, fileName);
+                if (target.exists() && target.length() > 0) {
+                    File backupFile = new File(backupsDir, fileName.replace(".yml", "") + "_backup_" + timestamp + ".yml");
+                    java.nio.file.Files.copy(target.toPath(), backupFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        } catch (Exception e) {
+            getLogger().warning("[Backup] No se pudo crear backup preventivo de configuración: " + e.getMessage());
+        }
     }
 
     /** Persists newly introduced defaults while keeping every configured production value. */
