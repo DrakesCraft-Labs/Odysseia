@@ -262,7 +262,7 @@ public final class ServerChangelogService {
                 + "{\"name\":\"👤 Autor / Publicado por\",\"value\":\"`" + Odysseia.escapeJson(author) + "`\",\"inline\":true},"
                 + "{\"name\":\"📅 Fecha\",\"value\":\"`" + Odysseia.escapeJson(dateStr) + "`\",\"inline\":true}"
                 + "],"
-                + "\"footer\":{\"text\":\"DrakesCraft Network · play.drakescraft.net\"},"
+                + "\"footer\":{\"text\":\"DrakesCraft Network · play.drakescraft.cl\"},"
                 + "\"thumbnail\":{\"url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\"}"
                 + "}]}";
 
