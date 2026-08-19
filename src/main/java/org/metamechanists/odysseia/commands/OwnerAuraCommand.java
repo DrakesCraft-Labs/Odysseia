@@ -1,9 +1,6 @@
 package org.metamechanists.odysseia.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,18 +9,15 @@ import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.metamechanists.odysseia.Odysseia;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-/** Eliminación administrativa absoluta dentro de un radio controlado. */
+/** Eliminación administrativa absoluta dentro de un radio controlado con efectos divinos. */
 public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
 
-    private static final List<Integer> ALLOWED_RADII = List.of(2, 5, 10, 100);
+    private static final List<Integer> ALLOWED_RADII = List.of(2, 5, 10, 25, 50, 100);
     private final Odysseia plugin;
 
     public OwnerAuraCommand(Odysseia plugin) {
@@ -38,32 +32,105 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         }
         Integer radius = args.length == 1 ? parseRadius(args[0]) : null;
         if (radius == null) {
-            player.sendMessage(ChatColor.RED + "Uso: /auradueño <2|5|10|100>");
+            player.sendMessage(ChatColor.RED + "Uso: /auradueño <2|5|10|25|50|100>");
             return true;
         }
 
         Location center = player.getLocation().clone();
+        
+        // Efectos iniciales masivos de impacto divino
+        playGodlikeAuraEffects(player, center, radius);
+
         int removed = purge(center, radius, player.getUniqueId());
         Bukkit.getScheduler().runTask(plugin, () -> purge(center, radius, player.getUniqueId()));
 
-        player.playSound(center, Sound.ENTITY_WITHER_DEATH, 0.8F, 0.55F);
-        player.sendMessage(ChatColor.DARK_RED + "Aura absoluta: " + ChatColor.RED + removed
-                + ChatColor.DARK_RED + " entidad(es) eliminadas en " + radius + " bloques.");
+        player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "✦ AURA DEL CREADOR: " 
+                + ChatColor.RED + removed + ChatColor.DARK_RED + " entidad(es) desintegradas en radio " + radius + "m.");
         plugin.getLogger().warning("[AuraDueño] " + player.getName() + " eliminó " + removed
                 + " entidad(es) en radio " + radius + " desde " + formatLocation(center) + '.');
         return true;
     }
 
+    /** Despliega partículas cinematográficas y sonido de colapso espacial. */
+    private void playGodlikeAuraEffects(Player player, Location center, int radius) {
+        World world = center.getWorld();
+        if (world == null) return;
+
+        // Sonidos orquestales de juicio final
+        world.playSound(center, Sound.ITEM_TRIDENT_THUNDER, 2.0F, 0.6F);
+        world.playSound(center, Sound.ENTITY_WARDEN_SONIC_BOOM, 2.0F, 0.7F);
+        world.playSound(center, Sound.BLOCK_BEACON_DEACTIVATE, 2.0F, 0.5F);
+        world.playSound(center, Sound.ENTITY_WITHER_DEATH, 1.2F, 0.5F);
+
+        // Flash cegador en el centro
+        world.spawnParticle(Particle.FLASH, center.clone().add(0, 1.5, 0), 4, 0.2, 0.2, 0.2, 0);
+        world.spawnParticle(Particle.SONIC_BOOM, center.clone().add(0, 1.2, 0), 2, 0, 0, 0, 0);
+
+        // Pilar de luz cósmica vertical
+        for (double y = center.getY(); y < center.getY() + 40.0; y += 1.5) {
+            Location beamLoc = new Location(world, center.getX(), y, center.getZ());
+            world.spawnParticle(Particle.END_ROD, beamLoc, 4, 0.2, 0.5, 0.2, 0.02);
+            world.spawnParticle(Particle.SOUL_FIRE_FLAME, beamLoc, 3, 0.3, 0.5, 0.3, 0.01);
+        }
+
+        // Onda expansiva animada en 3D (Cúpula de choque divina)
+        int effectiveRadius = Math.min(radius, 50);
+        new BukkitRunnable() {
+            int step = 1;
+
+            @Override
+            public void run() {
+                if (step > effectiveRadius) {
+                    cancel();
+                    return;
+                }
+
+                double currentR = step;
+                int points = Math.min(120, (int) (currentR * 8));
+
+                for (int i = 0; i < points; i++) {
+                    double angle = 2 * Math.PI * i / points;
+                    double x = center.getX() + currentR * Math.cos(angle);
+                    double z = center.getZ() + currentR * Math.sin(angle);
+
+                    // Anillo en el suelo
+                    Location ringLoc = new Location(world, x, center.getY() + 0.3, z);
+                    world.spawnParticle(Particle.SOUL_FIRE_FLAME, ringLoc, 1, 0.05, 0.05, 0.05, 0.01);
+                    world.spawnParticle(Particle.REVERSE_PORTAL, ringLoc, 1, 0.05, 0.05, 0.05, 0.05);
+
+                    // Puntos en cúpula elevada
+                    if (step % 2 == 0) {
+                        double domeY = center.getY() + Math.sqrt(Math.max(0, (effectiveRadius * effectiveRadius) - (currentR * currentR))) * 0.5;
+                        Location domeLoc = new Location(world, x, domeY, z);
+                        world.spawnParticle(Particle.DRAGON_BREATH, domeLoc, 1, 0.1, 0.1, 0.1, 0.01);
+                    }
+                }
+
+                step += Math.max(1, effectiveRadius / 10);
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+    }
+
     /** Fuerza muerte de seres vivos y elimina directamente el resto. */
     private int purge(Location center, int radius, UUID executorId) {
+        World world = center.getWorld();
+        if (world == null) return 0;
+
         Set<UUID> processed = new HashSet<>();
         int removed = 0;
-        for (Entity nearby : new ArrayList<>(center.getWorld().getNearbyEntities(
+        for (Entity nearby : new ArrayList<>(world.getNearbyEntities(
                 center, radius, radius, radius,
                 entity -> isInsideSphere(center, entity.getLocation(), radius)))) {
             Entity target = nearby instanceof ComplexEntityPart part ? part.getParent() : nearby;
             if (target.getUniqueId().equals(executorId) || !processed.add(target.getUniqueId())) continue;
             try {
+                Location tLoc = target.getLocation();
+
+                // Partículas de desintegración en la posición de cada entidad purgada
+                world.spawnParticle(Particle.LARGE_SMOKE, tLoc.clone().add(0, 0.8, 0), 12, 0.3, 0.5, 0.3, 0.05);
+                world.spawnParticle(Particle.SOUL, tLoc.clone().add(0, 1.0, 0), 8, 0.4, 0.4, 0.4, 0.08);
+                world.spawnParticle(Particle.EXPLOSION, tLoc.clone().add(0, 0.5, 0), 1, 0, 0, 0, 0);
+
                 target.setInvulnerable(false);
                 if (target instanceof LivingEntity living) {
                     living.setHealth(0.0);
