@@ -195,7 +195,10 @@ public final class Odysseia extends JavaPlugin {
                 Bukkit.getPluginManager().registerEvents(
                         new org.metamechanists.odysseia.laboratorio.SandboxChunkLimitListener(
                                 this, mundosLaboratorio), this);
-                getLogger().info("[Laboratorio] Aislamiento de inventario activo en: " + mundosLaboratorio);
+                Bukkit.getPluginManager().registerEvents(
+                        new org.metamechanists.odysseia.laboratorio.SandboxItemSentinel(
+                                this, mundosLaboratorio), this);
+                getLogger().info("[Laboratorio] Aislamiento de inventario y Centinela de items activos en: " + mundosLaboratorio);
             } catch (java.sql.SQLException error) {
                 getLogger().log(Level.SEVERE, "[Laboratorio] No se pudo abrir la consigna de inventarios; "
                         + "el laboratorio NO queda aislado y no se debe abrir a los jugadores", error);

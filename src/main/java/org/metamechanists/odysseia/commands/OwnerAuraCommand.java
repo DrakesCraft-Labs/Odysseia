@@ -63,7 +63,7 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         world.playSound(center, Sound.ENTITY_WITHER_DEATH, 1.2F, 0.5F);
 
         // Flash cegador en el centro
-        world.spawnParticle(Particle.FLASH, center.clone().add(0, 1.5, 0), 4, 0.2, 0.2, 0.2, 0);
+        org.metamechanists.odysseia.util.ParticleCompat.spawnFlash(world, center.clone().add(0, 1.5, 0), 4);
         world.spawnParticle(Particle.SONIC_BOOM, center.clone().add(0, 1.2, 0), 2, 0, 0, 0, 0);
 
         // Pilar de luz cósmica vertical
@@ -102,7 +102,7 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
                     if (step % 2 == 0) {
                         double domeY = center.getY() + Math.sqrt(Math.max(0, (effectiveRadius * effectiveRadius) - (currentR * currentR))) * 0.5;
                         Location domeLoc = new Location(world, x, domeY, z);
-                        world.spawnParticle(Particle.DRAGON_BREATH, domeLoc, 1, 0.1, 0.1, 0.1, 0.01);
+                        org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(world, domeLoc, 1, 0.1, 0.1, 0.1, 0.01, 1.0F);
                     }
                 }
 
