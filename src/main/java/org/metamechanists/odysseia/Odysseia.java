@@ -63,6 +63,7 @@ public final class Odysseia extends JavaPlugin {
     @Getter
     private org.metamechanists.odysseia.modalities.ModalityService modalityService;
     private org.metamechanists.odysseia.listeners.ModalityStorageGuardListener modalityStorageGuard;
+    private org.metamechanists.odysseia.laboratorio.SandboxStashRepository sandboxStash;
     @Getter
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
@@ -173,6 +174,32 @@ public final class Odysseia extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(modalityStorageGuard, this);
         } catch (java.sql.SQLException error) {
             getLogger().log(Level.SEVERE, "[Bovedas] No se pudo iniciar el almacen de bovedas por modalidad", error);
+        }
+
+        // Frontera del laboratorio. Si esto no arranca, el mundo creativo se queda sin aislar el
+        // inventario, asi que en ese caso NO se registra nada: mas vale un laboratorio que no
+        // funciona que uno por el que se puede sacar equipo invocado con /sf cheat.
+        java.util.Set<String> mundosLaboratorio = new java.util.HashSet<>();
+        for (String mundo : getConfig().getStringList("modalidades.modos.laboratorio.mundos")) {
+            mundosLaboratorio.add(mundo.toLowerCase(java.util.Locale.ROOT));
+        }
+        if (!mundosLaboratorio.isEmpty()) {
+            try {
+                this.sandboxStash = new org.metamechanists.odysseia.laboratorio.SandboxStashRepository(
+                        new java.io.File(getDataFolder(), "laboratorio.db"));
+                org.metamechanists.odysseia.laboratorio.SandboxIsolationListener aislamiento =
+                        new org.metamechanists.odysseia.laboratorio.SandboxIsolationListener(
+                                this, sandboxStash, mundosLaboratorio);
+                Bukkit.getPluginManager().registerEvents(aislamiento, this);
+                aislamiento.reconciliarAlArrancar();
+                Bukkit.getPluginManager().registerEvents(
+                        new org.metamechanists.odysseia.laboratorio.SandboxChunkLimitListener(
+                                this, mundosLaboratorio), this);
+                getLogger().info("[Laboratorio] Aislamiento de inventario activo en: " + mundosLaboratorio);
+            } catch (java.sql.SQLException error) {
+                getLogger().log(Level.SEVERE, "[Laboratorio] No se pudo abrir la consigna de inventarios; "
+                        + "el laboratorio NO queda aislado y no se debe abrir a los jugadores", error);
+            }
         }
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
@@ -569,6 +596,13 @@ public final class Odysseia extends JavaPlugin {
 
         // Guarda las bovedas que sigan abiertas antes de cerrar la base.
         if (modalityVaults != null) modalityVaults.close();
+        if (sandboxStash != null) {
+            try {
+                sandboxStash.close();
+            } catch (java.sql.SQLException error) {
+                getLogger().log(Level.WARNING, "[Laboratorio] No se pudo cerrar la consigna", error);
+            }
+        }
 
         if (bloodMoonManager != null) {
             bloodMoonManager.shutdown();

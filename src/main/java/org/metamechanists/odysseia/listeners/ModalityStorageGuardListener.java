@@ -38,6 +38,18 @@ public final class ModalityStorageGuardListener implements Listener {
     private final Set<String> vaultCommands = new HashSet<>();
     /** Modalidades cuyo inventario aislado tambien exige bloquear almacenes globales. */
     private final Set<String> isolatedModalities = new HashSet<>();
+    /**
+     * Modalidades que deniegan por defecto: solo corre lo que este en su lista blanca.
+     *
+     * El servidor declara 373 comandos con 295 alias entre ellos, y cada plugin nuevo añade los
+     * suyos. Mantener una lista negra ahi es perder por cansancio: basta que se escape un alias
+     * --/ah tiene cuatro, /balance seis-- para abrir una via de fuga. En el laboratorio, donde
+     * cualquiera puede invocar objetos con /sf cheat, se invierte la regla: se prohibe todo y se
+     * permite lo justo. Un plugin instalado mañana queda bloqueado ahi sin tocar nada.
+     */
+    private final Set<String> whitelistModalities = new HashSet<>();
+    /** Lo unico que se deja pasar en cada modalidad de lista blanca. */
+    private final Map<String, List<List<String>>> whitelistPatterns = new HashMap<>();
     /** Patrones bloqueados ya tokenizados; cada uno se compara como prefijo del comando escrito. */
     private final List<List<String>> blockedPatterns = new ArrayList<>();
     /** Restricciones de jugabilidad por modalidad, independientes del aislamiento de items. */
@@ -56,12 +68,26 @@ public final class ModalityStorageGuardListener implements Listener {
     public void reload() {
         vaultCommands.clear();
         isolatedModalities.clear();
+        whitelistModalities.clear();
+        whitelistPatterns.clear();
         blockedPatterns.clear();
         gameplayPatterns.clear();
         allowedStoragePatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
         isolatedModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-aisladas")));
+        whitelistModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-lista-blanca")));
+        var whitelist = plugin.getConfig().getConfigurationSection("modalidades.guard.comandos-lista-blanca");
+        if (whitelist != null) {
+            for (String modality : whitelist.getKeys(false)) {
+                List<List<String>> patterns = new ArrayList<>();
+                for (String value : lower(whitelist.getStringList(modality))) {
+                    List<String> pattern = tokens(value);
+                    if (!pattern.isEmpty()) patterns.add(pattern);
+                }
+                whitelistPatterns.put(modality.toLowerCase(Locale.ROOT), patterns);
+            }
+        }
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) {
             List<String> pattern = tokens(value);
             if (!pattern.isEmpty()) blockedPatterns.add(pattern);
@@ -163,6 +189,22 @@ public final class ModalityStorageGuardListener implements Listener {
         if (written.isEmpty()) return false;
 
         String modalityId = modalities.resolve(player).id().toLowerCase(Locale.ROOT);
+
+        // Denegar por defecto. Va antes que el resto de comprobaciones a proposito: si la
+        // modalidad es de lista blanca, nada de lo que venga despues puede reabrir un comando.
+        // El bypass de staff sigue valiendo, para poder administrar dentro del laboratorio.
+        if (whitelistModalities.contains(modalityId) && !player.hasPermission(GAMEPLAY_BYPASS)) {
+            if (!matches(whitelistPatterns.getOrDefault(modalityId, List.of()), written)) {
+                String message = plugin.getConfig().getString(
+                        "modalidades.guard.mensaje-lista-blanca",
+                        "&6DrakesCraft &8· &7En el laboratorio solo funcionan &e/sf&7, &e/modalidades&7, "
+                                + "&e/spawn&7 y &e/tpa&7. Nada de aqui sale a las demas modalidades.");
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                return true;
+            }
+            return false;
+        }
+
         List<List<String>> gameplay = gameplayPatterns.getOrDefault(modalityId, List.of());
         if (!player.hasPermission(GAMEPLAY_BYPASS) && matches(gameplay, written)) {
             String message = plugin.getConfig().getString(

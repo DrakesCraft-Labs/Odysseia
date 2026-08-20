@@ -3870,6 +3870,19 @@ modalidades:
       comando: oneblock
       mundos:
         - oneblock_world
+    laboratorio:
+      nombre: "&eLaboratorio"
+      descripcion: "Creativo para probar maquinas. Se borra cada lunes. Nada sale de aqui."
+      icono: CRAFTING_TABLE
+      comando: laboratorio
+      mundos:
+        - laboratorio
+  # Ajustes propios del laboratorio.
+  laboratorio:
+    # Tope de bloques de Slimefun por chunk, solo dentro del laboratorio. El ticker de Slimefun
+    # es global: un chunk saturado aqui le cuesta TPS a todo el servidor. Con creativo y
+    # /sf cheat no hay coste que frene a nadie, asi que el freno se pone explicito.
+    max-slimefun-por-chunk: 120
   # Comando que /survival despacha desde consola para llevar al jugador a la modalidad base.
   comando-spawn: spawn
   # Bovedas personales, una coleccion independiente por modalidad.
@@ -3884,6 +3897,52 @@ modalidades:
       - skyblock
       - oneblock
       - clasico
+      - laboratorio
+    # El laboratorio deniega por defecto: solo corre lo que este en comandos-lista-blanca.
+    # Es la unica forma sostenible de aislarlo. Con 373 comandos declarados y 295 alias entre
+    # ellos, una lista negra se queda corta en cuanto se instala un plugin: bastaria un alias
+    # olvidado --/ah tiene cuatro, /balance seis-- para sacar al mercado real un objeto creado
+    # con /sf cheat. Prohibiendo todo por defecto, un plugin nuevo nace bloqueado aqui.
+    modalidades-lista-blanca:
+      - laboratorio
+    comandos-lista-blanca:
+      laboratorio:
+        # Lo que da sentido al mundo: Slimefun entero, cheat incluido.
+        - sf
+        - slimefun
+        # Salir. Sin esto un jugador se queda encerrado.
+        - modalidad
+        - modalidades
+        - spawn
+        - laboratorio
+        - survival
+        - clasico
+        - skyblock
+        - oneblock
+        # Convivencia basica y teletransporte entre jugadores del propio laboratorio.
+        - tpa
+        - tpaccept
+        - tpdeny
+        - tpacancel
+        - msg
+        - r
+        - reply
+        - tell
+        - w
+        - ignore
+        # Ayuda y reglas.
+        - help
+        - ayuda
+        - reglas
+        - rules
+        - discord
+        - web
+        # Utilidad inofensiva.
+        - ping
+        - list
+        - lista
+        - who
+    mensaje-lista-blanca: "&6DrakesCraft &8· &7En el &eLaboratorio&7 solo funcionan &e/sf&7, &e/modalidad&7, &e/spawn&7 y &e/tpa&7.&r\n&7Nada de lo que hagas aqui sale a las demas modalidades: ni objetos, ni dinero, ni rangos."
     # Clásico conserva economía, ProtectionStones y hogares, pero evita atajos que conviertan
     # la modalidad vanilla en otra entrada al survival tecnológico.
     comandos-restringidos:
