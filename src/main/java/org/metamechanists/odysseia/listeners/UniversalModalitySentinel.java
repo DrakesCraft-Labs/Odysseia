@@ -31,21 +31,23 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 /**
- * Centinela Universal de Aislamiento de Ítems entre Modalidades de DrakesCraft.
+ * Centinela Universal Anti-Fugas de Ítems entre TODAS las Modalidades de DrakesCraft.
  * 
- * Reglas de Protección:
- * 1. [LABORATORIO]: Ningún ítem originario del Laboratorio Creativo puede cruzar a otra modalidad.
- *    Se destruye inmediatamente, alerta al staff y expulsa al jugador preventivamente.
- * 2. [CLÁSICO]: Ningún ítem de Slimefun (máquinas, componentes, mochilas, reactores, armas SF)
- *    puede existir en los mundos de Clásico (Vanilla). Se purga automáticamente.
- * 3. [INSPECCIÓN PROFUNDA]: Escanea contenedores como Shulker Boxes recursivamente para evitar
- *    que jugadores intenten contrabandear ítems prohibidos dentro de cajas.
+ * Matriz de Aislamiento Completa:
+ * 1. [LABORATORIO]: Ningún ítem originario del Laboratorio Creativo puede ingresar a ninguna otra modalidad.
+ *    (Purga instantánea + Alerta Staff + Expulsión preventiva).
+ * 2. [CLÁSICO VANILLA]: Ningún ítem con origen Slimefun, Survival, SkyBlock, OneBlock o Laboratorio puede
+ *    ingresar a Clásico. Clásico se mantiene 100% puro.
+ * 3. [SKYBLOCK / ONEBLOCK]: Los ítems generados en islas y fases quedan aislados en su propia modalidad y
+ *    no cruzan al Survival ni a Clásico.
+ * 4. [INSPECCIÓN PROFUNDA]: Escaneo recursivo continuo en Shulker Boxes y contenedores portátiles para evitar
+ *    contrabando encubierto.
  */
 public final class UniversalModalitySentinel implements Listener {
 
     private final Odysseia plugin;
     private final Set<String> sandboxWorlds;
-    private final NamespacedKey keySandbox;
+    private final NamespacedKey keyOriginModality;
     private final NamespacedKey keyCreator;
     private final NamespacedKey keyTimestamp;
     private final NamespacedKey keySlimefun;
@@ -53,25 +55,24 @@ public final class UniversalModalitySentinel implements Listener {
     public UniversalModalitySentinel(Odysseia plugin, Set<String> sandboxWorlds) {
         this.plugin = plugin;
         this.sandboxWorlds = sandboxWorlds;
-        this.keySandbox = new NamespacedKey(plugin, "sandbox_item");
-        this.keyCreator = new NamespacedKey(plugin, "sandbox_creator");
-        this.keyTimestamp = new NamespacedKey(plugin, "sandbox_time");
+        this.keyOriginModality = new NamespacedKey(plugin, "origin_modality");
+        this.keyCreator = new NamespacedKey(plugin, "origin_creator");
+        this.keyTimestamp = new NamespacedKey(plugin, "origin_time");
         this.keySlimefun = new NamespacedKey("slimefun", "slimefun_item");
     }
 
-    private boolean isSandbox(Location location) {
-        return location != null && location.getWorld() != null
-                && sandboxWorlds.contains(location.getWorld().getName().toLowerCase(Locale.ROOT));
-    }
-
-    /** Marca un ítem con el sello del Laboratorio Creativo. */
-    public void tagSandboxItem(ItemStack item, UUID creator) {
+    /** Marca un ítem con el sello indeleble de su modalidad de origen. */
+    public void tagItemWithModality(ItemStack item, String modalityId, UUID creator) {
         if (item == null || item.getType().isAir()) return;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        pdc.set(keySandbox, PersistentDataType.BYTE, (byte) 1);
+        // No sobreescribir si ya tiene origen del laboratorio (máxima prioridad de aislamiento)
+        String currentOrigin = pdc.get(keyOriginModality, PersistentDataType.STRING);
+        if ("laboratorio".equalsIgnoreCase(currentOrigin)) return;
+
+        pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
         if (creator != null) {
             pdc.set(keyCreator, PersistentDataType.STRING, creator.toString());
         }
@@ -79,16 +80,27 @@ public final class UniversalModalitySentinel implements Listener {
         item.setItemMeta(meta);
     }
 
-    /** Comprueba si un ítem fue creado o manipulado en el Laboratorio Creativo. */
-    public boolean isSandboxItem(ItemStack item) {
-        if (item == null || item.getType().isAir()) return false;
+    /** Obtiene la modalidad de origen marcada en el ítem. */
+    public String getOriginModality(ItemStack item) {
+        if (item == null || item.getType().isAir()) return null;
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return false;
+        if (meta == null) return null;
 
-        return meta.getPersistentDataContainer().has(keySandbox, PersistentDataType.BYTE);
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        String origin = pdc.get(keyOriginModality, PersistentDataType.STRING);
+        if (origin != null) return origin;
+
+        // Comprobación de compatibilidad con versión anterior de laboratorio
+        NamespacedKey legacyKey = new NamespacedKey(plugin, "sandbox_item");
+        if (pdc.has(legacyKey, PersistentDataType.BYTE)) return "laboratorio";
+
+        // Comprobación intrínseca de Slimefun
+        if (pdc.has(keySlimefun, PersistentDataType.STRING)) return "survival";
+
+        return null;
     }
 
-    /** Comprueba con total certeza si un ítem pertenece a Slimefun o sus expansiones. */
+    /** Comprueba con total certeza si un ítem es de Slimefun. */
     public boolean isSlimefunItem(ItemStack item) {
         if (item == null || item.getType().isAir()) return false;
         ItemMeta meta = item.getItemMeta();
@@ -97,56 +109,75 @@ public final class UniversalModalitySentinel implements Listener {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         if (pdc.has(keySlimefun, PersistentDataType.STRING)) return true;
 
-        // Inspección de respaldo por Slimefun Registry si está activo en runtime
         try {
             Class<?> sfItemClass = Class.forName("io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem");
             var getByItemMethod = sfItemClass.getMethod("getByItem", ItemStack.class);
             Object sfItem = getByItemMethod.invoke(null, item);
             if (sfItem != null) return true;
         } catch (Throwable ignored) {
-            // Slimefun no presente o clase no cargada
         }
 
         return false;
     }
 
     /**
-     * Valida y sanea un ítem según la modalidad donde se encuentra el jugador.
-     * Retorna true si el ítem era ilegal y fue destruido/purificado.
+     * Evalúa si un ítem es legal en la modalidad destino.
+     * Retorna true si el ítem es ilegal y debe ser destruido.
      */
-    public boolean sanitizeItem(ItemStack item, String modalityId, Player player) {
+    public boolean isItemIllegalInModality(ItemStack item, String targetModality) {
         if (item == null || item.getType().isAir()) return false;
 
-        // 1. Detección de Ítem de Laboratorio fuera de Laboratorio
-        if (!"laboratorio".equalsIgnoreCase(modalityId) && isSandboxItem(item)) {
+        String origin = getOriginModality(item);
+
+        // Regla 1: Laboratorio NUNCA cruza a ninguna otra modalidad
+        if ("laboratorio".equalsIgnoreCase(origin) && !"laboratorio".equalsIgnoreCase(targetModality)) {
+            return true;
+        }
+
+        // Regla 2: Clásico NO acepta Slimefun ni ítems de Laboratorio/Skyblock/Oneblock
+        if ("clasico".equalsIgnoreCase(targetModality)) {
+            if (isSlimefunItem(item)) return true;
+            if ("skyblock".equalsIgnoreCase(origin) || "oneblock".equalsIgnoreCase(origin) || "laboratorio".equalsIgnoreCase(origin)) {
+                return true;
+            }
+        }
+
+        // Regla 3: SkyBlock y OneBlock son economías aisladas
+        if ("skyblock".equalsIgnoreCase(targetModality) && "oneblock".equalsIgnoreCase(origin)) {
+            return true;
+        }
+        if ("oneblock".equalsIgnoreCase(targetModality) && "skyblock".equalsIgnoreCase(origin)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Sanea el ítem y contenedores (Shulker Boxes).
+     * Retorna true si se purificó/destruyó algún elemento ilegal.
+     */
+    public boolean sanitizeItem(ItemStack item, String targetModality, Player player) {
+        if (item == null || item.getType().isAir()) return false;
+
+        if (isItemIllegalInModality(item, targetModality)) {
             item.setAmount(0);
             return true;
         }
 
-        // 2. Detección de Ítem de Slimefun en Clásico Vanilla
-        if ("clasico".equalsIgnoreCase(modalityId) && isSlimefunItem(item)) {
-            item.setAmount(0);
-            return true;
-        }
-
-        // 3. Inspección profunda de Shulker Boxes (Anti-Contrabando en contenedores)
+        // Inspección profunda recursiva de Shulker Boxes
         if (item.getItemMeta() instanceof BlockStateMeta bsm && bsm.getBlockState() instanceof ShulkerBox shulker) {
-            boolean shulkerModified = false;
-            ItemStack[] shulkerContents = shulker.getInventory().getContents();
-            for (int i = 0; i < shulkerContents.length; i++) {
-                ItemStack inner = shulkerContents[i];
-                if (inner != null && !inner.getType().isAir()) {
-                    if (!"laboratorio".equalsIgnoreCase(modalityId) && isSandboxItem(inner)) {
-                        shulkerContents[i] = null;
-                        shulkerModified = true;
-                    } else if ("clasico".equalsIgnoreCase(modalityId) && isSlimefunItem(inner)) {
-                        shulkerContents[i] = null;
-                        shulkerModified = true;
-                    }
+            boolean modified = false;
+            ItemStack[] contents = shulker.getInventory().getContents();
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack inner = contents[i];
+                if (inner != null && !inner.getType().isAir() && isItemIllegalInModality(inner, targetModality)) {
+                    contents[i] = null;
+                    modified = true;
                 }
             }
-            if (shulkerModified) {
-                shulker.getInventory().setContents(shulkerContents);
+            if (modified) {
+                shulker.getInventory().setContents(contents);
                 bsm.setBlockState(shulker);
                 item.setItemMeta(bsm);
                 return true;
@@ -157,67 +188,72 @@ public final class UniversalModalitySentinel implements Listener {
     }
 
     // =========================================================================
-    // FASE 1: MARCADO ACTIVO DENTRO DEL LABORATORIO
+    // FASE 1: MARCADO ACTIVO SEGÚN LA MODALIDAD ACTUAL DEL JUGADOR
     // =========================================================================
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInventoryClickInSandbox(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!isSandbox(player.getLocation())) return;
+        Modality modality = plugin.getModalityService().resolve(player);
 
-        if (event.getCurrentItem() != null) tagSandboxItem(event.getCurrentItem(), player.getUniqueId());
-        if (event.getCursor() != null) tagSandboxItem(event.getCursor(), player.getUniqueId());
+        if (event.getCurrentItem() != null) tagItemWithModality(event.getCurrentItem(), modality.id(), player.getUniqueId());
+        if (event.getCursor() != null) tagItemWithModality(event.getCursor(), modality.id(), player.getUniqueId());
+
+        boolean curPurged = sanitizeItem(event.getCurrentItem(), modality.id(), player);
+        boolean curCursorPurged = sanitizeItem(event.getCursor(), modality.id(), player);
+        if (curPurged || curCursorPurged) {
+            event.setCancelled(true);
+            inspectAndSanitize(player);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPickupInSandbox(EntityPickupItemEvent event) {
+    public void onPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        if (!isSandbox(player.getLocation())) return;
+        Modality modality = plugin.getModalityService().resolve(player);
 
-        tagSandboxItem(event.getItem().getItemStack(), player.getUniqueId());
+        tagItemWithModality(event.getItem().getItemStack(), modality.id(), player.getUniqueId());
+        if (sanitizeItem(event.getItem().getItemStack(), modality.id(), player)) {
+            event.getItem().remove();
+            event.setCancelled(true);
+            inspectAndSanitize(player);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onDropInSandbox(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
-        if (!isSandbox(player.getLocation())) return;
-
-        tagSandboxItem(event.getItemDrop().getItemStack(), player.getUniqueId());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onCraftInSandbox(CraftItemEvent event) {
+    public void onCraft(CraftItemEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!isSandbox(player.getLocation())) return;
+        Modality modality = plugin.getModalityService().resolve(player);
 
-        if (event.getCurrentItem() != null) tagSandboxItem(event.getCurrentItem(), player.getUniqueId());
+        if (event.getCurrentItem() != null) tagItemWithModality(event.getCurrentItem(), modality.id(), player.getUniqueId());
     }
 
     // =========================================================================
-    // FASE 2: INSPECCIÓN, PURGA Y AUDITORÍA UNIVERSAL
+    // FASE 2: INSPECCIÓN, PURGA Y REACCIÓN
     // =========================================================================
 
     public void inspectAndSanitize(Player player) {
         Modality modality = plugin.getModalityService().resolve(player);
-        String modalityId = modality.id();
+        String targetModality = modality.id();
         String worldName = player.getWorld().getName();
 
-        boolean sandboxViolacion = false;
-        boolean slimefunEnClasico = false;
+        boolean laboratorioViolacion = false;
+        boolean generalViolacion = false;
+        String detalleViolacion = "";
 
         // Escanear inventario principal
         ItemStack[] contents = player.getInventory().getContents();
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (item != null && !item.getType().isAir()) {
-                if (!"laboratorio".equalsIgnoreCase(modalityId) && isSandboxItem(item)) {
-                    sandboxViolacion = true;
-                    player.getInventory().setItem(i, null);
-                } else if ("clasico".equalsIgnoreCase(modalityId) && isSlimefunItem(item)) {
-                    slimefunEnClasico = true;
+                String origin = getOriginModality(item);
+                if (isItemIllegalInModality(item, targetModality)) {
+                    if ("laboratorio".equalsIgnoreCase(origin)) laboratorioViolacion = true;
+                    generalViolacion = true;
+                    detalleViolacion = item.getType().name() + " (Origen: " + (origin != null ? origin : "Desconocido") + ")";
                     player.getInventory().setItem(i, null);
                 } else {
-                    sanitizeItem(item, modalityId, player);
+                    sanitizeItem(item, targetModality, player);
                 }
             }
         }
@@ -227,11 +263,11 @@ public final class UniversalModalitySentinel implements Listener {
         for (int i = 0; i < armor.length; i++) {
             ItemStack item = armor[i];
             if (item != null && !item.getType().isAir()) {
-                if (!"laboratorio".equalsIgnoreCase(modalityId) && isSandboxItem(item)) {
-                    sandboxViolacion = true;
-                    armor[i] = null;
-                } else if ("clasico".equalsIgnoreCase(modalityId) && isSlimefunItem(item)) {
-                    slimefunEnClasico = true;
+                String origin = getOriginModality(item);
+                if (isItemIllegalInModality(item, targetModality)) {
+                    if ("laboratorio".equalsIgnoreCase(origin)) laboratorioViolacion = true;
+                    generalViolacion = true;
+                    detalleViolacion = item.getType().name() + " (Origen: " + (origin != null ? origin : "Desconocido") + ")";
                     armor[i] = null;
                 }
             }
@@ -241,24 +277,24 @@ public final class UniversalModalitySentinel implements Listener {
         // Escanear offhand
         ItemStack offhand = player.getInventory().getItemInOffHand();
         if (offhand != null && !offhand.getType().isAir()) {
-            if (!"laboratorio".equalsIgnoreCase(modalityId) && isSandboxItem(offhand)) {
-                sandboxViolacion = true;
-                player.getInventory().setItemInOffHand(null);
-            } else if ("clasico".equalsIgnoreCase(modalityId) && isSlimefunItem(offhand)) {
-                slimefunEnClasico = true;
+            String origin = getOriginModality(offhand);
+            if (isItemIllegalInModality(offhand, targetModality)) {
+                if ("laboratorio".equalsIgnoreCase(origin)) laboratorioViolacion = true;
+                generalViolacion = true;
+                detalleViolacion = offhand.getType().name() + " (Origen: " + (origin != null ? origin : "Desconocido") + ")";
                 player.getInventory().setItemInOffHand(null);
             }
         }
 
-        // Reacción 1: Violación del Laboratorio (Crítica)
-        if (sandboxViolacion) {
+        // Alerta y respuesta
+        if (laboratorioViolacion) {
             plugin.getLogger().log(Level.SEVERE,
-                    "[SENTINEL CRÍTICO] Violación de Aislamiento: " + player.getName()
-                            + " detectado con ítem del Laboratorio en mundo " + worldName + " (" + modalityId + ")! Ítem incinerado.");
+                    "[CENTINELA CRÍTICO] " + player.getName() + " detectado con ítem del Laboratorio en "
+                            + worldName + " (" + targetModality + ")! Detalle: " + detalleViolacion);
 
             String alertaStaff = ChatColor.translateAlternateColorCodes('&',
-                    "&4&l[SENTINEL ALERTA] &c" + player.getName()
-                            + " &7intentó ingresar ítem del Laboratorio a &e" + worldName + "&7. Ítem incinerado.");
+                    "&4&l[CENTINELA ALERTA] &c" + player.getName()
+                            + " &7intentó ingresar ítem del Laboratorio a &e" + targetModality + "&7. Ítem incinerado.");
             for (Player staff : Bukkit.getOnlinePlayers()) {
                 if (staff.isOp() || staff.hasPermission("odysseia.admin") || staff.hasPermission("odysseia.alerts")) {
                     staff.sendMessage(alertaStaff);
@@ -267,21 +303,18 @@ public final class UniversalModalitySentinel implements Listener {
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 player.kickPlayer(ChatColor.translateAlternateColorCodes('&',
-                        "&c[DrakesCraft - Seguridad]\n\n&eSe detectó un ítem no autorizado del Laboratorio en tu inventario.\n"
+                        "&c[DrakesCraft - Centinela]\n\n&eSe detectó un ítem no autorizado del Laboratorio en tu inventario.\n"
                                 + "&7El ítem ha sido destruido para proteger la economía del servidor.\n"
                                 + "&fSi crees que esto fue un fallo de red, vuelve a ingresar."));
             });
-        }
-
-        // Reacción 2: Violación de Slimefun en Clásico
-        if (slimefunEnClasico) {
+        } else if (generalViolacion) {
             plugin.getLogger().log(Level.WARNING,
-                    "[SENTINEL] Purga de Slimefun en Clásico: " + player.getName()
-                            + " tenía ítem de Slimefun en Clásico (" + worldName + "). Ítem retirado.");
+                    "[CENTINELA] " + player.getName() + " tenía ítem incompatible en " + targetModality
+                            + " (" + worldName + "): " + detalleViolacion + ". Ítem purgado.");
 
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6DrakesCraft &8· &c[Clásico] En esta modalidad no se permiten ítems tecnológicos de Slimefun. "
-                            + "&7El ítem ha sido purgado."));
+                    "&6DrakesCraft &8· &c[Centinela] Ese ítem no está permitido en la modalidad &e"
+                            + targetModality + "&c. Ha sido purgado automáticamente."));
         }
     }
 
@@ -310,20 +343,6 @@ public final class UniversalModalitySentinel implements Listener {
         Player player = event.getPlayer();
         Modality modality = plugin.getModalityService().resolve(player);
         if (sanitizeItem(event.getItemInHand(), modality.id(), player)) {
-            event.setCancelled(true);
-            inspectAndSanitize(player);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        Modality modality = plugin.getModalityService().resolve(player);
-
-        boolean currentPurged = sanitizeItem(event.getCurrentItem(), modality.id(), player);
-        boolean cursorPurged = sanitizeItem(event.getCursor(), modality.id(), player);
-
-        if (currentPurged || cursorPurged) {
             event.setCancelled(true);
             inspectAndSanitize(player);
         }

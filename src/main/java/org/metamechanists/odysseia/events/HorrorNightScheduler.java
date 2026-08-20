@@ -8,6 +8,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffect;
@@ -25,9 +26,14 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Evento Nocturno de Terror del Wither Storm.
- * Se ejecuta ESPECÍFICAMENTE UNA VEZ POR DÍA DE MINECRAFT durante la noche.
- * Distribuye aproximadamente 3 eventos terroríficos y screamers aleatorios entre los jugadores conectados.
+ * Evento Nocturno de Terror del Multiverso & Dioses Antiguos de DrakesCraft.
+ * 
+ * Ambientación Inmersiva:
+ * - Apariciones y espejismos fugaces de Herobrine y Sombras del Vacío.
+ * - Susurros encriptados de Dioses Antiguos y colapso multiversal.
+ * - Alucinaciones auditivas (pasos detrás del jugador, campanas lejanas, latidos cósmicos).
+ * - Distorsiones atmosféricas con relámpagos de sangre, niebla espesa y glitches dimensionales.
+ * - Recompensas de reliquias de Slimefun al abatir monstruos nocturnos.
  */
 public class HorrorNightScheduler implements Listener {
 
@@ -49,9 +55,9 @@ public class HorrorNightScheduler implements Listener {
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
-        // Revisa cada 5 segundos (100 ticks) el estado del ciclo día/noche
+        // Revisa cada 5 segundos el estado del ciclo día/noche
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::checkNightCycle, 100L, 100L);
-        plugin.getLogger().info("[HorrorNight] Sistema de Noche de Terror activado (sin invocación automática de jefes).");
+        plugin.getLogger().info("[HorrorNight] Noche de Terror & Lore del Multiverso activado.");
     }
 
     public void shutdown() {
@@ -87,20 +93,22 @@ public class HorrorNightScheduler implements Listener {
         }
     }
 
-    /** Dispara la secuencia nocturna (eventos atmosféricos y ambientación de terror). */
+    /** Dispara la secuencia nocturna cinematográfica. */
     private void triggerNightHorrorSequence(World world) {
-        plugin.getLogger().info("[HorrorNight] Secuencia nocturna iniciada para el día " + (world.getFullTime() / 24000L));
+        plugin.getLogger().info("[HorrorNight] Secuencia del Multiverso iniciada en el día " + (world.getFullTime() / 24000L));
 
         for (Player p : world.getPlayers()) {
             p.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&4&l✦ [NOCHE DE TERROR] &cLa niebla oscura envuelve el mapa... Los monstruos nocturnos llevan reliquias de Slimefun."));
+                "&4&l✦ [NOCHE DE TERROR] &cEl Velo del Multiverso se debilita... Los Antiguos caminan entre las sombras."));
             p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 2.0f, 0.4f);
-            p.playSound(p.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 1.5f, 0.5f);
+            p.playSound(p.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 1.8f, 0.4f);
+            p.playSound(p.getLocation(), Sound.BLOCK_BELL_RESONATE, 1.2f, 0.3f);
         }
 
-        // Programar 3 eventos en momentos aleatorios de la noche (entre 10 y 50 segundos)
-        for (int i = 1; i <= 3; i++) {
-            long delayTicks = (long) (i * 250 + random.nextInt(400));
+        // Programar entre 4 y 6 eventos aleatorios durante la noche
+        int eventCount = 4 + random.nextInt(3);
+        for (int i = 1; i <= eventCount; i++) {
+            long delayTicks = (long) (i * 220 + random.nextInt(300));
             final int eventIndex = i;
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -109,7 +117,7 @@ public class HorrorNightScheduler implements Listener {
         }
     }
 
-    /** Ejecuta un evento de terror aleatorio a un jugador conectado. */
+    /** Ejecuta un evento de terror o distorsión cósmica a un jugador. */
     private void executeRandomHorrorStrike(World world, int strikeIndex) {
         if (!plugin.getConfig().getBoolean("horror-night.enabled", true)
                 || world.getTime() < 13000L || world.getTime() > 22000L) {
@@ -125,38 +133,44 @@ public class HorrorNightScheduler implements Listener {
         if (eligiblePlayers.isEmpty()) return;
 
         Player victim = eligiblePlayers.get(random.nextInt(eligiblePlayers.size()));
-        int horrorType = random.nextInt(4);
+        int horrorType = random.nextInt(7);
 
         switch (horrorType) {
             case 0 -> WitherStormBoss.triggerScreamer(victim);
             case 1 -> triggerCreepyWhispers(victim);
             case 2 -> triggerShadowStalker(victim);
             case 3 -> triggerAtmosphericEclipse(victim);
+            case 4 -> triggerHerobrineMirage(victim);
+            case 5 -> triggerAudioHallucination(victim);
+            case 6 -> triggerDimensionalGlitch(victim);
         }
     }
 
-    /** Evento 1: Susurros del Más Allá y distorsión ambiental. */
+    /** Evento 1: Susurros crípticos de Dioses Antiguos y colapso multiversal. */
     private void triggerCreepyWhispers(Player player) {
         String[] whispers = {
-            "§8[§4???§8] §7\"Puedo oler tu miedo en la oscuridad...\"",
-            "§8[§4???§8] §7\"Las sombras acechan este mundo...\"",
-            "§8[§4???§8] §7\"No estás solo en la penumbra...\"",
-            "§8[§4???§8] §7\"Los monstruos de la noche portan secretos del Slimefun...\""
+            "&8[&4&k|||&4 Khronos el Olvidado &8&k|||&8] &7\"Las líneas temporales convergen... esta realidad pronto será reclamada.\"",
+            "&8[&5&k|||&5 El Velo del Multiverso &8&k|||&8] &7\"No mires hacia atrás en la niebla. Ellos ya te han visto.\"",
+            "&8[&6&k|||&6 El Oráculo Roto &8&k|||&8] &7\"Los dioses del Olimpo duermen, pero los Antiguos están despiertos...\"",
+            "&8[&c&k|||&c Entidad 404 &8&k|||&8] &7\"DrakesCraft no es un mundo seguro... es una convergencia de dimensiones.\"",
+            "&8[&4&k|||&4 La Sombra del Tártaro &8&k|||&8] &7\"Tus máquinas y reactores son insignificantes ante el vacío eterno.\"",
+            "&8[&8&k|||&8 El Testigo Silencioso &8&k|||&8] &7\"¿Escuchas los pasos? No son los tuyos...\""
         };
-        String msg = whispers[random.nextInt(whispers.length)];
+        String msg = ChatColor.translateAlternateColorCodes('&', whispers[random.nextInt(whispers.length)]);
         player.sendMessage(msg);
         player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.8f, 0.4f);
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_STARE, 1.5f, 0.5f);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 100, 1, false, false));
+        player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 1.6f, 0.5f);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 120, 1, false, false));
     }
 
-    /** Evento 2: Aparición fugaz de una sombra que se desvanece al mirar. */
+    /** Evento 2: Aparición fugaz de una Sombra del Vacío. */
     private void triggerShadowStalker(Player player) {
         Location behind = player.getLocation().subtract(player.getLocation().getDirection().multiply(2.5)).add(0, 0.5, 0);
         if (behind.getWorld() == null) return;
 
         WitherSkeleton ghost = (WitherSkeleton) behind.getWorld().spawnEntity(behind, EntityType.WITHER_SKELETON);
-        ghost.setCustomName("§8§lSombra del Vacío");
+        ghost.setCustomName(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "Sombra del Vacío");
         ghost.setCustomNameVisible(true);
         ghost.setGlowing(true);
         ghost.setAI(false);
@@ -170,10 +184,10 @@ public class HorrorNightScheduler implements Listener {
                 ghost.getWorld().playSound(ghost.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.2f, 0.5f);
                 ghost.remove();
             }
-        }, 40L); // Desaparece tras 2 segundos
+        }, 40L);
     }
 
-    /** Evento 3: Eclipse atmosférico sin invocación de jefes. */
+    /** Evento 3: Eclipse atmosférico y relámpago de sangre. */
     private void triggerAtmosphericEclipse(Player player) {
         player.sendMessage(ChatColor.translateAlternateColorCodes('&',
             "&5&l⚡ &dUn relámpago de sangre rasga el firmamento. La Noche de Terror se intensifica."));
@@ -185,7 +199,65 @@ public class HorrorNightScheduler implements Listener {
 
         org.metamechanists.odysseia.util.ParticleCompat.spawnDragonBreath(
                 player.getWorld(), player.getLocation().add(0, 2, 0),
-                80, 2.0, 2.0, 2.0, 0.1, 0.1f);
+                80, 2.0, 2.0, 2.0, 0.1, 1.0f);
+    }
+
+    /** Evento 4: Espejismo de Herobrine en la niebla periférica. */
+    private void triggerHerobrineMirage(Player player) {
+        Location front = player.getLocation().add(player.getLocation().getDirection().multiply(8.0)).add(0, 0.2, 0);
+        if (front.getWorld() == null) return;
+
+        // Efecto visual: destello espectral con ojos blancos
+        player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 1.8f, 0.3f);
+        player.playSound(player.getLocation(), Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, 2.0f, 0.4f);
+
+        Skeleton mirage = (Skeleton) front.getWorld().spawnEntity(front, EntityType.SKELETON);
+        mirage.setCustomName(ChatColor.WHITE + "" + ChatColor.BOLD + "§k|||§f Herobrine §k|||");
+        mirage.setCustomNameVisible(true);
+        mirage.setGlowing(true);
+        mirage.setAI(false);
+        mirage.setInvulnerable(true);
+
+        front.getWorld().spawnParticle(Particle.REVERSE_PORTAL, front.clone().add(0, 1, 0), 40, 0.5, 1.0, 0.5, 0.05);
+
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&8[&f✦&8] &7Sentiste una mirada fría clavada en tu nuca desde la niebla..."));
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (mirage.isValid()) {
+                mirage.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, mirage.getLocation().add(0, 1, 0), 25, 0.3, 0.8, 0.3, 0.02);
+                mirage.getWorld().playSound(mirage.getLocation(), Sound.ENTITY_WARDEN_DIG, 1.5f, 0.7f);
+                mirage.remove();
+            }
+        }, 50L); // Desaparece tras 2.5 segundos
+    }
+
+    /** Evento 5: Alucinación auditiva (pasos y campanas fantasmales). */
+    private void triggerAudioHallucination(Player player) {
+        Location behind = player.getLocation().subtract(player.getLocation().getDirection().multiply(2.0));
+        player.playSound(behind, Sound.ENTITY_ZOMBIE_STEP, 1.8f, 0.8f);
+        player.playSound(behind, Sound.ENTITY_PHANTOM_SWOOP, 1.4f, 0.4f);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            player.playSound(player.getLocation(), Sound.BLOCK_BELL_RESONATE, 1.5f, 0.3f);
+            player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 2.0f, 0.6f);
+        }, 20L);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 0, false, false));
+    }
+
+    /** Evento 6: Glitch dimensional / Colapso del Velo. */
+    private void triggerDimensionalGlitch(Player player) {
+        Location loc = player.getLocation();
+        loc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, 1, 0), 60, 1.5, 1.5, 1.5, 0.1);
+        player.playSound(loc, Sound.BLOCK_BEACON_DEACTIVATE, 2.0f, 0.4f);
+        player.playSound(loc, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.5f);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 80, 1, false, false));
+
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&c&l✦ [DISTORSIÓN] &4La realidad a tu alrededor parpadea. Un fragmento del multiverso se ha superpuesto a este mundo."));
     }
 
     /** Dropeo especial de ítems de Slimefun al matar monstruos en la Noche de Terror. */
