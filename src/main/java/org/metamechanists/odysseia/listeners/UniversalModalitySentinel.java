@@ -61,7 +61,7 @@ public final class UniversalModalitySentinel implements Listener {
         this.keySlimefun = new NamespacedKey("slimefun", "slimefun_item");
     }
 
-    /** Marca un ítem con el sello de su modalidad de origen. */
+    /** Marca un ítem con el sello de su modalidad de origen sin romper el stackeo. */
     public void tagItemWithModality(ItemStack item, String modalityId, UUID creator) {
         if (item == null || item.getType().isAir()) return;
         if ("laboratorio".equalsIgnoreCase(modalityId)) return; // No marcar ítems en el laboratorio
@@ -69,12 +69,23 @@ public final class UniversalModalitySentinel implements Listener {
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
-        if (creator != null) {
-            pdc.set(keyCreator, PersistentDataType.STRING, creator.toString());
+        boolean changed = false;
+        // Limpiar timestamps y creador únicos para que los ítems del mismo tipo se stackeen perfectamente
+        if (pdc.has(keyTimestamp, PersistentDataType.LONG)) {
+            pdc.remove(keyTimestamp);
+            changed = true;
         }
-        pdc.set(keyTimestamp, PersistentDataType.LONG, System.currentTimeMillis());
-        item.setItemMeta(meta);
+        if (pdc.has(keyCreator, PersistentDataType.STRING)) {
+            pdc.remove(keyCreator);
+            changed = true;
+        }
+        if (!pdc.has(keyOriginModality, PersistentDataType.STRING)) {
+            pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
+            changed = true;
+        }
+        if (changed) {
+            item.setItemMeta(meta);
+        }
     }
 
     /** Obtiene la modalidad de origen marcada en el ítem. */
@@ -117,7 +128,7 @@ public final class UniversalModalitySentinel implements Listener {
         return false;
     }
 
-    /** Limpia marcas erróneas de laboratorio en ítems legítimos de supervivencia. */
+    /** Limpia marcas erróneas y timestamps en ítems legítimos de supervivencia para permitir stackeo. */
     public void untagTaintedItem(ItemStack item) {
         if (item == null || item.getType().isAir() || !item.hasItemMeta()) return;
         ItemMeta meta = item.getItemMeta();
@@ -130,6 +141,14 @@ public final class UniversalModalitySentinel implements Listener {
                 pdc.remove(keyOriginModality);
                 changed = true;
             }
+        }
+        if (pdc.has(keyTimestamp, PersistentDataType.LONG)) {
+            pdc.remove(keyTimestamp);
+            changed = true;
+        }
+        if (pdc.has(keyCreator, PersistentDataType.STRING)) {
+            pdc.remove(keyCreator);
+            changed = true;
         }
         NamespacedKey legacyKey = new NamespacedKey(plugin, "sandbox_item");
         if (pdc.has(legacyKey, PersistentDataType.BYTE)) {
