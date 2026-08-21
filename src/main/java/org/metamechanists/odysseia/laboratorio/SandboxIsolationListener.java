@@ -151,14 +151,7 @@ public final class SandboxIsolationListener implements Listener {
         }
 
         if (deposito == null) {
-            // Sin consigna no hay nada que devolver, pero lo que lleva encima se fabrico dentro
-            // del laboratorio y no puede cruzar. Se descarta y se deja constancia.
-            inventory.clear();
-            inventory.setArmorContents(null);
-            inventory.setItemInOffHand(null);
-            player.setGameMode(GameMode.SURVIVAL);
-            plugin.getLogger().warning("Salida del laboratorio de " + player.getName()
-                    + " sin consigna registrada; se descarto lo que llevaba encima.");
+            // Si no hay depósito registrado, no borrar nada para evitar pérdidas de inventario
             return;
         }
 
