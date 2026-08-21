@@ -61,29 +61,20 @@ public final class UniversalModalitySentinel implements Listener {
         this.keySlimefun = new NamespacedKey("slimefun", "slimefun_item");
     }
 
-    /** Marca un ítem con el sello de su modalidad de origen sin romper el stackeo. */
+    /** Marca un ítem sólo si es necesario (no ensucia ítems vanilla de supervivencia). */
     public void tagItemWithModality(ItemStack item, String modalityId, UUID creator) {
         if (item == null || item.getType().isAir()) return;
-        if ("laboratorio".equalsIgnoreCase(modalityId)) return; // No marcar ítems en el laboratorio
+        // En Survival y Laboratorio no marcamos ítems para no romper el stackeo vanilla
+        if ("survival".equalsIgnoreCase(modalityId) || "laboratorio".equalsIgnoreCase(modalityId)) {
+            untagTaintedItem(item);
+            return;
+        }
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        boolean changed = false;
-        // Limpiar timestamps y creador únicos para que los ítems del mismo tipo se stackeen perfectamente
-        if (pdc.has(keyTimestamp, PersistentDataType.LONG)) {
-            pdc.remove(keyTimestamp);
-            changed = true;
-        }
-        if (pdc.has(keyCreator, PersistentDataType.STRING)) {
-            pdc.remove(keyCreator);
-            changed = true;
-        }
         if (!pdc.has(keyOriginModality, PersistentDataType.STRING)) {
             pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
-            changed = true;
-        }
-        if (changed) {
             item.setItemMeta(meta);
         }
     }
@@ -128,7 +119,7 @@ public final class UniversalModalitySentinel implements Listener {
         return false;
     }
 
-    /** Limpia marcas erróneas y timestamps en ítems legítimos de supervivencia para permitir stackeo. */
+    /** Limpia marcas erróneas y restaura ítems vanilla puros para permitir stackeo nativo. */
     public void untagTaintedItem(ItemStack item) {
         if (item == null || item.getType().isAir() || !item.hasItemMeta()) return;
         ItemMeta meta = item.getItemMeta();
@@ -136,11 +127,8 @@ public final class UniversalModalitySentinel implements Listener {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         boolean changed = false;
         if (pdc.has(keyOriginModality, PersistentDataType.STRING)) {
-            String origin = pdc.get(keyOriginModality, PersistentDataType.STRING);
-            if ("laboratorio".equalsIgnoreCase(origin)) {
-                pdc.remove(keyOriginModality);
-                changed = true;
-            }
+            pdc.remove(keyOriginModality);
+            changed = true;
         }
         if (pdc.has(keyTimestamp, PersistentDataType.LONG)) {
             pdc.remove(keyTimestamp);
@@ -156,7 +144,13 @@ public final class UniversalModalitySentinel implements Listener {
             changed = true;
         }
         if (changed) {
-            item.setItemMeta(meta);
+            // Si el ítem no tiene nombre personalizado, ni lore, ni encantamientos, ni Slimefun, restaurar a vanilla puro sin ItemMeta
+            if (!meta.hasDisplayName() && !meta.hasLore() && !meta.hasEnchants() && !meta.hasAttributeModifiers()
+                    && !pdc.has(keySlimefun, PersistentDataType.STRING) && pdc.getKeys().isEmpty()) {
+                item.setItemMeta(null);
+            } else {
+                item.setItemMeta(meta);
+            }
         }
     }
 
