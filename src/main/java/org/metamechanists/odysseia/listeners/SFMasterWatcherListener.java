@@ -390,6 +390,10 @@ public class SFMasterWatcherListener implements Listener {
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        String world = event.getPlayer().getWorld().getName();
+        if ("laboratorio".equalsIgnoreCase(world)) {
+            return; // En el mundo laboratorio el modo cheat y comandos de Slimefun están 100% permitidos
+        }
         String msg = event.getMessage().toLowerCase();
         if (isSfMasterActive(event.getPlayer())
                 && plugin.getConfig().getBoolean("sfmaster-guide.block-cheat-command", true)

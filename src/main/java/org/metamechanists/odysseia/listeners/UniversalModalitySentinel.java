@@ -286,27 +286,34 @@ public final class UniversalModalitySentinel implements Listener {
             }
         }
 
-        // Alerta y respuesta
-        if (laboratorioViolacion) {
-            plugin.getLogger().log(Level.SEVERE,
-                    "[CENTINELA CRÍTICO] " + player.getName() + " detectado con ítem del Laboratorio en "
-                            + worldName + " (" + targetModality + ")! Detalle: " + detalleViolacion);
-
-            String alertaStaff = ChatColor.translateAlternateColorCodes('&',
-                    "&4&l[CENTINELA ALERTA] &c" + player.getName()
-                            + " &7intentó ingresar ítem del Laboratorio a &e" + targetModality + "&7. Ítem incinerado.");
-            for (Player staff : Bukkit.getOnlinePlayers()) {
-                if (staff.isOp() || staff.hasPermission("odysseia.admin") || staff.hasPermission("odysseia.alerts")) {
-                    staff.sendMessage(alertaStaff);
+        // Escanear Ender Chest si no está en laboratorio
+        if (!"laboratorio".equalsIgnoreCase(targetModality)) {
+            ItemStack[] ecContents = player.getEnderChest().getContents();
+            for (int i = 0; i < ecContents.length; i++) {
+                ItemStack item = ecContents[i];
+                if (item != null && !item.getType().isAir()) {
+                    String origin = getOriginModality(item);
+                    if (isItemIllegalInModality(item, targetModality)) {
+                        if ("laboratorio".equalsIgnoreCase(origin)) laboratorioViolacion = true;
+                        generalViolacion = true;
+                        detalleViolacion = "EnderChest: " + item.getType().name() + " (Origen: " + (origin != null ? origin : "Desconocido") + ")";
+                        player.getEnderChest().setItem(i, null);
+                    } else {
+                        sanitizeItem(item, targetModality, player);
+                    }
                 }
             }
+        }
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                player.kickPlayer(ChatColor.translateAlternateColorCodes('&',
-                        "&c[DrakesCraft - Centinela]\n\n&eSe detectó un ítem no autorizado del Laboratorio en tu inventario.\n"
-                                + "&7El ítem ha sido destruido para proteger la economía del servidor.\n"
-                                + "&fSi crees que esto fue un fallo de red, vuelve a ingresar."));
-            });
+        // Alerta y respuesta
+        if (laboratorioViolacion) {
+            plugin.getLogger().log(Level.WARNING,
+                    "[CENTINELA] " + player.getName() + " detectado con ítem del Laboratorio en "
+                            + worldName + " (" + targetModality + ")! Detalle: " + detalleViolacion + ". Ítem purgado.");
+
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &c[Centinela] Un ítem generado en el Laboratorio fue purgado automáticamente al entrar a &e"
+                            + targetModality + "&c."));
         } else if (generalViolacion) {
             plugin.getLogger().log(Level.WARNING,
                     "[CENTINELA] " + player.getName() + " tenía ítem incompatible en " + targetModality
@@ -318,14 +325,24 @@ public final class UniversalModalitySentinel implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldChange(PlayerChangedWorldEvent event) {
-        inspectAndSanitize(event.getPlayer());
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                inspectAndSanitize(player);
+            }
+        }, 1L);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
-        inspectAndSanitize(event.getPlayer());
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                inspectAndSanitize(player);
+            }
+        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
