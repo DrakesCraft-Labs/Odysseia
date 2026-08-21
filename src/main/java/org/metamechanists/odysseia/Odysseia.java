@@ -166,6 +166,8 @@ public final class Odysseia extends JavaPlugin {
         getCommand("buy").setExecutor(
                 new org.metamechanists.odysseia.commands.BuyCommand(this));
         Bukkit.getPluginManager().registerEvents(modalidadesCmd, this);
+        Bukkit.getPluginManager().registerEvents(
+                new org.metamechanists.odysseia.listeners.ModalitySpawnListener(this), this);
         try {
             this.modalityVaults = new org.metamechanists.odysseia.vaults.ModalityVaultService(this, modalityService);
             Bukkit.getPluginManager().registerEvents(modalityVaults, this);

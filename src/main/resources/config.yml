@@ -3883,6 +3883,22 @@ modalidades:
     # es global: un chunk saturado aqui le cuesta TPS a todo el servidor. Con creativo y
     # /sf cheat no hay coste que frene a nadie, asi que el freno se pone explicito.
     max-slimefun-por-chunk: 120
+  # /spawn lleva al spawn de la modalidad que estas jugando, no siempre al lobby.
+  #
+  # EssentialsX resuelve /spawn por grupo de permisos, no por mundo, asi que con un unico grupo
+  # manda a todos al mismo sitio. El destino de aqui sale del punto de aparicion del propio
+  # mundo --el que gestiona Multiverse con /mv setspawn--, de modo que no hay una segunda lista
+  # de coordenadas que mantener en paralelo: se mueve el spawn del mundo y esto lo sigue solo.
+  spawn-por-modalidad:
+    enabled: true
+    # Mundo cuyo spawn representa a cada modalidad. Solo hace falta declarar las que no tienen
+    # mundos propios en modalidades.modos; survival es la de respaldo y por eso va aqui.
+    mundos:
+      survival: world
+    # Para volver al hub. Antes la unica salida era /spawn, que es justo lo que ya no saca a
+    # nadie de su modalidad sin pedirlo.
+    comando-lobby: lobby
+    mundo-lobby: SpawnWarps
   # Comando que /survival despacha desde consola para llevar al jugador a la modalidad base.
   comando-spawn: spawn
   # Bovedas personales, una coleccion independiente por modalidad.
