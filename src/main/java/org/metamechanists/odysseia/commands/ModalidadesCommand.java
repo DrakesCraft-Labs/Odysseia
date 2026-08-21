@@ -24,8 +24,13 @@ import java.util.Locale;
 /**
  * Menu para saltar entre las modalidades del servidor.
  *
- * Deja explicito lo que mas se pregunta: el rango y los kits se conservan en las tres, y lo
+ * Deja explicito lo que mas se pregunta: el rango y los kits se conservan en todas, y lo
  * unico que cambia es el inventario y las bovedas.
+ *
+ * El recuento se calcula, no se escribe. Estaba puesto a mano como "las tres" y siguio diciendolo
+ * al llegar SkyBlock, OneBlock y el laboratorio: un jugador lo reporto viendo cinco iconos y un
+ * texto que hablaba de tres. Un numero escrito a mano en un menu que crece solo siempre acaba
+ * mintiendo.
  */
 public final class ModalidadesCommand implements CommandExecutor, Listener {
 
@@ -72,8 +77,31 @@ public final class ModalidadesCommand implements CommandExecutor, Listener {
                 color("&7En &bSkyBlock&7 y &dOneBlock&7 tu isla crece"),
                 color("&7segun el rango que tengas."),
                 "",
-                color("&7Los rangos y kits son los mismos en las tres.")), false));
+                color("&7Los rangos y kits son los mismos en " + enTodas() + ".")), false));
         player.openInventory(inventory);
+    }
+
+    /**
+     * "las cinco", "las cuatro"... segun cuantas modalidades haya cargadas de verdad.
+     *
+     * Se deletrea hasta diez y a partir de ahi se usa la cifra, que es donde deja de sonar
+     * natural en castellano.
+     */
+    private String enTodas() {
+        int total = modalities.modalities().size();
+        return switch (total) {
+            case 0, 1 -> "esta";
+            case 2 -> "las dos";
+            case 3 -> "las tres";
+            case 4 -> "las cuatro";
+            case 5 -> "las cinco";
+            case 6 -> "las seis";
+            case 7 -> "las siete";
+            case 8 -> "las ocho";
+            case 9 -> "las nueve";
+            case 10 -> "las diez";
+            default -> "las " + total;
+        };
     }
 
     /** Distribuye los iconos centrados en la fila del medio del cofre. */

@@ -5,13 +5,32 @@ import java.util.Random;
 
 /** Generates five genuinely different weekly formats rather than repainting one trivia loop. */
 final class SeasonalChallengeFactory {
-    private static final List<String> RUNES = List.of("SLIMEFUN", "ODYSSEIA", "DRAGMAS", "NETHERITE", "CONVERGENCIA", "AUTOMATIZACION", "BOSSWARP", "PROTECCION");
+    private static final List<String> RUNES = List.of("SLIMEFUN", "ODYSSEIA", "DRAGMAS", "NETHERITE", "CONVERGENCIA", "AUTOMATIZACION",
+            "BOSSWARP", "PROTECCION", "MODALIDADES", "SKYBLOCK", "ONEBLOCK", "CLASICO", "LABORATORIO",
+            "CARTOGRAFO", "TERRALITH", "QUANTUM", "CARGO", "INFINITY", "MULTIVERSO", "DRAKESCRAFT");
+    /*
+     * Preguntas del servidor.
+     *
+     * Ninguna pregunta CUANTAS modalidades hay, ni cuantos addons, ni nada que se cuente. Ese
+     * tipo de pregunta caduca sola: el menu de modalidades tenia escrito "las tres" y siguio
+     * diciendolo con cinco cargadas, hasta que un jugador lo reporto. Lo que se pregunta aqui son
+     * comandos y reglas, que cambian cuando alguien decide cambiarlos y no a espaldas de nadie.
+     */
     private static final List<String[]> TRIVIA = List.of(
             new String[]{"Que comando abre el menu principal del servidor?", "/menu", "El menu principal se abre con /menu."},
             new String[]{"Que comando abre la guia de Slimefun?", "/sf guide", "La guia se abre con /sf guide."},
             new String[]{"Que moneda usa DrakesCraft?", "dragmas", "La moneda del servidor se llama Dragmas."},
             new String[]{"Que dios gobierna los mares en el Olimpo?", "poseidon", "Poseidon es el patron de mares y terremotos."},
-            new String[]{"Cuantos bloques mide un chunk por lado?", "16", "Un chunk mide 16 por 16 bloques."}
+            new String[]{"Cuantos bloques mide un chunk por lado?", "16", "Un chunk mide 16 por 16 bloques."},
+            new String[]{"Que comando abre el menu de modalidades?", "/modalidades", "Con /modalidades saltas entre las modalidades del servidor."},
+            new String[]{"Que comando te devuelve al lobby?", "/lobby", "El /lobby te lleva al hub para elegir modalidad."},
+            new String[]{"En que modalidad NO funciona Slimefun?", "clasico", "Clasico es vanilla a proposito: sin maquinas ni mobs personalizados."},
+            new String[]{"Que comando abre tu isla de SkyBlock?", "/is", "La isla de SkyBlock se abre con /is. La de OneBlock es /ob."},
+            new String[]{"Que comando te lleva lejos a empezar una base?", "/rtp", "El /rtp te suelta lejos del spawn para que construyas tranquilo."},
+            new String[]{"Que comando abre tus bovedas personales?", "/pv", "Las bovedas van por modalidad: lo que guardas en una no aparece en otra."},
+            new String[]{"Que se conserva al cambiar de modalidad: el rango o el inventario?", "el rango", "El rango, el dinero y los kits te siguen; el inventario y las bovedas no."},
+            new String[]{"Que comando abre la subasta entre jugadores?", "/ah", "En /ah pones tus cosas al precio que quieras."},
+            new String[]{"Como se llama el plugin de maquinas del servidor?", "slimefun", "Slimefun es la base tecnica de la modalidad principal."}
     );
     private static final List<String[]> REFLEXES = List.of(
             new String[]{"RAYO DORADO", "RAYO DORADO"}, new String[]{"CARGO LISTO", "CARGO LISTO"},
