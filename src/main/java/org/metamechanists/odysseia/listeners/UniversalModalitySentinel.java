@@ -61,17 +61,14 @@ public final class UniversalModalitySentinel implements Listener {
         this.keySlimefun = new NamespacedKey("slimefun", "slimefun_item");
     }
 
-    /** Marca un ítem con el sello indeleble de su modalidad de origen. */
+    /** Marca un ítem con el sello de su modalidad de origen. */
     public void tagItemWithModality(ItemStack item, String modalityId, UUID creator) {
         if (item == null || item.getType().isAir()) return;
+        if ("laboratorio".equalsIgnoreCase(modalityId)) return; // No marcar ítems en el laboratorio
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        // No sobreescribir si ya tiene origen del laboratorio (máxima prioridad de aislamiento)
-        String currentOrigin = pdc.get(keyOriginModality, PersistentDataType.STRING);
-        if ("laboratorio".equalsIgnoreCase(currentOrigin)) return;
-
         pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
         if (creator != null) {
             pdc.set(keyCreator, PersistentDataType.STRING, creator.toString());
@@ -120,6 +117,30 @@ public final class UniversalModalitySentinel implements Listener {
         return false;
     }
 
+    /** Limpia marcas erróneas de laboratorio en ítems legítimos de supervivencia. */
+    public void untagTaintedItem(ItemStack item) {
+        if (item == null || item.getType().isAir() || !item.hasItemMeta()) return;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        boolean changed = false;
+        if (pdc.has(keyOriginModality, PersistentDataType.STRING)) {
+            String origin = pdc.get(keyOriginModality, PersistentDataType.STRING);
+            if ("laboratorio".equalsIgnoreCase(origin)) {
+                pdc.remove(keyOriginModality);
+                changed = true;
+            }
+        }
+        NamespacedKey legacyKey = new NamespacedKey(plugin, "sandbox_item");
+        if (pdc.has(legacyKey, PersistentDataType.BYTE)) {
+            pdc.remove(legacyKey);
+            changed = true;
+        }
+        if (changed) {
+            item.setItemMeta(meta);
+        }
+    }
+
     /**
      * Evalúa si un ítem es legal en la modalidad destino.
      * Retorna true si el ítem es ilegal y debe ser destruido.
@@ -127,14 +148,15 @@ public final class UniversalModalitySentinel implements Listener {
     public boolean isItemIllegalInModality(ItemStack item, String targetModality) {
         if (item == null || item.getType().isAir()) return false;
 
-        String origin = getOriginModality(item);
-
-        // Regla 1: Laboratorio NUNCA cruza a ninguna otra modalidad
-        if ("laboratorio".equalsIgnoreCase(origin) && !"laboratorio".equalsIgnoreCase(targetModality)) {
-            return true;
+        // Si estamos en supervivencia y el ítem tiene tag de laboratorio erróneo de la prueba anterior, limpiarlo
+        if ("survival".equalsIgnoreCase(targetModality)) {
+            untagTaintedItem(item);
+            return false;
         }
 
-        // Regla 2: Clásico NO acepta Slimefun ni ítems de Laboratorio/Skyblock/Oneblock
+        String origin = getOriginModality(item);
+
+        // Regla 1: Clásico NO acepta Slimefun ni ítems de otras modalidades
         if ("clasico".equalsIgnoreCase(targetModality)) {
             if (isSlimefunItem(item)) return true;
             if ("skyblock".equalsIgnoreCase(origin) || "oneblock".equalsIgnoreCase(origin) || "laboratorio".equalsIgnoreCase(origin)) {
@@ -142,7 +164,7 @@ public final class UniversalModalitySentinel implements Listener {
             }
         }
 
-        // Regla 3: SkyBlock y OneBlock son economías aisladas
+        // Regla 2: SkyBlock y OneBlock son economías aisladas
         if ("skyblock".equalsIgnoreCase(targetModality) && "oneblock".equalsIgnoreCase(origin)) {
             return true;
         }
