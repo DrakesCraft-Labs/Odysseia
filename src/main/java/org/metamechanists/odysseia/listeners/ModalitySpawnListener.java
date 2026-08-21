@@ -42,6 +42,26 @@ public final class ModalitySpawnListener implements Listener {
         return plugin.getConfig().getBoolean("modalidades.spawn-por-modalidad.enabled", true);
     }
 
+    /**
+     * Si la modalidad gestiona su propia aparicion y hay que dejarla en paz.
+     *
+     * SkyBlock y OneBlock no tienen spawn: se entra directamente a la isla, y de eso se encarga
+     * BentoBox. Sus mundos son de vacio, asi que el punto de aparicion del mundo --8,64,8-- no
+     * es un sitio, es aire: mandar ahi a alguien es tirarlo al vacio. Y al morir, BentoBox ya
+     * devuelve al jugador a su isla; pisar ese respawn seria cambiar una vuelta a casa por una
+     * caida.
+     *
+     * Por eso la exclusion es una lista explicita y no una heuristica sobre el tipo de mundo:
+     * quien anada una modalidad gestionada por otro plugin tiene que decirlo aqui a mano.
+     */
+    private boolean gestionaSuPropioSpawn(Modality modalidad) {
+        for (String id : plugin.getConfig()
+                .getStringList("modalidades.spawn-por-modalidad.gestionan-su-spawn")) {
+            if (id.equalsIgnoreCase(modalidad.id())) return true;
+        }
+        return false;
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         if (!enabled()) return;
@@ -64,6 +84,9 @@ public final class ModalitySpawnListener implements Listener {
         }
 
         if (!comando.equals("spawn")) return;
+
+        // Se deja pasar sin tocarlo: lo atiende quien corresponda (BentoBox, EssentialsX).
+        if (gestionaSuPropioSpawn(modalidad(player))) return;
 
         World destino = mundoDeLaModalidad(player);
         // Si la modalidad no resuelve a ningun mundo cargado, no se toca el comando: que lo
@@ -95,6 +118,7 @@ public final class ModalitySpawnListener implements Listener {
     public void onRespawn(PlayerRespawnEvent event) {
         if (!enabled()) return;
         if (event.isBedSpawn() || event.isAnchorSpawn()) return;
+        if (gestionaSuPropioSpawn(modalidad(event.getPlayer()))) return;
 
         World destino = mundoDeLaModalidad(event.getPlayer());
         if (destino != null) {

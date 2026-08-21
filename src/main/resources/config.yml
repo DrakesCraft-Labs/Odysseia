@@ -3895,6 +3895,15 @@ modalidades:
     # mundos propios en modalidades.modos; survival es la de respaldo y por eso va aqui.
     mundos:
       survival: world
+    # Modalidades cuya aparicion gestiona OTRO plugin y que hay que dejar en paz.
+    #
+    # SkyBlock y OneBlock no tienen spawn: se entra directo a la isla y de eso se encarga
+    # BentoBox. Sus mundos son de vacio, asi que el punto de aparicion del mundo no es un
+    # sitio, es aire. Mandar ahi a alguien es tirarlo al vacio, y pisar su respawn convierte
+    # una vuelta a casa en una caida.
+    gestionan-su-spawn:
+    - skyblock
+    - oneblock
     # Para volver al hub. Antes la unica salida era /spawn, que es justo lo que ya no saca a
     # nadie de su modalidad sin pedirlo.
     comando-lobby: lobby

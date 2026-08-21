@@ -55,6 +55,31 @@ class ModalitySpawnConfigTest {
     }
 
     @Test
+    void lasModalidadesDeBentoBoxQuedanFueraDelEnrutado() throws Exception {
+        YamlConfiguration config = config();
+        List<String> excluidas = config.getStringList("modalidades.spawn-por-modalidad.gestionan-su-spawn");
+
+        // SkyBlock y OneBlock no tienen spawn: se entra directo a la isla via BentoBox, y sus
+        // mundos son de vacio. Enrutar /spawn o el respawn hacia el punto de aparicion del mundo
+        // deja al jugador cayendo. Si alguien quita una de estas dos entradas, esto lo para.
+        for (String id : List.of("skyblock", "oneblock")) {
+            assertTrue(excluidas.stream().anyMatch(value -> value.equalsIgnoreCase(id)),
+                    "la modalidad '" + id + "' la gestiona BentoBox y no puede entrar en el "
+                            + "enrutado de spawn: su mundo es de vacio y el spawn del mundo es aire");
+        }
+    }
+
+    @Test
+    void loQueSeExcluyeExisteComoModalidad() throws Exception {
+        YamlConfiguration config = config();
+        ConfigurationSection modos = config.getConfigurationSection("modalidades.modos");
+        for (String id : config.getStringList("modalidades.spawn-por-modalidad.gestionan-su-spawn")) {
+            assertTrue(modos.getKeys(false).stream().anyMatch(k -> k.equalsIgnoreCase(id)),
+                    "se excluye '" + id + "' del enrutado de spawn pero esa modalidad no existe");
+        }
+    }
+
+    @Test
     void elLobbyEstaDeclarado() throws Exception {
         YamlConfiguration config = config();
         String lobby = config.getString("modalidades.spawn-por-modalidad.mundo-lobby");
