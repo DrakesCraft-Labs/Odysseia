@@ -65,6 +65,8 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.ModalityStorageGuardListener modalityStorageGuard;
     private org.metamechanists.odysseia.laboratorio.SandboxStashRepository sandboxStash;
     @Getter
+    private org.metamechanists.odysseia.listeners.ModalitySpawnListener modalitySpawn;
+    @Getter
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
     private org.metamechanists.odysseia.papa.PapaDeMarService papaService;
@@ -166,8 +168,8 @@ public final class Odysseia extends JavaPlugin {
         getCommand("buy").setExecutor(
                 new org.metamechanists.odysseia.commands.BuyCommand(this));
         Bukkit.getPluginManager().registerEvents(modalidadesCmd, this);
-        Bukkit.getPluginManager().registerEvents(
-                new org.metamechanists.odysseia.listeners.ModalitySpawnListener(this), this);
+        this.modalitySpawn = new org.metamechanists.odysseia.listeners.ModalitySpawnListener(this);
+        Bukkit.getPluginManager().registerEvents(modalitySpawn, this);
         try {
             this.modalityVaults = new org.metamechanists.odysseia.vaults.ModalityVaultService(this, modalityService);
             Bukkit.getPluginManager().registerEvents(modalityVaults, this);

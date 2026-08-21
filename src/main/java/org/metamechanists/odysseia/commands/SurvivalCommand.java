@@ -33,16 +33,35 @@ public final class SurvivalCommand implements CommandExecutor {
             return true;
         }
 
-        String destino = plugin.getConfig().getString("modalidades.comando-spawn", "spawn");
-        boolean ok = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), destino + " " + player.getName());
-        if (ok) {
+        /*
+         * Se resuelve el mundo de la modalidad en vez de despachar /spawn desde consola.
+         *
+         * Aquello mandaba al jugador al spawn de EssentialsX, que es unico y esta en el lobby:
+         * pulsar "Slimefun" en el menu te dejaba justo donde ya estabas. No se notaba porque la
+         * gente entraba al mundo con /rtp, y el holograma del lobby lo decia tal cual. Al cerrar
+         * el /rtp en el lobby, esa via dejo de existir y esto quedo como unica entrada.
+         *
+         * La resolucion se pide al listener de spawn para no tener dos maneras distintas de
+         * calcular el mismo destino, que es como acaban divergiendo cuando alguien mueve un mundo.
+         */
+        org.bukkit.World destino = plugin instanceof org.metamechanists.odysseia.Odysseia odysseia
+                && odysseia.getModalitySpawn() != null
+                        ? odysseia.getModalitySpawn().mundoDeModalidad("survival")
+                        : null;
+
+        if (destino != null) {
+            player.teleport(destino.getSpawnLocation());
             player.sendMessage(color("&6DrakesCraft &8· &7Te llevamos al &aSurvival&7."));
-        } else {
-            // Sin el comando de spawn disponible, al menos dejamos al jugador en un lugar valido.
-            player.teleport(Bukkit.getWorlds().getFirst().getSpawnLocation());
-            player.sendMessage(color("&6DrakesCraft &8· &7Te llevamos al &aSurvival&7. "
-                    + "&8(spawn por defecto)"));
+            return true;
         }
+
+        // Sin mundo resuelto se cae al comportamiento anterior, que al menos deja al jugador
+        // en un sitio valido en vez de no hacer nada.
+        String comando = plugin.getConfig().getString("modalidades.comando-spawn", "spawn");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), comando + " " + player.getName());
+        player.sendMessage(color("&6DrakesCraft &8· &7Te llevamos al &aSurvival&7. &8(spawn por defecto)"));
+        plugin.getLogger().warning("[Spawn] No se pudo resolver el mundo de survival; "
+                + "revisa modalidades.spawn-por-modalidad.mundos.survival");
         return true;
     }
 

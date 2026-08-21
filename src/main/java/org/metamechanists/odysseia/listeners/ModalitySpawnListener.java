@@ -130,6 +130,30 @@ public final class ModalitySpawnListener implements Listener {
         return plugin.getModalityService().resolve(player);
     }
 
+    /**
+     * El mundo cuyo spawn representa a una modalidad por id, o null si no se puede saber.
+     *
+     * Publico porque /survival necesita exactamente esta respuesta y no debe tener la suya:
+     * dos formas de resolver el mismo destino acaban divergiendo en cuanto alguien mueve un
+     * mundo de sitio.
+     */
+    public World mundoDeModalidad(String id) {
+        String configurado = plugin.getConfig()
+                .getString("modalidades.spawn-por-modalidad.mundos." + id.toLowerCase(Locale.ROOT));
+        if (configurado != null && !configurado.isBlank()) {
+            World mundo = Bukkit.getWorld(configurado);
+            if (mundo != null) return mundo;
+        }
+        for (Modality modalidad : plugin.getModalityService().modalities()) {
+            if (!modalidad.id().equalsIgnoreCase(id)) continue;
+            for (String nombre : modalidad.worlds()) {
+                World mundo = Bukkit.getWorld(nombre);
+                if (mundo != null) return mundo;
+            }
+        }
+        return null;
+    }
+
     /** El mundo cuyo spawn representa a la modalidad del jugador, o null si no se puede saber. */
     private World mundoDeLaModalidad(Player player) {
         Modality modalidad = modalidad(player);
