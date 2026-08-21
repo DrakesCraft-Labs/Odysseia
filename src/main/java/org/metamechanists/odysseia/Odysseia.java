@@ -176,33 +176,20 @@ public final class Odysseia extends JavaPlugin {
             getLogger().log(Level.SEVERE, "[Bovedas] No se pudo iniciar el almacen de bovedas por modalidad", error);
         }
 
-        // Frontera del laboratorio. Si esto no arranca, el mundo creativo se queda sin aislar el
-        // inventario, asi que en ese caso NO se registra nada: mas vale un laboratorio que no
-        // funciona que uno por el que se puede sacar equipo invocado con /sf cheat.
+        // Frontera del laboratorio y centinela universal.
+        // El aislamiento de inventarios y Ender Chests lo gestiona de forma nativa e independiente InvSwitcher.
         java.util.Set<String> mundosLaboratorio = new java.util.HashSet<>();
         for (String mundo : getConfig().getStringList("modalidades.modos.laboratorio.mundos")) {
             mundosLaboratorio.add(mundo.toLowerCase(java.util.Locale.ROOT));
         }
         if (!mundosLaboratorio.isEmpty()) {
-            try {
-                this.sandboxStash = new org.metamechanists.odysseia.laboratorio.SandboxStashRepository(
-                        new java.io.File(getDataFolder(), "laboratorio.db"));
-                org.metamechanists.odysseia.laboratorio.SandboxIsolationListener aislamiento =
-                        new org.metamechanists.odysseia.laboratorio.SandboxIsolationListener(
-                                this, sandboxStash, mundosLaboratorio);
-                Bukkit.getPluginManager().registerEvents(aislamiento, this);
-                aislamiento.reconciliarAlArrancar();
-                Bukkit.getPluginManager().registerEvents(
-                        new org.metamechanists.odysseia.laboratorio.SandboxChunkLimitListener(
-                                this, mundosLaboratorio), this);
-                Bukkit.getPluginManager().registerEvents(
-                        new org.metamechanists.odysseia.listeners.UniversalModalitySentinel(
-                                this, mundosLaboratorio), this);
-                getLogger().info("[Modalidades] Aislamiento de inventario y Centinela Universal de items activos.");
-            } catch (java.sql.SQLException error) {
-                getLogger().log(Level.SEVERE, "[Laboratorio] No se pudo abrir la consigna de inventarios; "
-                        + "el laboratorio NO queda aislado y no se debe abrir a los jugadores", error);
-            }
+            Bukkit.getPluginManager().registerEvents(
+                    new org.metamechanists.odysseia.laboratorio.SandboxChunkLimitListener(
+                            this, mundosLaboratorio), this);
+            Bukkit.getPluginManager().registerEvents(
+                    new org.metamechanists.odysseia.listeners.UniversalModalitySentinel(
+                            this, mundosLaboratorio), this);
+            getLogger().info("[Modalidades] Centinela Universal de items y limites de laboratorio activos.");
         }
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
