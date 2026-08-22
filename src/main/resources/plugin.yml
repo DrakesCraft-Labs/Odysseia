@@ -22,6 +22,15 @@ commands:
   survival:
     description: Te lleva a la modalidad principal (Survival).
     aliases: [principal, polis, main]
+  # Estos dos no los registraba nadie: se ejecutaban y no pasaba nada. Los NPC del
+  # lobby y el menu de /modalidades los lanzan, asi que tienen que existir.
+  # skyblock y oneblock no van aqui: los registra BentoBox.
+  clasico:
+    description: Te lleva a la modalidad Clasico.
+    aliases: [classic, vanilla]
+  laboratorio:
+    description: Te lleva al Laboratorio creativo de pruebas.
+    aliases: [lab, laboratory]
   modalidades:
     description: Menu para saltar entre Survival, SkyBlock y OneBlock.
     aliases: [modalidad, modos, hub, modes, modalities]

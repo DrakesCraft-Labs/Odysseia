@@ -163,8 +163,12 @@ public final class Odysseia extends JavaPlugin {
         org.metamechanists.odysseia.commands.ModalidadesCommand modalidadesCmd =
                 new org.metamechanists.odysseia.commands.ModalidadesCommand(modalityService);
         getCommand("modalidades").setExecutor(modalidadesCmd);
-        getCommand("survival").setExecutor(
-                new org.metamechanists.odysseia.commands.SurvivalCommand(this));
+        // Un solo ejecutor para las tres modalidades propias. Resuelve cual es por el
+        // nombre del comando, asi que anadir otra solo pide declararla y registrarla.
+        var viajeModalidad = new org.metamechanists.odysseia.commands.ModalityTravelCommand(this);
+        getCommand("survival").setExecutor(viajeModalidad);
+        getCommand("clasico").setExecutor(viajeModalidad);
+        getCommand("laboratorio").setExecutor(viajeModalidad);
         getCommand("buy").setExecutor(
                 new org.metamechanists.odysseia.commands.BuyCommand(this));
         Bukkit.getPluginManager().registerEvents(modalidadesCmd, this);
