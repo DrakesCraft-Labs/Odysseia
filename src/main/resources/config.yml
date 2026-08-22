@@ -578,12 +578,50 @@ natural-spawn:
 # ProtectionStones. Si la API de protecciones falla, la rotura queda desactivada.
 blood-moon:
   enabled: true
+  # Cada cuantas noches cae. Deterministico, para que la comunidad pueda contarlas.
+  # Poner 0 vuelve al sorteo por `chance`.
+  every-nights: 5
   chance: 0.18
   worlds: [world]
-  waves: 3
-  wave-interval-seconds: 45
-  zombies-per-player: 5
-  max-zombies-per-wave: 18
+
+  # Techo duro de criaturas vivas de la horda en el mundo. Con muchos jugadores el
+  # total se reparte entre ellos, asi que cada uno recibe menos y la suma no sube.
+  max-alive-global: 300
+  # Techo por jugador cuando hay poca gente conectada.
+  per-player-share: 60
+  # Cada cuanto se repone lo que fue cayendo. No hay oleadas fijas.
+  refill-seconds: 8
+  spawn-radius-min: 20
+  spawn-radius-max: 34
+
+  # Un corazon por golpe, para todos. Se aplica por atributo y ademas se recorta en
+  # el evento de dano, porque las flechas, las pociones de bruja y el grito del
+  # warden no pasan por el atributo de ataque.
+  damage-cap: 2.0
+  health: 20.0
+  speed-multiplier: 1.15
+
+  # Reparto de la horda por pesos relativos. SHULKER se ignora aunque se anada: es
+  # estatico y su levitacion tira al jugador al vacio.
+  composition:
+    ZOMBIE: 55
+    SKELETON: 15
+    SPIDER: 10
+    ENDERMAN: 8
+    WITCH: 5
+    VINDICATOR: 4
+    EVOKER: 2
+
+  # El warden es el evento raro de la noche: como mucho uno, y se anuncia.
+  # Conserva su vida entera; lo unico que se le recorta es el dano.
+  warden:
+    enabled: true
+    max-per-moon: 1
+
+  # Podio de bajas al amanecer.
+  top-kills:
+    enabled: true
+    show: 3
   final-boss:
     enabled: true
     id: dios_corrupto
