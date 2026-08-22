@@ -133,12 +133,14 @@ public final class SafeRestartCommand implements CommandExecutor {
 
         Bukkit.savePlayers();
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "save-all flush");
+        respaldarInventarios();
         // Las bovedas de modalidad viven en su propia base y no las cubre save-all.
         try {
             plugin.flushModalityVaults();
         } catch (RuntimeException error) {
             plugin.getLogger().log(Level.WARNING, "[Restart] No se pudieron volcar las bovedas", error);
         }
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "save-all flush");
 
         try {
             var ruta = RestartRequest.escribir(plugin.getDataFolder().toPath(), quien, motivo);
@@ -149,6 +151,22 @@ public final class SafeRestartCommand implements CommandExecutor {
                     "[Restart] No se pudo dejar la peticion de reinicio. Hay que reiniciar a mano "
                             + "desde Star con: python3 scripts/control_drakescraft.py restart", error);
             Bukkit.broadcast(componente("&e&l⚠ &fEl reinicio se hara en unos minutos. &7Todo quedo guardado."));
+        }
+    }
+
+    /** Crea un punto de restauracion individual antes de entregar el reinicio a Star. */
+    private void respaldarInventarios() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("InventoryRollbackPlus")) {
+            plugin.getLogger().warning("[Restart] InventoryRollbackPlus no esta activo; no se crearon respaldos de inventario.");
+            return;
+        }
+
+        for (Player jugador : Bukkit.getOnlinePlayers()) {
+            boolean enviado = Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(), "irp forcebackup " + jugador.getName());
+            if (!enviado) {
+                plugin.getLogger().warning("[Restart] IRP rechazo el respaldo de " + jugador.getName());
+            }
         }
     }
 
