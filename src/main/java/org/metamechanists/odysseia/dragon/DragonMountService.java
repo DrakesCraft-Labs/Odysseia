@@ -341,16 +341,45 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
         dragon.setCustomNameVisible(true);
 
         FlightSession session = new FlightSession(variant, dragon, origin);
-        activeFlights.put(player.getUniqueId(), session);
         playerBreaths.putIfAbsent(player.getUniqueId(), variant.defaultBreath());
-        if (!dragon.addPassenger(player)) {
-            activeFlights.remove(player.getUniqueId());
+        mountWhenReady(player, dragon, session, 0);
+    }
+
+    /**
+     * Sube al jinete en cuanto el dragon existe de verdad para el servidor.
+     *
+     * <p>Antes se llamaba a {@code addPassenger} en el mismo tick del spawn y
+     * devolvia {@code false}: la entidad todavia no esta registrada ni la siguen
+     * los jugadores, asi que el montaje se rechaza y el jugador solo veia
+     * "No se pudo iniciar el vuelo". Un tick de espera lo resuelve.
+     *
+     * <p>Ademas se limpian los dos estados que tambien impiden montar: ir ya
+     * dentro de otro vehiculo y estar planeando con elitros.
+     */
+    private void mountWhenReady(Player player, EnderDragon dragon, FlightSession session, int intento) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!player.isOnline() || dragon.isDead() || !dragon.isValid()) {
+                cleanupFlight(player, session);
+                return;
+            }
+            if (player.isInsideVehicle()) player.leaveVehicle();
+            if (player.isGliding()) player.setGliding(false);
+
+            if (dragon.addPassenger(player)) {
+                activeFlights.put(player.getUniqueId(), session);
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL,
+                        session.variant().volume(), session.variant().pitch());
+                player.sendMessage(color(session.variant().summonMessage()));
+                return;
+            }
+            // Hasta cuatro ticks de margen antes de rendirse.
+            if (intento < 3) {
+                mountWhenReady(player, dragon, session, intento + 1);
+                return;
+            }
             cleanupFlight(player, session);
             player.sendMessage(ChatColor.RED + "No se pudo iniciar el vuelo. Inténtalo de nuevo en suelo firme.");
-            return;
-        }
-        player.playSound(origin, Sound.ENTITY_ENDER_DRAGON_GROWL, variant.volume(), variant.pitch());
-        player.sendMessage(color(variant.summonMessage()));
+        });
     }
 
     private boolean canUseAnyDragon(Player player) {
