@@ -32,6 +32,7 @@ on:
       - 'build.gradle'
       - 'README.md'
       - 'docs/**'
+      - '.github/scripts/**'
   workflow_dispatch:
     inputs:
       dry_run:
