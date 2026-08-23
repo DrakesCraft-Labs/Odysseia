@@ -37,12 +37,11 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         }
 
         Location center = player.getLocation().clone();
-        
+
         // Efectos iniciales masivos de impacto divino
         playGodlikeAuraEffects(player, center, radius);
 
         int removed = purge(center, radius, player.getUniqueId());
-        Bukkit.getScheduler().runTask(plugin, () -> purge(center, radius, player.getUniqueId()));
 
         player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "✦ AURA DEL CREADOR: " 
                 + ChatColor.RED + removed + ChatColor.DARK_RED + " entidad(es) desintegradas en radio " + radius + "m.");
@@ -65,6 +64,8 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         // Flash cegador en el centro
         org.metamechanists.odysseia.util.ParticleCompat.spawnFlash(world, center.clone().add(0, 1.5, 0), 4);
         world.spawnParticle(Particle.SONIC_BOOM, center.clone().add(0, 1.2, 0), 2, 0, 0, 0, 0);
+        world.spawnParticle(Particle.TOTEM_OF_UNDYING, center.clone().add(0, 1.1, 0),
+                120, 0.7, 1.0, 0.7, 0.35);
 
         // Pilar de luz cósmica vertical
         for (double y = center.getY(); y < center.getY() + 40.0; y += 1.5) {
@@ -97,6 +98,8 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
                     Location ringLoc = new Location(world, x, center.getY() + 0.3, z);
                     world.spawnParticle(Particle.SOUL_FIRE_FLAME, ringLoc, 1, 0.05, 0.05, 0.05, 0.01);
                     world.spawnParticle(Particle.REVERSE_PORTAL, ringLoc, 1, 0.05, 0.05, 0.05, 0.05);
+                    world.spawnParticle(Particle.END_ROD, ringLoc.clone().add(0, 0.18, 0),
+                            1, 0.02, 0.02, 0.02, 0.005);
 
                     // Puntos en cúpula elevada
                     if (step % 2 == 0) {
@@ -122,7 +125,9 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
                 center, radius, radius, radius,
                 entity -> isInsideSphere(center, entity.getLocation(), radius)))) {
             Entity target = nearby instanceof ComplexEntityPart part ? part.getParent() : nearby;
-            if (target.getUniqueId().equals(executorId) || !processed.add(target.getUniqueId())) continue;
+            // Una limpieza administrativa jamás debe matar ni penalizar a un jugador.
+            if (target instanceof Player || target.getUniqueId().equals(executorId)
+                    || !processed.add(target.getUniqueId())) continue;
             try {
                 Location tLoc = target.getLocation();
 
