@@ -64,6 +64,28 @@ class CosmeticShapesTest {
     }
 
     @Test
+    void lasAlasQuedanDetrasEnLosCuatroPuntosCardinales() {
+        for (int grados : new int[]{0, 90, 180, 270}) {
+            double yaw = Math.toRadians(grados);
+            double miraX = -Math.sin(yaw);
+            double miraZ = Math.cos(yaw);
+            for (Vector punto : CosmeticShapes.alas(yaw, 0, 40)) {
+                double avance = punto.getX() * miraX + punto.getZ() * miraZ;
+                assertTrue(avance < 0, "ala delante del jugador con yaw " + grados);
+            }
+        }
+    }
+
+    @Test
+    void losHuesosSiguenLaSuperficieYLaEspalda() {
+        List<Vector> huesos = CosmeticShapes.huesosAlas(Math.PI / 2, 0, 10);
+        assertEquals(20, huesos.size());
+        for (Vector punto : huesos) {
+            assertTrue(punto.getX() > 0, "mirando al oeste, la espalda queda al este");
+        }
+    }
+
+    @Test
     void lasAlasBaten() {
         // Dos instantes distintos del ciclo tienen que dar aperturas distintas.
         Vector puntaAhora = CosmeticShapes.alas(0, 0, 8).get(7);

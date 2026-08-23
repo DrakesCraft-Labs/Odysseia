@@ -60,8 +60,8 @@ public final class CosmeticShapes {
      */
     public static List<Vector> alas(double yawRadianes, double fase, int puntosPorAla) {
         List<Vector> salida = new ArrayList<>(puntosPorAla * 2);
-        // El batido oscila entre casi cerrado y bien abierto.
-        double apertura = 0.55D + 0.35D * Math.sin(fase * 0.15D);
+        // Batido amplio pero suave: nunca se cierra tanto como para atravesar el torso.
+        double apertura = 0.78D + 0.18D * Math.sin(fase * 0.15D);
         // Los puntos se reparten en filas a lo largo del hueso; cada fila cuelga sus plumas.
         int filas = Math.max(1, (int) Math.ceil(puntosPorAla / (double) PLUMAS_POR_FILA));
 
@@ -74,15 +74,31 @@ public final class CosmeticShapes {
                 double s = PLUMAS_POR_FILA > 1 ? pluma / (double) (PLUMAS_POR_FILA - 1) : 0.0D;
 
                 // Borde superior del ala: nace junto al hombro y se aleja subiendo.
-                double huesoX = (0.22D + t * 1.25D) * apertura;
-                double huesoY = 1.45D + 0.5D * Math.sin(t * Math.PI * 0.55D);
+                double huesoX = (0.28D + t * 1.48D) * apertura;
+                double huesoY = 1.5D + 0.58D * Math.sin(t * Math.PI * 0.62D);
                 // Perfil de las plumas: nunca llega a cero, para que la punta no se deshilache.
-                double largo = 1.2D * Math.sin(Math.PI * (0.12D + 0.8D * t));
+                double largo = 1.38D * Math.sin(Math.PI * (0.12D + 0.8D * t));
 
                 // Coordenadas locales: X hacia el lado, Z hacia atras.
                 double x = (huesoX + s * largo * 0.3D) * lado;
                 double y = huesoY - s * largo;
-                double z = -0.28D - t * 0.42D - s * 0.12D;
+                double z = -0.52D - t * 0.34D - s * (0.12D + 0.18D * t);
+                salida.add(rotarY(new Vector(x, y, z), yawRadianes));
+            }
+        }
+        return salida;
+    }
+
+    /** Borde luminoso que marca hombro, articulación y punta sobre la superficie de cada ala. */
+    public static List<Vector> huesosAlas(double yawRadianes, double fase, int puntosPorAla) {
+        List<Vector> salida = new ArrayList<>(puntosPorAla * 2);
+        double apertura = 0.78D + 0.18D * Math.sin(fase * 0.15D);
+        for (int lado = -1; lado <= 1; lado += 2) {
+            for (int i = 0; i < puntosPorAla; i++) {
+                double t = puntosPorAla > 1 ? i / (double) (puntosPorAla - 1) : 0.0D;
+                double x = (0.28D + t * 1.48D) * apertura * lado;
+                double y = 1.5D + 0.58D * Math.sin(t * Math.PI * 0.62D);
+                double z = -0.54D - t * 0.34D;
                 salida.add(rotarY(new Vector(x, y, z), yawRadianes));
             }
         }

@@ -57,7 +57,7 @@ public final class CosmeticService implements Listener {
      * Es multiplo de las plumas por fila, de modo que todas las filas salen completas y el borde
      * inferior del ala no queda escalonado.
      */
-    private static final int PUNTOS_ALA = 28;
+    private static final int PUNTOS_ALA = 40;
 
     public CosmeticService(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -152,15 +152,27 @@ public final class CosmeticService implements Listener {
                 case "ember" -> world.spawnParticle(Particle.LAVA, loc, 2, 0.3, 0.4, 0.3, 0.01);
                 case "forest" -> world.spawnParticle(Particle.COMPOSTER, loc, 6, 0.4, 0.5, 0.4, 0.02);
                 case "heart" -> world.spawnParticle(Particle.HEART, loc, 2, 0.4, 0.5, 0.4, 0.01);
-                case "lightning" -> world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 8, 0.4, 0.6, 0.4, 0.05);
+                case "lightning" -> {
+                    dibujar(p, CosmeticShapes.vortice(fase, 3, 5, 0.82D, 2.15D),
+                            BLANCO_CALIDO, 0.62F);
+                    world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 6, 0.4, 0.7, 0.4, 0.06);
+                }
                 case "soul" -> world.spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 6, 0.3, 0.5, 0.3, 0.02);
                 case "sand" -> world.spawnParticle(Particle.FALLING_DUST, loc,
                         8, 0.4, 0.6, 0.4, org.bukkit.Material.SAND.createBlockData());
                 case "abyss" -> world.spawnParticle(Particle.BUBBLE_POP, loc, 8, 0.4, 0.6, 0.4, 0.02);
                 case "titan" -> world.spawnParticle(Particle.END_ROD, loc, 10, 0.5, 0.8, 0.5, 0.03);
-                case "solar" -> world.spawnParticle(Particle.DUST, loc, 10, 0.5, 0.8, 0.5,
-                        new Particle.DustOptions(Color.fromRGB(255, 196, 0), 1.5F));
-                case "void" -> world.spawnParticle(Particle.REVERSE_PORTAL, loc, 12, 0.5, 0.8, 0.5, 0.06);
+                case "solar" -> {
+                    dibujar(p, CosmeticShapes.anilloInclinado(fase, 20, 0.82D, 1.25D, 0.22D),
+                            DORADO, 1.05F);
+                    dibujar(p, CosmeticShapes.orbita(-fase * 1.4D, 4, 1.02D), BLANCO_CALIDO, 0.65F);
+                    world.spawnParticle(Particle.SMALL_FLAME, loc, 3, 0.25, 0.55, 0.25, 0.01);
+                }
+                case "void" -> {
+                    dibujar(p, CosmeticShapes.espiral(-fase * 1.3D, 18, 0.75D, 2.15D),
+                            Color.fromRGB(55, 15, 90), 0.9F);
+                    world.spawnParticle(Particle.REVERSE_PORTAL, loc, 7, 0.35, 0.65, 0.35, 0.08);
+                }
                 case "singularidad" -> {
                     // Espiral de particulas, sin entidades Display ni coste de pathfinding.
                     dibujar(p, CosmeticShapes.espiral(fase * 1.45D, 20, 0.9D, 2.35D), MORADO, 1.05F);
@@ -168,32 +180,36 @@ public final class CosmeticService implements Listener {
                             Color.fromRGB(18, 8, 42), 1.25F);
                 }
                 case "caos" -> {
-                    world.spawnParticle(Particle.DUST, loc, 10, 0.5, 0.8, 0.5,
-                            new Particle.DustOptions(Color.fromRGB(255, 0, 85), 1.5F));
-                    world.spawnParticle(Particle.REVERSE_PORTAL, loc, 6, 0.3, 0.5, 0.3, 0.05);
+                    dibujar(p, CosmeticShapes.anilloInclinado(fase * 2, 18, 1.0D, 1.05D, 0.55D),
+                            Color.fromRGB(255, 0, 85), 1.05F);
+                    dibujar(p, CosmeticShapes.anilloInclinado(-fase * 1.4D, 14, 0.7D, 1.35D, -0.4D),
+                            MORADO, 0.75F);
+                    world.spawnParticle(Particle.REVERSE_PORTAL, loc, 4, 0.3, 0.5, 0.3, 0.05);
                 }
-                case "staff" -> world.spawnParticle(Particle.DUST, loc, 8, 0.4, 0.6, 0.4,
-                        new Particle.DustOptions(Color.fromRGB(0, 200, 255), 1.2F));
+                case "staff" -> {
+                    dibujar(p, CosmeticShapes.corona(fase, 8, 0.4D, 2.3D), ABISAL, 0.75F);
+                    dibujar(p, CosmeticShapes.orbita(fase * 1.5D, 4, 0.9D), BLANCO_CALIDO, 0.62F);
+                }
                 // ── Cosmeticos con forma ──────────────────────────────
                 // PUNTOS_ALA reparte la membrana; con menos se veia un trazo y no un ala.
-                case "alas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), DORADO, 1.0F);
-                case "alas_moradas" -> dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), MORADO, 1.0F);
+                case "alas" -> dibujarAlas(p, DORADO, BLANCO_CALIDO);
+                case "alas_moradas" -> dibujarAlas(p, MORADO, Color.fromRGB(225, 170, 255));
                 case "alas_abisales" -> {
-                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), ABISAL, 1.0F);
+                    dibujarAlas(p, ABISAL, HIELO);
                     world.spawnParticle(Particle.DRIPPING_WATER, loc, 3, 0.6, 0.5, 0.4, 0.0);
                 }
                 case "alas_infernales" -> {
-                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), CARMESI, 1.0F);
+                    dibujarAlas(p, CARMESI, Color.fromRGB(255, 155, 35));
                     world.spawnParticle(Particle.SMALL_FLAME, loc, 4, 0.6, 0.5, 0.4, 0.01);
                 }
                 case "alas_glaciares" -> {
-                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), HIELO, 1.0F);
+                    dibujarAlas(p, HIELO, Color.WHITE);
                     world.spawnParticle(Particle.SNOWFLAKE, loc, 3, 0.6, 0.5, 0.4, 0.01);
                 }
                 case "alas_solares" -> {
-                    // Dos capas: el nucleo blanco recorta la silueta contra el dorado exterior.
-                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA), DORADO, 1.15F);
-                    dibujar(p, CosmeticShapes.alas(yaw(p), fase, PUNTOS_ALA / 2), BLANCO_CALIDO, 0.6F);
+                    dibujarAlas(p, DORADO, Color.WHITE);
+                    dibujar(p, CosmeticShapes.huesosAlas(yaw(p), fase + 4, 8),
+                            Color.fromRGB(255, 110, 20), 0.7F);
                 }
                 case "corona_dorada" -> dibujar(p, CosmeticShapes.corona(fase, 8, 0.36D, 2.25D), DORADO, 0.75F);
                 case "corona_abisal" -> dibujar(p, CosmeticShapes.corona(fase, 8, 0.36D, 2.25D), ABISAL, 0.75F);
@@ -285,7 +301,16 @@ public final class CosmeticService implements Listener {
 
     /** Hacia donde mira el jugador, en radianes, para orientar alas y colas. */
     private static double yaw(Player player) {
-        return Math.toRadians(-player.getLocation().getYaw());
+        // Bukkit: yaw 0 mira +Z y yaw 90 mira -X. La rotación local necesita el mismo signo;
+        // negarlo reflejaba la espalda y llevaba alas/cola al frente al mirar este u oeste.
+        return Math.toRadians(player.getLocation().getYaw());
+    }
+
+    /** Superficie coloreada y borde claro: da volumen y conserva la silueta en cualquier fondo. */
+    private void dibujarAlas(Player player, Color membrana, Color borde) {
+        double orientacion = yaw(player);
+        dibujar(player, CosmeticShapes.alas(orientacion, fase, PUNTOS_ALA), membrana, 1.0F);
+        dibujar(player, CosmeticShapes.huesosAlas(orientacion, fase, 10), borde, 0.72F);
     }
 
     /**
