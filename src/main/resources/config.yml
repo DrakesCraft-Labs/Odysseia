@@ -3970,9 +3970,24 @@ modalidades:
       - laboratorio
     comandos-lista-blanca:
       laboratorio:
-        # Lo que da sentido al mundo: Slimefun entero, cheat incluido.
+        # Slimefun se permite por rutas concretas. Un token "sf" solo abre /sf exacto; no
+        # autoriza automaticamente subcomandos administrativos presentes o futuros.
         - sf
         - slimefun
+        - sf help
+        - slimefun help
+        - sf versions
+        - slimefun versions
+        - sf cheat
+        - slimefun cheat
+        - sf guide
+        - slimefun guide
+        - sf open_guide
+        - slimefun open_guide
+        - sf search
+        - slimefun search
+        - sf stats
+        - slimefun stats
         # Salir. Sin esto un jugador se queda encerrado.
         - modalidad
         - modalidades

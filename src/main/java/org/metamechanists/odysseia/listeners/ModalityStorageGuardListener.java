@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.metamechanists.odysseia.modalities.ModalityService;
 import org.metamechanists.odysseia.vaults.ModalityVaultService;
@@ -163,11 +164,35 @@ public final class ModalityStorageGuardListener implements Listener {
         return false;
     }
 
+    /**
+     * Allowlist matching is deliberately stricter than denylist matching. A one-token entry such
+     * as "sf" permits only /sf itself; it must never implicitly authorize /sf give or a future
+     * administrative subcommand added by Slimefun.
+     */
+    static boolean matchesAllowlist(List<List<String>> patterns, List<String> written) {
+        for (List<String> pattern : patterns) {
+            if (pattern.size() > written.size()) continue;
+            if (pattern.size() == 1 && written.size() != 1) continue;
+            if (written.subList(0, pattern.size()).equals(pattern)) return true;
+        }
+        return false;
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         if (intercept(event.getPlayer(), event.getMessage())) {
             event.setCancelled(true);
         }
+    }
+
+    /** Hides commands which the laboratory would reject, reducing accidental and probing paths. */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onCommandList(PlayerCommandSendEvent event) {
+        if (!enabled || playerBypassesLaboratory(event.getPlayer())) return;
+        String modalityId = modalities.resolve(event.getPlayer()).id().toLowerCase(Locale.ROOT);
+        if (!whitelistModalities.contains(modalityId)) return;
+        List<List<String>> allowed = whitelistPatterns.getOrDefault(modalityId, List.of());
+        event.getCommands().removeIf(command -> !matchesAllowlist(allowed, tokens(command)));
     }
 
     /**
@@ -193,8 +218,8 @@ public final class ModalityStorageGuardListener implements Listener {
         // Denegar por defecto. Va antes que el resto de comprobaciones a proposito: si la
         // modalidad es de lista blanca, nada de lo que venga despues puede reabrir un comando.
         // El bypass de staff sigue valiendo, para poder administrar dentro del laboratorio.
-        if (whitelistModalities.contains(modalityId) && !player.hasPermission(GAMEPLAY_BYPASS)) {
-            if (!matches(whitelistPatterns.getOrDefault(modalityId, List.of()), written)) {
+        if (whitelistModalities.contains(modalityId) && !playerBypassesLaboratory(player)) {
+            if (!matchesAllowlist(whitelistPatterns.getOrDefault(modalityId, List.of()), written)) {
                 String message = plugin.getConfig().getString(
                         "modalidades.guard.mensaje-lista-blanca",
                         "&6DrakesCraft &8· &7En el laboratorio solo funcionan &e/sf&7, &e/modalidades&7, "
@@ -235,6 +260,10 @@ public final class ModalityStorageGuardListener implements Listener {
             return true;
         }
         return false;
+    }
+
+    private static boolean playerBypassesLaboratory(Player player) {
+        return player.hasPermission(GAMEPLAY_BYPASS);
     }
 
     /** Extrae la etiqueta del comando, tolerando la forma plugin:comando. */

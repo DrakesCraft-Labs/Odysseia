@@ -31,7 +31,7 @@ class SandboxWhitelistTest {
     }
 
     private static boolean permitido(String command) throws Exception {
-        return ModalityStorageGuardListener.matches(whitelist(), ModalityStorageGuardListener.tokens(command));
+        return ModalityStorageGuardListener.matchesAllowlist(whitelist(), ModalityStorageGuardListener.tokens(command));
     }
 
     @Test
@@ -40,6 +40,16 @@ class SandboxWhitelistTest {
         assertTrue(permitido("sf cheat"));
         assertTrue(permitido("sf guide"));
         assertTrue(permitido("slimefun:sf cheat"), "la forma plugin:comando no debe saltarse la lista blanca");
+    }
+
+    @Test
+    void slimefunAdministrativoNuncaQuedaAutorizadoPorElPrefijo() throws Exception {
+        for (String command : List.of(
+                "sf give Jack DIAMOND", "sf research Jack all", "sf timings", "sf teleporter",
+                "sf backpack Jack", "sf charge Jack 1000", "sf debug", "sf repair",
+                "sf native", "slimefun:sf give Jack DIAMOND", "slimefun research Jack all")) {
+            assertFalse(permitido(command), "el laboratorio no debe autorizar /" + command);
+        }
     }
 
     @Test
