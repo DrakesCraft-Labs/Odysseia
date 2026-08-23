@@ -192,9 +192,12 @@ public final class Odysseia extends JavaPlugin {
         }
         if (!mundosLaboratorio.isEmpty()) {
             Bukkit.getPluginManager().registerEvents(
+                    new org.metamechanists.odysseia.listeners.UniversalModalitySentinel(
+                            this, mundosLaboratorio), this);
+            Bukkit.getPluginManager().registerEvents(
                     new org.metamechanists.odysseia.laboratorio.SandboxChunkLimitListener(
                             this, mundosLaboratorio), this);
-            getLogger().info("[Modalidades] Limites de maquinas de laboratorio activos (aislamiento delegado a InvSwitcher).");
+            getLogger().info("[Modalidades] Centinela anti-fugas y limites de maquinas de laboratorio activos.");
         }
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.

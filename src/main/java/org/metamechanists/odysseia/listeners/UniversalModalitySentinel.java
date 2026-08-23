@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -51,6 +52,7 @@ public final class UniversalModalitySentinel implements Listener {
     private final NamespacedKey keyCreator;
     private final NamespacedKey keyTimestamp;
     private final NamespacedKey keySlimefun;
+    private final NamespacedKey keySlimefunGuideMode;
 
     public UniversalModalitySentinel(Odysseia plugin, Set<String> sandboxWorlds) {
         this.plugin = plugin;
@@ -59,14 +61,19 @@ public final class UniversalModalitySentinel implements Listener {
         this.keyCreator = new NamespacedKey(plugin, "origin_creator");
         this.keyTimestamp = new NamespacedKey(plugin, "origin_time");
         this.keySlimefun = new NamespacedKey("slimefun", "slimefun_item");
+        this.keySlimefunGuideMode = new NamespacedKey("slimefun", "slimefun_guide_mode");
     }
 
-    /** Marca un ítem sólo si es necesario (no ensucia ítems vanilla de supervivencia). */
+    /** Marca todo lo creado en modalidades aisladas; Survival permanece vanilla y apilable. */
     public void tagItemWithModality(ItemStack item, String modalityId, UUID creator) {
         if (item == null || item.getType().isAir()) return;
-        // En Survival y Laboratorio no marcamos ítems para no romper el stackeo vanilla
-        if ("survival".equalsIgnoreCase(modalityId) || "laboratorio".equalsIgnoreCase(modalityId)) {
-            untagTaintedItem(item);
+        if ("survival".equalsIgnoreCase(modalityId)) {
+            String origin = getOriginModality(item);
+            // Nunca limpiar aqui una prueba de contrabando. Sólo se retiran marcas antiguas de
+            // Survival; las de Laboratorio/islas deben llegar intactas al saneamiento posterior.
+            if (origin == null || "survival".equalsIgnoreCase(origin)) {
+                untagTaintedItem(item);
+            }
             return;
         }
         ItemMeta meta = item.getItemMeta();
@@ -75,8 +82,10 @@ public final class UniversalModalitySentinel implements Listener {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         if (!pdc.has(keyOriginModality, PersistentDataType.STRING)) {
             pdc.set(keyOriginModality, PersistentDataType.STRING, modalityId.toLowerCase(Locale.ROOT));
-            item.setItemMeta(meta);
         }
+        pdc.set(keyCreator, PersistentDataType.STRING, creator.toString());
+        pdc.set(keyTimestamp, PersistentDataType.LONG, System.currentTimeMillis());
+        item.setItemMeta(meta);
     }
 
     /** Obtiene la modalidad de origen marcada en el ítem. */
@@ -161,13 +170,13 @@ public final class UniversalModalitySentinel implements Listener {
     public boolean isItemIllegalInModality(ItemStack item, String targetModality) {
         if (item == null || item.getType().isAir()) return false;
 
-        // Si estamos en supervivencia y el ítem tiene tag de laboratorio erróneo de la prueba anterior, limpiarlo
-        if ("survival".equalsIgnoreCase(targetModality)) {
-            untagTaintedItem(item);
-            return false;
-        }
-
         String origin = getOriginModality(item);
+
+        // Nada creado en el creativo semanal puede cruzar a ninguna otra modalidad.
+        if (!"laboratorio".equalsIgnoreCase(targetModality)
+                && "laboratorio".equalsIgnoreCase(origin)) {
+            return true;
+        }
 
         // Regla 1: Clásico NO acepta Slimefun ni ítems de otras modalidades
         if ("clasico".equalsIgnoreCase(targetModality)) {
@@ -234,12 +243,28 @@ public final class UniversalModalitySentinel implements Listener {
         if (event.getCurrentItem() != null) tagItemWithModality(event.getCurrentItem(), modality.id(), player.getUniqueId());
         if (event.getCursor() != null) tagItemWithModality(event.getCursor(), modality.id(), player.getUniqueId());
 
+        if ("laboratorio".equalsIgnoreCase(modality.id())) {
+            // El modo creativo y /sf cheat clonan el resultado después del evento. El barrido del
+            // siguiente tick marca la copia real que terminó en el inventario del jugador.
+            Bukkit.getScheduler().runTask(plugin, () -> tagInventory(player, "laboratorio"));
+        }
+
         boolean curPurged = sanitizeItem(event.getCurrentItem(), modality.id(), player);
         boolean curCursorPurged = sanitizeItem(event.getCursor(), modality.id(), player);
         if (curPurged || curCursorPurged) {
             event.setCancelled(true);
             inspectAndSanitize(player);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreativeInventory(InventoryCreativeEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        Modality modality = plugin.getModalityService().resolve(player);
+        if (!"laboratorio".equalsIgnoreCase(modality.id())) return;
+
+        tagItemWithModality(event.getCursor(), modality.id(), player.getUniqueId());
+        Bukkit.getScheduler().runTask(plugin, () -> tagInventory(player, modality.id()));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -358,6 +383,32 @@ public final class UniversalModalitySentinel implements Listener {
                     "&6DrakesCraft &8· &c[Centinela] Ese ítem no está permitido en la modalidad &e"
                             + targetModality + "&c. Ha sido purgado automáticamente."));
         }
+    }
+
+    /** Marca el inventario ya materializado por Creative o por la guía Cheat. */
+    private void tagInventory(Player player, String modalityId) {
+        if (!player.isOnline() || !modalityId.equalsIgnoreCase(plugin.getModalityService().resolve(player).id())) return;
+        for (ItemStack item : player.getInventory().getContents()) {
+            tagItemWithModality(item, modalityId, player.getUniqueId());
+        }
+    }
+
+    /** Una guía Cheat que aparezca fuera del laboratorio vuelve a ser guía Survival. */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void normalizeCheatGuideOutsideLaboratory(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if ("laboratorio".equalsIgnoreCase(plugin.getModalityService().resolve(player).id())) return;
+
+        ItemStack item = event.getItem();
+        if (item == null || !item.hasItemMeta()) return;
+        ItemMeta meta = item.getItemMeta();
+        String mode = meta.getPersistentDataContainer().get(keySlimefunGuideMode, PersistentDataType.STRING);
+        if (!"CHEAT_MODE".equalsIgnoreCase(mode)) return;
+
+        meta.getPersistentDataContainer().set(keySlimefunGuideMode, PersistentDataType.STRING, "SURVIVAL_MODE");
+        item.setItemMeta(meta);
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6DrakesCraft &8· &7La guía Cheat sólo funciona dentro de &eLaboratorio&7."));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
