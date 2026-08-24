@@ -3920,6 +3920,19 @@ modalidades:
     # es global: un chunk saturado aqui le cuesta TPS a todo el servidor. Con creativo y
     # /sf cheat no hay coste que frene a nadie, asi que el freno se pone explicito.
     max-slimefun-por-chunk: 120
+    # Herramientas cuyos efectos de rotura masiva se desactivan en laboratorio. Las explosiones
+    # Bukkit se cancelan siempre y se sustituyen por particulas/sonido sin daño ni bloques rotos.
+    fragmentos-items-explosivos:
+      - EXPLOSIVE
+      - TNT
+      - NUKE
+      - BOMB
+      - MISSILE
+      - WARHEAD
+    fragmentos-maquinas-peligrosas:
+      - CHUNK_LOADER
+      - TICK_ACCELERATOR
+      - TIME_ACCELERATOR
   # /spawn lleva al spawn de la modalidad que estas jugando, no siempre al lobby.
   #
   # EssentialsX resuelve /spawn por grupo de permisos, no por mundo, asi que con un unico grupo
