@@ -59,6 +59,8 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private org.metamechanists.odysseia.services.ServerChangelogService changelogService;
+    @Getter
+    private org.metamechanists.odysseia.services.GlobalPlaytimeService globalPlaytime;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     @Getter
     private org.metamechanists.odysseia.modalities.ModalityService modalityService;
@@ -282,6 +284,9 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(seasonalChatGames, this);
         horrorNightScheduler.start();
         bloodMoonManager.start();
+
+        this.globalPlaytime = new org.metamechanists.odysseia.services.GlobalPlaytimeService(this);
+        globalPlaytime.start();
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -594,6 +599,7 @@ public final class Odysseia extends JavaPlugin {
         sendShutdownWebhookSync();
 
         if (purchaseEngine != null) purchaseEngine.close();
+        if (globalPlaytime != null) globalPlaytime.close();
 
         // Guarda las bovedas que sigan abiertas antes de cerrar la base.
         if (modalityVaults != null) modalityVaults.close();

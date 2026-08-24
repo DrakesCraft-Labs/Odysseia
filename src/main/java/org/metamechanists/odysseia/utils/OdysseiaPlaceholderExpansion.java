@@ -76,6 +76,11 @@ public final class OdysseiaPlaceholderExpansion extends PlaceholderExpansion {
                     ? org.bukkit.ChatColor.stripColor(nombre)
                     : nombre;
         }
+        if (params.equalsIgnoreCase("playtime_global")) {
+            return player == null || plugin.getGlobalPlaytime() == null
+                    ? "0s"
+                    : plugin.getGlobalPlaytime().formatted(player.getUniqueId());
+        }
         if (params.equalsIgnoreCase("owner_prefix_odiseo")) {
             return plugin.getCurrentOdiseoPrefix();
         }
