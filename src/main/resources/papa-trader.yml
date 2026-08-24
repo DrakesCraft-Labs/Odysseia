@@ -75,17 +75,17 @@ niveles:
       - "&7Un stack entero de papas."
       - "&7Firmado por la casa."
     comandos:
-      - "eco give {jugador} 5000"
+      - "cheque give {jugador} 5000 1"
     unica: false
 
   cheque_grande:
-    nombre: "&2Cheque de &a30.000 Dragmas"
+    nombre: "&2Cheque de &a25.000 Dragmas"
     coste: 320
     icono: "PAPER"
     descripcion:
       - "&7Cinco stacks. Ya es una fortuna en papas."
     comandos:
-      - "eco give {jugador} 30000"
+      - "cheque give {jugador} 25000 1"
     unica: false
 
   # ── Kits de oficio ────────────────────────────────────────

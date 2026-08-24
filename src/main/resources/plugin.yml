@@ -3,7 +3,7 @@ version: 1.1.3
 main: org.metamechanists.odysseia.Odysseia
 api-version: 1.21
 description: Suite principal de sistemas, tienda, kits, eventos y administracion de DrakesCraft.
-authors: [JackStar]
+authors: [JackStar6677-1]
 softdepend:
   - PlaceholderAPI
   - LuckPerms
@@ -133,12 +133,22 @@ commands:
     description: Vende rápidamente los recursos y materiales de tu inventario principal.
     aliases: [venderinv, sellall]
     usage: /sellinv
+  cheque:
+    description: Emite cheques físicos firmados para premios y crates.
+    aliases: [cheques]
+    usage: /cheque give <jugador> <5000|10000|25000|50000> [cantidad]
   esteusuarioesviejo:
     description: Otorga el rango, permisos y kit legendario Oldschool (Veteranos 5+ Años) a un jugador.
     permission: odysseia.admin.oldschool
     aliases: [grantoldschool, viejodesde, oldschoolgive]
     usage: /esteusuarioesviejo <jugador>
 permissions:
+  odysseia.cheque.admin:
+    description: Permite emitir cheques firmados desde consola o staff.
+    default: op
+  odysseia.cheque.redeem:
+    description: Permite canjear cheques auténticos con clic derecho.
+    default: true
   odysseia.modalidades.storage-bypass:
     description: Permite usar los almacenamientos globales dentro de las islas (staff y pruebas).
     default: op

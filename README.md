@@ -197,7 +197,7 @@ mvn clean package
 cargo test --workspace
 ```
 
-The compiled plugin JAR will be located at `target/Odysseia-1.1.0.jar`.
+The compiled plugin JAR will be located at `target/Odysseia-1.1.3.jar`.
 
 ---
 
@@ -212,6 +212,26 @@ Odysseia bridges and synchronizes with industry-standard server components:
 - **Floodgate 2.0**: Seamless Bedrock Edition UUID translation and prefix handling.
 - **DiscordSRV**: Live synchronization of staff alerts, store broadcasts, and server maintenance countdowns.
 - **PlaceholderAPI**: Rich placeholders for rank tier, daily streaks, claim counts, and active events.
+
+### Signed economy cheques for crates
+
+Odysseia can issue physical, one-use Vault cheques in four deliberately limited denominations:
+`5,000`, `10,000`, `25,000`, and `50,000` Dragmas. Every item has a unique serial and an
+HMAC-SHA256 signature. Redeemed serials are recorded atomically in `plugins/Odysseia/cheques.db`,
+so copied NBT, renamed paper, or a duplicated crate reward cannot create a second payment.
+
+ExcellentCrates should use a **console command reward**. Examples:
+
+```text
+cheque give %player_name% 5000 1
+cheque give %player_name% 10000 1
+cheque give %player_name% 25000 1
+cheque give %player_name% 50000 1
+```
+
+Replace `%player_name%` with the player placeholder used by the installed ExcellentCrates
+version. Players redeem the physical paper with right click. Never copy `cheques.secret`
+between unrelated servers, publish it, or delete it while issued cheques are still circulating.
 
 ---
 

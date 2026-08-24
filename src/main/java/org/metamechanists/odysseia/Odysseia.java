@@ -72,6 +72,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.vaults.ModalityVaultService modalityVaults;
     private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
     private org.metamechanists.odysseia.papa.PapaDeMarService papaService;
+    private org.metamechanists.odysseia.cheques.ChequeService chequeService;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -114,6 +115,16 @@ public final class Odysseia extends JavaPlugin {
         getCommand("daily").setExecutor(new org.metamechanists.odysseia.commands.DailyCommand(automation));
         registerDynamicCommand("restart30", new org.metamechanists.odysseia.commands.SafeRestartCommand(this));
         getCommand("sellinv").setExecutor(new org.metamechanists.odysseia.commands.SellInventoryCommand(this));
+        try {
+            this.chequeService = new org.metamechanists.odysseia.cheques.ChequeService(this);
+            var chequeCommand = new org.metamechanists.odysseia.commands.ChequeCommand(chequeService);
+            getCommand("cheque").setExecutor(chequeCommand);
+            getCommand("cheque").setTabCompleter(chequeCommand);
+            Bukkit.getPluginManager().registerEvents(chequeService, this);
+            getLogger().info("[SUCCESS] Cheques firmados y libro contable disponibles.");
+        } catch (IOException | java.sql.SQLException error) {
+            getLogger().log(Level.SEVERE, "[Cheques] Sistema deshabilitado para proteger la economía", error);
+        }
         org.metamechanists.odysseia.commands.OwnerAuraCommand ownerAura = new org.metamechanists.odysseia.commands.OwnerAuraCommand(this);
         getCommand("auradueno").setExecutor(ownerAura);
         getCommand("auradueno").setTabCompleter(ownerAura);
@@ -600,6 +611,13 @@ public final class Odysseia extends JavaPlugin {
 
         if (purchaseEngine != null) purchaseEngine.close();
         if (globalPlaytime != null) globalPlaytime.close();
+        if (chequeService != null) {
+            try {
+                chequeService.close();
+            } catch (java.sql.SQLException error) {
+                getLogger().log(Level.WARNING, "[Cheques] No se pudo cerrar el libro contable", error);
+            }
+        }
 
         // Guarda las bovedas que sigan abiertas antes de cerrar la base.
         if (modalityVaults != null) modalityVaults.close();
