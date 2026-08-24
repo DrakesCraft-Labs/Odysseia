@@ -966,12 +966,11 @@ native-menus:
         material: SUNFLOWER
         name: "&e&lSubastas de Jugadores"
         lore:
-          - "&7Mercado global de la comunidad."
-          - "&8Vende y compra ítems a otros usuarios."
-          - "&cDisponible únicamente en Survival."
+          - "&7Mercado de jugadores de tu modalidad."
+          - "&8Nada cruza entre Survival, Clásico o islas."
           - ""
           - "&e➤ Clic para abrir &f/ca"
-        commands: ["odysseia:survival-command:ca"]
+        commands: ["ca"]
       slimefun:
         slot: 14
         material: AMETHYST_SHARD
@@ -4065,13 +4064,17 @@ modalidades:
       # descubrio que no la podia poner: se le cobro sin poder usarla ahi.
       - tiendaprot
       - ps get
-    # Clásico sí permite comprar y usar ProtectionStones. CrazyAuctions se permite porque
-    # su fork Drake mantiene mercados separados; estas excepciones no abren cofres de equipo
-    # ni SFMarket.
+    # CrazyAuctions no necesita excepción: su fork Drake resuelve un mercado distinto por
+    # modalidad. DrakesSlimeMarket sí se permite en las dos islas tecnológicas, pero nunca en
+    # Clásico ni Laboratorio.
     comandos-permitidos:
       clasico:
         - tiendaprot
         - ps get
+      oneblock:
+        - sfmercado
+      skyblock:
+        - sfmercado
     # Mensaje por bloqueo, con el patron como clave y guiones en vez de espacios. Sin entrada,
     # se usa el generico de almacenamiento.
     mensajes:

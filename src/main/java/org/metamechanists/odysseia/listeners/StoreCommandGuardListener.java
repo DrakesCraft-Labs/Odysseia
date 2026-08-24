@@ -14,7 +14,7 @@ import java.util.UUID;
 public final class StoreCommandGuardListener implements Listener {
     private static final ThreadLocal<UUID> INTERNAL_DISPATCH = new ThreadLocal<>();
     private static final Set<String> LEGACY_STORE_COMMANDS = Set.of(
-            "shop", "shops", "store", "market", "ultimateshop", "sfmercado", "drakestienda",
+            "shop", "shops", "store", "market", "ultimateshop", "drakestienda",
             "mercado", "tiendaitems", "tiendamateriales", "tmateriales"
     );
 

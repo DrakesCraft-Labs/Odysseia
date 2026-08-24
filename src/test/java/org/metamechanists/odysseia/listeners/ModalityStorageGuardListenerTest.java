@@ -83,6 +83,18 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
+    void slimefunMarketExistsOnlyInTechnologicalModalities() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+
+        assertTrue(config.getStringList("modalidades.guard.comandos-bloqueados").contains("sfmercado"));
+        assertTrue(config.getStringList("modalidades.guard.comandos-permitidos.oneblock").contains("sfmercado"));
+        assertTrue(config.getStringList("modalidades.guard.comandos-permitidos.skyblock").contains("sfmercado"));
+        assertFalse(config.getStringList("modalidades.guard.comandos-permitidos.clasico").contains("sfmercado"));
+        assertFalse(config.getStringList("modalidades.guard.comandos-lista-blanca.laboratorio").contains("sfmercado"));
+    }
+
+    @Test
     void classicGameplayRestrictionsCoverShortcutsButKeepHomesProtectionsAndRtp() {
         var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
                 new java.io.File("src/main/resources/config.yml"));
