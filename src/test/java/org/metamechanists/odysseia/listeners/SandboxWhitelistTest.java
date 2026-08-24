@@ -76,7 +76,8 @@ class SandboxWhitelistTest {
     void noSePuedeSacarNadaPorAlmacenamientoNiHogares() throws Exception {
         for (String command : List.of(
                 "home", "homes", "sethome", "ec", "enderchest", "pv", "vault", "backpack",
-                "mochila", "kit", "kits", "back", "warp", "tpahere", "team echest", "ps get")) {
+                "mochila", "kit", "kits", "back", "warp", "tpa", "tpaccept", "tpdeny",
+                "tpacancel", "tpahere", "team echest", "ps get")) {
             assertFalse(permitido(command), "no debe permitirse /" + command + " en el laboratorio");
         }
     }

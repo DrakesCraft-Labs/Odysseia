@@ -3997,11 +3997,8 @@ modalidades:
         - clasico
         - skyblock
         - oneblock
-        # Convivencia basica y teletransporte entre jugadores del propio laboratorio.
-        - tpa
-        - tpaccept
-        - tpdeny
-        - tpacancel
+        # Chat privado permitido; los teletransportes se bloquean porque una solicitud
+        # originada en otra modalidad podria convertirse en una salida del sandbox.
         - msg
         - r
         - reply
@@ -4020,7 +4017,7 @@ modalidades:
         - list
         - lista
         - who
-    mensaje-lista-blanca: "&6DrakesCraft &8· &7En el &eLaboratorio&7 solo funcionan &e/sf&7, &e/modalidad&7, &e/spawn&7 y &e/tpa&7.&r\n&7Nada de lo que hagas aqui sale a las demas modalidades: ni objetos, ni dinero, ni rangos."
+    mensaje-lista-blanca: "&6DrakesCraft &8· &7En el &eLaboratorio&7 solo funcionan el catalogo seguro de &e/sf&7, comandos de salida, ayuda y chat.&r\n&7Economia, almacenamientos y teletransportes estan aislados: nada de aqui sale a otra modalidad."
     # Clásico conserva economía, ProtectionStones y hogares, pero evita atajos que conviertan
     # la modalidad vanilla en otra entrada al survival tecnológico.
     comandos-restringidos:
