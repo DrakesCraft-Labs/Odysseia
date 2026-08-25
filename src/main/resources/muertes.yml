@@ -162,6 +162,10 @@ mensajes:
     - "&e{jugador} &7descubrió que la arena cae hacia abajo."
     - "&e{jugador} &7intentó atravesar una pared por pura terquedad."
     - "&e{jugador} &7se fusionó con un bloque de piedra. Ganó la piedra."
+    - "&7{jugador} &7se quedó sin aire dentro de un bloque."
+    - "&7{jugador} &7intentó ocupar el mismo sitio que la piedra. Perdió."
+    - "&7A &f{jugador} &7lo aplastó el mundo, sin metáforas."
+    - "&f{jugador} &7descubrió que la arena cae más rápido que él."
 
   starvation:
     - "&e{jugador} &7murió de hambre teniendo un inventario lleno de lingotes de oro."
@@ -169,30 +173,50 @@ mensajes:
     - "&e{jugador} &7confirmó que el polvo de redstone no alimenta."
     - "&e{jugador} &7murió con la despensa vacía por no gastar un filete."
     - "&e{jugador} &7dejó que su barrita de comida llegara a cero absoluto."
+    - "&6{jugador} &7se murió de hambre teniendo cofres llenos."
+    - "&6{jugador} &7olvidó que comer es parte del juego."
+    - "&7Nadie le pasó un pan a &6{jugador}&7."
+    - "&6{jugador} &7priorizó minar sobre almorzar. Mal."
 
   poison:
     - "&e{jugador} &7se tomó una botella verde sospechosa."
     - "&e{jugador} &7fue derrotado lentamente con mucho veneno y cero dignidad."
     - "&e{jugador} &7comió ojos de araña fermentados por curiosidad gastronómica."
     - "&e{jugador} &7perdió contra una toxina que olía a calcetín usado."
+    - "&2{jugador} &7se bebió algo verde y confió."
+    - "&2{jugador} &7aprendió que no todo lo que brilla se toma."
+    - "&7El veneno tardó, pero llegó. Adiós &2{jugador}&7."
+    - "&2{jugador} &7murió por decisiones dietéticas cuestionables."
 
   magic:
     - "&e{jugador} &7fue víctima de magia oscura que no entendía."
     - "&e{jugador} &7recibió una poción de daño instantáneo en la frente."
     - "&c{asesino} &7hizo un pase mágico y &e{jugador} &7dejó de existir."
     - "&e{jugador} &7tocó un artefacto arcano sin leer las advertencias."
+    - "&d{jugador} &7recibió magia que no venía de su bando."
+    - "&d{jugador} &7subestimó a alguien con una poción."
+    - "&7A &d{jugador} &7lo mató algo que ni se veía."
+    - "&d{jugador} &7fue borrado con estilo arcano."
 
   wither:
     - "&e{jugador} &7se marchitó como flor en el desierto."
     - "&e{jugador} &7se puso negro, se marchitó y luego se fue al lobby."
     - "&e{jugador} &7sintió el abrazo marchito del Wither."
     - "&e{jugador} &7quedó desintegrado por la descomposición celular."
+    - "&8{jugador} &7se marchitó a la altura &f{y}&7."
+    - "&8{jugador} &7se puso negro y se quedó así."
+    - "&7El wither se llevó a &8{jugador}&7. Otra vez."
+    - "&8{jugador} &7se apagó lentamente. Poético y doloroso."
 
   lightning:
     - "&e{jugador} &7fue elegido por Zeus. Para recibir 100,000 voltios."
     - "&e{jugador} &7recibió un rayo celestial. No pidió ninguno pero le sobró voltaje."
     - "&7Zeus miró a &e{jugador} &7desde el Olimpo y dijo: 'a ese de ahí'."
     - "&e{jugador} &7hizo de pararrayos humano en medio de la tormenta."
+    - "&e{jugador} &7fue elegido por el cielo. Para mal."
+    - "&e{jugador} &7recibió 300.000 amperios de retroalimentación."
+    - "&7Zeus le tomó cariño a &e{jugador}&7."
+    - "&e{jugador} &7se convirtió en pararrayos en &f{mundo}&7."
 
   fly_into_wall:
     - "&e{jugador} &7iba volando espectacular con élitras hasta que apareció una montaña."
@@ -200,17 +224,30 @@ mensajes:
     - "&e{jugador} &7se estampó contra el muro a velocidad supersónica."
     - "&e{jugador} &7quiso hacer un giro acrobático y quedó estampado como calcomanía."
     - "&e{jugador} &7probó la dureza del ladrillo a 120 km/h."
+    - "&b{jugador} &7confundió una pared con el cielo."
+    - "&b{jugador} &7volaba precioso hasta que dejó de volar."
+    - "&7Elytra 1 - &b{jugador} &70."
+    - "&b{jugador} &7aterrizó a &f{y}&7 metros. Contra algo sólido."
 
   sonic_boom:
     - "&e{jugador} &7fue gritado hasta la muerte por &c{asesino}&7."
     - "&e{jugador} &7hizo ruido al lado de un Warden sordo pero con mala uva."
     - "&e{jugador} &7sintió una onda sónica que le descalibró el alma."
     - "&e{jugador} &7aprendió por qué en las Ciudades Antiguas se camina agachado."
+    - "&3{jugador} &7fue gritado hasta la muerte."
+    - "&3{jugador} &7conoció el warden. Brevemente."
+    - "&7El warden mandó su opinión sonora a &3{jugador}&7."
+    - "&3{jugador} &7aprendió que agacharse también importa."
 
   freeze:
     - "&e{jugador} &7se congeló entero en nieve polvo. Quedó como estatua decorativa."
     - "&e{jugador} &7subestimó el frío de las cumbres. El frío no."
     - "&e{jugador} &7se convirtió en helado de paleta sabor survival."
+    - "&b{jugador} &7se quedó tieso a la altura &f{y}&7. Literalmente."
+    - "&b{jugador} &7descubrió que el hielo polvo no es decorativo."
+    - "&b{jugador} &7se congeló. Nadie le pasó un abrigo."
+    - "&b{jugador} &7pasó de jugador a paleta helada."
+    - "&7A &b{jugador} &7se le acabó la calefacción en &f{mundo}&7."
 
   # ── Slimefun & Tecnología Cósmica ───────────────────────────
 
@@ -232,6 +269,9 @@ mensajes:
     - "&7El multiverso se plegó sobre &e{jugador}&7 y lo borró del registro dimensional."
     - "&e{jugador} &7escuchó un susurro en una frecuencia olvidada por los dioses."
     - "&e{jugador} &7vio una silueta familiar en la oscuridad antes de que todo se apagara."
+    - "&8{jugador} &7vio algo en la niebla y ya no volvió."
+    - "&8Herobrine &7no existe. &8{jugador} &7tampoco ya."
+    - "&7Alguien apagó las antorchas de &8{jugador}&7."
 
   generico:
     - "&e{jugador} &7murió de una forma que ni la física cuántica supo explicar."
@@ -243,3 +283,30 @@ mensajes:
     - "&e{jugador} &7se fue al lobby sin dar explicaciones ni dejar herencia."
     - "&e{jugador} &7colapsó su línea temporal en este cuadrante del multiverso."
     - "&e{jugador} &7olvidó la regla número uno: no morirse."
+  hot_floor:
+    - "&c{jugador} &7pisó magma con las manos vacías y la mente en blanco."
+    - "&c{jugador} &7bailó sobre bloques de magma. Duró poco."
+    - "&7El suelo estaba caliente. &c{jugador} &7no lo estaba."
+  contact:
+    - "&2{jugador} &7abrazó un cactus. El cactus ganó."
+    - "&2{jugador} &7murió por tocar lo que pinchaba a simple vista."
+    - "&7Las bayas dulces se comieron a &2{jugador}&7."
+  falling_block:
+    - "&7A &f{jugador} &7le cayó encima medio mundo."
+    - "&f{jugador} &7excavó hacia arriba. Clásico error."
+    - "&7La gravedad ajustó cuentas con &f{jugador}&7."
+  cramming:
+    - "&7{jugador} &7murió aplastado entre demasiadas criaturas."
+    - "&f{jugador} &7descubrió el límite de mobs por bloque. Por dentro."
+  dragon_breath:
+    - "&5{jugador} &7respiró aliento de dragón. Una vez."
+    - "&5{jugador} &7se quedó en la nube morada demasiado tiempo."
+  thorns:
+    - "&f{jugador} &7se hirió pegándole a alguien con espinas."
+    - "&7El encantamiento devolvió el golpe. &f{jugador} &7no lo esperaba."
+  world_border:
+    - "&f{jugador} &7intentó salir del mundo y el mundo dijo que no."
+    - "&7El borde del mundo no negocia con &f{jugador}&7."
+  projectile:
+    - "&f{jugador} &7recibió algo lanzado desde muy lejos."
+    - "&7A &f{jugador} &7lo alcanzó un proyectil con buena puntería."

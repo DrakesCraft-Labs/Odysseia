@@ -22,6 +22,30 @@ public final class DeathMessageCatalog {
 
     public static final String GENERICO = "generico";
 
+    /**
+     * Causas de Bukkit que comparten grupo de mensajes.
+     *
+     * Bukkit distingue si una explosion la causo un bloque o una entidad, y si el fuego te quemo
+     * de golpe o poco a poco. Para contar la muerte con gracia esa diferencia no aporta nada, y
+     * mantenerla obligaba a escribir el mismo chiste dos veces con nombres distintos.
+     *
+     * Sin esto un grupo llamado "explosion" no se usaba nunca, porque la causa real que llega
+     * siempre es block_explosion o entity_explosion: los mensajes estaban escritos y el jugador
+     * veia el generico.
+     */
+    private static final Map<String, String> ALIAS = Map.ofEntries(
+            Map.entry("block_explosion", "explosion"),
+            Map.entry("entity_explosion", "explosion"),
+            Map.entry("fire_tick", "fire"),
+            Map.entry("campfire", "fire"),
+            Map.entry("hot_floor", "lava"),
+            Map.entry("melting", "fire"),
+            Map.entry("entity_attack", "generico"),
+            Map.entry("entity_sweep_attack", "generico"),
+            Map.entry("suicide", "autogol"),
+            Map.entry("kill", "generico"),
+            Map.entry("dryout", "drowning"));
+
     private final Map<String, List<String>> grupos;
     /** Ultimo mensaje servido por clave, para no repetirlo seguido. */
     private final Map<String, String> ultimo = new HashMap<>();
@@ -54,6 +78,7 @@ public final class DeathMessageCatalog {
      */
     public String elegir(String clave, RandomGenerator azar) {
         List<String> grupo = grupos.get(clave);
+        if (grupo == null) grupo = grupos.get(ALIAS.getOrDefault(clave, ""));
         if (grupo == null) grupo = grupos.get(GENERICO);
         if (grupo == null || grupo.isEmpty()) return null;
 

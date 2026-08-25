@@ -152,4 +152,34 @@ class DeathMessageTest {
         rachas.olvidar(quien);
         assertEquals(0, rachas.seguidos());
     }
+
+    // ── Alias de causas ─────────────────────────────────────────
+
+    @Test
+    void lasExplosionesEncuentranSuGrupo() {
+        // Bukkit nunca emite la causa "explosion" a secas: manda block_explosion o
+        // entity_explosion. Sin alias, un grupo llamado "explosion" queda escrito y sin usar,
+        // y el jugador ve siempre el generico. Eso es justo lo que pasaba.
+        var catalogo = new DeathMessageCatalog(Map.of(
+                "explosion", List.of("boom"),
+                DeathMessageCatalog.GENERICO, List.of("generico")));
+        var azar = new java.util.Random(1);
+        assertEquals("boom", catalogo.elegir("block_explosion", azar));
+        assertEquals("boom", catalogo.elegir("entity_explosion", azar));
+    }
+
+    @Test
+    void elFuegoLentoUsaLosMensajesDelFuego() {
+        var catalogo = new DeathMessageCatalog(Map.of(
+                "fire", List.of("arde"),
+                DeathMessageCatalog.GENERICO, List.of("generico")));
+        assertEquals("arde", catalogo.elegir("fire_tick", new java.util.Random(1)));
+    }
+
+    @Test
+    void unaCausaSinGrupoNiAliasCaeAlGenerico() {
+        var catalogo = new DeathMessageCatalog(Map.of(
+                DeathMessageCatalog.GENERICO, List.of("generico")));
+        assertEquals("generico", catalogo.elegir("causa_que_no_existe", new java.util.Random(1)));
+    }
 }
