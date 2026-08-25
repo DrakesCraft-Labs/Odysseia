@@ -57,6 +57,7 @@ public class SFMasterWatcherListener implements Listener {
     private static final String SFMASTER_ACTIVE_PERMISSION = "odysseia.sfmaster.active";
     private static final String SFMASTER_BYPASS_PERMISSION = "odysseia.sfmaster.bypass_marking";
     private static final String SFMASTER_MARKER_LORE = "§cGenerado por SFMaster - No comerciable";
+    private static final String LABORATORY_WORLD = "laboratorio";
     private static final long OWNER_MISMATCH_ALERT_INTERVAL_MILLIS = 2_000L;
     private static final long OWNER_MISMATCH_ALERT_RETENTION_MILLIS = 60_000L;
 
@@ -204,6 +205,25 @@ public class SFMasterWatcherListener implements Listener {
         String owner = meta == null ? null : meta.getPersistentDataContainer()
                 .get(sfMasterOwnerKey, PersistentDataType.STRING);
         return owner == null || owner.equals(playerId.toString());
+    }
+
+    /**
+     * SFMaster is deliberately usable inside the isolated laboratory. Keeping this decision in a
+     * small pure helper makes it harder for a future inventory handler to accidentally reopen a
+     * route into another modality.
+     */
+    static boolean isLaboratoryWorld(String worldName) {
+        return LABORATORY_WORLD.equalsIgnoreCase(worldName == null ? "" : worldName);
+    }
+
+    /** Only automation entirely contained in the laboratory may carry marked SFMaster items. */
+    static boolean allowsLaboratoryInventoryMove(String sourceWorld, String destinationWorld) {
+        return isLaboratoryWorld(sourceWorld) && isLaboratoryWorld(destinationWorld);
+    }
+
+    private static String inventoryWorldName(Inventory inventory) {
+        Location location = inventory == null ? null : inventory.getLocation();
+        return location == null || location.getWorld() == null ? null : location.getWorld().getName();
     }
 
     private boolean isSfMasterActive(Player player) {
@@ -476,7 +496,8 @@ public class SFMasterWatcherListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (isSFMasterItem(event.getItem())) {
+        if (isSFMasterItem(event.getItem()) && !allowsLaboratoryInventoryMove(
+                inventoryWorldName(event.getSource()), inventoryWorldName(event.getDestination()))) {
             event.setCancelled(true);
         }
     }
@@ -506,6 +527,11 @@ public class SFMasterWatcherListener implements Listener {
                     || !belongsTo(hotbarItem, player.getUniqueId())) {
                 event.setCancelled(true);
                 player.sendMessage("§cNo puedes usar un ítem SFMaster de otro jugador.");
+                return;
+            }
+            // El laboratorio tiene inventarios separados por InvSwitcher y una lista blanca de
+            // comandos: permitir su maquinaria aquí no abre una ruta hacia Survival u otra isla.
+            if (isLaboratoryWorld(player.getWorld().getName())) {
                 return;
             }
             if (event.getHotbarButton() >= 0
@@ -552,7 +578,13 @@ public class SFMasterWatcherListener implements Listener {
         boolean touchesExternalInventory = event.getRawSlots().stream()
                 .anyMatch(slot -> slot < inventory.getSize());
 
-        if (touchesExternalInventory && isSFMasterItem(event.getOldCursor())) {
+        ItemStack cursor = event.getOldCursor();
+        if (touchesExternalInventory && isSFMasterItem(cursor)) {
+            if (event.getWhoClicked() instanceof Player player
+                    && isLaboratoryWorld(player.getWorld().getName())
+                    && belongsTo(cursor, player.getUniqueId())) {
+                return;
+            }
             event.setCancelled(true);
             if (event.getWhoClicked() instanceof Player player) {
                 player.sendMessage("§cNo puedes arrastrar ítems de SFMaster a este inventario.");
