@@ -213,7 +213,10 @@ public final class Odysseia extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(
                     new org.metamechanists.odysseia.laboratorio.SandboxSafetyListener(
                             this, mundosLaboratorio), this);
-            getLogger().info("[Modalidades] Aislamiento, limites de maquinas y seguridad no destructiva de laboratorio activos.");
+            Bukkit.getPluginManager().registerEvents(
+                    new org.metamechanists.odysseia.laboratorio.SandboxAdvancementGuardListener(
+                            mundosLaboratorio), this);
+            getLogger().info("[Modalidades] Aislamiento, avances, limites de maquinas y seguridad no destructiva de laboratorio activos.");
         }
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
