@@ -57,6 +57,8 @@ public class SFMasterWatcherListener implements Listener {
     private static final String SFMASTER_ACTIVE_PERMISSION = "odysseia.sfmaster.active";
     private static final String SFMASTER_BYPASS_PERMISSION = "odysseia.sfmaster.bypass_marking";
     private static final String SFMASTER_MARKER_LORE = "§cGenerado por SFMaster - No comerciable";
+    private static final long OWNER_MISMATCH_ALERT_INTERVAL_MILLIS = 2_000L;
+    private static final long OWNER_MISMATCH_ALERT_RETENTION_MILLIS = 60_000L;
 
     private final Plugin plugin;
     private final NamespacedKey sfMasterKey;
@@ -67,6 +69,7 @@ public class SFMasterWatcherListener implements Listener {
     private final Set<String> sfMasterBlocks = new HashSet<>();
     private final Map<String, String> sfMasterBlockOwners = new HashMap<>();
     private final Map<String, BrokenBlock> brokenSFMasterBlocks = new HashMap<>();
+    private final Map<String, Long> ownerMismatchAlerts = new HashMap<>();
     private Set<String> blockedAddons;
     private Set<String> blockedIdPrefixes;
     private Set<String> blockedIdFragments;
@@ -319,10 +322,28 @@ public class SFMasterWatcherListener implements Listener {
         ItemStack item = event.getItem().getItemStack();
         if (isSFMasterItem(item) && !belongsTo(item, player.getUniqueId())) {
             event.setCancelled(true);
-            player.sendMessage("§cEse ítem SFMaster pertenece a otro jugador.");
-            plugin.getLogger().warning("[SFMaster] " + player.getName()
-                    + " intentó recoger un ítem marcado de otro propietario.");
+            String alertKey = player.getUniqueId() + ":" + event.getItem().getUniqueId();
+            if (shouldAlertOwnerMismatch(ownerMismatchAlerts, alertKey, System.currentTimeMillis())) {
+                player.sendMessage("§cEse ítem SFMaster pertenece a otro jugador.");
+                plugin.getLogger().warning("[SFMaster] " + player.getName()
+                        + " intentó recoger un ítem marcado de otro propietario.");
+            }
         }
+    }
+
+    /**
+     * Limits repeated feedback from a protected item left within a player's pickup radius.
+     * The pickup remains cancelled on every event; only player-facing and console notices are throttled.
+     */
+    static boolean shouldAlertOwnerMismatch(Map<String, Long> alerts, String alertKey, long nowMillis) {
+        alerts.entrySet().removeIf(entry -> nowMillis - entry.getValue() > OWNER_MISMATCH_ALERT_RETENTION_MILLIS);
+        Long previousAlert = alerts.get(alertKey);
+        if (previousAlert != null && nowMillis >= previousAlert
+                && nowMillis - previousAlert < OWNER_MISMATCH_ALERT_INTERVAL_MILLIS) {
+            return false;
+        }
+        alerts.put(alertKey, nowMillis);
+        return true;
     }
 
     @EventHandler
