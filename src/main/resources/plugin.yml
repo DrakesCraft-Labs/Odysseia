@@ -34,6 +34,14 @@ commands:
   modalidades:
     description: Menu para saltar entre Survival, SkyBlock y OneBlock.
     aliases: [modalidad, modos, hub, modes, modalities]
+  jack:
+    description: Envía un reporte o mensaje privado directamente a Jack y al sistema SAORI.
+    aliases: [reportar, bug, ticket, soporte]
+    usage: /jack <mensaje>
+  saorifreeze:
+    description: Comando de cuarentena y congelamiento de seguridad SAORI.
+    permission: odysseia.admin
+    usage: /saorifreeze <freeze|unfreeze|status> <jugador> [minutos]
   buy:
     # Reemplaza el /buy del plugin de Tebex, que hay que apagar en su config.yml.
     description: Enlace a la tienda oficial en web.drakescraft.cl.

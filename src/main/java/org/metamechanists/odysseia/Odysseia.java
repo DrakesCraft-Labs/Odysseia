@@ -73,6 +73,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.DeathMessageListener deathMessages;
     private org.metamechanists.odysseia.papa.PapaDeMarService papaService;
     private org.metamechanists.odysseia.cheques.ChequeService chequeService;
+    private org.metamechanists.odysseia.saori.SaoriFreezeManager saoriFreezeManager;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -238,6 +239,21 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(dragonMountService, this);
 
         // Register listeners
+        // SAORI Security Suite (/jack, /saorifreeze, anti-injection, dupe deterrence, Kali-freeze)
+        this.saoriFreezeManager = new org.metamechanists.odysseia.saori.SaoriFreezeManager(this);
+        Bukkit.getPluginManager().registerEvents(saoriFreezeManager, this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.saori.SaoriChatInterceptor(this, saoriFreezeManager), this);
+        var jackCmd = new org.metamechanists.odysseia.saori.JackReportCommand(this);
+        if (getCommand("jack") != null) {
+            getCommand("jack").setExecutor(jackCmd);
+            getCommand("jack").setTabCompleter(jackCmd);
+        }
+        if (getCommand("saorifreeze") != null) {
+            getCommand("saorifreeze").setExecutor(saoriFreezeManager);
+            getCommand("saorifreeze").setTabCompleter(saoriFreezeManager);
+        }
+        getLogger().info("[SAORI] Suite de seguridad, reportes /jack y contención de exploits activa.");
+
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         Bukkit.getPluginManager().registerEvents(ultraGodCommand, this);
         vanishCommand.startReminder();
@@ -647,6 +663,9 @@ public final class Odysseia extends JavaPlugin {
         }
         if (automationGuard != null) {
             automationGuard.shutdown();
+        }
+        if (saoriFreezeManager != null) {
+            saoriFreezeManager.cleanup();
         }
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");
