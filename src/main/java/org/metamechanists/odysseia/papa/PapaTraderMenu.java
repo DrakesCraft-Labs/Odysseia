@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -52,6 +53,11 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         }
         if (!servicio.activo()) {
             jugador.sendMessage(color("&7El trueque de la Papa de mar esta cerrado ahora mismo."));
+            return true;
+        }
+        if (!mundoPermitido(jugador.getWorld().getName(), mundosPermitidos())) {
+            jugador.sendMessage(color("&cEl trueque solo funciona dentro de la modalidad Slimefun. "
+                    + "&7Usa &f/survival &7y vuelve a intentarlo."));
             return true;
         }
         // Las papas viejas se marcan al abrir, para que nadie pierda lo que ya tenia guardado.
@@ -170,6 +176,14 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         event.setCancelled(true);   // el menu no es un cofre: nada entra ni sale
         if (!(event.getWhoClicked() instanceof Player jugador)) return;
 
+        // Se valida otra vez al pulsar: el jugador pudo cambiar de mundo con el menu abierto.
+        // Esto evita depositar un inventario aislado y recuperar despues su copia anterior.
+        if (!mundoPermitido(jugador.getWorld().getName(), mundosPermitidos())) {
+            jugador.closeInventory();
+            jugador.sendMessage(color("&cEl trueque se cerró porque cambiaste de modalidad."));
+            return;
+        }
+
         if (event.getRawSlot() == holder.slotDeposito) {
             int depositadas = servicio.depositar(jugador);
             jugador.sendMessage(color(depositadas > 0
@@ -205,6 +219,21 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
 
     private static String color(String texto) {
         return ChatColor.translateAlternateColorCodes('&', texto);
+    }
+
+    private List<String> mundosPermitidos() {
+        List<String> configured = plugin.getConfig().getStringList("papa-de-mar.trueque.mundos-permitidos");
+        return configured.isEmpty() ? List.of("world", "world_nether", "world_the_end") : configured;
+    }
+
+    /** Comprueba nombres exactos; un prefijo ambiguo podría abrir el trueque en otra modalidad. */
+    static boolean mundoPermitido(String mundo, List<String> permitidos) {
+        if (mundo == null) return false;
+        String normalizado = mundo.toLowerCase(Locale.ROOT);
+        return permitidos.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(nombre -> nombre.toLowerCase(Locale.ROOT))
+                .anyMatch(normalizado::equals);
     }
 
     /** Identifica el menu del trueque y recuerda que nivel hay en cada hueco. */

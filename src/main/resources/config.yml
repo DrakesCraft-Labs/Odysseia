@@ -151,6 +151,12 @@ papa-de-mar:
       - VANISHING_CURSE:1
   # Trueque con el NPC del spawn (/papatrueque)
   trueque:
+    # Nunca habilitar SpawnWarps/laboratorio: sus inventarios aislados permitirían depositar
+    # objetos y recuperarlos al volver a Survival.
+    mundos-permitidos:
+      - world
+      - world_nether
+      - world_the_end
     # Porcentaje de papas que se pierde al DEPOSITAR en la alcancía.
     # La papa se reparte sola cada 15 min y no se gasta en nada más: sin una fuga, la cantidad en
     # circulación solo puede subir. Nunca se lleva la última: depositar 1 siempre guarda 1.

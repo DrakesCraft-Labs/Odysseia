@@ -173,6 +173,8 @@ public final class Odysseia extends JavaPlugin {
         // Modalidades y bovedas separadas. Si las bovedas fallan al abrir la base, el resto del
         // plugin sigue funcionando: solo se pierde la separacion de /pv dentro de las islas.
         this.modalityService = new org.metamechanists.odysseia.modalities.ModalityService(this);
+        Bukkit.getPluginManager().registerEvents(
+                new org.metamechanists.odysseia.listeners.ModalityAdvancementListener(modalityService), this);
         org.metamechanists.odysseia.commands.ModalidadesCommand modalidadesCmd =
                 new org.metamechanists.odysseia.commands.ModalidadesCommand(modalityService);
         getCommand("modalidades").setExecutor(modalidadesCmd);

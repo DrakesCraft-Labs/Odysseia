@@ -64,12 +64,15 @@ mensajes:
     - "&c{asesino} &7le explicó a &e{jugador} &7cómo funciona el combate con &f{arma}&7."
     - "&e{jugador} &7se llevó una lección de &c{asesino}&7 y la lección pesaba toneladas."
     - "&c{asesino} &7hizo respawnear a &e{jugador} &7sin pedirle permiso."
-    - "&e{jugador} &7apostó a que le ganaba a &c{asesino}&7. Perdió la apuesta y todo su inventario."
+    - "&e{jugador} &7apostó a que le ganaba a &c{asesino}&7. Perdió la apuesta y la discusión."
     - "&e{jugador} &7sintió el filo cósmico de &c{asesino}&7 (&f{arma}&7)."
     - "&c{asesino} &7le reseteó el sistema operativo a &e{jugador} &7con &f{arma}&7."
     - "&e{jugador} &7trató de correr, pero &c{asesino} &7tenía mejor sprint y &f{arma}&7."
     - "&c{asesino} &7mandó a &e{jugador} &7al lobby sin escalas con &f{arma}&7."
     - "&e{jugador} &7creyó que el escudo lo salvaba de &c{asesino}&7. No lo salvó."
+    - "&c{asesino} &7le mostró a &e{jugador} &7la pantalla de reaparición en resolución 4K."
+    - "&e{jugador} &7llevó valor; &c{asesino} &7llevó &f{arma}&7. Ganó el equipamiento."
+    - "&c{asesino} &7cerró el argumento de &e{jugador} &7con un crítico y cero bibliografía."
 
   autogol:
     - "&e{jugador} &7se mató solo. Que quede en actas del servidor."
@@ -103,6 +106,8 @@ mensajes:
     - "&e{jugador} &7olvidó cómo funcionaba el teclado justo en el borde del acantilado."
     - "&e{jugador} &7quedó incrustado en el suelo como fósil prehistórico."
     - "&e{jugador} &7intentó emular a Ícaro pero sin alas."
+    - "&e{jugador} &7vio el cartel de 'no saltar' y lo tomó como desafío personal."
+    - "&e{jugador} &7llegó antes que el ascensor, pero en varias piezas."
 
   lava:
     - "&e{jugador} &7pensó que la lava se veía más fría de cerca."
@@ -144,6 +149,8 @@ mensajes:
     - "&e{jugador} &7quiso apagar una dinamita con la mano."
     - "&e{jugador} &7descubrió que las camas en el Nether no son para dormir."
     - "&e{jugador} &7fue eyectado hacia la estratósfera por una explosión sorpresa."
+    - "&e{jugador} &7preguntó qué hacía ese botón rojo. La respuesta fue audiovisual."
+    - "&e{jugador} &7se convirtió en partículas sin tenerlas activadas en ajustes."
 
   void:
     - "&e{jugador} &7se cayó del mundo. Literalmente se le acabó el mapa."
@@ -155,6 +162,8 @@ mensajes:
     - "&e{jugador} &7saltó al vacío de SkyBlock pensando que había puente."
     - "&e{jugador} &7fue absorbido por el vacío cuántico de las islas."
     - "&e{jugador} &7desapareció entre los pliegues de la realidad."
+    - "&e{jugador} &7intentó cargar un chunk que ni Mojang había imaginado."
+    - "&e{jugador} &7salió del mapa y también del presupuesto de rescate."
 
   suffocation:
     - "&e{jugador} &7se quedó sin espacio personal en la pared."
