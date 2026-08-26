@@ -7,6 +7,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerCommandSendEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.metamechanists.odysseia.modalities.ModalityService;
 import org.metamechanists.odysseia.vaults.ModalityVaultService;
@@ -39,6 +41,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final Set<String> vaultCommands = new HashSet<>();
     /** Modalidades cuyo inventario aislado tambien exige bloquear almacenes globales. */
     private final Set<String> isolatedModalities = new HashSet<>();
+    /** Mundos exactos donde se permite abrir el PlayerVaultZ historico de Survival. */
+    private final Set<String> globalVaultWorlds = new HashSet<>();
     /**
      * Modalidades que deniegan por defecto: solo corre lo que este en su lista blanca.
      *
@@ -53,6 +57,8 @@ public final class ModalityStorageGuardListener implements Listener {
     private final Map<String, List<List<String>>> whitelistPatterns = new HashMap<>();
     /** Patrones bloqueados ya tokenizados; cada uno se compara como prefijo del comando escrito. */
     private final List<List<String>> blockedPatterns = new ArrayList<>();
+    /** Rutas que nunca pueden puentear una modalidad, ni siquiera mediante bypass de staff. */
+    private final List<List<String>> strictBlockedPatterns = new ArrayList<>();
     /** Restricciones de jugabilidad por modalidad, independientes del aislamiento de items. */
     private final Map<String, List<List<String>>> gameplayPatterns = new HashMap<>();
     /** Excepciones concretas a los patrones globales bloqueados, por modalidad. */
@@ -69,14 +75,17 @@ public final class ModalityStorageGuardListener implements Listener {
     public void reload() {
         vaultCommands.clear();
         isolatedModalities.clear();
+        globalVaultWorlds.clear();
         whitelistModalities.clear();
         whitelistPatterns.clear();
         blockedPatterns.clear();
+        strictBlockedPatterns.clear();
         gameplayPatterns.clear();
         allowedStoragePatterns.clear();
         enabled = plugin.getConfig().getBoolean("modalidades.guard.enabled", true);
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-boveda"))) vaultCommands.add(value);
         isolatedModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-aisladas")));
+        globalVaultWorlds.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.mundos-boveda-global")));
         whitelistModalities.addAll(lower(plugin.getConfig().getStringList("modalidades.guard.modalidades-lista-blanca")));
         var whitelist = plugin.getConfig().getConfigurationSection("modalidades.guard.comandos-lista-blanca");
         if (whitelist != null) {
@@ -92,6 +101,10 @@ public final class ModalityStorageGuardListener implements Listener {
         for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados"))) {
             List<String> pattern = tokens(value);
             if (!pattern.isEmpty()) blockedPatterns.add(pattern);
+        }
+        for (String value : lower(plugin.getConfig().getStringList("modalidades.guard.comandos-bloqueados-siempre"))) {
+            List<String> pattern = tokens(value);
+            if (!pattern.isEmpty()) strictBlockedPatterns.add(pattern);
         }
         var restrictions = plugin.getConfig().getConfigurationSection("modalidades.guard.comandos-restringidos");
         if (restrictions != null) {
@@ -196,6 +209,25 @@ public final class ModalityStorageGuardListener implements Listener {
     }
 
     /**
+     * Ultima barrera contra accesos directos por API, menus o aliases que no disparen el evento
+     * de comando. PlayerVaultZ solo puede abrirse en los tres mundos Survival autorizados.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVaultOpen(InventoryOpenEvent event) {
+        if (!enabled || !(event.getPlayer() instanceof Player player)) return;
+        InventoryHolder holder = event.getInventory().getHolder();
+        if (holder == null || !holder.getClass().getName().equals("com.rugzy.playervaultz.ui.VaultGUI")) return;
+        if (globalVaultWorlds.contains(player.getWorld().getName().toLowerCase(Locale.ROOT))) return;
+
+        event.setCancelled(true);
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6DrakesCraft &8· &7Ese /pv pertenece a &eSurvival&7. "
+                        + "Abre la boveda propia de tu modalidad desde un mundo de juego."));
+        plugin.getLogger().warning("[Bovedas] PlayerVaultZ global bloqueado fuera de Survival para "
+                + player.getName() + " en " + player.getWorld().getName());
+    }
+
+    /**
      * Applies the modality boundary to commands launched by menus as well as commands typed in
      * chat. Bukkit.dispatchCommand does not fire PlayerCommandPreprocessEvent, so every native
      * menu must pass its player actions through this method before dispatching them.
@@ -239,9 +271,8 @@ public final class ModalityStorageGuardListener implements Listener {
             return true;
         }
 
-        if (player.hasPermission(BYPASS) || !isIsolatedModality(isolatedModalities, modalityId)) return false;
-
-        if (vaultCommands.contains(written.get(0))) {
+        boolean isolated = isIsolatedModality(isolatedModalities, modalityId);
+        if (vaultCommands.contains(written.get(0)) && isolated) {
             int vault = 1;
             if (parts.length > 1) {
                 try {
@@ -253,6 +284,25 @@ public final class ModalityStorageGuardListener implements Listener {
             vaults.open(player, vault);
             return true;
         }
+
+        // Los mundos auxiliares caen en el fallback Survival, pero no deben poder abrir la base
+        // global: SpawnWarps, arenas, limbo o futuros mundos serian un puente entre inventarios.
+        if (vaultCommands.contains(written.get(0))
+                && !globalVaultWorlds.contains(player.getWorld().getName().toLowerCase(Locale.ROOT))) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &7/pv solo se abre dentro del mundo de tu modalidad."));
+            return true;
+        }
+
+        // Estas herramientas operan directamente sobre la base global de PlayerVaultZ. Un bypass
+        // accidental desde una isla puede copiar items entre modalidades, por eso no admite staff.
+        if (isolated && matches(strictBlockedPatterns, written)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &7La administracion de PlayerVault solo se ejecuta en Survival."));
+            return true;
+        }
+
+        if (player.hasPermission(BYPASS) || !isolated) return false;
 
         List<List<String>> allowed = allowedStoragePatterns.getOrDefault(modalityId, List.of());
         if (matches(blockedPatterns, written) && !matches(allowed, written)) {

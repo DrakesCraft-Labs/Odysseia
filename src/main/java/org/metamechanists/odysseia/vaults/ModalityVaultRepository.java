@@ -34,7 +34,9 @@ public final class ModalityVaultRepository implements AutoCloseable {
         connection = DriverManager.getConnection("jdbc:sqlite:" + database.getAbsolutePath());
         try (Statement statement = connection.createStatement()) {
             statement.execute("PRAGMA journal_mode=WAL");
+            statement.execute("PRAGMA synchronous=FULL");
             statement.execute("PRAGMA busy_timeout=5000");
+            statement.execute("PRAGMA wal_autocheckpoint=100");
             statement.execute("""
                     CREATE TABLE IF NOT EXISTS modality_vaults(
                       player_uuid TEXT NOT NULL,

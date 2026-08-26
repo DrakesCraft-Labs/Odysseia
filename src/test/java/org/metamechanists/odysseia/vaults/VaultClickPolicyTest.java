@@ -79,14 +79,20 @@ class VaultClickPolicyTest {
     }
 
     @Test
-    void bloqueaSoloTransaccionesAtomicasPeligrosas() {
+    void bloqueaTransaccionesAtomicasYPuentesDeSlots() {
         assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.COLLECT_TO_CURSOR));
         assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.CLONE_STACK));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.MOVE_TO_OTHER_INVENTORY));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_SWAP));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_MOVE_AND_READD));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ALL_SLOT));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ONE_SLOT));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ALL_CURSOR));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ONE_CURSOR));
         assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.UNKNOWN));
 
         assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PICKUP_ALL));
         assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PLACE_ALL));
-        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.MOVE_TO_OTHER_INVENTORY));
-        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_SWAP));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.SWAP_WITH_CURSOR));
     }
 }

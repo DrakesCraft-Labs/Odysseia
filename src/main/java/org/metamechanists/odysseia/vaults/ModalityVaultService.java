@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -72,6 +73,11 @@ public final class ModalityVaultService implements Listener {
             return;
         }
         try {
+            // Fuerza el cierre y guardado del inventario anterior antes de leer otra boveda.
+            // Abrir una GUI encima de otra deja el orden de InventoryClose en manos de Bukkit.
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof VaultInventory) {
+                player.closeInventory();
+            }
             int size = rows * 9;
             ItemStack[] contents = repository.load(player.getUniqueId(), modality.id(), vault, size);
             VaultHolder holder = new VaultHolder(player.getUniqueId(), modality.id(), vault);
@@ -80,7 +86,7 @@ public final class ModalityVaultService implements Listener {
             holder.inventory = inventory;
             inventory.setContents(contents);
             player.openInventory(inventory);
-        } catch (SQLException error) {
+        } catch (SQLException | RuntimeException error) {
             plugin.getLogger().log(Level.SEVERE, "[Bovedas] No se pudo abrir la boveda " + vault
                     + " de " + player.getName(), error);
             player.sendMessage(color("&cNo se pudo abrir la boveda. Avisa al staff."));
@@ -101,10 +107,19 @@ public final class ModalityVaultService implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        // Una GUI abierta conserva su holder aunque el jugador cambie de mundo. Se cierra para
+        // impedir que una boveda de la modalidad anterior viaje junto con el jugador.
+        if (event.getPlayer().getOpenInventory().getTopInventory().getHolder() instanceof VaultHolder) {
+            event.getPlayer().closeInventory();
+        }
+    }
+
     private void persist(VaultHolder holder, ItemStack[] contents) {
         try {
             repository.save(holder.owner, holder.modality, holder.vault, contents);
-        } catch (SQLException error) {
+        } catch (SQLException | RuntimeException error) {
             plugin.getLogger().log(Level.SEVERE, "[Bovedas] No se pudo guardar la boveda "
                     + holder.vault + " (" + holder.modality + ") de " + holder.owner, error);
         }

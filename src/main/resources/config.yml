@@ -3972,6 +3972,12 @@ modalidades:
     cantidad-base: 3
   guard:
     enabled: true
+    # PlayerVaultZ conserva las bovedas historicas, pero exclusivamente en Survival. Todo mundo
+    # no listado (hub, arenas, limbo y futuros mundos) queda cerrado para que no sirva de puente.
+    mundos-boveda-global:
+      - world
+      - world_nether
+      - world_the_end
     # Estas modalidades usan bovedas y mercados aislados. Clasico comparte economia y
     # protecciones, pero no inventarios ni cofres globales.
     modalidades-aisladas:
@@ -4070,6 +4076,12 @@ modalidades:
     # que empiece con el patron, asi que el resto de /team sigue funcionando.
     # /ec no va aqui: InvSwitcher ya separa el cofre de ender, y las mochilas de Slimefun
     # viajan en el inventario, que tambien esta separado.
+    comandos-bloqueados-siempre:
+      # Operan directamente sobre la base global de PlayerVaultZ. No admiten bypass dentro de
+      # modalidades: incluso el staff debe volver a Survival antes de administrarlas.
+      - pvadmin
+      - pvimport
+      - pvdebug
     comandos-bloqueados:
       # BetterTeams: el cofre de ender del equipo es una base global, no la del jugador.
       - team echest

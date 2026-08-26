@@ -34,18 +34,22 @@ public final class VaultBackpackGuardListener implements Listener {
     private static final String BYPASS = "odysseia.bovedas.mochilas-bypass";
 
     private final JavaPlugin plugin;
-    private final boolean enabled;
+    private final boolean backpacksEnabled;
     private final String mensaje;
+    private final String mensajeAccionInsegura;
     private final BackpackDetector detector;
 
     public VaultBackpackGuardListener(JavaPlugin plugin) {
         this.plugin = plugin;
         var config = plugin.getConfig();
-        this.enabled = config.getBoolean("bovedas.bloquear-mochilas.enabled", true);
+        this.backpacksEnabled = config.getBoolean("bovedas.bloquear-mochilas.enabled", true);
         this.mensaje = config.getString("bovedas.bloquear-mochilas.mensaje",
                 "&6DrakesCraft &8· &7Las &emochilas de Slimefun&7 no entran en la boveda: "
                         + "guardan un ID, no los items, y una sola valdria por cientos de slots. "
                         + "&7Usa la mochila directamente o un cofre.");
+        this.mensajeAccionInsegura = config.getString("bovedas.mensaje-accion-insegura",
+                "&6DrakesCraft &8· &7Por seguridad usa &eclics simples&7 dentro de /pv. "
+                        + "Shift, doble clic, teclas de barra, Q y arrastre estan bloqueados.");
         this.detector = new BackpackDetector(
                 config.getBoolean("bovedas.bloquear-mochilas.revisar-contenedores", true),
                 config.getInt("bovedas.bloquear-mochilas.profundidad-maxima", 3));
@@ -53,18 +57,21 @@ public final class VaultBackpackGuardListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onClick(InventoryClickEvent event) {
-        if (!enabled || !(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
         Inventory arriba = event.getView().getTopInventory();
-        if (!esBoveda(arriba) || player.hasPermission(BYPASS)) return;
+        if (!esBoveda(arriba)) return;
 
         if (VaultClickPolicy.esAccionInsegura(event.getAction())) {
             event.setCancelled(true);
             plugin.getServer().getScheduler().runTask(plugin, player::updateInventory);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensajeAccionInsegura));
             plugin.getLogger().warning("[Bovedas] Accion atomica insegura bloqueada en /pv para "
                     + player.getName() + ": " + event.getAction());
             return;
         }
+
+        if (!backpacksEnabled || player.hasPermission(BYPASS)) return;
 
         ItemStack candidato = switch (VaultClickPolicy.origen(
                 event.getRawSlot(), arriba.getSize(), event.getClick(), event.getAction())) {
@@ -84,17 +91,24 @@ public final class VaultBackpackGuardListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onDrag(InventoryDragEvent event) {
-        if (!enabled || !(event.getWhoClicked() instanceof Player player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
         Inventory arriba = event.getView().getTopInventory();
-        if (!esBoveda(arriba) || player.hasPermission(BYPASS)) return;
-        if (!detector.contieneMochila(event.getOldCursor())) return;
+        if (!esBoveda(arriba)) return;
 
-        // Arrastrar reparte el stack entre varios slots: basta con que uno caiga en la boveda.
+        // Un drag reparte un stack entre varios slots como una sola transaccion. Las GUIs
+        // virtuales no pueden persistirla de forma atomica ante cierre o cambio de mundo.
         for (int slot : event.getRawSlots()) {
             if (slot < arriba.getSize()) {
                 event.setCancelled(true);
-                avisar(player);
+                if (backpacksEnabled && !player.hasPermission(BYPASS)
+                        && detector.contieneMochila(event.getOldCursor())) {
+                    avisar(player);
+                } else {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensajeAccionInsegura));
+                }
+                plugin.getLogger().warning("[Bovedas] Arrastre atomico bloqueado en /pv para "
+                        + player.getName());
                 return;
             }
         }

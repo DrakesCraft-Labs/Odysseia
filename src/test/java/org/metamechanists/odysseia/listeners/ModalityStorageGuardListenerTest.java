@@ -63,6 +63,35 @@ class ModalityStorageGuardListenerTest {
     }
 
     @Test
+    void globalPlayerVaultExistsOnlyInMainSurvivalWorlds() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        var worlds = config.getStringList("modalidades.guard.mundos-boveda-global");
+
+        assertEquals(Set.of("world", "world_nether", "world_the_end"), Set.copyOf(worlds));
+        assertFalse(worlds.contains("SpawnWarps"));
+        assertFalse(worlds.contains("boss_arena"));
+        assertFalse(worlds.contains("laboratorio"));
+    }
+
+    @Test
+    void blocksDirectPlayerVaultAdministrationInsideIsolatedModes() {
+        var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+                new java.io.File("src/main/resources/config.yml"));
+        List<List<String>> blocked = new java.util.ArrayList<>();
+        for (String value : config.getStringList("modalidades.guard.comandos-bloqueados-siempre")) {
+            blocked.add(ModalityStorageGuardListener.tokens(value));
+        }
+
+        assertTrue(ModalityStorageGuardListener.matches(blocked,
+                ModalityStorageGuardListener.tokens("playervaultz:pvadmin backup")));
+        assertTrue(ModalityStorageGuardListener.matches(blocked,
+                ModalityStorageGuardListener.tokens("pvimport import player")));
+        assertTrue(ModalityStorageGuardListener.matches(blocked,
+                ModalityStorageGuardListener.tokens("pvdebug cache")));
+    }
+
+    @Test
     void classicAllowsIsolatedAuctionsAndKeepsProtectionShop() {
         var config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
                 new java.io.File("src/main/resources/config.yml"));

@@ -67,6 +67,13 @@ public final class VaultClickPolicy {
     public static boolean esAccionInsegura(InventoryAction action) {
         return action == InventoryAction.COLLECT_TO_CURSOR
                 || action == InventoryAction.CLONE_STACK
+                || action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || action == InventoryAction.HOTBAR_SWAP
+                || action == InventoryAction.HOTBAR_MOVE_AND_READD
+                || action == InventoryAction.DROP_ALL_SLOT
+                || action == InventoryAction.DROP_ONE_SLOT
+                || action == InventoryAction.DROP_ALL_CURSOR
+                || action == InventoryAction.DROP_ONE_CURSOR
                 || action == InventoryAction.UNKNOWN;
     }
 }
