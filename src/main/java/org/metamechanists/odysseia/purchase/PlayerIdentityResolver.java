@@ -30,13 +30,10 @@ public final class PlayerIdentityResolver {
         }
         Optional<PurchaseRepository.PlayerIdentity> exact = repository.findIdentityByCanonical(requested);
         if (exact.isPresent()) {
-            if (!requested.startsWith(".")) {
-                List<PurchaseRepository.PlayerIdentity> bedrock = repository.findByAlias(requested, "BEDROCK_NORMALIZED");
-                if (bedrock.stream().anyMatch(candidate -> !candidate.uuid().equals(exact.get().uuid()))) {
-                    List<PurchaseRepository.PlayerIdentity> candidates = new ArrayList<>(bedrock); candidates.add(exact.get());
-                    return ambiguous("Coinciden identidades Java y Bedrock", candidates);
-                }
-            }
+            // A canonical spelling is stronger evidence than a normalized Bedrock alias.
+            // Tebex receives the leading dot for Bedrock accounts; without it, an exact
+            // Java identity must not lose a paid delivery merely because a distinct
+            // Bedrock account happens to share the normalized name.
             return IdentityResolution.resolved(exact.get(), "CANONICAL_EXACT");
         }
         List<PurchaseRepository.PlayerIdentity> aliases = repository.findByAlias(requested);

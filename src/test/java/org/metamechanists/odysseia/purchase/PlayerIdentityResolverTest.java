@@ -25,10 +25,13 @@ class PlayerIdentityResolverTest {
         assertEquals(uuid, resolver.resolve("AngelicVr6991").uuid());
     }
 
-    @Test void rejectsAmbiguousJavaAndBedrockAliases() throws Exception {
-        resolver.observe(UUID.randomUUID(), "JackStar");
-        resolver.observe(UUID.randomUUID(), ".JackStar");
-        assertEquals(IdentityResolutionStatus.AMBIGUOUS, resolver.resolve("JackStar").status());
+    @Test void exactJavaIdentityWinsOverNormalizedBedrockAlias() throws Exception {
+        UUID javaUuid = UUID.randomUUID();
+        UUID bedrockUuid = UUID.randomUUID();
+        resolver.observe(javaUuid, "JackStar");
+        resolver.observe(bedrockUuid, ".JackStar");
+        assertEquals(javaUuid, resolver.resolve("JackStar").uuid());
+        assertEquals(bedrockUuid, resolver.resolve(".JackStar").uuid());
     }
 
     @Test void keepsUnknownAndInvalidNamesOutOfDelivery() throws Exception {
