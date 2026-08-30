@@ -13,11 +13,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.metamechanists.odysseia.Odysseia;
 
 import java.util.*;
+import java.util.function.IntConsumer;
 
 /** Eliminación administrativa absoluta dentro de un radio controlado con efectos divinos. */
 public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
 
     private static final List<Integer> ALLOWED_RADII = List.of(2, 5, 10, 25, 50, 100);
+    /** Entidades procesadas por tick durante la purga (ticket SAORI #9: evita una ráfaga
+     *  de cientos de EntityDeathEvent sincrónicos en un único tick). */
+    private static final int PURGE_BATCH_SIZE = 25;
     private final Odysseia plugin;
 
     public OwnerAuraCommand(Odysseia plugin) {
@@ -41,12 +45,16 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         // Efectos iniciales masivos de impacto divino
         playGodlikeAuraEffects(player, center, radius);
 
-        int removed = purge(center, radius, player.getUniqueId());
-
-        player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "✦ AURA DEL CREADOR: " 
-                + ChatColor.RED + removed + ChatColor.DARK_RED + " entidad(es) desintegradas en radio " + radius + "m.");
-        plugin.getLogger().warning("[AuraDueño] " + player.getName() + " eliminó " + removed
-                + " entidad(es) en radio " + radius + " desde " + formatLocation(center) + '.');
+        // La recolección de objetivos es barata (no dispara eventos); la eliminación
+        // real se reparte en lotes por tick para no agotar hilos nativos del servidor
+        // con cientos de EntityDeathEvent sincrónicos de golpe (ticket SAORI #9).
+        List<Entity> targets = collectPurgeTargets(center, radius, player.getUniqueId());
+        schedulePurge(center.getWorld(), targets, removed -> {
+            player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "✦ AURA DEL CREADOR: "
+                    + ChatColor.RED + removed + ChatColor.DARK_RED + " entidad(es) desintegradas en radio " + radius + "m.");
+            plugin.getLogger().warning("[AuraDueño] " + player.getName() + " eliminó " + removed
+                    + " entidad(es) en radio " + radius + " desde " + formatLocation(center) + '.');
+        });
         return true;
     }
 
@@ -114,41 +122,75 @@ public final class OwnerAuraCommand implements CommandExecutor, TabCompleter {
         }.runTaskTimer(plugin, 0L, 1L);
     }
 
-    /** Fuerza muerte de seres vivos y elimina directamente el resto. */
-    private int purge(Location center, int radius, UUID executorId) {
+    /** Encuentra las entidades candidatas a purgar. No las toca todavía. */
+    private List<Entity> collectPurgeTargets(Location center, int radius, UUID executorId) {
         World world = center.getWorld();
-        if (world == null) return 0;
+        if (world == null) return List.of();
 
         Set<UUID> processed = new HashSet<>();
-        int removed = 0;
-        for (Entity nearby : new ArrayList<>(world.getNearbyEntities(
+        List<Entity> targets = new ArrayList<>();
+        for (Entity nearby : world.getNearbyEntities(
                 center, radius, radius, radius,
-                entity -> isInsideSphere(center, entity.getLocation(), radius)))) {
+                entity -> isInsideSphere(center, entity.getLocation(), radius))) {
             Entity target = nearby instanceof ComplexEntityPart part ? part.getParent() : nearby;
             // Una limpieza administrativa jamás debe matar ni penalizar a un jugador.
             if (target instanceof Player || target.getUniqueId().equals(executorId)
                     || !processed.add(target.getUniqueId())) continue;
-            try {
-                Location tLoc = target.getLocation();
-
-                // Partículas de desintegración en la posición de cada entidad purgada
-                world.spawnParticle(Particle.LARGE_SMOKE, tLoc.clone().add(0, 0.8, 0), 12, 0.3, 0.5, 0.3, 0.05);
-                world.spawnParticle(Particle.SOUL, tLoc.clone().add(0, 1.0, 0), 8, 0.4, 0.4, 0.4, 0.08);
-                world.spawnParticle(Particle.EXPLOSION, tLoc.clone().add(0, 0.5, 0), 1, 0, 0, 0, 0);
-
-                target.setInvulnerable(false);
-                if (target instanceof LivingEntity living) {
-                    living.setHealth(0.0);
-                } else {
-                    target.remove();
-                }
-                removed++;
-            } catch (RuntimeException exception) {
-                plugin.getLogger().severe("[AuraDueño] No se pudo eliminar " + target.getType()
-                        + " (" + target.getUniqueId() + "): " + exception.getMessage());
-            }
+            targets.add(target);
         }
-        return removed;
+        return targets;
+    }
+
+    /**
+     * Elimina las entidades recolectadas en lotes de {@link #PURGE_BATCH_SIZE} por tick.
+     *
+     * Matar cientos de entidades en un único tick dispara la misma cantidad de
+     * EntityDeathEvent de forma sincrónica en ese tick; si algún otro plugin reacciona a ese
+     * evento con trabajo pesado (hilos propios, I/O), una ráfaga tan grande puede ser lo que
+     * agote los hilos nativos del proceso (ticket SAORI #9). Repartir la purga en varios ticks
+     * no cambia el resultado — se sigue eliminando todo — solo evita la ráfaga de golpe.
+     */
+    private void schedulePurge(World world, List<Entity> targets, IntConsumer onFinished) {
+        if (world == null || targets.isEmpty()) {
+            onFinished.accept(0);
+            return;
+        }
+        new BukkitRunnable() {
+            int index = 0;
+            int removed = 0;
+
+            @Override
+            public void run() {
+                int end = Math.min(index + PURGE_BATCH_SIZE, targets.size());
+                for (; index < end; index++) {
+                    Entity target = targets.get(index);
+                    if (!target.isValid()) continue;
+                    try {
+                        Location tLoc = target.getLocation();
+
+                        // Partículas de desintegración en la posición de cada entidad purgada
+                        world.spawnParticle(Particle.LARGE_SMOKE, tLoc.clone().add(0, 0.8, 0), 12, 0.3, 0.5, 0.3, 0.05);
+                        world.spawnParticle(Particle.SOUL, tLoc.clone().add(0, 1.0, 0), 8, 0.4, 0.4, 0.4, 0.08);
+                        world.spawnParticle(Particle.EXPLOSION, tLoc.clone().add(0, 0.5, 0), 1, 0, 0, 0, 0);
+
+                        target.setInvulnerable(false);
+                        if (target instanceof LivingEntity living) {
+                            living.setHealth(0.0);
+                        } else {
+                            target.remove();
+                        }
+                        removed++;
+                    } catch (RuntimeException exception) {
+                        plugin.getLogger().severe("[AuraDueño] No se pudo eliminar " + target.getType()
+                                + " (" + target.getUniqueId() + "): " + exception.getMessage());
+                    }
+                }
+                if (index >= targets.size()) {
+                    cancel();
+                    onFinished.accept(removed);
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
     }
 
     static Integer parseRadius(String raw) {

@@ -26,9 +26,22 @@ class OwnerAuraCommandTest {
         String source = Files.readString(Path.of(
                 "src/main/java/org/metamechanists/odysseia/commands/OwnerAuraCommand.java"));
 
-        assertEquals(1, source.split("int removed = purge\\(", -1).length - 1,
+        assertEquals(1, source.split("targets = collectPurgeTargets\\(", -1).length - 1,
+                "el comando no debe recolectar objetivos de purga dos veces");
+        assertEquals(1, source.split("schedulePurge\\(center\\.getWorld\\(\\)", -1).length - 1,
                 "el comando no debe programar una segunda purga");
         org.junit.jupiter.api.Assertions.assertTrue(source.contains("target instanceof Player"),
                 "la purga debe excluir a todos los jugadores, no solo al ejecutor");
+    }
+
+    @Test
+    void purgeBatchSizeIsPositiveAndBounded() throws Exception {
+        String source = Files.readString(Path.of(
+                "src/main/java/org/metamechanists/odysseia/commands/OwnerAuraCommand.java"));
+        // La purga se reparte por ticks (ticket SAORI #9): un lote de 0 o negativo
+        // dejaría el BukkitRunnable girando para siempre sin avanzar.
+        org.junit.jupiter.api.Assertions.assertTrue(
+                source.contains("PURGE_BATCH_SIZE = ") && !source.contains("PURGE_BATCH_SIZE = 0"),
+                "el tamaño de lote de la purga debe ser un entero positivo fijo");
     }
 }
