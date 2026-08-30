@@ -79,6 +79,22 @@ public final class PapaDeMarItem {
         return true;
     }
 
+    /**
+     * True si el item tiene material y nombre de papa, sin mirar el lore.
+     *
+     * NO sirve para aceptar un canje --un yunque falsifica el nombre en diez segundos-- pero
+     * distingue "no llevas papas" de "llevas papas que no reconozco", que es justo la
+     * diferencia que hacia falta para diagnosticar el reporte de Alaska001.
+     */
+    public static boolean pareceCandidata(ItemStack item, String materialEsperado,
+                                          String nombreEsperado) {
+        if (item == null || !item.hasItemMeta()) return false;
+        if (!item.getType().name().equalsIgnoreCase(materialEsperado)) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) return false;
+        return sinColores(meta.getDisplayName()).equals(sinColores(nombreEsperado));
+    }
+
     /** Quita codigos de color, tanto los de '&' como los de seccion, y los espacios de los bordes. */
     static String sinColores(String texto) {
         if (texto == null) return "";

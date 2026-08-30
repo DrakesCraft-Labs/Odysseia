@@ -179,11 +179,26 @@ public final class PapaDeMarService {
         List<String> lore = plugin.getConfig().getStringList("papa-de-mar.item.lore");
         int convertidas = 0;
         ItemStack[] contenido = jugador.getInventory().getContents();
+        int candidatasNoMigradas = 0;
         for (ItemStack item : contenido) {
             if (item == null || PapaDeMarItem.marcada(plugin, item)) continue;
-            if (!PapaDeMarItem.pareceAntigua(item, material, nombre, lore)) continue;
+            if (!PapaDeMarItem.pareceAntigua(item, material, nombre, lore)) {
+                // Una papa que lleva el nombre correcto pero no migra es el caso que deja al
+                // jugador con "no llevas papas" y al staff sin nada que mirar: el rechazo era
+                // silencioso. Se registra el motivo para poder diagnosticarlo desde el log.
+                if (PapaDeMarItem.pareceCandidata(item, material, nombre)) {
+                    candidatasNoMigradas += item.getAmount();
+                }
+                continue;
+            }
             PapaDeMarItem.marcar(plugin, item);
             convertidas += item.getAmount();
+        }
+        if (candidatasNoMigradas > 0) {
+            plugin.getLogger().warning("[Papa] " + jugador.getName() + " lleva "
+                    + candidatasNoMigradas + " item(s) con el nombre de la papa que NO migran: "
+                    + "su lore no coincide con papa-de-mar.item.lore del config. "
+                    + "Comparar el lore real del item con el configurado antes de tocar nada.");
         }
         if (convertidas > 0) jugador.getInventory().setContents(contenido);
         return convertidas;
