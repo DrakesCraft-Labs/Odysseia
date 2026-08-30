@@ -6,9 +6,11 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -170,6 +172,16 @@ public final class ShopMenuService implements Listener, org.bukkit.command.Comma
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
         pages.remove(event.getInventory());
+    }
+
+    /**
+     * Los iconos de la tienda son items de verdad; clic y arrastre son eventos Bukkit distintos y
+     * cancelar solo onClick deja la puerta abierta a un arrastre (los clientes Bedrock lo generan
+     * distinto a un mouse) que saque o pierda items en este inventario temporal.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDrag(InventoryDragEvent event) {
+        if (pages.containsKey(event.getInventory())) event.setCancelled(true);
     }
 
     private ItemStack item(ConfigurationSection entry, Material fallback) {

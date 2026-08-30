@@ -8,8 +8,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -110,6 +112,17 @@ public final class ModalidadesCommand implements CommandExecutor, Listener {
         int start = 13 - (count / 2);
         for (int index = 0; index < count; index++) slots[index] = start + index;
         return slots;
+    }
+
+    /**
+     * El menu deja huecos sin item entre los iconos centrados: sin esto, un arrastre (los
+     * clientes Bedrock lo generan distinto a un mouse) podria soltar un item real del jugador
+     * dentro de este inventario temporal, donde se pierde al cerrarse. Clic y arrastre son
+     * eventos Bukkit distintos: cancelar solo el primero no basta.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDrag(InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof Holder) event.setCancelled(true);
     }
 
     @EventHandler

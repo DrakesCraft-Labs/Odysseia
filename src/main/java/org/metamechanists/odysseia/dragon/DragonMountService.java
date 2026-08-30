@@ -20,6 +20,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -28,6 +29,7 @@ import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -307,6 +309,16 @@ public class DragonMountService implements CommandExecutor, TabCompleter, Listen
     @EventHandler
     public void onSelectorClose(InventoryCloseEvent event) {
         selectors.remove(event.getInventory());
+    }
+
+    /**
+     * Clic y arrastre son eventos Bukkit distintos: cancelar solo onSelectorClick deja la puerta
+     * abierta a que un arrastre (los clientes Bedrock lo generan distinto a un mouse) meta un item
+     * real del jugador en este inventario temporal, donde se pierde al cerrarse.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onSelectorDrag(InventoryDragEvent event) {
+        if (selectors.containsKey(event.getInventory())) event.setCancelled(true);
     }
 
     private void summonSelected(Player player, DragonVariant variant) {
