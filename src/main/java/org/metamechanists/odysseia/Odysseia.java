@@ -278,10 +278,10 @@ public final class Odysseia extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossItemListener(this), this);
         }
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.BossCaptureGuardListener(this), this);
-        org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
-        Bukkit.getPluginManager().registerEvents(sfMasterWatcher, this);
-        Bukkit.getScheduler().runTask(this, sfMasterWatcher::deliverGuidesToOnlinePassHolders);
-        sfMasterWatcher.startGuideCleanup();
+        this.sfMasterWatcher = new org.metamechanists.odysseia.listeners.SFMasterWatcherListener(this);
+        Bukkit.getPluginManager().registerEvents(this.sfMasterWatcher, this);
+        Bukkit.getScheduler().runTask(this, this.sfMasterWatcher::deliverGuidesToOnlinePassHolders);
+        this.sfMasterWatcher.startGuideCleanup();
         this.maintenanceGuard = new org.metamechanists.odysseia.listeners.MaintenanceGuardListener(this);
         Bukkit.getPluginManager().registerEvents(maintenanceGuard, this);
 

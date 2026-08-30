@@ -90,7 +90,13 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(color("&cEl jugador debe estar conectado para auditar inventario y Ender Chest."));
             return true;
         }
-        var result = plugin.getSfMasterWatcher().audit(target);
+        var watcher = plugin.getSfMasterWatcher();
+        if (watcher == null) {
+            sender.sendMessage(color("&c[SFMaster] El servicio aún no está disponible; revisa el arranque de Odysseia."));
+            plugin.getLogger().warning("[SFMaster Audit] Servicio no inicializado al auditar a " + target.getName());
+            return true;
+        }
+        var result = watcher.audit(target);
         sender.sendMessage(color("&6[SFMaster] &f" + target.getName()
                 + " &8| &7marcados: &f" + result.markedItems()
                 + " &8| &7guías: &f" + result.cheatGuides()
