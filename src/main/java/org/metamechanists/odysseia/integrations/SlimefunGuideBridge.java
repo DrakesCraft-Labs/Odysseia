@@ -34,7 +34,15 @@ public final class SlimefunGuideBridge {
             Class<?> guide = Class.forName("com.github.drakescraft_labs.slimefun4.core.guide.SlimefunGuide");
             this.cheatMode = Enum.valueOf(guideMode.asSubclass(Enum.class), "CHEAT_MODE");
             this.getGuideItem = guide.getMethod("getItem", guideMode);
-            this.openGuide = guide.getMethod("openGuide", Player.class, guideMode);
+            try {
+                this.openGuide = guide.getMethod("openCheatMenu", Player.class);
+            } catch (NoSuchMethodException ignored) {
+                try {
+                    this.openGuide = guide.getMethod("openMainMenuAsync", Player.class, guideMode, int.class);
+                } catch (NoSuchMethodException ignored2) {
+                    this.openGuide = guide.getMethod("openGuide", Player.class, ItemStack.class);
+                }
+            }
         } catch (ReflectiveOperationException exception) {
             logUnavailable(exception);
         }
@@ -105,10 +113,20 @@ public final class SlimefunGuideBridge {
 
     /** Opens cheat mode directly because ownership metadata intentionally changes ItemStack equality. */
     public boolean openOwnedCheatGuide(Player player) {
-        if (openGuide == null || cheatMode == null) return false;
+        if (openGuide == null) return false;
         try {
-            openGuide.invoke(null, player, cheatMode);
-            return true;
+            if (openGuide.getParameterCount() == 1) {
+                openGuide.invoke(null, player);
+                return true;
+            } else if (openGuide.getParameterCount() == 3 && cheatMode != null) {
+                openGuide.invoke(null, player, cheatMode, 1);
+                return true;
+            } else if (openGuide.getParameterCount() == 2) {
+                ItemStack item = createCheatGuide();
+                openGuide.invoke(null, player, item);
+                return true;
+            }
+            return false;
         } catch (ReflectiveOperationException exception) {
             logUnavailable(exception);
             return false;

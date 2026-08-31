@@ -437,10 +437,12 @@ public class SFMasterWatcherListener implements Listener {
         }
         String msg = event.getMessage().toLowerCase();
         if (isSfMasterActive(event.getPlayer())
-                && plugin.getConfig().getBoolean("sfmaster-guide.block-cheat-command", true)
                 && (msg.equals("/sf cheat") || msg.equals("/slimefun cheat"))) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage("§eUsa la guía SFMaster que recibiste para abrir la Cheat Sheet.");
+            ensureCheatGuide(event.getPlayer());
+            if (!slimefunGuide.openOwnedCheatGuide(event.getPlayer())) {
+                event.getPlayer().sendMessage("§eUsa la guía SFMaster que recibiste para abrir la Cheat Sheet.");
+            }
             return;
         }
         if (isSfMasterActive(event.getPlayer())

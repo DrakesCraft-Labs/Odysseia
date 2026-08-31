@@ -17,9 +17,14 @@ public final class SFMasterPassExpiry {
         User user = registration.getProvider().getUserManager().getUser(player.getUniqueId());
         if (user == null) return 0L;
         return user.getNodes().stream()
-                .filter(InheritanceNode.class::isInstance)
-                .map(InheritanceNode.class::cast)
-                .filter(node -> node.getGroupName().equalsIgnoreCase("sfmaster") && node.hasExpiry())
+                .filter(node -> node.hasExpiry())
+                .filter(node -> {
+                    if (node instanceof InheritanceNode inheritance) {
+                        return inheritance.getGroupName().equalsIgnoreCase("sfmaster");
+                    }
+                    String key = node.getKey().toLowerCase();
+                    return key.equals("odysseia.sfmaster.active") || key.equals("slimefun.cheat.items") || key.equals("group.sfmaster");
+                })
                 .mapToLong(node -> node.getExpiry().getEpochSecond())
                 .max().orElse(0L);
     }
