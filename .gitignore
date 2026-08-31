@@ -8,3 +8,6 @@ staging/
 
 build/
 .gradle/
+
+# Worktrees y registros locales del asistente; nunca forman parte del plugin.
+.claude/worktrees/
