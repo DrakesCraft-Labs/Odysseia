@@ -8,6 +8,14 @@ import java.util.function.Consumer;
 /** Coordina entregas, reintentos y eventos financieros sin duplicar acciones. */
 public final class PurchaseService {
     private static final String PROVIDER = "TEBEX";
+    /**
+     * Estados de los que una entrega no vuelve. Un reembolso o un contracargo solo revocan lo
+     * que ya estaba COMPLETED: lo que quedo pendiente sigue siendo accionable, asi que sin esta
+     * guarda un reenvio de Tebex o un retry a ciegas entregaba producto de una compra sin cobro
+     * detras, y ademas pisaba el REFUNDED con un estado de entrega.
+     */
+    private static final Set<PurchaseState> ESTADOS_TERMINALES =
+            Set.of(PurchaseState.REFUNDED, PurchaseState.CHARGEBACK, PurchaseState.CANCELLED);
     private final ProductCatalog catalog;
     private final PurchaseRepository repository;
     private final PurchaseActionRuntime runtime;
@@ -42,6 +50,7 @@ public final class PurchaseService {
                 return Result.error("Identidad en revisión: " + identity.detail());
             }
             if (delivery.state() == PurchaseState.COMPLETED) return Result.ok("Idempotente: la compra ya estaba completada.");
+            if (ESTADOS_TERMINALES.contains(delivery.state())) return Result.error("La compra está en estado " + delivery.state() + ": no se re-entrega.");
             process(delivery, actor);
             PurchaseRepository.Delivery current = repository.find(PROVIDER, transaction, productId).orElseThrow();
             return Result.ok("Estado: " + current.state());
@@ -91,6 +100,14 @@ public final class PurchaseService {
     private void process(PurchaseRepository.Delivery delivery, String actor) throws SQLException {
         if (!processing.add(delivery.id())) return;
         try {
+            // El estado se relee: retry y resolveIdentity procesan objetos cargados antes, que
+            // pueden haber quedado obsoletos si entretanto llego un evento financiero.
+            PurchaseState actual = repository.find(delivery.provider(), delivery.transaction(), delivery.product())
+                    .map(PurchaseRepository.Delivery::state).orElse(delivery.state());
+            if (ESTADOS_TERMINALES.contains(actual)) {
+                repository.audit(delivery.id(), actor, "SKIPPED_" + actual, "Entrega en estado terminal: no se reprocesa");
+                return;
+            }
             ProductDefinition product = catalog.get(delivery.product());
             if (product == null) { repository.deliveryState(delivery.id(), PurchaseState.FAILED_MANUAL_REVIEW, "Producto eliminado del catálogo"); return; }
             IdentityResolution resolution = delivery.uuid() == null ? identities.resolve(delivery.player()) : null;
@@ -109,7 +126,7 @@ public final class PurchaseService {
                 ProductAction action = product.actions().stream().filter(candidate -> candidate.id().equals(record.key())).findFirst().orElse(null);
                 if (action == null) { repository.actionState(record.id(), ActionState.FAILED_MANUAL_REVIEW, null, "Acción ausente del catálogo v" + product.version()); manual = true; continue; }
                 if (action.type() == ActionType.ANNOUNCEMENT) continue;
-                if (action.requiresOnline() && !runtime.isOnline(delivery.player())) {
+                if (action.requiresOnline() && !runtime.isOnline(canonical)) {
                     repository.actionState(record.id(), ActionState.WAITING_FOR_PLAYER, null, "Jugador offline"); waiting = true; continue;
                 }
                 repository.actionState(record.id(), ActionState.PROCESSING, null, null);

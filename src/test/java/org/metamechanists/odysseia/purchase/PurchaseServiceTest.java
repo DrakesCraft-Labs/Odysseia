@@ -191,6 +191,75 @@ class PurchaseServiceTest {
         assertEquals("nethercolossus", catalog.get("protection_nether_colossus").actions().getFirst().parameters().get("alias"));
     }
 
+    @Test void refundedPurchaseIsNotReprocessedAndKeepsItsState() throws Exception {
+        runtime.online = true;
+        service.deliver("txn-refund-replay", "TestPlayer", "dragmas_saco", false, "test");
+        assertTrue(service.financialEvent("txn-refund-replay", "dragmas_saco", false, "admin").success());
+
+        // Tebex puede reenviar el comando de entrega, y un admin puede lanzar un retry a ciegas.
+        // Ninguno de los dos debe borrar el REFUNDED ni volver a ejecutar acciones.
+        assertFalse(service.deliver("txn-refund-replay", "TestPlayer", "dragmas_saco", false, "test").success());
+        service.retry("txn-refund-replay", "admin");
+
+        assertEquals(PurchaseState.REFUNDED, service.status("txn-refund-replay").getFirst().state());
+        assertEquals(1, runtime.calls(ActionType.ECONOMY));
+        assertEquals(1, runtime.calls(ActionType.KIT));
+    }
+
+    @Test void chargebackDoesNotDeliverActionsThatWerePendingWhenItArrived() throws Exception {
+        // El caso caro: el jugador nunca entro, asi que el kit quedo WAITING_FOR_PLAYER y el
+        // contracargo no lo pudo revocar --solo revoca lo que estaba COMPLETED--. Si despues
+        // alguien reprocesa la transaccion, ese kit se entregaria sin cobro detras.
+        runtime.online = false;
+        service.deliver("txn-chargeback-pending", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(0, runtime.calls(ActionType.KIT));
+        assertTrue(service.financialEvent("txn-chargeback-pending", "dragmas_saco", true, "admin").success());
+
+        runtime.online = true;
+        service.retry("txn-chargeback-pending", "admin");
+        service.resumePlayer("TestPlayer", "join");
+
+        assertEquals(0, runtime.calls(ActionType.KIT));
+        assertEquals(PurchaseState.CHARGEBACK, service.status("txn-chargeback-pending").getFirst().state());
+    }
+
+    @Test void cancelledPurchaseStaysCancelledAfterAnAdminRetry() throws Exception {
+        runtime.online = false;
+        service.deliver("txn-cancelled", "TestPlayer", "dragmas_saco", false, "test");
+        assertTrue(service.adminState("txn-cancelled", "cancel", "admin").success());
+
+        runtime.online = true;
+        service.retry("txn-cancelled", "admin");
+
+        assertEquals(PurchaseState.CANCELLED, service.status("txn-cancelled").getFirst().state());
+        assertEquals(0, runtime.calls(ActionType.KIT));
+    }
+
+    @Test void onlineCheckUsesTheCanonicalNameNotTheNameTebexSent() throws Exception {
+        // Tebex manda el nick que el comprador escribio; el canonico de una cuenta Bedrock lleva
+        // un punto delante. La entrega nace sin identidad, se resuelve al reprocesarla, y hasta
+        // ahora la comprobacion de "esta conectado" seguia preguntando por el nick de Tebex:
+        // el jugador estaba en linea como ".TestPlayer" y su kit se quedaba esperando para siempre.
+        PurchaseService resolving = new PurchaseService(service.catalog(), repository, runtime,
+                new PlayerIdentityResolver(repository));
+        runtime.online = true;
+
+        resolving.deliver("txn-bedrock", "TestPlayer", "dragmas_saco", false, "test");
+        assertEquals(PurchaseState.FAILED_MANUAL_REVIEW, resolving.status("txn-bedrock").getFirst().state());
+        assertNull(resolving.status("txn-bedrock").getFirst().uuid());
+
+        UUID uuid = UUID.nameUUIDFromBytes("bedrock".getBytes());
+        repository.observeIdentity(uuid, ".TestPlayer", "BEDROCK", "PLAYER_JOIN", "HIGH");
+        repository.observeAlias(uuid, ".TestPlayer", "CANONICAL", "HIGH");
+        repository.observeAlias(uuid, "TestPlayer", "BEDROCK_NORMALIZED", "HIGH");
+        runtime.onlyOnlineFor = ".TestPlayer";
+
+        resolving.recover("test");
+
+        assertEquals(1, runtime.calls(ActionType.KIT));
+        assertEquals(PurchaseState.COMPLETED, resolving.status("txn-bedrock").getFirst().state());
+    }
+
     private ProductAction action(ProductCatalog catalog, String productId, String actionId) {
         return catalog.get(productId).actions().stream()
                 .filter(action -> action.id().equals(actionId))
@@ -208,8 +277,9 @@ class PurchaseServiceTest {
         private boolean failKitOnce;
         private boolean failEconomy;
         private boolean failAnnouncementOnce;
+        private String onlyOnlineFor;
         @Override public UUID resolveUuid(String player) { return UUID.nameUUIDFromBytes(player.getBytes()); }
-        @Override public boolean isOnline(String player) { return online; }
+        @Override public boolean isOnline(String player) { return online && (onlyOnlineFor == null || onlyOnlineFor.equals(player)); }
         @Override public ActionResult execute(ExecutionContext context, ProductAction action) {
             counts.merge(action.type(), 1, Integer::sum);
             if (action.type() == ActionType.ECONOMY && failEconomy) return ActionResult.retryable("Vault unavailable");
