@@ -62,7 +62,7 @@ public final class VaultBackpackGuardListener implements Listener {
         Inventory arriba = event.getView().getTopInventory();
         if (!esBoveda(arriba)) return;
 
-        if (VaultClickPolicy.esAccionInsegura(event.getAction())) {
+        if (VaultClickPolicy.esAccionInsegura(event.getAction(), event.getRawSlot(), arriba.getSize())) {
             event.setCancelled(true);
             plugin.getServer().getScheduler().runTask(plugin, player::updateInventory);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensajeAccionInsegura));

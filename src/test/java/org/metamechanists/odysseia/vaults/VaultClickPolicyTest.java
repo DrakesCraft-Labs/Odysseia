@@ -95,4 +95,53 @@ class VaultClickPolicyTest {
         assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PLACE_ALL));
         assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.SWAP_WITH_CURSOR));
     }
+
+    @Test
+    void dejaPasarLasAccionesQueSeResuelvenEnElInventarioPropio() {
+        // Q y tecla de numero sobre un slot de abajo no rozan la boveda: se resuelven entre slots
+        // del jugador. Bloquearlos llenaba el log de produccion sin proteger nada.
+        int abajo = BOVEDA + 5;
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ALL_SLOT, abajo, BOVEDA));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ONE_SLOT, abajo, BOVEDA));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_SWAP, abajo, BOVEDA));
+        assertFalse(VaultClickPolicy.esAccionInsegura(
+                InventoryAction.HOTBAR_MOVE_AND_READD, abajo, BOVEDA));
+    }
+
+    @Test
+    void sigueBloqueandoLasMismasAccionesDentroDeLaBoveda() {
+        int dentro = 3;
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ALL_SLOT, dentro, BOVEDA));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ONE_SLOT, dentro, BOVEDA));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.HOTBAR_SWAP, dentro, BOVEDA));
+        assertTrue(VaultClickPolicy.esAccionInsegura(
+                InventoryAction.HOTBAR_MOVE_AND_READD, dentro, BOVEDA));
+    }
+
+    @Test
+    void loQueCruzaLaFronteraSigueBloqueadoDesdeLosDosLados() {
+        int abajo = BOVEDA + 5;
+        int dentro = 3;
+        for (int slot : new int[]{dentro, abajo}) {
+            assertTrue(VaultClickPolicy.esAccionInsegura(
+                    InventoryAction.MOVE_TO_OTHER_INVENTORY, slot, BOVEDA));
+            assertTrue(VaultClickPolicy.esAccionInsegura(
+                    InventoryAction.COLLECT_TO_CURSOR, slot, BOVEDA));
+            assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.CLONE_STACK, slot, BOVEDA));
+            assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.UNKNOWN, slot, BOVEDA));
+        }
+    }
+
+    @Test
+    void tirarElCursorFueraDeLaVentanaSigueBloqueado() {
+        // El cursor puede venir cargado con lo que se acaba de sacar de la boveda.
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ALL_CURSOR, -999, BOVEDA));
+        assertTrue(VaultClickPolicy.esAccionInsegura(InventoryAction.DROP_ONE_CURSOR, -999, BOVEDA));
+    }
+
+    @Test
+    void unClicNormalNoSeBloqueaEnNingunSlot() {
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PICKUP_ALL, 3, BOVEDA));
+        assertFalse(VaultClickPolicy.esAccionInsegura(InventoryAction.PLACE_ALL, BOVEDA + 5, BOVEDA));
+    }
 }

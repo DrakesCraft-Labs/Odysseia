@@ -60,9 +60,35 @@ public final class VaultClickPolicy {
     }
 
     /**
+     * Igual que {@link #esAccionInsegura(InventoryAction)}, pero mirando donde se pulso.
+     *
+     * Tirar al suelo con Q o cambiar un item de sitio con la tecla de numero DENTRO del inventario
+     * del propio jugador no toca la boveda ni cruza nada: se resuelve entero abajo. Bloquearlo solo
+     * porque la boveda esta abierta no protegia ningun item y si rompia el juego normal --el log de
+     * produccion se llenaba de HOTBAR_SWAP y DROP_ALL_SLOT de jugadores que no estaban haciendo
+     * nada raro--. Las que si cruzan (shift-click y doble clic) siguen bloqueadas desde los dos
+     * lados, y el cursor fuera de la ventana tambien, porque puede venir cargado de la boveda.
+     *
+     * @param rawSlot slot pulsado en coordenadas de la vista; negativo si es fuera de la ventana
+     * @param topSize tamaño del inventario de arriba (la boveda)
+     */
+    public static boolean esAccionInsegura(InventoryAction action, int rawSlot, int topSize) {
+        if (!esAccionInsegura(action)) return false;
+        // rawSlot < topSize cubre tanto la boveda como el -999 de "fuera de la ventana".
+        if (rawSlot < topSize) return true;
+        return switch (action) {
+            case DROP_ALL_SLOT, DROP_ONE_SLOT, HOTBAR_SWAP, HOTBAR_MOVE_AND_READD -> false;
+            default -> true;
+        };
+    }
+
+    /**
      * Indica si Bukkit intentaria resolver varios slots como una unica transaccion no serializable.
      * Los sorters normales conservan PICKUP, PLACE, MOVE y SWAP; solo se rechazan las operaciones
      * que pueden trabajar sobre una instantanea obsoleta de una GUI virtual.
+     *
+     * Sin contexto de slot es la respuesta conservadora. Para decidir sobre un clic concreto usa
+     * {@link #esAccionInsegura(InventoryAction, int, int)}.
      */
     public static boolean esAccionInsegura(InventoryAction action) {
         return action == InventoryAction.COLLECT_TO_CURSOR
