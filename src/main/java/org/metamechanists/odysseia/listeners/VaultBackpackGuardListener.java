@@ -66,7 +66,11 @@ public final class VaultBackpackGuardListener implements Listener {
             event.setCancelled(true);
             plugin.getServer().getScheduler().runTask(plugin, player::updateInventory);
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensajeAccionInsegura));
-            plugin.getLogger().warning("[Bovedas] Accion atomica insegura bloqueada en /pv para "
+            // FINE, no WARNING: la guarda funcionando es el caso normal, no un fallo del
+            // servidor. Al jugador ya se le explica por chat. En WARNING inundaba latest.log
+            // (14 lineas en 45 min de juego corriente) y la observacion automatica lo levantaba
+            // como incidente inexistente.
+            plugin.getLogger().fine(() -> "[Bovedas] Accion atomica insegura bloqueada en /pv para "
                     + player.getName() + ": " + event.getAction());
             return;
         }
@@ -107,7 +111,7 @@ public final class VaultBackpackGuardListener implements Listener {
                 } else {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', mensajeAccionInsegura));
                 }
-                plugin.getLogger().warning("[Bovedas] Arrastre atomico bloqueado en /pv para "
+                plugin.getLogger().fine(() -> "[Bovedas] Arrastre atomico bloqueado en /pv para "
                         + player.getName());
                 return;
             }
