@@ -55,27 +55,40 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
             jugador.sendMessage(color("&7El trueque de la Papa de mar esta cerrado ahora mismo."));
             return true;
         }
-        if (!mundoPermitido(jugador.getWorld().getName(), mundosPermitidos())) {
-            jugador.sendMessage(color("&cEl trueque solo funciona dentro de la modalidad Slimefun. "
-                    + "&7Usa &f/survival &7y vuelve a intentarlo."));
-            return true;
+        // Fuera de Survival el trueque no se cierra: se ensena. La vendedora del lobby existe y
+        // los jugadores le hacen click; devolverles solo una linea roja hacia que el NPC pareciera
+        // roto (reporte de Alaska001). Aqui el menu se abre como escaparate: se ve la escalera y el
+        // saldo, pero no se mueve ni un item, que es justo lo que protege el aislamiento de
+        // inventarios entre modalidades.
+        boolean soloLectura = !mundoPermitido(jugador.getWorld().getName(), mundosPermitidos());
+        if (soloLectura) {
+            jugador.sendMessage(color("&eEsto es solo el escaparate del trueque. "
+                    + "&7Para canjear y depositar, usa &f/survival&7."));
+        } else {
+            // Las papas viejas se marcan al abrir, para que nadie pierda lo que ya tenia guardado.
+            // Solo en Survival: marcar items dentro de un inventario aislado los tocaria en una
+            // copia que despues se descarta.
+            int migradas = servicio.migrar(jugador);
+            if (migradas > 0) {
+                jugador.sendMessage(color("&8Se validaron &7" + migradas + "&8 papas antiguas de tu inventario."));
+            }
         }
-        // Las papas viejas se marcan al abrir, para que nadie pierda lo que ya tenia guardado.
-        int migradas = servicio.migrar(jugador);
-        if (migradas > 0) {
-            jugador.sendMessage(color("&8Se validaron &7" + migradas + "&8 papas antiguas de tu inventario."));
-        }
-        abrir(jugador);
+        abrir(jugador, soloLectura);
         return true;
     }
 
     public void abrir(Player jugador) {
+        abrir(jugador, !mundoPermitido(jugador.getWorld().getName(), mundosPermitidos()));
+    }
+
+    public void abrir(Player jugador, boolean soloLectura) {
         int papas = servicio.contar(jugador);
         Set<String> yaCanjeados = servicio.canjeados(jugador.getUniqueId());
         List<PapaTier> niveles = servicio.escalera().todos();
 
         int filas = Math.max(3, Math.min(6, (niveles.size() / 9) + 2));
         Holder holder = new Holder();
+        holder.soloLectura = soloLectura;
         Inventory menu = Bukkit.createInventory(holder, filas * 9, servicio.titulo());
         holder.inventory = menu;
 
@@ -83,18 +96,18 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
             PapaTier nivel = niveles.get(i);
             boolean gastado = nivel.unica() && yaCanjeados.contains(nivel.id());
             boolean puede = servicio.escalera().disponible(nivel, papas, yaCanjeados);
-            menu.setItem(i, icono(nivel, papas, puede, gastado));
+            menu.setItem(i, icono(nivel, papas, puede, gastado, soloLectura));
             holder.porSlot.put(i, nivel.id());
         }
 
         menu.setItem(filas * 9 - 5, resumen(jugador, papas, yaCanjeados));
-        menu.setItem(filas * 9 - 1, botonDeposito(jugador));
+        menu.setItem(filas * 9 - 1, botonDeposito(jugador, soloLectura));
         holder.slotDeposito = filas * 9 - 1;
         jugador.openInventory(menu);
     }
 
     /** El boton que vacia el inventario en la alcancia. */
-    private ItemStack botonDeposito(Player jugador) {
+    private ItemStack botonDeposito(Player jugador, boolean soloLectura) {
         ItemStack item = new ItemStack(Material.CHEST);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
@@ -107,16 +120,19 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
                 color("&7Llevas encima: &e" + llevaba),
                 color("&7En la alcancia: &6" + servicio.enAlcancia(jugador.getUniqueId())),
                 color(""),
-                llevaba > 0
-                        ? color("&a▶ Click para depositar " + llevaba
-                                + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")
-                        : color("&8No llevas papas encima."),
+                soloLectura
+                        ? color("&cSolo se deposita en Survival &8(&f/survival&8)")
+                        : llevaba > 0
+                                ? color("&a▶ Click para depositar " + llevaba
+                                        + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")
+                                : color("&8No llevas papas encima."),
                 color("&8El mar se queda un " + (int) servicio.porcentajeMerma() + "% de lo que guardas.")));
         item.setItemMeta(meta);
         return item;
     }
 
-    private ItemStack icono(PapaTier nivel, int papas, boolean puede, boolean gastado) {
+    private ItemStack icono(PapaTier nivel, int papas, boolean puede, boolean gastado,
+                            boolean soloLectura) {
         Material material = Material.matchMaterial(nivel.icono());
         ItemStack item = new ItemStack(material == null ? Material.BAKED_POTATO : material);
         ItemMeta meta = item.getItemMeta();
@@ -130,6 +146,10 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         lore.add("");
         if (gastado) {
             lore.add(color("&8Ya te lo llevaste."));
+        } else if (soloLectura) {
+            lore.add(color(puede
+                    ? "&eLo puedes pagar. Canjea en Survival &8(&f/survival&8)"
+                    : "&cTe faltan &4" + (nivel.coste() - papas) + "&c papas."));
         } else if (puede) {
             lore.add(color("&a▶ Click para canjear"));
         } else {
@@ -178,7 +198,19 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
 
         // Se valida otra vez al pulsar: el jugador pudo cambiar de mundo con el menu abierto.
         // Esto evita depositar un inventario aislado y recuperar despues su copia anterior.
-        if (!mundoPermitido(jugador.getWorld().getName(), mundosPermitidos())) {
+        boolean permitido = mundoPermitido(jugador.getWorld().getName(), mundosPermitidos());
+        if (holder.soloLectura) {
+            // Escaparate del lobby: ningun click mueve papas. Si ademas ya viajo a Survival con
+            // el menu abierto, se repinta en modo real en vez de dejarlo mirando iconos muertos.
+            if (permitido) {
+                repintar(jugador);
+                return;
+            }
+            jugador.sendMessage(color("&eEsto es solo el escaparate del trueque. "
+                    + "&7Para canjear y depositar, usa &f/survival&7."));
+            return;
+        }
+        if (!permitido) {
             jugador.closeInventory();
             jugador.sendMessage(color("&cEl trueque se cerró porque cambiaste de modalidad."));
             return;
@@ -241,6 +273,8 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         private final Map<Integer, String> porSlot = new HashMap<>();
         private int slotDeposito = -1;
         private Inventory inventory;
+        /** Menu abierto fuera de Survival: se mira, no se toca. */
+        private boolean soloLectura;
 
         @Override
         public @NotNull Inventory getInventory() {
