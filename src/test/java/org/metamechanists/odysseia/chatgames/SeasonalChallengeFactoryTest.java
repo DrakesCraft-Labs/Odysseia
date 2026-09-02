@@ -86,4 +86,36 @@ class SeasonalChallengeFactoryTest {
                     "la runa salio sin desordenar y se regala la respuesta: " + reto.answer());
         }
     }
+
+    /*
+     * Regresion del ticket 278: ocho de las catorce preguntas del Oraculo respondian "/menu",
+     * "/pv", "/ah"... Escribir eso en el chat ejecuta el comando, el evento de chat no dispara y
+     * la ronda se pierde aunque el jugador supiera la respuesta.
+     */
+    @Test
+    void ningunaRespuestaSeEscribeComoComando() {
+        for (SeasonalGameMode modo : SeasonalGameMode.values()) {
+            for (ChatGameChallenge reto : generar(modo)) {
+                assertFalse(reto.answer().trim().startsWith("/"),
+                        modo + ": la respuesta se enviaria como comando y el chat no la recibe -> " + reto.answer());
+            }
+        }
+    }
+
+    @Test
+    void siLaRespuestaEsUnComandoElEnunciadoAvisaDeLaBarra() {
+        for (ChatGameChallenge reto : generar(SeasonalGameMode.ORACLE_TRIVIA)) {
+            if (!reto.explanation().contains("/" + reto.answer())) continue;
+            assertTrue(reto.prompt().contains("sin barra") || reto.prompt().contains("despues de la barra"),
+                    "la respuesta es un comando y el enunciado no avisa del formato: " + reto.prompt());
+        }
+    }
+
+    @Test
+    void laBarraYLasTildesNoTumbanUnaRespuestaCorrecta() {
+        ChatGameChallenge reto = new ChatGameChallenge(SeasonalGameMode.ORACLE_TRIVIA, "prompt", "menu", "El menu se abre con /menu.");
+        assertTrue(reto.matches("/menu"), "un cliente que envie la barra deberia seguir ganando");
+        assertTrue(new ChatGameChallenge(SeasonalGameMode.ORACLE_TRIVIA, "p", "poseidon", "e").matches("Poseid\u00f3n"),
+                "las tildes no deberian invalidar una respuesta correcta");
+    }
 }
