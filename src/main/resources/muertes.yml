@@ -1,321 +1,260 @@
 # ─────────────────────────────────────────────────────────────
-#  Mensajes de muerte de DrakesCraft — Edición Multiverso & Olimpo
+#  Mensajes de muerte de DrakesCraft — Edición Multiverso, Cuántica & Comedia
 # ─────────────────────────────────────────────────────────────
 #
-# Vive aparte de config.yml porque Odysseia reescribe ese archivo al arrancar y se lleva los
-# comentarios por delante. Este no lo toca nadie: se puede editar tranquilo.
-#
-# Se recarga con /odysseia reload, sin reiniciar.
-#
-# MARCADORES disponibles en cualquier mensaje:
+# MARCADORES:
 #   {jugador}  quien murió
-#   {asesino}  quien lo mató, con su nombre visible
-#   {arma}     el arma que llevaba el asesino (sobre todo útil en pvp)
-#   {mundo}    el mundo
-#   {y}        la altura donde murió
-#
-# Nunca sale dos veces seguidas el mismo mensaje del mismo grupo.
+#   {asesino}  quien lo mató
+#   {arma}     el arma usada
+#   {mundo}    el mundo donde ocurrió
+#   {y}        la altura Y
 
 enabled: true
 
-# Coletilla que se añade cuando alguien lleva varias muertes en poco rato.
+# Coletilla añadida automáticamente cuando alguien muere repetidamente
 racha:
   minimo: 3
   ventana-minutos: 10
   coletillas:
-    - "&8(van &c{veces}&8 en un rato, tómate un tecito)"
-    - "&8(&c{veces}&8 veces ya, esto dejó de ser mala suerte)"
-    - "&8(&c{veces}&8 seguidas — alguien escóndale la armadura)"
-    - "&8(&c{veces}&8 muertes, va camino al récord del servidor)"
-    - "&8(&c{veces}&8 en diez minutos, impresionante en el mal sentido)"
+    - "&8(van &c{veces}&8 en un rato, tómate un tecito y respira)"
+    - "&8(&c{veces}&8 veces ya, esto dejó de ser mala suerte y es vocación)"
+    - "&8(&c{veces}&8 seguidas — por favor alguien escóndale la armadura)"
+    - "&8(&c{veces}&8 muertes, va camino al récord Guinness del servidor)"
+    - "&8(&c{veces}&8 en diez minutos... impresionante consistencia en perder)"
     - "&8(&c{veces}&8 derrotas al hilo... ¿seguro que tienes el monitor encendido?)"
     - "&8(&c{veces}&8 caídas: los dioses en el Olimpo están llorando de la risa)"
     - "&8(&c{veces}&8 muertes: Hades ya te tiene preparado un departamento amoblado)"
+    - "&8(&c{veces}&8 visitas al cementerio, el sepulturero te cobra tarifa plana)"
+    - "&8(&c{veces}&8 f's en el chat, el botón de respawn pide clemencia)"
+    - "&8(&c{veces}&8 descalabros cósmicos, la gravedad tiene algo personal contigo)"
+    - "&8(&c{veces}&8 desintegraciones, tus átomos ya no saben cómo rearmarse)"
 
 mensajes:
 
-  # ── Quién te mató manda sobre cómo te mató ──────────────────
-
-  jefe:
-    - "&e{jugador} &7retó a &c{asesino}&7. &c{asesino} &7aceptó el reto."
-    - "&c{asesino} &7ni siquiera lo consideró un combate. &e{jugador} &7sí."
-    - "&e{jugador} &7fue borrado del mapa por &c{asesino}&7 sin derecho a réplica."
-    - "&7Los dioses vieron a &e{jugador} &7caer ante &c{asesino}&7. Aplaudieron."
-    - "&c{asesino} &7le recordó a &e{jugador} &7por qué se llama jefe."
-    - "&e{jugador} &7duró exactamente lo que &c{asesino} &7quiso que durara."
-    - "&e{jugador} &7trajo un plan. &c{asesino} &7trajo el resultado."
-    - "&c{asesino} &7bostezó y &e{jugador} &7dejó de estar en este plano de la realidad."
-    - "&e{jugador} &7llegó hasta aquí. Justo hasta aquí."
-    - "&e{jugador} &7fue una anécdota corta en la vida milenaria de &c{asesino}&7."
-    - "&e{jugador} &7pensó que esquivaba el ataque de &c{asesino}&7. La hitbox dijo lo contrario."
-    - "&c{asesino} &7usó a &e{jugador} &7para trapear el piso de la arena."
-    - "&e{jugador} &7vino por la gloria y se fue por la tubería ante &c{asesino}&7."
-    - "&c{asesino} &7le desarmó hasta los cromosomas a &e{jugador}&7."
-    - "&e{jugador} &7desafió a un titán antiguo y descubrió por qué estaban sellados."
-    - "&c{asesino} &7convirtió la armadura de &e{jugador} &7en papel picado."
-
-  pvp:
-    - "&c{asesino} &7mandó a &e{jugador} &7de vuelta al spawn con &f{arma}&7."
-    - "&e{jugador} &7perdió una discusión contra &c{asesino} &7y contra &f{arma}&7."
-    - "&c{asesino} &7le hizo el favor a &e{jugador} &7de acortarle el camino a casa."
-    - "&e{jugador} &7ahora sabe que &c{asesino} &7no estaba bromeando."
-    - "&c{asesino} &7usó &f{arma}&7. Fue críticamente efectivo contra &e{jugador}&7."
-    - "&e{jugador} &7pidió PvP. &c{asesino} &7trajo &f{arma}&7 y talento."
-    - "&c{asesino} &7le explicó a &e{jugador} &7cómo funciona el combate con &f{arma}&7."
-    - "&e{jugador} &7se llevó una lección de &c{asesino}&7 y la lección pesaba toneladas."
-    - "&c{asesino} &7hizo respawnear a &e{jugador} &7sin pedirle permiso."
-    - "&e{jugador} &7apostó a que le ganaba a &c{asesino}&7. Perdió la apuesta y la discusión."
-    - "&e{jugador} &7sintió el filo cósmico de &c{asesino}&7 (&f{arma}&7)."
-    - "&c{asesino} &7le reseteó el sistema operativo a &e{jugador} &7con &f{arma}&7."
-    - "&e{jugador} &7trató de correr, pero &c{asesino} &7tenía mejor sprint y &f{arma}&7."
-    - "&c{asesino} &7mandó a &e{jugador} &7al lobby sin escalas con &f{arma}&7."
-    - "&e{jugador} &7creyó que el escudo lo salvaba de &c{asesino}&7. No lo salvó."
-    - "&c{asesino} &7le mostró a &e{jugador} &7la pantalla de reaparición en resolución 4K."
-    - "&e{jugador} &7llevó valor; &c{asesino} &7llevó &f{arma}&7. Ganó el equipamiento."
-    - "&c{asesino} &7cerró el argumento de &e{jugador} &7con un crítico y cero bibliografía."
-
-  autogol:
-    - "&e{jugador} &7se mató solo. Que quede en actas del servidor."
-    - "&e{jugador} &7fue traicionado por &c{asesino}&7… que era de los suyos."
-    - "&e{jugador} &7confirmó que el peor enemigo de uno va con uno."
-    - "&e{jugador} &7no necesitó ayuda de nadie para hacer el ridículo."
-    - "&e{jugador} &7se saboteó a sí mismo con precisión quirúrgica."
-    - "&e{jugador} &7tropezó con su propia trampa. Nadie se sorprende."
-    - "&e{jugador} &7se eliminó en solitario. La selección natural haciendo su trabajo."
-
-  # ── Cómo te mataste en el entorno ───────────────────────────
-
+  # ══════════════════════════════════════════════════════════════
+  # CAÍDAS & GRAVEDAD (FALL)
+  # ══════════════════════════════════════════════════════════════
   fall:
-    - "&e{jugador} &7descubrió que la gravedad no negocia."
-    - "&e{jugador} &7intentó bajar por el camino corto. Funcionó demasiado bien."
-    - "&e{jugador} &7cayó desde Y={y} y el suelo no perdonó."
-    - "&e{jugador} &7confundió el suelo con una sugerencia opcional."
-    - "&e{jugador} &7probó si podía volar. No podía."
-    - "&e{jugador} &7aterrizó. Mal, pero aterrizó."
-    - "&7Alguien avísele a &e{jugador} &7que las escaleras existen por algo."
-    - "&e{jugador} &7se estrelló contra el planeta a toda velocidad."
-    - "&e{jugador} &7calculó el salto. Se equivocó en tres ceros."
-    - "&e{jugador} &7le tenía fe al salto. El salto no le tenía fe a él."
-    - "&e{jugador} &7bajó los &f{y}&7 bloques en tiempo récord."
-    - "&e{jugador} &7pensó que abajo había agua. Había concreto."
-    - "&e{jugador} &7hizo un vuelo sin escalas, sin paracaídas y sin futuro."
-    - "&e{jugador} &7se despidió del cielo desde arriba y saludó al suelo con la frente."
-    - "&7La caída no mató a &e{jugador}&7. Fue la parada en seco."
-    - "&e{jugador} &7comprobó experimentalmente que 9.8 m/s² es una ley universal."
-    - "&e{jugador} &7quiso hacer un MLG con balde de agua... y puso una antorcha."
-    - "&e{jugador} &7olvidó cómo funcionaba el teclado justo en el borde del acantilado."
-    - "&e{jugador} &7quedó incrustado en el suelo como fósil prehistórico."
-    - "&e{jugador} &7intentó emular a Ícaro pero sin alas."
-    - "&e{jugador} &7vio el cartel de 'no saltar' y lo tomó como desafío personal."
-    - "&e{jugador} &7llegó antes que el ascensor, pero en varias piezas."
+    - "&e{jugador} &7probó que la gravedad en &f{mundo}&7 funciona al 100% de eficiencia."
+    - "&e{jugador} &7cayó desde &f{y}&7 metros creyendo que era un pájaro. Spoiler: era una piedra."
+    - "&e{jugador} &7intentó hacer MLG con un cubo de agua y puso el cubo... pero en su imaginación."
+    - "&e{jugador} &7se cayó de tan alto que le dio tiempo de reflexionar sobre todas sus malas decisiones."
+    - "&e{jugador} &7olvidó que no tenía el modo creativo activado antes de saltar al vacío."
+    - "&e{jugador} &7aterrizó con la cara contra el suelo a velocidad terminal."
+    - "&e{jugador} &7se tiró por el barranco buscando un atajo y encontró el lobby."
+    - "&e{jugador} &7quiso imitar a Batman y terminó como tortilla en &f{mundo}&7."
+    - "&e{jugador} &7hizo un clavado perfecto... lástima que no había piscina abajo."
+    - "&e{jugador} &7tropezó con un píxel de aire y cayó desde la altura &f{y}&7."
+    - "&e{jugador} &7confundió las leyes de Newton con una sugerencia opcional."
+    - "&e{jugador} &7descubrió que el suelo es duro, implacable y no negocia."
+    - "&e{jugador} &7quiso desafiar a Einstein y la aceleración gravitacional (9.8 m/s2) ganó."
+    - "&e{jugador} &7dejó un cráter con su silueta grabado en el suelo."
+    - "&e{jugador} &7pensó que un bloque de heno lo salvaría desde 200 bloques de altura."
+    - "&e{jugador} &7cayó con estilo, elegancia y un impacto sísmico devastador."
+    - "&e{jugador} &7quiso comprobar si había daño por caída. Ya lo confirmó."
 
+  # ══════════════════════════════════════════════════════════════
+  # AHOGAMIENTO (DROWNING)
+  # ══════════════════════════════════════════════════════════════
+  drowning:
+    - "&e{jugador} &7olvidó que los humanos necesitan oxígeno para no apagarse."
+    - "&e{jugador} &7quiso hablar con las sirenas en &f{mundo}&7 y se quedó a vivir con Bob Esponja."
+    - "&e{jugador} &7bebió tanta agua que se convirtió en sopa marina humana."
+    - "&e{jugador} &7pensó que aguantar la respiración 15 minutos era un logro desbloqueable."
+    - "&e{jugador} &7intentó respirar bajo el agua usando pura fuerza de voluntad."
+    - "&e{jugador} &7se quedó mirando un pez tropical hasta que se le desconectaron los pulmones."
+    - "&e{jugador} &7quiso ser Aquaman pero sin superpoderes, sin tridente y sin oxígeno."
+    - "&e{jugador} &7descubrió el fondo del océano... y no supo cómo volver a la superficie."
+    - "&e{jugador} &7quedó atrapado bajo el hielo intentando picar con la mano vacía."
+    - "&e{jugador} &7nadó con armadura de netherite completa creyendo que flotaría."
+
+  # ══════════════════════════════════════════════════════════════
+  # LAVA & FUEGO (LAVA & FIRE)
+  # ══════════════════════════════════════════════════════════════
   lava:
-    - "&e{jugador} &7pensó que la lava se veía más fría de cerca."
-    - "&e{jugador} &7se metió al jacuzzi equivocado."
-    - "&e{jugador} &7ahora forma parte del basalto del mapa."
-    - "&e{jugador} &7descubrió que el color naranja fluorescente significa &cno entrar&7."
-    - "&e{jugador} &7se fue a nadar donde ningún ser vivo debería nadar."
-    - "&e{jugador} &7se derritió con estilo, eso hay que reconocérselo."
-    - "&e{jugador} &7se bañó en el líquido más caro del servidor."
-    - "&e{jugador} &7dejó de existir en formato sólido."
-    - '&e{jugador} &7pensó "total, son dos bloquecitos de lava". Fueron los últimos.'
-    - "&e{jugador} &7quiso ver el núcleo de la Tierra desde adentro."
-    - "&7Se busca el inventario de &e{jugador}&7. Última vez visto: flotando en llamas."
-    - "&e{jugador} &7hizo cosplay de Terminator 2 con pulgar arriba incluido."
-    - "&e{jugador} &7confundió la sopa de magma con un buff de regeneración."
-    - "&e{jugador} &7descubrió que el Nether no tiene servicio de bomberos."
+    - "&e{jugador} &7se dio un baño termal en lava a 1.200 grados. Quedó bien crocante."
+    - "&e{jugador} &7confundió la lava con salsa de tomate picante en &f{mundo}&7."
+    - "&e{jugador} &7probó la temperatura de la lava con todo el cuerpo al mismo tiempo."
+    - "&e{jugador} &7se convirtió en carbón vegetal de alta calidad para el asado del domingo."
+    - "&e{jugador} &7buscaba diamantes en la capa -58 y encontró cremación instantánea gratuita."
+    - "&e{jugador} &7hizo natación sincronizada en el lago de magma del Nether."
+    - "&e{jugador} &7entró a la lava y sus herramientas se desintegraron en otra dimensión."
+    - "&e{jugador} &7se derritió más rápido que mantequilla en una sartén al rojo vivo."
+    - "&e{jugador} &7intentó enfriar la lava con su propio cuerpo."
 
   fire:
-    - "&e{jugador} &7se prendió fuego y olvidó la parte de apagarse."
-    - "&e{jugador} &7quedó crujiente por fuera y bien cocido por dentro."
-    - "&e{jugador} &7jugó con fósforos en un servidor de bloques inflamables."
-    - "&e{jugador} &7ardió en llamas como antorcha olímpica."
-    - "&e{jugador} &7olvidó que los bomberos no llegan al Nether."
-    - "&e{jugador} &7hizo combustión espontánea por exceso de confianza."
+    - "&e{jugador} &7jugó con fuego y terminó como malvavisco tostado."
+    - "&e{jugador} &7se convirtió en una antorcha humana que iluminó todo &f{mundo}&7."
+    - "&e{jugador} &7olvidó la regla básica de 'detenerse, tirarse al suelo y rodar'."
+    - "&e{jugador} &7ardió con la intensidad de una supernova en miniatura."
+    - "&e{jugador} &7se prendió fuego y corrió en círculos gritando sin buscar agua."
+    - "&e{jugador} &7se auto-cocinó a fuego lento hasta quedar a punto medio."
 
-  drowning:
-    - "&e{jugador} &7olvidó que los pulmones necesitan aire para funcionar."
-    - "&e{jugador} &7fue a visitar a Bob Esponja y se quedó a vivir."
-    - "&e{jugador} &7se quedó sin burbujitas en el peor momento posible."
-    - "&e{jugador} &7nadó hacia el fondo buscando tesoros y encontró a Poseidón enojado."
-    - "&e{jugador} &7aprendió a respirar bajo el agua. Bueno, no aprendió."
-    - "&e{jugador} &7bebió demasiada agua de golpe."
-
+  # ══════════════════════════════════════════════════════════════
+  # EXPLOSIONES (TNT, CAMAS, CRISTALES, CREEPERS)
+  # ══════════════════════════════════════════════════════════════
   explosion:
-    - "&e{jugador} &7abrazó un Creeper pensando que era amigable."
-    - "&e{jugador} &7hizo volar todo en pedazos, incluyéndose a sí mismo."
-    - "&e{jugador} &7escuchó un 'Tssss' y no le dio tiempo ni de rezar."
-    - "&e{jugador} &7se convirtió en confeti espacial."
-    - "&e{jugador} &7quiso apagar una dinamita con la mano."
-    - "&e{jugador} &7descubrió que las camas en el Nether no son para dormir."
-    - "&e{jugador} &7fue eyectado hacia la estratósfera por una explosión sorpresa."
-    - "&e{jugador} &7preguntó qué hacía ese botón rojo. La respuesta fue audiovisual."
-    - "&e{jugador} &7se convirtió en partículas sin tenerlas activadas en ajustes."
+    - "&e{jugador} &7intentó dormir en una cama en el Nether. La termodinámica explotó en su cara."
+    - "&e{jugador} &7quiso jugar con TNT y ahora sus piezas están repartidas en 4 chunks distintos."
+    - "&e{jugador} &7tocó un Cristal del End y aprendió química de impacto a la fuerza."
+    - "&e{jugador} &7escuchó un 'tsss' a su espalda y conoció a su creador de inmediato."
+    - "&c{asesino} &7le dio un abrazo explosivo a &e{jugador} &7sin pedir permiso."
+    - "&e{jugador} &7se convirtió en confeti brillante gracias a la explosión de &c{asesino}&7."
+    - "&e{jugador} &7se dio vuelta para ver quién venía y ¡BUM! Adiós inventario."
+    - "&e{jugador} &7presionó la placa de presión de la pirámide del desierto creyendo que daba regalos."
+    - "&e{jugador} &7fue eyectado a la estratosfera por una detonación milimétrica."
+    - "&c{asesino} &7le enseñó a &e{jugador} &7por qué no se juega con pólvora en espacios cerrados."
 
+  # ══════════════════════════════════════════════════════════════
+  # EL VACÍO (VOID - ONEBLOCK & SKYBLOCK)
+  # ══════════════════════════════════════════════════════════════
   void:
-    - "&e{jugador} &7se cayó del mundo. Literalmente se le acabó el mapa."
-    - "&e{jugador} &7fue a ver qué había abajo de la bedrock. No había nada."
-    - "&e{jugador} &7encontró el borde del multiverso con la cara."
-    - "&e{jugador} &7sigue cayendo en algún servidor paralelo."
-    - "&e{jugador} &7bajó de Y=-64 sin pasaporte interdimensional."
-    - "&e{jugador} &7se fue donde no hay bloques, ni luz, ni esperanza."
-    - "&e{jugador} &7saltó al vacío de SkyBlock pensando que había puente."
-    - "&e{jugador} &7fue absorbido por el vacío cuántico de las islas."
-    - "&e{jugador} &7desapareció entre los pliegues de la realidad."
-    - "&e{jugador} &7intentó cargar un chunk que ni Mojang había imaginado."
-    - "&e{jugador} &7salió del mapa y también del presupuesto de rescate."
+    - "&e{jugador} &7se resbaló en la isla de OneBlock y fue a saludar a los extraterrestres."
+    - "&e{jugador} &7descubrió qué hay debajo de la capa -64 del SkyBlock: absolutamente nada."
+    - "&e{jugador} &7se cayó de la isla mientras contestaba un WhatsApp en la vida real."
+    - "&e{jugador} &7saltó al abismo del vacío creyendo firmemente que había un bloque invisible."
+    - "&e{jugador} &7fue absorbido por la nada cósmica y se convirtió en polvo estelar."
+    - "&e{jugador} &7tropezó en el borde de su parcela y se desvaneció en el espacio exterior."
+    - "&e{jugador} &7tiró su inventario al vacío... y luego se tiró él mismo para acompañarlo."
+    - "&e{jugador} &7olvidó agacharse (Shift) mientras construía el puente hacia el infinito."
+    - "&e{jugador} &7se cayó de su propia isla por mirar las estrellas con la boca abierta."
 
-  suffocation:
-    - "&e{jugador} &7se quedó sin espacio personal en la pared."
-    - "&e{jugador} &7intentó ocupar el mismo lugar que un bloque de grava."
-    - "&e{jugador} &7descubrió que la arena cae hacia abajo."
-    - "&e{jugador} &7intentó atravesar una pared por pura terquedad."
-    - "&e{jugador} &7se fusionó con un bloque de piedra. Ganó la piedra."
-    - "&7{jugador} &7se quedó sin aire dentro de un bloque."
-    - "&7{jugador} &7intentó ocupar el mismo sitio que la piedra. Perdió."
-    - "&7A &f{jugador} &7lo aplastó el mundo, sin metáforas."
-    - "&f{jugador} &7descubrió que la arena cae más rápido que él."
+  # ══════════════════════════════════════════════════════════════
+  # COMBATE PVP
+  # ══════════════════════════════════════════════════════════════
+  pvp:
+    - "&c{asesino} &7desinstaló a &e{jugador} &7del servidor usando &f{arma}&7."
+    - "&e{jugador} &7fue educado en combate cuerpo a cuerpo por &c{asesino}&7 con &f{arma}&7."
+    - "&c{asesino} &7le aplicó un combo de 25 hits a &e{jugador} &7y lo mandó al lobby sin escalas."
+    - "&e{jugador} &7escribió '1v1 fácil' y &c{asesino} &7se lo tomó como algo estrictamente personal."
+    - "&c{asesino} &7le dio una clase magistral de esgrima a &e{jugador} &7con &f{arma}&7."
+    - "&e{jugador} &7culpó al lag con 12ms de ping, pero &c{asesino} &7simplemente le dio una paliza."
+    - "&c{asesino} &7convirtió a &e{jugador} &7en una generosa donación de puntos de experiencia."
+    - "&e{jugador} &7descubrió por las malas por qué &c{asesino} &7tiene mejor puntería con &f{arma}&7."
+    - "&c{asesino} &7le reinició el sistema operativo a &e{jugador} &7con &f{arma}&7."
 
+  # ══════════════════════════════════════════════════════════════
+  # JEFES & MITOLOGÍA (BOSSES)
+  # ══════════════════════════════════════════════════════════════
+  jefe:
+    - "&e{jugador} &7desafió a &c{asesino} &7y aprendió por qué los jefes se llaman jefes."
+    - "&c{asesino} &7pisoteó a &e{jugador} &7como si fuera una hormiga en la arena del Olimpo."
+    - "&e{jugador} &7entró a la arena de jefes con armadura de cuero y optimismo infundado."
+    - "&c{asesino} &7le devolvió a &e{jugador} &7el boleto de entrada a golpes."
+    - "&e{jugador} &7subestimó el poder divino de &c{asesino} &7y pagó con su alma."
+
+  # ══════════════════════════════════════════════════════════════
+  # AUTOGOL, SUICIDIO & TORPEZAS
+  # ══════════════════════════════════════════════════════════════
+  autogol:
+    - "&e{jugador} &7se cansó de existir y aplicó auto-desconexión biológica voluntaria."
+    - "&e{jugador} &7usó /kill porque caminar 50 bloques le daba demasiada flojera."
+    - "&e{jugador} &7lanzó una perla de ender, rebotó en una pared y cayó directo a la lava."
+    - "&e{jugador} &7se disparó a sí mismo con su propia flecha rebotada. Puntería inversa."
+    - "&e{jugador} &7decidió que renacer salía más barato y rápido que cocinar comida."
+
+  # ══════════════════════════════════════════════════════════════
+  # HAMBRE (STARVATION)
+  # ══════════════════════════════════════════════════════════════
   starvation:
-    - "&e{jugador} &7murió de hambre teniendo un inventario lleno de lingotes de oro."
-    - "&e{jugador} &7se olvidó de almorzar, de cenar y de respirar."
-    - "&e{jugador} &7confirmó que el polvo de redstone no alimenta."
-    - "&e{jugador} &7murió con la despensa vacía por no gastar un filete."
-    - "&e{jugador} &7dejó que su barrita de comida llegara a cero absoluto."
-    - "&6{jugador} &7se murió de hambre teniendo cofres llenos."
-    - "&6{jugador} &7olvidó que comer es parte del juego."
-    - "&7Nadie le pasó un pan a &6{jugador}&7."
-    - "&6{jugador} &7priorizó minar sobre almorzar. Mal."
+    - "&e{jugador} &7se murió de hambre teniendo 5 cofres llenos de comida en su base."
+    - "&e{jugador} &7olvidó que en este juego hay que masticar para que el corazón siga latiendo."
+    - "&e{jugador} &7priorizó minar 14 horas seguidas antes que comerse una simple manzana."
+    - "&e{jugador} &7intentó hacer fotosíntesis en la oscuridad y sus células no cooperaron."
 
+  # ══════════════════════════════════════════════════════════════
+  # VENENO & MAGIA
+  # ══════════════════════════════════════════════════════════════
   poison:
-    - "&e{jugador} &7se tomó una botella verde sospechosa."
-    - "&e{jugador} &7fue derrotado lentamente con mucho veneno y cero dignidad."
-    - "&e{jugador} &7comió ojos de araña fermentados por curiosidad gastronómica."
-    - "&e{jugador} &7perdió contra una toxina que olía a calcetín usado."
-    - "&2{jugador} &7se bebió algo verde y confió."
-    - "&2{jugador} &7aprendió que no todo lo que brilla se toma."
-    - "&7El veneno tardó, pero llegó. Adiós &2{jugador}&7."
-    - "&2{jugador} &7murió por decisiones dietéticas cuestionables."
+    - "&e{jugador} &7se tomó un frasco verde misterioso que encontró tirado en una cueva."
+    - "&e{jugador} &7comió ojos de araña fermentados creyendo que eran uvas gourmet."
+    - "&e{jugador} &7perdió contra una toxina que olía a calcetín vencido hace 3 meses."
+    - "&e{jugador} &7aprendió que no todas las botellas con líquido brillante son pociones de velocidad."
 
   magic:
-    - "&e{jugador} &7fue víctima de magia oscura que no entendía."
-    - "&e{jugador} &7recibió una poción de daño instantáneo en la frente."
-    - "&c{asesino} &7hizo un pase mágico y &e{jugador} &7dejó de existir."
-    - "&e{jugador} &7tocó un artefacto arcano sin leer las advertencias."
-    - "&d{jugador} &7recibió magia que no venía de su bando."
-    - "&d{jugador} &7subestimó a alguien con una poción."
-    - "&7A &d{jugador} &7lo mató algo que ni se veía."
-    - "&d{jugador} &7fue borrado con estilo arcano."
+    - "&e{jugador} &7recibió una poción arrojadiza de daño instantáneo II en plena frente."
+    - "&c{asesino} &7hizo un truco de magia y &e{jugador} &7dejó de ocupar espacio en este plano."
+    - "&e{jugador} &7tocó una runa mágica sin leer la letra chica del contrato arcano."
+    - "&e{jugador} &7fue víctima de un hechizo tan potente que le descalibró el teclado."
 
+  # ══════════════════════════════════════════════════════════════
+  # WITHER & MARCHITAMIENTO
+  # ══════════════════════════════════════════════════════════════
   wither:
-    - "&e{jugador} &7se marchitó como flor en el desierto."
-    - "&e{jugador} &7se puso negro, se marchitó y luego se fue al lobby."
-    - "&e{jugador} &7sintió el abrazo marchito del Wither."
-    - "&e{jugador} &7quedó desintegrado por la descomposición celular."
-    - "&8{jugador} &7se marchitó a la altura &f{y}&7."
-    - "&8{jugador} &7se puso negro y se quedó así."
-    - "&7El wither se llevó a &8{jugador}&7. Otra vez."
-    - "&8{jugador} &7se apagó lentamente. Poético y doloroso."
+    - "&e{jugador} &7se marchitó enterito y envejeció 80 años en 4 segundos."
+    - "&e{jugador} &7se puso negro, se marchitó como flor en el desierto y se fue al lobby."
+    - "&e{jugador} &7recibió un abrazo marchito del Wither y se descompuso celularmente."
+    - "&e{jugador} &7se apagó lentamente con mucho dramatismo y cero dignidad."
 
+  # ══════════════════════════════════════════════════════════════
+  # RAYOS DE ZEUS (LIGHTNING)
+  # ══════════════════════════════════════════════════════════════
   lightning:
-    - "&e{jugador} &7fue elegido por Zeus. Para recibir 100,000 voltios."
-    - "&e{jugador} &7recibió un rayo celestial. No pidió ninguno pero le sobró voltaje."
-    - "&7Zeus miró a &e{jugador} &7desde el Olimpo y dijo: 'a ese de ahí'."
-    - "&e{jugador} &7hizo de pararrayos humano en medio de la tormenta."
-    - "&e{jugador} &7fue elegido por el cielo. Para mal."
-    - "&e{jugador} &7recibió 300.000 amperios de retroalimentación."
-    - "&7Zeus le tomó cariño a &e{jugador}&7."
-    - "&e{jugador} &7se convirtió en pararrayos en &f{mundo}&7."
+    - "&e{jugador} &7fue seleccionado personalmente por Zeus para recibir 100.000 voltios de castigo."
+    - "&e{jugador} &7hizo de pararrayos humano en medio de la tormenta en &f{mundo}&7."
+    - "&7Zeus miró a &e{jugador} &7desde el Olimpo y dijo: 'a ese de ahí me lo cocinan bien tostado'."
+    - "&e{jugador} &7recibió un rayo celestial con sabor a tostada con mantequilla quemada."
 
+  # ══════════════════════════════════════════════════════════════
+  # ÉLITRAS & ESTRELLADAS (FLY INTO WALL)
+  # ══════════════════════════════════════════════════════════════
   fly_into_wall:
-    - "&e{jugador} &7iba volando espectacular con élitras hasta que apareció una montaña."
-    - "&e{jugador} &7confirmó que las alas no traen frenos ABS."
-    - "&e{jugador} &7se estampó contra el muro a velocidad supersónica."
-    - "&e{jugador} &7quiso hacer un giro acrobático y quedó estampado como calcomanía."
-    - "&e{jugador} &7probó la dureza del ladrillo a 120 km/h."
-    - "&b{jugador} &7confundió una pared con el cielo."
-    - "&b{jugador} &7volaba precioso hasta que dejó de volar."
-    - "&7Elytra 1 - &b{jugador} &70."
-    - "&b{jugador} &7aterrizó a &f{y}&7 metros. Contra algo sólido."
+    - "&e{jugador} &7iba volando espectacular con élitras hasta que apareció una montaña salvaje."
+    - "&e{jugador} &7confirmó a 150 km/h que las alas de Minecraft no vienen con frenos ABS."
+    - "&e{jugador} &7se estampó contra un muro de ladrillos y quedó pegado como calcomanía."
+    - "&e{jugador} &7quiso hacer una pirueta aérea acrobática y aterrizó con la nariz en la piedra."
+    - "&e{jugador} &7confundió una pared sólida con el cielo abierto."
 
+  # ══════════════════════════════════════════════════════════════
+  # WARDEN & ATAQUE SÓNICO (SONIC BOOM)
+  # ══════════════════════════════════════════════════════════════
   sonic_boom:
-    - "&e{jugador} &7fue gritado hasta la muerte por &c{asesino}&7."
-    - "&e{jugador} &7hizo ruido al lado de un Warden sordo pero con mala uva."
-    - "&e{jugador} &7sintió una onda sónica que le descalibró el alma."
-    - "&e{jugador} &7aprendió por qué en las Ciudades Antiguas se camina agachado."
-    - "&3{jugador} &7fue gritado hasta la muerte."
-    - "&3{jugador} &7conoció el warden. Brevemente."
-    - "&7El warden mandó su opinión sonora a &3{jugador}&7."
-    - "&3{jugador} &7aprendió que agacharse también importa."
+    - "&e{jugador} &7hizo ruido al lado de un Warden ciego y recibió un grito supersónico en el pecho."
+    - "&e{jugador} &7aprendió por las malas por qué en las Ciudades Antiguas se camina agachado y en silencio."
+    - "&c{asesino} &7le descalibró el esqueleto a &e{jugador} &7con un rayo sónico de 500 decibeles."
+    - "&e{jugador} &7quiso cantar ópera en el Deep Dark y el Warden lo silenció para siempre."
 
+  # ══════════════════════════════════════════════════════════════
+  # NIEVE POLVO & CONGELAMIENTO (FREEZE)
+  # ══════════════════════════════════════════════════════════════
   freeze:
-    - "&e{jugador} &7se congeló entero en nieve polvo. Quedó como estatua decorativa."
-    - "&e{jugador} &7subestimó el frío de las cumbres. El frío no."
-    - "&e{jugador} &7se convirtió en helado de paleta sabor survival."
-    - "&b{jugador} &7se quedó tieso a la altura &f{y}&7. Literalmente."
-    - "&b{jugador} &7descubrió que el hielo polvo no es decorativo."
-    - "&b{jugador} &7se congeló. Nadie le pasó un abrigo."
-    - "&b{jugador} &7pasó de jugador a paleta helada."
-    - "&7A &b{jugador} &7se le acabó la calefacción en &f{mundo}&7."
+    - "&e{jugador} &7pisó nieve polvo y se convirtió en una paleta helada sabor supervivencia."
+    - "&e{jugador} &7se congeló entero a la altura &f{y}&7. Nadie le pasó una bufanda ni un café."
+    - "&e{jugador} &7quedó tieso como estatua de hielo por no usar botas de cuero calentitas."
+    - "&e{jugador} &7subestimó el frío polar y terminó listo para enfriar las bebidas del servidor."
 
-  # ── Slimefun & Tecnología Cósmica ───────────────────────────
-
-  slimefun:
-    - "&e{jugador} &7tocó un cable de alta tensión de Slimefun sin guantes de goma."
-    - "&e{jugador} &7abrió un reactor nuclear de Slimefun para ver si ya estaba listo."
-    - "&e{jugador} &7sufrió una sobrecarga cuántica en su red de energía."
-    - "&e{jugador} &7quedó irradiado por manipular uranio enriquecido sin traje hazmat."
-    - "&e{jugador} &7fue triturado por una máquina automática de molienda."
-    - "&e{jugador} &7intentó reparar un condensador cuántico con un palo de madera."
-    - "&e{jugador} &7descalibró el generador de antimateria y pagó las consecuencias."
-    - "&e{jugador} &7se metió dentro de un teletransportador de Networks sin destino."
-
-  # ── Lore del Multiverso & Herobrine ─────────────────────────
-
-  herobrine:
-    - "&7Un par de ojos blancos miró a &e{jugador}&7 desde la niebla. &e{jugador} &7no sobrevivió al susto."
-    - "&e{jugador} &7encontró una estructura que no debería existir en este mundo."
-    - "&7El multiverso se plegó sobre &e{jugador}&7 y lo borró del registro dimensional."
-    - "&e{jugador} &7escuchó un susurro en una frecuencia olvidada por los dioses."
-    - "&e{jugador} &7vio una silueta familiar en la oscuridad antes de que todo se apagara."
-    - "&8{jugador} &7vio algo en la niebla y ya no volvió."
-    - "&8Herobrine &7no existe. &8{jugador} &7tampoco ya."
-    - "&7Alguien apagó las antorchas de &8{jugador}&7."
-
-  generico:
-    - "&e{jugador} &7murió de una forma que ni la física cuántica supo explicar."
-    - "&e{jugador} &7dejó de existir en &f{mundo}&7, a la altura &f{y}&7."
-    - "&e{jugador} &7se murió. Los detalles técnicos se perdieron en el éter."
-    - "&e{jugador} &7encontró una forma totalmente innovadora de perecer."
-    - "&e{jugador} &7se murió de una manera que ni la consola del servidor comprendió."
-    - "&e{jugador} &7dejó de existir por motivos de fuerza mayor y falta de reflejos."
-    - "&e{jugador} &7se fue al lobby sin dar explicaciones ni dejar herencia."
-    - "&e{jugador} &7colapsó su línea temporal en este cuadrante del multiverso."
-    - "&e{jugador} &7olvidó la regla número uno: no morirse."
-  hot_floor:
-    - "&c{jugador} &7pisó magma con las manos vacías y la mente en blanco."
-    - "&c{jugador} &7bailó sobre bloques de magma. Duró poco."
-    - "&7El suelo estaba caliente. &c{jugador} &7no lo estaba."
+  # ══════════════════════════════════════════════════════════════
+  # CACTUS & PLANTAS (CONTACT)
+  # ══════════════════════════════════════════════════════════════
   contact:
-    - "&2{jugador} &7abrazó un cactus. El cactus ganó."
-    - "&2{jugador} &7murió por tocar lo que pinchaba a simple vista."
-    - "&7Las bayas dulces se comieron a &2{jugador}&7."
-  falling_block:
-    - "&7A &f{jugador} &7le cayó encima medio mundo."
-    - "&f{jugador} &7excavó hacia arriba. Clásico error."
-    - "&7La gravedad ajustó cuentas con &f{jugador}&7."
-  cramming:
-    - "&7{jugador} &7murió aplastado entre demasiadas criaturas."
-    - "&f{jugador} &7descubrió el límite de mobs por bloque. Por dentro."
-  dragon_breath:
-    - "&5{jugador} &7respiró aliento de dragón. Una vez."
-    - "&5{jugador} &7se quedó en la nube morada demasiado tiempo."
-  thorns:
-    - "&f{jugador} &7se hirió pegándole a alguien con espinas."
-    - "&7El encantamiento devolvió el golpe. &f{jugador} &7no lo esperaba."
-  world_border:
-    - "&f{jugador} &7intentó salir del mundo y el mundo dijo que no."
-    - "&7El borde del mundo no negocia con &f{jugador}&7."
+    - "&e{jugador} &7le dio un abrazo apasionado a un cactus en el desierto. El cactus ganó por goleada."
+    - "&e{jugador} &7murió desangrado por tocar bayas dulces que pinchaban a simple vista."
+    - "&e{jugador} &7tropezó con una planta espinosa y perdió toda su reputación de guerrero."
+
+  # ══════════════════════════════════════════════════════════════
+  # FLECHAS & PROYECTILES (PROJECTILE)
+  # ══════════════════════════════════════════════════════════════
   projectile:
-    - "&f{jugador} &7recibió algo lanzado desde muy lejos."
-    - "&7A &f{jugador} &7lo alcanzó un proyectil con buena puntería."
+    - "&e{jugador} &7recibió un flechazo certero entre ceja y ceja desde el otro lado del mapa."
+    - "&c{asesino} &7demostró puntería olímpica y clavó a &e{jugador} &7con un proyectil milimétrico."
+    - "&e{jugador} &7intentó esquivar una flecha como en Matrix pero tropezó con sus propios pies."
+
+  # ══════════════════════════════════════════════════════════════
+  # CUÁNTICA, NETWORKS, SLIMEFUN, SINTÉRGICA & MULTIVERSO (GENÉRICO)
+  # ══════════════════════════════════════════════════════════════
+  generico:
+    - "&e{jugador} &7estaba ordenando su red de Networks y un quark rebelde provocó una superposición cuántica donde murió y no murió a la vez."
+    - "&e{jugador} &7colapsó su función de onda de Schrödinger: el observador abrió la caja y descubrió que estaba tieso."
+    - "&e{jugador} &7tocó un cable de alta tensión de Slimefun sin guantes y fue teleportado al plano astral."
+    - "&e{jugador} &7abrió un reactor nuclear de Slimefun para ver si el uranio ya estaba doradito para la cena."
+    - "&e{jugador} &7distorsionó la Lattice de Jacobo Grinberg y su campo neuronal se quedó sin señal wifi."
+    - "&e{jugador} &7sufrió una sobrecarga de 500.000 Joules mientras calibraba un condensador cuántico con un palo."
+    - "&e{jugador} &7manipuló uranio enriquecido en calzoncillos sin ponerse el traje Hazmat reglamentario."
+    - "&e{jugador} &7se metió dentro de un teletransportador de Networks sin configurar las coordenadas de destino."
+    - "&e{jugador} &7intentó hacer inferencia cuántica y su existencia cayó en una indeterminación estadística permanente."
+    - "&e{jugador} &7murió de una forma tan absurdamente cuántica que ni la física teórica supo explicarla."
+    - "&e{jugador} &7se fue al lobby sin dar explicaciones, sin pagar sus deudas en /bank ni dejar herencia a sus amigos."
+    - "&e{jugador} &7olvidó la regla número uno de DrakesCraft: respirar, no explotar y no morirse."
+    - "&e{jugador} &7descalibró el generador de antimateria y fue borrado del registro dimensional."
+    - "&e{jugador} &7dejó de existir en &f{mundo}&7 por motivos de fuerza mayor y falta de reflejos básicos."
+    - "&e{jugador} &7colapsó su línea temporal en este cuadrante del multiverso de DrakesCraft."
