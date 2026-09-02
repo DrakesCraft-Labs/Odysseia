@@ -12,6 +12,7 @@
 [![Rust](https://img.shields.io/badge/Rust-2021_Workspace-DEA584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](./LICENSE)
 [![Platform](https://img.shields.io/badge/Network-DrakesCraft_Production-00E5FF)](https://web.drakescraft.cl)
+[![RepoRanker](https://reporanker.com/badge/DrakesCraft-Labs/Odysseia)](https://reporanker.com/repos/DrakesCraft-Labs/Odysseia)
 
 **A high-performance Paper/Purpur 1.21.11 production core that centralizes transactional store fulfillment, cross-modality inventory isolation, multi-tier kit progression, automated server maintenance windows, anti-exploit rate limiters, and horror night environmental events.**
 
@@ -25,7 +26,7 @@
 > ### 🏰 ¡Únete a la Comunidad Oficial de DrakesCraft!
 > 
 > * 🎮 **IP del Servidor**: `play.drakescraft.cl` *(Java 1.21.11 & Bedrock)*
-> * 💬 **Discord Oficial**: [discord.gg/drakescraft](https://discord.gg/rR7FbfCt9Y)
+> * 💬 **Discord Oficial**: [discord.gg/drakescraft](https://discord.gg/rv3vtXZTk7)
 > * 🌐 **Web & Guía**: [web.drakescraft.cl](https://web.drakescraft.cl) — 🛒 **Tienda**: [web.drakescraft.cl/store](https://web.drakescraft.cl/store.html)
 > 
 > *¡Juega con este addon y más de 80 expansiones optimizadas en vivo en nuestra network de supervivencia técnica!*
@@ -253,6 +254,6 @@ between unrelated servers, publish it, or delete it while issued cheques are sti
 - **Port & Maintenance**: DrakesCraft Labs team (Compatibility for Paper / Purpur 1.21.11).
 - **License**: GPL-3.0 / MIT.
 - **Source Code**: [GitHub Repository](https://github.com/DrakesCraft-Labs/Odysseia)
-- **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/Odysseia/issues) | [Discord](https://discord.gg/rR7FbfCt9Y)
+- **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/Odysseia/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
 
 *This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets and concepts belong to their respective creators.*
