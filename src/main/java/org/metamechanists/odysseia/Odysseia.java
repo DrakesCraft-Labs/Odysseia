@@ -61,6 +61,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.services.ServerChangelogService changelogService;
     @Getter
     private org.metamechanists.odysseia.services.GlobalPlaytimeService globalPlaytime;
+    private org.metamechanists.odysseia.services.ThreadBudgetMonitor threadBudgetMonitor;
     private org.metamechanists.odysseia.integrations.DiscordTranslationBridgeService discordTranslationBridge;
     @Getter
     private org.metamechanists.odysseia.modalities.ModalityService modalityService;
@@ -319,6 +320,9 @@ public final class Odysseia extends JavaPlugin {
 
         this.globalPlaytime = new org.metamechanists.odysseia.services.GlobalPlaytimeService(this);
         globalPlaytime.start();
+
+        this.threadBudgetMonitor = new org.metamechanists.odysseia.services.ThreadBudgetMonitor(this);
+        threadBudgetMonitor.start();
 
         // Register PlaceholderAPI expansion if present
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

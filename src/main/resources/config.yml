@@ -4163,3 +4163,21 @@ combate-clasico:
   anular-barrido: true
   # Vacío = todos los mundos.
   mundos: []
+
+# Vigilancia del presupuesto de hilos de la JVM (ticket 217).
+# El contenedor tiene un techo de PIDs; al alcanzarlo la JVM cae con
+# "OutOfMemoryError: unable to create native thread". Esto avisa antes.
+threadbudget:
+  enabled: true
+  # Cada cuanto se muestrea el conteo de hilos.
+  period-seconds: 120
+  # A partir de aqui se registra el reparto por familia de hilos en WARNING.
+  warn-threshold: 380
+  # A partir de aqui el aviso sube a SEVERE y ademas se envia a Discord.
+  critical-threshold: 450
+  # Techo de PIDs del contenedor, solo informativo en el mensaje.
+  container-pid-ceiling: 512
+  # Solo se repite el aviso si el conteo sube este tramo...
+  realert-step: 25
+  # ...o si pasaron estos minutos desde el ultimo.
+  realert-cooldown-minutes: 15
