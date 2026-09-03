@@ -698,11 +698,39 @@ public final class Odysseia extends JavaPlugin {
                 : getConfig().getString("owner-cycle.penelope.prefix-a", "&d✦ &d&lᴘᴇɴᴇʟᴏᴘᴇ &8✦ &d");
     }
 
+    /**
+     * Escapa una cadena para incrustarla en un literal JSON.
+     *
+     * Escapar solo la barra y las comillas no basta: el mensaje de baneo de vanilla lleva un salto
+     * de linea literal ("You are banned from this server.\nReason: ..."), y un caracter de control
+     * sin escapar dentro de una cadena JSON es sintaxis invalida, asi que Discord respondia 400 y
+     * el aviso de moderacion se perdia. Cualquier texto que venga del juego puede traerlos.
+     */
     public static String escapeJson(String s) {
         if (s == null) {
             return "";
         }
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+        StringBuilder out = new StringBuilder(s.length() + 16);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '\\' -> out.append("\\\\");
+                case '"' -> out.append("\\\"");
+                case '\n' -> out.append("\\n");
+                case '\r' -> out.append("\\r");
+                case '\t' -> out.append("\\t");
+                case '\b' -> out.append("\\b");
+                case '\f' -> out.append("\\f");
+                default -> {
+                    if (c < 0x20 || c == 0x7F) {
+                        out.append(String.format(Locale.ROOT, "\\u%04x", (int) c));
+                    } else {
+                        out.append(c);
+                    }
+                }
+            }
+        }
+        return out.toString();
     }
 
     private String loadOrCreateInstanceId() {
