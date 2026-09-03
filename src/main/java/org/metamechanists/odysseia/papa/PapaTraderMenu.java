@@ -63,7 +63,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         boolean soloLectura = !mundoPermitido(jugador.getWorld().getName(), mundosPermitidos());
         if (soloLectura) {
             jugador.sendMessage(color("&eEsto es solo el escaparate del trueque. "
-                    + "&7Para canjear y depositar, usa &f/survival&7."));
+                    + "&7Para canjear y depositar, usa &f/survival&7 o &f/ob&7."));
         } else {
             // Las papas viejas se marcan al abrir, para que nadie pierda lo que ya tenia guardado.
             // Solo en Survival: marcar items dentro de un inventario aislado los tocaria en una
@@ -83,7 +83,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
 
     public void abrir(Player jugador, boolean soloLectura) {
         int papas = servicio.contar(jugador);
-        Set<String> yaCanjeados = servicio.canjeados(jugador.getUniqueId());
+        Set<String> yaCanjeados = servicio.canjeados(jugador);
         List<PapaTier> niveles = servicio.escalera().todos();
 
         int filas = Math.max(3, Math.min(6, (niveles.size() / 9) + 2));
@@ -118,10 +118,10 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
                 color("&7juntar mas de las que caben encima."),
                 color(""),
                 color("&7Llevas encima: &e" + llevaba),
-                color("&7En la alcancia: &6" + servicio.enAlcancia(jugador.getUniqueId())),
+                color("&7En la alcancia: &6" + servicio.enAlcancia(jugador)),
                 color(""),
                 soloLectura
-                        ? color("&cSolo se deposita en Survival &8(&f/survival&8)")
+                        ? color("&cSolo se deposita en juego &8(&f/survival&8 o &f/ob&8)")
                         : llevaba > 0
                                 ? color("&a▶ Click para depositar " + llevaba
                                         + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")
@@ -255,7 +255,11 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
 
     private List<String> mundosPermitidos() {
         List<String> configured = plugin.getConfig().getStringList("papa-de-mar.trueque.mundos-permitidos");
-        return configured.isEmpty() ? List.of("world", "world_nether", "world_the_end") : configured;
+        return configured.isEmpty()
+                ? List.of("world", "world_nether", "world_the_end",
+                          "oneblock_world", "oneblock_nether", "oneblock_the_end",
+                          "skyblock", "skyblock_world", "bskyblock_world")
+                : configured;
     }
 
     /** Comprueba nombres exactos; un prefijo ambiguo podría abrir el trueque en otra modalidad. */

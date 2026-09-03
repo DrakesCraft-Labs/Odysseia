@@ -101,29 +101,47 @@ public final class PapaDeMarService {
         return titulo;
     }
 
+    public static String obtenerModalidad(String worldName) {
+        if (worldName == null) return "survival";
+        String norm = worldName.toLowerCase(Locale.ROOT);
+        if (norm.contains("oneblock") || norm.contains("ob")) return "oneblock";
+        if (norm.contains("skyblock") || norm.contains("bskyblock")) return "skyblock";
+        return "survival";
+    }
+
     /** Papas autenticas que lleva encima el jugador. */
     public int enInventario(Player jugador) {
         return PapaDeMarItem.contar(plugin, Arrays.asList(jugador.getInventory().getContents()));
     }
 
     /**
-     * Papas guardadas en la alcancia del comerciante.
-     *
-     * Existe por un limite fisico: en un inventario caben 36 x 64 = 2304 papas y ni una mas. Sin un
-     * sitio donde acumularlas, cualquier nivel por encima de eso seria impagable por mucho que se
-     * juntara. Depositando, el total sube sin techo.
+     * Papas guardadas en la alcancia del comerciante segun la modalidad del jugador.
      */
-    public int enAlcancia(UUID jugador) {
-        return canjes.getInt("alcancia." + jugador, 0);
+    public int enAlcancia(Player jugador) {
+        return enAlcancia(jugador.getUniqueId(), obtenerModalidad(jugador.getWorld().getName()));
     }
 
-    /** Lo que cuenta para los niveles: lo que lleva encima mas lo depositado. */
+    public int enAlcancia(UUID jugador) {
+        return enAlcancia(jugador, "survival");
+    }
+
+    public int enAlcancia(UUID jugador, String modalidad) {
+        if (canjes.contains("alcancia." + modalidad + "." + jugador)) {
+            return canjes.getInt("alcancia." + modalidad + "." + jugador, 0);
+        }
+        if ("survival".equals(modalidad)) {
+            return canjes.getInt("alcancia." + jugador, 0);
+        }
+        return 0;
+    }
+
+    /** Lo que cuenta para los niveles: lo que lleva encima mas lo depositado en esta modalidad. */
     public int contar(Player jugador) {
-        return enInventario(jugador) + enAlcancia(jugador.getUniqueId());
+        return enInventario(jugador) + enAlcancia(jugador);
     }
 
     /**
-     * Mete en la alcancia todas las papas marcadas del inventario.
+     * Mete en la alcancia de la modalidad actual todas las papas marcadas del inventario.
      *
      * @return cuantas se depositaron
      */
@@ -132,9 +150,10 @@ public final class PapaDeMarService {
         if (llevaba <= 0) return 0;
         int quitadas = quitarDelInventario(jugador, llevaba);
         int guardadas = quitadas - merma(quitadas);
-        canjes.set("alcancia." + jugador.getUniqueId(), enAlcancia(jugador.getUniqueId()) + guardadas);
+        String mod = obtenerModalidad(jugador.getWorld().getName());
+        canjes.set("alcancia." + mod + "." + jugador.getUniqueId(), enAlcancia(jugador.getUniqueId(), mod) + guardadas);
         guardarCanjes();
-        plugin.getLogger().info("[Papa] " + jugador.getName() + " deposito " + quitadas
+        plugin.getLogger().info("[Papa] [" + mod + "] " + jugador.getName() + " deposito " + quitadas
                 + " papas y guardo " + guardadas + ".");
         return guardadas;
     }
@@ -161,8 +180,22 @@ public final class PapaDeMarService {
         return plugin.getConfig().getDouble("papa-de-mar.trueque.merma-porcentaje", 5.0);
     }
 
+    public Set<String> canjeados(Player jugador) {
+        return canjeados(jugador.getUniqueId(), obtenerModalidad(jugador.getWorld().getName()));
+    }
+
     public Set<String> canjeados(UUID jugador) {
-        return new HashSet<>(canjes.getStringList(jugador.toString()));
+        return canjeados(jugador, "survival");
+    }
+
+    public Set<String> canjeados(UUID jugador, String modalidad) {
+        if (canjes.contains("canjes." + modalidad + "." + jugador)) {
+            return new HashSet<>(canjes.getStringList("canjes." + modalidad + "." + jugador));
+        }
+        if ("survival".equals(modalidad)) {
+            return new HashSet<>(canjes.getStringList(jugador.toString()));
+        }
+        return new HashSet<>();
     }
 
     /**
@@ -205,7 +238,7 @@ public final class PapaDeMarService {
     }
 
     /**
-     * Canjea un nivel.
+     * Canjea un nivel en la modalidad activa del jugador.
      *
      * @return un mensaje con lo ocurrido; nunca null
      */
@@ -214,7 +247,8 @@ public final class PapaDeMarService {
         if (buscado.isEmpty()) return "&cEse trueque ya no existe.";
         PapaTier nivel = buscado.get();
 
-        Set<String> yaCanjeados = canjeados(jugador.getUniqueId());
+        String mod = obtenerModalidad(jugador.getWorld().getName());
+        Set<String> yaCanjeados = canjeados(jugador.getUniqueId(), mod);
         if (nivel.unica() && yaCanjeados.contains(nivel.id())) {
             return "&7Ese trueque es de una sola vez y ya te lo llevaste.";
         }
@@ -229,15 +263,18 @@ public final class PapaDeMarService {
             // No deberia pasar: se conto y se quito en el mismo tick. Si pasa, se devuelve lo
             // quitado antes de tocar las recompensas, para no cobrar sin entregar.
             devolver(jugador, quitadas);
-            plugin.getLogger().warning("[Papa] Canje abortado para " + jugador.getName()
+            plugin.getLogger().warning("[Papa] [" + mod + "] Canje abortado para " + jugador.getName()
                     + ": se esperaban " + nivel.coste() + " papas y se quitaron " + quitadas);
             return "&cAlgo salio mal con el trueque. No se te cobro nada, avisa al staff.";
         }
 
         if (nivel.unica()) {
-            List<String> lista = new ArrayList<>(canjes.getStringList(jugador.getUniqueId().toString()));
+            List<String> lista = new ArrayList<>(canjes.getStringList("canjes." + mod + "." + jugador.getUniqueId()));
+            if (lista.isEmpty() && "survival".equals(mod)) {
+                lista.addAll(canjes.getStringList(jugador.getUniqueId().toString()));
+            }
             lista.add(nivel.id());
-            canjes.set(jugador.getUniqueId().toString(), lista);
+            canjes.set("canjes." + mod + "." + jugador.getUniqueId(), lista);
             guardarCanjes();
         }
 
@@ -246,27 +283,25 @@ public final class PapaDeMarService {
                     comando.replace("{jugador}", jugador.getName()));
         }
 
-        plugin.getLogger().info("[Papa] " + jugador.getName() + " canjeo '" + nivel.id()
+        plugin.getLogger().info("[Papa] [" + mod + "] " + jugador.getName() + " canjeo '" + nivel.id()
                 + "' por " + nivel.coste() + " papas.");
         jugador.playSound(jugador.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
         return "&aTrueque hecho: &6" + ChatColor.stripColor(nivel.nombre());
     }
 
     /**
-     * Cobra el coste, primero del inventario y luego de la alcancia.
-     *
-     * En ese orden a proposito: lo que se ve desaparecer es lo que uno lleva encima, y asi el
-     * jugador entiende que pago.
+     * Cobra el coste, primero del inventario y luego de la alcancia de la modalidad activa.
      */
     private int quitar(Player jugador, int cuantas) {
         int delInventario = quitarDelInventario(jugador, cuantas);
         int pendiente = cuantas - delInventario;
         if (pendiente <= 0) return delInventario;
 
-        int alcancia = enAlcancia(jugador.getUniqueId());
+        String mod = obtenerModalidad(jugador.getWorld().getName());
+        int alcancia = enAlcancia(jugador.getUniqueId(), mod);
         int deLaAlcancia = Math.min(alcancia, pendiente);
         if (deLaAlcancia > 0) {
-            canjes.set("alcancia." + jugador.getUniqueId(), alcancia - deLaAlcancia);
+            canjes.set("alcancia." + mod + "." + jugador.getUniqueId(), alcancia - deLaAlcancia);
             guardarCanjes();
         }
         return delInventario + deLaAlcancia;

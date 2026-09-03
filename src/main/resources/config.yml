@@ -157,6 +157,12 @@ papa-de-mar:
       - world
       - world_nether
       - world_the_end
+      - oneblock_world
+      - oneblock_nether
+      - oneblock_the_end
+      - skyblock
+      - skyblock_world
+      - bskyblock_world
     # Porcentaje de papas que se pierde al DEPOSITAR en la alcancía.
     # La papa se reparte sola cada 15 min y no se gasta en nada más: sin una fuga, la cantidad en
     # circulación solo puede subir. Nunca se lleva la última: depositar 1 siempre guarda 1.
