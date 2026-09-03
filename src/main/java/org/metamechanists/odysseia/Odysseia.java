@@ -733,6 +733,39 @@ public final class Odysseia extends JavaPlugin {
         return out.toString();
     }
 
+    /** Tope de Discord para el valor de un campo de embed. */
+    public static final int LIMITE_CAMPO_DISCORD = 1024;
+
+    /**
+     * Escapa un texto del juego para un campo de embed sin pasarse del tope de Discord.
+     *
+     * Escapar los caracteres de control arregla la sintaxis, pero no la longitud: un motivo de
+     * sancion largo o el mensaje de kick detallado de otro plugin pasa de 1024 caracteres, Discord
+     * vuelve a responder 400 y el aviso de moderacion se pierde dejando solo un WARN. Se recorta
+     * antes de escapar, asi el corte nunca parte una secuencia de escape a la mitad.
+     */
+    public static String escapeJsonCampo(String s) {
+        return escapeJson(recortar(s, LIMITE_CAMPO_DISCORD));
+    }
+
+    /**
+     * Recorta a {@code maximo} caracteres marcando el corte con puntos suspensivos.
+     *
+     * Discord cuenta el texto ya decodificado, no el JSON escapado, por eso se mide sobre el
+     * original. Si el corte cae entre los dos char de un par suplente se retrocede uno: dejar un
+     * suplente suelto produciria una cadena invalida.
+     */
+    public static String recortar(String s, int maximo) {
+        if (s == null || s.length() <= maximo) {
+            return s;
+        }
+        int corte = maximo - 1;
+        if (Character.isHighSurrogate(s.charAt(corte - 1))) {
+            corte--;
+        }
+        return s.substring(0, corte) + "\u2026";
+    }
+
     private String loadOrCreateInstanceId() {
         java.io.File file = new java.io.File(getDataFolder(), "data.yml");
         org.bukkit.configuration.file.YamlConfiguration data = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(file);
@@ -975,7 +1008,7 @@ public final class Odysseia extends JavaPlugin {
                 
                 String json = "{\"username\":\"Odysseia Heartbeat\",\"embeds\":[{\"title\":\"Drakes lab heartbeat\",\"description\":\""
                         + escapeJson(desc) + "\",\"color\":5814783,\"fields\":[{\"name\":\"Servidor\",\"value\":\""
-                        + escapeJson(serverLabel.length() <= 900 ? serverLabel : serverLabel.substring(0, 900) + "…") + "\",\"inline\":false}]}]}";
+                        + escapeJsonCampo(serverLabel) + "\",\"inline\":false}]}]}";
 
                 WebhookSender.sendAsync(this, url, json);
             } catch (Exception e) {

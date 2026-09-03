@@ -68,7 +68,7 @@ public final class ModerationListener implements Listener {
                         + "{\"name\":\"Motivo\",\"value\":\"%s\",\"inline\":false}],"
                         + "\"footer\":{\"text\":\"%s\"}}]}",
                 Odysseia.escapeJson(title), color, Odysseia.escapeJson(player.getName()), action,
-                Odysseia.escapeJson(reason), Odysseia.escapeJson(serverLabel));
+                Odysseia.escapeJsonCampo(reason), Odysseia.escapeJsonCampo(serverLabel));
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
 
@@ -136,7 +136,7 @@ public final class ModerationListener implements Listener {
                         + "\"footer\":{\"text\":\"%s\"}}]}",
                 Odysseia.escapeJson(accion), Odysseia.escapeJson(objetivo),
                 Odysseia.escapeJson(accion), Odysseia.escapeJson(autor),
-                Odysseia.escapeJson(motivo), Odysseia.escapeJson(serverLabel()));
+                Odysseia.escapeJsonCampo(motivo), Odysseia.escapeJsonCampo(serverLabel()));
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
 
@@ -161,7 +161,7 @@ public final class ModerationListener implements Listener {
                         + "{\"name\":\"Mensaje de bloqueo\",\"value\":\"%s\",\"inline\":false}],"
                         + "\"footer\":{\"text\":\"%s\"}}]}",
                 Odysseia.escapeJson(event.getPlayer().getName()),
-                Odysseia.escapeJson(event.getKickMessage()), Odysseia.escapeJson(serverLabel()));
+                Odysseia.escapeJsonCampo(event.getKickMessage()), Odysseia.escapeJsonCampo(serverLabel()));
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
     }
 
