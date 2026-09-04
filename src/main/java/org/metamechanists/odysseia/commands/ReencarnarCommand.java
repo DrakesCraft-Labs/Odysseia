@@ -49,9 +49,13 @@ public final class ReencarnarCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            if (!session.getPlayerName().equalsIgnoreCase(targetName)) {
+            if (!targetName.equals("*") && !session.getPlayerName().equalsIgnoreCase(targetName)) {
                 sender.sendMessage("ERROR: El codigo '" + code + "' pertenece a '" + session.getPlayerName() + "', no a '" + targetName + "'.");
                 return true;
+            }
+
+            if (targetName.equals("*")) {
+                targetName = session.getPlayerName();
             }
 
             boolean ok = manager.executeSession(code);
