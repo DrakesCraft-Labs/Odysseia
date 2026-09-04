@@ -255,6 +255,16 @@ public final class Odysseia extends JavaPlugin {
         }
         getLogger().info("[SAORI] Suite de seguridad, reportes /jack y contención de exploits activa.");
 
+        // Sistema de Reencarnacion y Prestigio
+        var reencarnacionManager = new org.metamechanists.odysseia.reencarnacion.ReencarnacionManager(this);
+        Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.reencarnacion.ReencarnacionListener(reencarnacionManager), this);
+        var reencarnarCmd = new org.metamechanists.odysseia.commands.ReencarnarCommand(reencarnacionManager);
+        if (getCommand("reencarnar") != null) {
+            getCommand("reencarnar").setExecutor(reencarnarCmd);
+            getCommand("reencarnar").setTabCompleter(reencarnarCmd);
+        }
+        getLogger().info("[Reencarnacion] Sistema de Prestigio y Cápsula de Recuerdos activo.");
+
         Bukkit.getPluginManager().registerEvents(vanishCommand, this);
         Bukkit.getPluginManager().registerEvents(ultraGodCommand, this);
         vanishCommand.startReminder();

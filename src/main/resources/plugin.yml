@@ -49,6 +49,9 @@ commands:
   borde:
     description: Muestra u oculta el borde de cristal de tu proteccion.
     aliases: [bordes, border, limite]
+  reencarnar:
+    description: Rito de Reencarnacion y Prestigio para reiniciar progreso con Capsula de Recuerdos.
+    aliases: [prestigio, ascender, reborn, reencarnacion]
   papademar:
     description: Entrega la legendaria Papa de mar.
     permission: odysseia.papademar
