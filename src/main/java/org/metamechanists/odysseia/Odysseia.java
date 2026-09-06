@@ -191,6 +191,14 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(modalidadesCmd, this);
         this.modalitySpawn = new org.metamechanists.odysseia.listeners.ModalitySpawnListener(this);
         Bukkit.getPluginManager().registerEvents(modalitySpawn, this);
+        getCommand("lobby").setExecutor((sender, command, label, args) -> {
+            if (sender instanceof Player player) {
+                modalitySpawn.irAlLobby(player);
+            } else {
+                sender.sendMessage("Solo un jugador puede ir al lobby.");
+            }
+            return true;
+        });
         try {
             this.modalityVaults = new org.metamechanists.odysseia.vaults.ModalityVaultService(this, modalityService);
             Bukkit.getPluginManager().registerEvents(modalityVaults, this);

@@ -4019,6 +4019,9 @@ modalidades:
         - sf stats
         - slimefun stats
         # Salir. Sin esto un jugador se queda encerrado.
+        - lobby
+        - hub
+        - l
         - modalidad
         - modalidades
         - spawn

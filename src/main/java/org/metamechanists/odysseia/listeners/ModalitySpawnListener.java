@@ -183,7 +183,7 @@ public final class ModalitySpawnListener implements Listener {
         return null;
     }
 
-    private void irAlLobby(Player player) {
+    public void irAlLobby(Player player) {
         String nombre = plugin.getConfig()
                 .getString("modalidades.spawn-por-modalidad.mundo-lobby", "SpawnWarps");
         World lobby = Bukkit.getWorld(nombre);
