@@ -60,6 +60,7 @@ public class SFMasterWatcherListener implements Listener {
     private static final String LABORATORY_WORLD = "laboratorio";
     private static final long OWNER_MISMATCH_ALERT_INTERVAL_MILLIS = 2_000L;
     private static final long OWNER_MISMATCH_ALERT_RETENTION_MILLIS = 60_000L;
+    private static final long OWNER_MISMATCH_LOG_INTERVAL_MILLIS = 60_000L;
 
     private final Plugin plugin;
     private final NamespacedKey sfMasterKey;
@@ -71,6 +72,7 @@ public class SFMasterWatcherListener implements Listener {
     private final Map<String, String> sfMasterBlockOwners = new HashMap<>();
     private final Map<String, BrokenBlock> brokenSFMasterBlocks = new HashMap<>();
     private final Map<String, Long> ownerMismatchAlerts = new HashMap<>();
+    private final Map<String, Long> ownerMismatchLogs = new HashMap<>();
     private Set<String> blockedAddons;
     private Set<String> blockedIdPrefixes;
     private Set<String> blockedIdFragments;
@@ -343,8 +345,11 @@ public class SFMasterWatcherListener implements Listener {
         if (isSFMasterItem(item) && !belongsTo(item, player.getUniqueId())) {
             event.setCancelled(true);
             String alertKey = player.getUniqueId() + ":" + event.getItem().getUniqueId();
-            if (shouldAlertOwnerMismatch(ownerMismatchAlerts, alertKey, System.currentTimeMillis())) {
+            long now = System.currentTimeMillis();
+            if (shouldAlertOwnerMismatch(ownerMismatchAlerts, alertKey, now)) {
                 player.sendMessage("§cEse ítem SFMaster pertenece a otro jugador.");
+            }
+            if (shouldLogOwnerMismatch(ownerMismatchLogs, player.getUniqueId().toString(), now)) {
                 plugin.getLogger().warning("[SFMaster] " + player.getName()
                         + " intentó recoger un ítem marcado de otro propietario.");
             }
@@ -363,6 +368,24 @@ public class SFMasterWatcherListener implements Listener {
             return false;
         }
         alerts.put(alertKey, nowMillis);
+        return true;
+    }
+
+    /**
+     * Throttles the console notice separately from the player-facing message.
+     * The player alert is keyed per item entity so each distinct item is reported once,
+     * but the console only needs one line per player and window: a player standing on a pile
+     * of protected items would otherwise emit a warning every alert interval
+     * per entity for as long as they stay there.
+     */
+    static boolean shouldLogOwnerMismatch(Map<String, Long> logs, String playerKey, long nowMillis) {
+        logs.entrySet().removeIf(entry -> nowMillis - entry.getValue() > OWNER_MISMATCH_LOG_INTERVAL_MILLIS);
+        Long previousLog = logs.get(playerKey);
+        if (previousLog != null && nowMillis >= previousLog
+                && nowMillis - previousLog < OWNER_MISMATCH_LOG_INTERVAL_MILLIS) {
+            return false;
+        }
+        logs.put(playerKey, nowMillis);
         return true;
     }
 
