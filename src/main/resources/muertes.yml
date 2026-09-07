@@ -11,6 +11,11 @@
 
 enabled: true
 
+# Deja una línea por muerte en la consola del servidor (quién, causa, asesino, arma, coordenadas
+# y la armadura que llevaba puesta). Paper solo manda el mensaje de muerte al chat, así que sin
+# esto el log no guarda ninguna traza y los tickets de pérdida quedan sin forma de verificarse.
+auditoria: true
+
 # Coletilla añadida automáticamente cuando alguien muere repetidamente
 racha:
   minimo: 3

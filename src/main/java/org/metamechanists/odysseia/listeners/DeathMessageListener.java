@@ -49,6 +49,7 @@ public final class DeathMessageListener implements Listener {
 
     private final JavaPlugin plugin;
     private boolean enabled;
+    private boolean auditoria;
     private DeathMessageCatalog catalogo;
     private DeathStreakTracker rachas;
     private int rachaMinima;
@@ -66,6 +67,7 @@ public final class DeathMessageListener implements Listener {
         FileConfiguration datos = YamlConfiguration.loadConfiguration(archivo);
 
         enabled = datos.getBoolean("enabled", true);
+        auditoria = datos.getBoolean("auditoria", true);
         rachaMinima = Math.max(2, datos.getInt("racha.minimo", 3));
         rachas = new DeathStreakTracker(Math.max(1, datos.getInt("racha.ventana-minutos", 10)) * 60_000L);
         coletillasRacha = datos.getStringList("racha.coletillas");
@@ -110,6 +112,58 @@ public final class DeathMessageListener implements Listener {
         // bueno y en Discord el aburrido. Escribir los dos no depende de si Paper los tiene
         // enlazados en esa direccion, que cambia entre versiones.
         event.setDeathMessage(coloreado);
+    }
+
+    /**
+     * Deja constancia de cada muerte en la consola del servidor.
+     *
+     * Paper manda el mensaje de muerte solo a los jugadores, asi que el log no guardaba ninguna
+     * traza: los tickets de perdida ("estaba AFK y volvi sin las botas") quedaban indecidibles
+     * porque no habia forma de saber si el jugador murio, quien lo mato ni que llevaba puesto.
+     * Aqui se registra ese contexto --que {@link #describir} ya calcula para el mensaje-- junto
+     * con la armadura equipada y si los objetos llegaron a caer.
+     *
+     * Corre en {@code MONITOR} y aparte de {@link #onDeath} a proposito: la auditoria no debe
+     * depender de que los mensajes con gracia esten activos ni de que haya plantilla para la
+     * causa, y en MONITOR ya se sabe si algun plugin cancelo el drop.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onDeathAudit(PlayerDeathEvent event) {
+        if (!auditoria) return;
+
+        Player muerto = event.getEntity();
+        DeathContext contexto = describir(muerto);
+        var sitio = muerto.getLocation();
+
+        plugin.getLogger().info(String.format(
+                "[Muertes] AUDITORIA jugador=%s causa=%s asesino=%s arma=%s pvp=%s"
+                        + " mundo=%s pos=%d,%d,%d drops=%d keepInventory=%s armadura=[%s]",
+                muerto.getName(),
+                contexto.causa().isEmpty() ? "DESCONOCIDA" : contexto.causa(),
+                contexto.asesino().isEmpty() ? "-" : ChatColor.stripColor(contexto.asesino()),
+                contexto.arma().isEmpty() ? "-" : ChatColor.stripColor(contexto.arma()),
+                contexto.esPvp(),
+                sitio.getWorld() == null ? "-" : sitio.getWorld().getName(),
+                sitio.getBlockX(), sitio.getBlockY(), sitio.getBlockZ(),
+                event.getDrops().size(),
+                event.getKeepInventory(),
+                armaduraDe(muerto)));
+    }
+
+    /** Las cuatro piezas equipadas al morir, que es lo que se reclama en los tickets de perdida. */
+    private static String armaduraDe(Player muerto) {
+        var equipo = muerto.getInventory();
+        List<String> piezas = new ArrayList<>();
+        anotar(piezas, "casco", equipo.getHelmet());
+        anotar(piezas, "peto", equipo.getChestplate());
+        anotar(piezas, "pantalones", equipo.getLeggings());
+        anotar(piezas, "botas", equipo.getBoots());
+        return piezas.isEmpty() ? "vacia" : String.join(", ", piezas);
+    }
+
+    private static void anotar(List<String> destino, String ranura, ItemStack pieza) {
+        if (pieza == null || pieza.getType().isAir()) return;
+        destino.add(ranura + "=" + ChatColor.stripColor(nombreArma(pieza)));
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
