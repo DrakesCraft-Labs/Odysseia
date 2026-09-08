@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import io.papermc.paper.advancement.AdvancementDisplay;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -40,13 +41,40 @@ public final class ModalityAdvancementListener implements Listener {
         Component mode = LegacyComponentSerializer.legacyAmpersand().deserialize(modality.displayName());
         String phrase = phrase(event.getAdvancement().getDisplay().frame());
 
-        event.message(Component.text("✦ ", NamedTextColor.GOLD)
+        Component announcement = Component.text("✦ ", NamedTextColor.GOLD)
                 .append(player)
                 .append(Component.text(" " + phrase + " [", NamedTextColor.GRAY))
                 .append(title)
                 .append(Component.text("] en ", NamedTextColor.GRAY))
                 .append(mode)
-                .append(Component.text(".", NamedTextColor.GRAY)));
+                .append(Component.text(".", NamedTextColor.GRAY));
+
+        /*
+         * Los avances de Slimefun y addons se emiten como anuncios globales. Clásico no
+         * instala ni usa ese contenido: mostrarle el aviso es una fuga visual, no una
+         * recompensa. Paper no permite filtrar receptores desde el mensaje del evento,
+         * así que cancelamos sólo ese anuncio no vanilla y lo reenviamos a las otras
+         * modalidades. Los avances minecraft:* conservan el broadcast habitual.
+         */
+        if (esAvanceExterno(event.getAdvancement().getKey().getNamespace())) {
+            event.message(null);
+            Bukkit.getOnlinePlayers().stream()
+                    .filter(recipient -> !esClasico(modalities.resolve(recipient)))
+                    .forEach(recipient -> recipient.sendMessage(announcement));
+            return;
+        }
+
+        event.message(announcement);
+    }
+
+    /** Los avances con namespace de Minecraft son parte de la experiencia vanilla de Clásico. */
+    static boolean esAvanceExterno(String namespace) {
+        return namespace != null && !"minecraft".equalsIgnoreCase(namespace);
+    }
+
+    /** Centraliza la comparación para no depender del texto visible y coloreado de la modalidad. */
+    static boolean esClasico(Modality modality) {
+        return modality != null && "clasico".equalsIgnoreCase(modality.id());
     }
 
     static String phrase(AdvancementDisplay.Frame type) {
