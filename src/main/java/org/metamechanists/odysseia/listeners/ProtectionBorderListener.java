@@ -213,6 +213,10 @@ public final class ProtectionBorderListener implements Listener, org.bukkit.comm
                 "protection-border.material", "LIGHT_BLUE_STAINED_GLASS")).createBlockData();
             List<Location> shown = new ArrayList<>();
             for (Location location : border) {
+                // Un punto del perimetro cuyo chunk no esta cargado no se consulta: getBlockAt
+                // forzaria ServerChunkCache.syncLoad en el hilo principal y con un jugador recien
+                // teletransportado por RTP eso cuelga el tick hasta disparar el watchdog.
+                if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) continue;
                 if (!location.getWorld().getBlockAt(location).getType().isAir()) continue;
                 player.sendBlockChange(location, data);
                 shown.add(location);
