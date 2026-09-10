@@ -9,7 +9,8 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -71,6 +72,11 @@ public final class ServerChangelogService {
         }
 
         try {
+            ManifestResult manifestResult = publishVerifiedManifest(webhookUrl);
+            if (manifestResult == ManifestResult.PUBLISHED || manifestResult == ManifestResult.DUPLICATE) {
+                return;
+            }
+
             File cacheDir = new File(plugin.getDataFolder(), "cache");
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
@@ -139,13 +145,110 @@ public final class ServerChangelogService {
                 return;
             }
 
-            // Despachar embed a Discord
+            // Sin manifiesto VERIFIED, esto es sólo una observación de binarios tras el boot.
             sendDeltaEmbed(webhookUrl, added, updated, removed);
 
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "[Changelog] Error durante la auditoría de inicio: " + e.getMessage(), e);
         }
     }
+
+    private ManifestResult publishVerifiedManifest(String webhookUrl) {
+        String manifestName = safeDataFileName(
+                plugin.getConfig().getString("discord.changelog-manifest-file", "release-manifest.json"));
+        String secretName = safeDataFileName(
+                plugin.getConfig().getString("discord.changelog-manifest-secret-file", "release-manifest.secret"));
+        if (manifestName == null || secretName == null) {
+            plugin.getLogger().warning("[Changelog] Nombres de manifiesto o secreto no seguros; se omiten.");
+            return ManifestResult.INVALID;
+        }
+
+        File manifestFile = new File(plugin.getDataFolder(), manifestName);
+        File secretFile = new File(plugin.getDataFolder(), secretName);
+        if (!manifestFile.isFile()) {
+            return ManifestResult.ABSENT;
+        }
+        if (!secretFile.isFile()) {
+            plugin.getLogger().warning("[Changelog] Hay manifiesto, pero falta su secreto HMAC privado.");
+            return ManifestResult.INVALID;
+        }
+
+        try {
+            byte[] secret = Files.readAllBytes(secretFile.toPath());
+            String json = Files.readString(manifestFile.toPath(), StandardCharsets.UTF_8);
+            ReleaseManifest.Verification verification = ReleaseManifest.verify(json, secret);
+            Arrays.fill(secret, (byte) 0);
+            if (verification.status() == ReleaseManifest.Verification.Status.IGNORED) {
+                plugin.getLogger().info("[Changelog] Manifiesto no publicable: " + verification.reason());
+                return ManifestResult.IGNORED;
+            }
+            if (verification.status() != ReleaseManifest.Verification.Status.VERIFIED) {
+                plugin.getLogger().warning("[Changelog] Manifiesto rechazado: " + verification.reason());
+                return ManifestResult.INVALID;
+            }
+
+            ReleaseManifest manifest = verification.manifest();
+            File deliveredFile = new File(new File(plugin.getDataFolder(), "cache"), "last_release_id.txt");
+            if (deliveredFile.isFile()
+                    && manifest.releaseId.equals(Files.readString(deliveredFile.toPath(), StandardCharsets.UTF_8).trim())) {
+                plugin.getLogger().info("[Changelog] Release ya publicada: " + manifest.releaseId);
+                return ManifestResult.DUPLICATE;
+            }
+
+            sendVerifiedManifestEmbed(webhookUrl, manifest);
+            saveDeliveredReleaseId(deliveredFile, manifest.releaseId);
+            plugin.getLogger().info("[Changelog] Manifiesto VERIFIED encolado: " + manifest.releaseId);
+            return ManifestResult.PUBLISHED;
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "[Changelog] No se pudo procesar el manifiesto: " + e.getMessage(), e);
+            return ManifestResult.INVALID;
+        }
+    }
+
+    private void sendVerifiedManifestEmbed(String webhookUrl, ReleaseManifest manifest) {
+        List<String> details = manifest.technicalDetails.stream()
+                .map(detail -> "Ticket #" + detail.ticket()
+                        + " · commit `" + detail.commit() + "`"
+                        + " · `" + detail.artifact() + "`"
+                        + " · SHA-256 `" + detail.sha256().substring(0, 12) + "…`"
+                        + " · respaldo " + (detail.backupVerified() ? "verificado" : "no declarado")
+                        + " · " + detail.validation())
+                .toList();
+        String jsonPayload = "{\"username\":\"DrakesCraft · Sistema de Parches\","
+                + "\"embeds\":[{"
+                + "\"title\":\"✅ Lote verificado · " + Odysseia.escapeJson(manifest.releaseId) + "\","
+                + "\"description\":\"" + Odysseia.escapeJson(manifest.playerSummary) + "\","
+                + "\"color\":3066993,"
+                + "\"fields\":["
+                + "{\"name\":\"Detalle técnico\",\"value\":\""
+                + Odysseia.escapeJson(String.join("\\n", details)) + "\",\"inline\":false},"
+                + "{\"name\":\"Salud postarranque\",\"value\":\"`"
+                + Odysseia.escapeJson(manifest.health.status()) + "` · "
+                + Odysseia.escapeJson(manifest.health.summary()) + "\",\"inline\":false}"
+                + "]}]}";
+        WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+    }
+
+    private void saveDeliveredReleaseId(File deliveredFile, String releaseId) throws Exception {
+        File parent = deliveredFile.getParentFile();
+        if (!parent.exists() && !parent.mkdirs()) {
+            throw new IllegalStateException("no se pudo crear cache de changelog");
+        }
+        File temporary = new File(parent, deliveredFile.getName() + ".tmp");
+        Files.writeString(temporary.toPath(), releaseId + "\n", StandardCharsets.UTF_8);
+        Files.move(temporary.toPath(), deliveredFile.toPath(),
+                StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private static String safeDataFileName(String value) {
+        if (value == null || value.isBlank() || value.contains("/") || value.contains("\\")
+                || value.equals(".") || value.equals("..")) {
+            return null;
+        }
+        return value;
+    }
+
+    private enum ManifestResult { ABSENT, IGNORED, INVALID, DUPLICATE, PUBLISHED }
 
     private Map<String, PluginMeta> scanPlugins(File pluginsDir) {
         Map<String, PluginMeta> map = new HashMap<>();
@@ -226,15 +329,15 @@ public final class ServerChangelogService {
                 + "\"avatar_url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\","
                 + "\"embeds\":[{"
                 + "\"title\":\"🚀 Actualización del Servidor · Registro de Cambios\","
-                + "\"description\":\"Se detectó y aplicó un nuevo lote de cambios en el reinicio del servidor.\","
+                + "\"description\":\"Observación de arranque: cambiaron binarios de plugins. No acredita despliegue ni verificación.\","
                 + "\"color\":9127158," // Morado oficial (#8B5CF6 = 9127158)
                 + "\"fields\":[" + fieldsJson + "],"
-                + "\"footer\":{\"text\":\"DrakesCraft Network · Parche verificado el " + Odysseia.escapeJson(dateStr) + "\"},"
+                + "\"footer\":{\"text\":\"DrakesCraft Network · Observado el " + Odysseia.escapeJson(dateStr) + "\"},"
                 + "\"thumbnail\":{\"url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\"}"
                 + "}]}";
 
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
-        plugin.getLogger().info("[Changelog] Notificación de parche enviada a Discord exitosamente.");
+        plugin.getLogger().info("[Changelog] Observación de delta binario encolada para Discord.");
     }
 
     /**

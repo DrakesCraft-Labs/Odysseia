@@ -12,6 +12,10 @@ discord:
   webhook-moderation-url: "REPLACE_ME_MODLOGS"
   # Canal de changelog y parches automáticos.
   webhook-changelog-url: "REPLACE_ME_CHANGELOG"
+  # La integración escribe el manifiesto mediante rename atómico y firma su objeto payload.
+  # Ambos nombres se resuelven dentro de plugins/Odysseia; el secreto nunca se versiona.
+  changelog-manifest-file: "release-manifest.json"
+  changelog-manifest-secret-file: "release-manifest.secret"
 
 # Integraciones opcionales. Odysseia sigue funcionando aunque el plugin externo no exista.
 integrations:
