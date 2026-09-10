@@ -55,3 +55,5 @@ reversiones `ROLLED_BACK`, no se publican. El último `releaseId` encolado queda
 registrado atómicamente en caché para deduplicar reinicios. Si no hay manifiesto
 publicable, el escaneo anterior de JAR se conserva únicamente como observación
 de un delta binario y jamás afirma que un parche fue aplicado o verificado.
+El detalle técnico agregado no puede superar 3800 caracteres; el consumidor lo
+divide en campos compatibles con Discord y desactiva todas las menciones.

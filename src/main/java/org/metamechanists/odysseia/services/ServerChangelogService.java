@@ -30,6 +30,7 @@ public final class ServerChangelogService {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Type SNAPSHOT_TYPE = new TypeToken<Map<String, PluginMeta>>() {}.getType();
+    private static final int DISCORD_FIELD_VALUE_LIMIT = 1_000;
 
     private final Odysseia plugin;
 
@@ -207,26 +208,50 @@ public final class ServerChangelogService {
 
     private void sendVerifiedManifestEmbed(String webhookUrl, ReleaseManifest manifest) {
         List<String> details = manifest.technicalDetails.stream()
-                .map(detail -> "Ticket #" + detail.ticket()
-                        + " · commit `" + detail.commit() + "`"
-                        + " · `" + detail.artifact() + "`"
-                        + " · SHA-256 `" + detail.sha256().substring(0, 12) + "…`"
-                        + " · respaldo " + (detail.backupVerified() ? "verificado" : "no declarado")
-                        + " · " + detail.validation())
+                .map(ReleaseManifest::technicalLine)
                 .toList();
+        List<String> technicalFields = technicalDetailFields(details);
+        StringBuilder fieldsJson = new StringBuilder();
+        for (int i = 0; i < technicalFields.size(); i++) {
+            if (i > 0) fieldsJson.append(',');
+            String name = i == 0 ? "Detalle técnico" : "Detalle técnico (continuación)";
+            fieldsJson.append("{\"name\":\"")
+                    .append(name)
+                    .append("\",\"value\":\"")
+                    .append(Odysseia.escapeJson(technicalFields.get(i)))
+                    .append("\",\"inline\":false}");
+        }
         String jsonPayload = "{\"username\":\"DrakesCraft · Sistema de Parches\","
+                + "\"allowed_mentions\":{\"parse\":[]},"
                 + "\"embeds\":[{"
                 + "\"title\":\"✅ Lote verificado · " + Odysseia.escapeJson(manifest.releaseId) + "\","
                 + "\"description\":\"" + Odysseia.escapeJson(manifest.playerSummary) + "\","
                 + "\"color\":3066993,"
                 + "\"fields\":["
-                + "{\"name\":\"Detalle técnico\",\"value\":\""
-                + Odysseia.escapeJson(String.join("\\n", details)) + "\",\"inline\":false},"
+                + fieldsJson + ","
                 + "{\"name\":\"Salud postarranque\",\"value\":\"`"
                 + Odysseia.escapeJson(manifest.health.status()) + "` · "
                 + Odysseia.escapeJson(manifest.health.summary()) + "\",\"inline\":false}"
                 + "]}]}";
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+    }
+
+    static List<String> technicalDetailFields(List<String> lines) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (String line : lines) {
+            if (line.length() > DISCORD_FIELD_VALUE_LIMIT) {
+                throw new IllegalArgumentException("detalle tecnico individual demasiado largo");
+            }
+            if (!current.isEmpty() && current.length() + 1 + line.length() > DISCORD_FIELD_VALUE_LIMIT) {
+                fields.add(current.toString());
+                current.setLength(0);
+            }
+            if (!current.isEmpty()) current.append('\n');
+            current.append(line);
+        }
+        if (!current.isEmpty()) fields.add(current.toString());
+        return List.copyOf(fields);
     }
 
     private void saveDeliveredReleaseId(File deliveredFile, String releaseId) throws Exception {

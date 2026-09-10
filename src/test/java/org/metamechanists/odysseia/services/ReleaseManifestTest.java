@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
+import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,29 @@ class ReleaseManifestTest {
 
         assertEquals(ReleaseManifest.Verification.Status.VERIFIED,
                 ReleaseManifest.verify(envelope.toString(), SECRET).status());
+    }
+
+    @Test
+    void rechazaDetalleAgregadoQueNoCabeEnElEmbed() throws Exception {
+        JsonObject oversized = JsonParser.parseString(payload("VERIFIED")).getAsJsonObject();
+        JsonObject detail = oversized.getAsJsonArray("technicalDetails").get(0).getAsJsonObject();
+        detail.addProperty("validation", "x".repeat(300));
+        for (int i = 1; i < 20; i++) {
+            oversized.getAsJsonArray("technicalDetails").add(detail.deepCopy());
+        }
+
+        assertEquals(ReleaseManifest.Verification.Status.INVALID,
+                ReleaseManifest.verify(envelope(oversized.toString()), SECRET).status());
+    }
+
+    @Test
+    void divideDetalleTecnicoSinSuperarElLimiteDeCampo() {
+        List<String> fields = ServerChangelogService.technicalDetailFields(List.of(
+                "a".repeat(600), "b".repeat(600), "c".repeat(300)));
+
+        assertEquals(2, fields.size());
+        assertEquals(600, fields.get(0).length());
+        assertEquals(901, fields.get(1).length());
     }
 
     private static String payload(String state) {

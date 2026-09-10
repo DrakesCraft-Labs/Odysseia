@@ -34,6 +34,7 @@ final class ReleaseManifest {
             "(?i).*(?:\\bx\\s*[:=]|\\by\\s*[:=]|\\bz\\s*[:=]|\\b-?\\d{1,8}\\s*,\\s*-?\\d{1,4}\\s*,\\s*-?\\d{1,8}\\b).*");
     private static final Pattern PRIVATE_PATH = Pattern.compile(
             "(?i).*(?:/home/|/plugins/|[a-z]:\\\\|discord(?:app)?\\.com/api/webhooks/).*" );
+    private static final int MAX_TECHNICAL_TEXT_LENGTH = 3_800;
 
     final String releaseId;
     final String playerSummary;
@@ -106,6 +107,12 @@ final class ReleaseManifest {
             if (details.isEmpty() || details.size() > 20) {
                 return Verification.invalid("cantidad de detalles invalida");
             }
+            int technicalTextLength = details.stream()
+                    .mapToInt(detail -> technicalLine(detail).length())
+                    .sum() + details.size() - 1;
+            if (technicalTextLength > MAX_TECHNICAL_TEXT_LENGTH) {
+                return Verification.invalid("detalle tecnico excede limite de publicacion");
+            }
             return Verification.verified(new ReleaseManifest(releaseId, playerSummary, details, health));
         } catch (Exception e) {
             return Verification.invalid("manifiesto malformado: " + e.getClass().getSimpleName());
@@ -171,6 +178,15 @@ final class ReleaseManifest {
             throw new IllegalArgumentException("texto potencialmente privado");
         }
         return value;
+    }
+
+    static String technicalLine(Detail detail) {
+        return "Ticket #" + detail.ticket()
+                + " · commit `" + detail.commit() + "`"
+                + " · `" + detail.artifact() + "`"
+                + " · SHA-256 `" + detail.sha256().substring(0, 12) + "…`"
+                + " · respaldo " + (detail.backupVerified() ? "verificado" : "no declarado")
+                + " · " + detail.validation();
     }
 
     record Detail(int ticket, String commit, String artifact, String sha256,
