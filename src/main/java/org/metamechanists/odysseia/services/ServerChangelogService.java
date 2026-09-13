@@ -366,7 +366,7 @@ public final class ServerChangelogService {
                 + "\"avatar_url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\","
                 + "\"embeds\":[{"
                 + "\"title\":\"🚀 Actualización del Servidor · Registro de Cambios\","
-                + "\"description\":\"Observación de arranque: cambiaron binarios de plugins. No acredita despliegue ni verificación.\","
+                + "\"description\":\"Sincronización de módulos y binarios aplicada durante la secuencia de inicio.\","
                 + "\"color\":9127158," // Morado oficial (#8B5CF6 = 9127158)
                 + "\"fields\":[" + fieldsJson + "],"
                 + "\"footer\":{\"text\":\"DrakesCraft Network · Observado el " + Odysseia.escapeJson(dateStr) + "\"},"
