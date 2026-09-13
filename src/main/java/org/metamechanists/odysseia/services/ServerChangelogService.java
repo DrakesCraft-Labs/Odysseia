@@ -196,8 +196,7 @@ public final class ServerChangelogService {
                 return ManifestResult.DUPLICATE;
             }
 
-            sendVerifiedManifestEmbed(webhookUrl, manifest);
-            saveDeliveredReleaseId(deliveredFile, manifest.releaseId);
+            sendVerifiedManifestEmbed(webhookUrl, manifest, deliveredFile);
             plugin.getLogger().info("[Changelog] Manifiesto VERIFIED encolado: " + manifest.releaseId);
             return ManifestResult.PUBLISHED;
         } catch (Exception e) {
@@ -206,7 +205,7 @@ public final class ServerChangelogService {
         }
     }
 
-    private void sendVerifiedManifestEmbed(String webhookUrl, ReleaseManifest manifest) {
+    private void sendVerifiedManifestEmbed(String webhookUrl, ReleaseManifest manifest, File deliveredFile) {
         List<String> details = manifest.technicalDetails.stream()
                 .map(ReleaseManifest::technicalLine)
                 .toList();
@@ -233,7 +232,20 @@ public final class ServerChangelogService {
                 + Odysseia.escapeJson(manifest.health.status()) + "` · "
                 + Odysseia.escapeJson(manifest.health.summary()) + "\",\"inline\":false}"
                 + "]}]}";
-        WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
+        WebhookSender.sendAsyncTracked(plugin, webhookUrl, jsonPayload).thenAccept(delivered -> {
+            if (!delivered) {
+                plugin.getLogger().warning("[Changelog] Manifiesto no entregado; se conserva para reintento: "
+                        + manifest.releaseId);
+                return;
+            }
+            try {
+                saveDeliveredReleaseId(deliveredFile, manifest.releaseId);
+                plugin.getLogger().info("[Changelog] Manifiesto entregado y deduplicado: " + manifest.releaseId);
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING,
+                        "[Changelog] Entregado, pero no se pudo persistir su deduplicacion: " + e.getMessage(), e);
+            }
+        });
     }
 
     static List<String> technicalDetailFields(List<String> lines) {

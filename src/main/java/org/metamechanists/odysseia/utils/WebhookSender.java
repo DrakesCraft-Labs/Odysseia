@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -76,8 +77,16 @@ public final class WebhookSender {
     }
 
     public static void sendAsync(JavaPlugin plugin, String url, String jsonBody) {
+        sendAsyncTracked(plugin, url, jsonBody);
+    }
+
+    /**
+     * Enqueues a webhook and completes with {@code true} only after Discord confirms a 2xx response.
+     * Callers that persist delivery/deduplication state should use this method.
+     */
+    public static CompletableFuture<Boolean> sendAsyncTracked(JavaPlugin plugin, String url, String jsonBody) {
         if (url == null || url.isBlank() || !isAllowedHttpsUrl(url)) {
-            return;
+            return CompletableFuture.completedFuture(false);
         }
         byte[] bodyUtf8 = jsonBody.getBytes(StandardCharsets.UTF_8);
         String trimmed = url.trim();
@@ -89,7 +98,7 @@ public final class WebhookSender {
                     .POST(HttpRequest.BodyPublishers.ofByteArray(bodyUtf8))
                     .build();
 
-            httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString()).whenComplete((resp, err) -> {
+            return httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofString()).handle((resp, err) -> {
                 if (err != null) {
                     if (isClosedSelector(err)) {
                         // A previous native-thread failure can poison the JDK selector.
@@ -97,6 +106,7 @@ public final class WebhookSender {
                         httpClient = newHttpClient();
                     }
                     warnTransportOnce(plugin, err);
+                    return false;
                 } else {
                     int code = resp != null ? resp.statusCode() : -1;
                     if (code == 429) {
@@ -111,10 +121,12 @@ public final class WebhookSender {
                     } else if (code < 200 || code >= 300) {
                         plugin.getLogger().warning("[Odysseia] Discord responded with HTTP " + code + " for webhook delivery.");
                     }
+                    return isSuccessfulResponseCode(code);
                 }
             });
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "[Odysseia] Could not post to Discord webhook", e);
+            return CompletableFuture.completedFuture(false);
         }
     }
 
@@ -148,6 +160,10 @@ public final class WebhookSender {
                 .build();
     }
 
+    static boolean isSuccessfulResponseCode(int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
     private static boolean isClosedSelector(Throwable error) {
         Throwable current = error;
         while (current != null) {
@@ -169,4 +185,3 @@ public final class WebhookSender {
         plugin.getLogger().log(Level.WARNING, "[Odysseia] Discord webhook HTTP task failed: " + error.getMessage());
     }
 }
-
