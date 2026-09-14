@@ -40,7 +40,11 @@ public final class PurchaseEngine implements Listener, AutoCloseable {
     }
     @EventHandler public void onJoin(PlayerJoinEvent event) {
         if (service != null) Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            try { identities.observe(event.getPlayer().getUniqueId(), event.getPlayer().getName()); }
+            try {
+                java.util.List<java.util.UUID> displaced = identities.observe(event.getPlayer().getUniqueId(), event.getPlayer().getName());
+                if (!displaced.isEmpty()) plugin.getLogger().info("[Purchase] Nick " + event.getPlayer().getName()
+                        + " reclamado por " + event.getPlayer().getUniqueId() + "; identidades retiradas: " + displaced);
+            }
             catch (Exception error) { plugin.getLogger().warning("[Purchase] Identidad no registrada: " + error.getMessage()); }
             service.resumePlayer(event.getPlayer().getName(), "PLAYER_JOIN");
         }, 20L);

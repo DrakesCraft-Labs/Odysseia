@@ -13,12 +13,14 @@ public final class PlayerIdentityResolver {
     private PlayerIdentityResolver(PurchaseActionRuntime runtime) { this.repository = null; this.legacyRuntime = runtime; }
     static PlayerIdentityResolver legacy(PurchaseActionRuntime runtime) { return new PlayerIdentityResolver(runtime); }
 
-    public void observe(UUID uuid, String canonicalName) throws SQLException {
-        if (repository == null) return;
+    /** @return los UUID que tenian reclamado el nick y quedan retirados; vacio en el caso normal. */
+    public List<UUID> observe(UUID uuid, String canonicalName) throws SQLException {
+        if (repository == null) return List.of();
         String platform = detectPlatform(uuid, canonicalName);
-        repository.observeIdentity(uuid, canonicalName, platform, "PLAYER_JOIN", "HIGH");
+        List<UUID> displaced = repository.observeIdentity(uuid, canonicalName, platform, "PLAYER_JOIN", "HIGH");
         repository.observeAlias(uuid, canonicalName, "CANONICAL", "HIGH");
         if ("BEDROCK".equals(platform) && canonicalName.startsWith(".")) repository.observeAlias(uuid, canonicalName.substring(1), "BEDROCK_NORMALIZED", "HIGH");
+        return displaced;
     }
 
     public IdentityResolution resolve(String requested) throws SQLException {

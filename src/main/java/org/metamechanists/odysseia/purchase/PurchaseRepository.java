@@ -117,13 +117,62 @@ public final class PurchaseRepository implements AutoCloseable {
         return deliveries("SELECT * FROM purchase_deliveries WHERE lower(player_name)=lower(?) ORDER BY received_at DESC LIMIT 50", player);
     }
 
-    public synchronized void observeIdentity(UUID uuid, String canonical, String platform, String source, String confidence) throws SQLException {
+    /**
+     * Registra la identidad observada del jugador que acaba de conectar.
+     *
+     * <p>{@code canonical_name} es UNIQUE COLLATE NOCASE, asi que el upsert por {@code player_uuid}
+     * no basta: si otro UUID ya reclamo ese nick (cambio de nombre, o el mismo jugador entrando con
+     * un UUID distinto al que se registro antes) SQLite aborta con SQLITE_CONSTRAINT_UNIQUE y el
+     * jugador se queda sin identidad ni alias. El titular anterior se retira del nick conservando su
+     * fila, su historial y un alias {@code DISPLACED_CANONICAL} con el nick en claro, de modo que
+     * sigue siendo localizable y ninguna entrega se pierde.
+     *
+     * @return los UUID que perdieron la reclamacion del nick; vacio en el caso normal.
+     */
+    public synchronized List<UUID> observeIdentity(UUID uuid, String canonical, String platform, String source, String confidence) throws SQLException {
         String now = now(); String normalized = canonical.startsWith(".") ? canonical.substring(1) : canonical;
+        connection.setAutoCommit(false);
+        try {
+            List<UUID> displaced = releaseCanonicalClaim(uuid, canonical, now);
+            upsertIdentity(uuid, canonical, normalized, platform, source, confidence, now);
+            connection.commit();
+            return displaced;
+        } catch (SQLException error) { connection.rollback(); throw error; }
+        finally { connection.setAutoCommit(true); }
+    }
+
+    private void upsertIdentity(UUID uuid, String canonical, String normalized, String platform, String source, String confidence, String now) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO player_identities(player_uuid,canonical_name,normalized_name,platform,bedrock_prefix,first_seen_at,last_seen_at,verification_source,confidence,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(player_uuid) DO UPDATE SET canonical_name=excluded.canonical_name,normalized_name=excluded.normalized_name,platform=excluded.platform,bedrock_prefix=excluded.bedrock_prefix,last_seen_at=excluded.last_seen_at,verification_source=excluded.verification_source,confidence=excluded.confidence,updated_at=excluded.updated_at")) {
             statement.setString(1, uuid.toString()); statement.setString(2, canonical); statement.setString(3, normalized);
             statement.setString(4, platform); statement.setInt(5, canonical.startsWith(".") ? 1 : 0);
             statement.setString(6, now); statement.setString(7, now); statement.setString(8, source); statement.setString(9, confidence); statement.setString(10, now); statement.executeUpdate();
         }
+    }
+
+    /**
+     * Libera el nick de cualquier identidad ajena que lo tenga reclamado.
+     *
+     * <p>No borra la fila desplazada: {@code player_identity_aliases} depende de ella con
+     * ON DELETE CASCADE y puede sostener entregas ya vinculadas. El nick retirado se marca con el
+     * propio UUID como sufijo, valor unico por construccion, y el nick en claro sobrevive como alias.
+     */
+    private List<UUID> releaseCanonicalClaim(UUID uuid, String canonical, String now) throws SQLException {
+        List<UUID> displaced = new ArrayList<>();
+        try (PreparedStatement query = connection.prepareStatement("SELECT player_uuid FROM player_identities WHERE canonical_name=? COLLATE NOCASE AND player_uuid<>?")) {
+            query.setString(1, canonical); query.setString(2, uuid.toString());
+            try (ResultSet rows = query.executeQuery()) { while (rows.next()) displaced.add(UUID.fromString(rows.getString("player_uuid"))); }
+        }
+        if (displaced.isEmpty()) return displaced;
+        for (UUID previous : displaced) {
+            try (PreparedStatement alias = connection.prepareStatement("INSERT INTO player_identity_aliases(player_uuid,alias,alias_type,confidence,first_seen_at,last_seen_at) VALUES(?,?,?,?,?,?) ON CONFLICT(player_uuid,alias) DO UPDATE SET alias_type=excluded.alias_type,last_seen_at=excluded.last_seen_at")) {
+                alias.setString(1, previous.toString()); alias.setString(2, canonical); alias.setString(3, "DISPLACED_CANONICAL");
+                alias.setString(4, "HIGH"); alias.setString(5, now); alias.setString(6, now); alias.executeUpdate();
+            }
+            try (PreparedStatement retire = connection.prepareStatement("UPDATE player_identities SET canonical_name=?,updated_at=? WHERE player_uuid=?")) {
+                retire.setString(1, canonical + "~" + previous); retire.setString(2, now); retire.setString(3, previous.toString()); retire.executeUpdate();
+            }
+        }
+        return displaced;
     }
 
     public synchronized void observeAlias(UUID uuid, String alias, String type, String confidence) throws SQLException {
