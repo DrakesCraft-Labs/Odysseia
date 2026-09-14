@@ -80,6 +80,22 @@ class PlayerIdentityResolverTest {
         assertEquals("txn-displaced", repository.findPendingForIdentity(previous, "Mr_Em1lio").getFirst().transaction());
     }
 
+    @Test void newNickClaimantCannotResumeDeliveryBoundToDisplacedUuid() throws Exception {
+        UUID previous = UUID.randomUUID();
+        UUID current = UUID.randomUUID();
+        ProductDefinition product = new ProductDefinition("test", 1, "Test", "test", "test", "test", 1,
+                VerificationState.VERIFIED_PRODUCTION, List.of(), List.of());
+        resolver.observe(previous, "Mr_Em1lio");
+        repository.createOrLoad("TEBEX", "txn-bound-previous", "Mr_Em1lio", previous, product, "test");
+
+        resolver.observe(current, "Mr_Em1lio");
+
+        assertTrue(repository.findPendingForIdentity(current, "Mr_Em1lio").isEmpty(),
+                "una coincidencia de nick no puede reasignar una entrega que ya tiene UUID");
+        assertEquals("txn-bound-previous",
+                repository.findPendingForIdentity(previous, "Mr_Em1lio").getFirst().transaction());
+    }
+
     @Test void caseOnlyNickChangeStaysOnTheSameIdentity() throws Exception {
         UUID uuid = UUID.randomUUID();
         resolver.observe(uuid, "Mr_Em1lio");
