@@ -130,7 +130,7 @@ public final class SandboxIsolationListener implements Listener {
         player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                 "&6DrakesCraft &8· &eLaboratorio&7. Tu inventario esta guardado y te espera al salir.&r\n"
                         + "&7Aqui tienes creativo y &e/sf cheat&7 sin limites. &cNada de lo que hagas aqui sale&7: "
-                        + "ni objetos, ni dinero, ni progreso. El mundo se borra cada lunes."));
+                        + "ni objetos, ni dinero, ni progreso. El mundo se borra cada domingo a las 04:00 (America/Santiago)."));
     }
 
     private void salir(Player player) {

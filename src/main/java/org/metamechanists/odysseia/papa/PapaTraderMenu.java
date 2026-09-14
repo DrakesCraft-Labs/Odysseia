@@ -63,7 +63,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         boolean soloLectura = !mundoPermitido(jugador.getWorld().getName(), mundosPermitidos());
         if (soloLectura) {
             jugador.sendMessage(color("&eEsto es solo el escaparate del trueque. "
-                    + "&7Para canjear y depositar, usa &f/survival&7 o &f/ob&7."));
+                    + "&7Para canjear y depositar, usa &f/survival&7."));
         } else {
             // Las papas viejas se marcan al abrir, para que nadie pierda lo que ya tenia guardado.
             // Solo en Survival: marcar items dentro de un inventario aislado los tocaria en una
@@ -121,7 +121,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
                 color("&7En la alcancia: &6" + servicio.enAlcancia(jugador)),
                 color(""),
                 soloLectura
-                        ? color("&cSolo se deposita en juego &8(&f/survival&8 o &f/ob&8)")
+                        ? color("&cSolo se deposita en Survival &8(&f/survival&8)")
                         : llevaba > 0
                                 ? color("&a▶ Click para depositar " + llevaba
                                         + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")

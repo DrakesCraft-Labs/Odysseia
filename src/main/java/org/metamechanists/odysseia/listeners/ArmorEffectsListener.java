@@ -10,13 +10,16 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.metamechanists.odysseia.Odysseia;
@@ -27,10 +30,14 @@ public final class ArmorEffectsListener implements Listener {
             "speed", "resistance", "health-boost", "saturation", "fire-resistance",
             "jump-boost", "regeneration", "strength", "night-vision");
 
-    private final Odysseia plugin;
-    private final Map<UUID, Set<PotionEffectType>> appliedEffects = new HashMap<>();
+    private final JavaPlugin plugin;
+    private final Map<UUID, Map<PotionEffectType, PotionEffect>> appliedEffects = new HashMap<>();
 
     public ArmorEffectsListener(Odysseia plugin) {
+        this((JavaPlugin) plugin);
+    }
+
+    ArmorEffectsListener(JavaPlugin plugin) {
         this.plugin = plugin;
         
         long refreshSeconds = plugin.getConfig().getLong("armor-effects.refresh-interval-seconds", 90L);
@@ -76,19 +83,25 @@ public final class ArmorEffectsListener implements Listener {
         if (!effectsToApply.isEmpty()) {
             Set<PotionEffectType> desiredTypes = new HashSet<>();
             for (PotionEffect effect : effectsToApply) desiredTypes.add(effect.getType());
-            Set<PotionEffectType> previousTypes = appliedEffects.getOrDefault(uuid, Set.of());
+            Set<PotionEffectType> previousTypes = Set.copyOf(
+                    appliedEffects.getOrDefault(uuid, Map.of()).keySet());
             for (PotionEffectType previousType : previousTypes) {
                 if (!desiredTypes.contains(previousType)) removeTrackedEffect(player, previousType);
             }
             for (PotionEffect effect : effectsToApply) {
-                player.addPotionEffect(effect);
+                // A stronger external effect may reject this aura or keep it hidden.
+                // Only claim an effect that actually became the visible effect.
+                if (player.addPotionEffect(effect)
+                        && effect.equals(player.getPotionEffect(effect.getType()))) {
+                    appliedEffects.computeIfAbsent(uuid, ignored -> new HashMap<>())
+                            .put(effect.getType(), effect);
+                }
             }
-            appliedEffects.put(uuid, desiredTypes);
         } else {
             // Remove any previously applied rank effects
-            Set<PotionEffectType> currentTracked = appliedEffects.remove(uuid);
+            Map<PotionEffectType, PotionEffect> currentTracked = appliedEffects.get(uuid);
             if (currentTracked != null) {
-                for (PotionEffectType type : currentTracked) {
+                for (PotionEffectType type : Set.copyOf(currentTracked.keySet())) {
                     removeTrackedEffect(player, type);
                 }
             }
@@ -161,9 +174,32 @@ public final class ArmorEffectsListener implements Listener {
     }
 
     private void removeTrackedEffect(Player player, PotionEffectType type) {
+        Map<PotionEffectType, PotionEffect> tracked = appliedEffects.get(player.getUniqueId());
+        if (tracked == null) return;
+        PotionEffect applied = tracked.remove(type);
+        if (tracked.isEmpty()) appliedEffects.remove(player.getUniqueId());
         PotionEffect active = player.getPotionEffect(type);
-        int configuredDuration = plugin.getConfig().getInt("armor-effects.effect-duration-seconds", 180) * 20;
-        if (active != null && active.getDuration() <= configuredDuration) player.removePotionEffect(type);
+        if (applied != null && active != null
+                && active.getDuration() > 0 && active.getDuration() <= applied.getDuration()
+                && active.getAmplifier() == applied.getAmplifier()
+                && active.isAmbient() == applied.isAmbient()
+                && active.hasParticles() == applied.hasParticles()
+                && active.hasIcon() == applied.hasIcon()) {
+            player.removePotionEffect(type);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPotionEffect(EntityPotionEffectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getAction() == EntityPotionEffectEvent.Action.CHANGED && !event.isOverride()) return;
+        // An accepted replacement, even with identical settings, belongs to its new source.
+        // Our own additions are recorded after addPotionEffect returns.
+        Map<PotionEffectType, PotionEffect> tracked = appliedEffects.get(player.getUniqueId());
+        if (tracked != null) {
+            tracked.remove(event.getModifiedType());
+            if (tracked.isEmpty()) appliedEffects.remove(player.getUniqueId());
+        }
     }
 
     @EventHandler

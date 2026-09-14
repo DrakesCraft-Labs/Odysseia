@@ -48,6 +48,18 @@
             <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>4.116.3</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.jupiter</groupId>
+                    <artifactId>junit-jupiter-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Paper API -->
         <dependency>
             <groupId>io.papermc.paper</groupId>

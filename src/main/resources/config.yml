@@ -3925,7 +3925,7 @@ modalidades:
         - oneblock_world
     laboratorio:
       nombre: "&eLaboratorio"
-      descripcion: "Creativo para probar maquinas. Se borra cada lunes. Nada sale de aqui."
+      descripcion: "Creativo para probar maquinas. Se borra cada domingo a las 04:00 (America/Santiago). Nada sale de aqui."
       icono: CRAFTING_TABLE
       comando: laboratorio
       mundos:
