@@ -295,6 +295,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: minero, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_minero}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Minero activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Minero"}}
   role_cazador:
@@ -305,6 +306,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: cazador, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_cazador}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Cazador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Cazador"}}
   role_constructor:
@@ -315,6 +317,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: constructor, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_constructor}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: flight, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: essentials.fly, duration: 7d}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Constructor activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Constructor"}}
@@ -326,6 +329,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: lenador, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_lenador}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Leñador activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Leñador"}}
   role_alquimista:
@@ -336,6 +340,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: alquimista, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_alquimista}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Alquimista activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Alquimista"}}
   role_nomada:
@@ -346,6 +351,7 @@ products:
     actions:
       - {id: role, type: LUCKPERMS_TEMPORARY, refund: AUTO_REVOKE, parameters: {group: nomada, duration: 30d}}
       - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: rol_nomada}}
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "15000"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aRol Nómada activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Rol Nómada"}}
 
