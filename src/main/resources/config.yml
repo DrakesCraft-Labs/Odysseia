@@ -201,6 +201,20 @@ slimefun-spawners:
 # servidor. BedrockRangeGuardListener aplica un borde de mundo personal a cada cuenta Bedrock
 # (Floodgate las nombra con un punto delante) y cancela cualquier teletransporte que la deje
 # fuera. Los jugadores de Java no se ven afectados y pueden viajar hasta donde este el Bedrock.
+# Resource pack del servidor (ticket 476): el arranque de Pterodactyl reescribe
+# server.properties y borra estos campos, asi que Odysseia lo envia al entrar.
+# Cambiar sha1 al publicar un pack nuevo y recargar con /odysseia reload.
+# /odysseia pack [jugador|all] reenvia el pack sin reiniciar.
+resource-pack:
+  enabled: true
+  url: https://pack.drakescraft.cl/latest.zip
+  sha1: eb865aadedba8a284c2948d82f4c1f52504318b9
+  required: false
+  prompt: "&bDrakesCraft &7ofrece texturas para Slimefun y sus addons. &aEs opcional&7, pero se ve mucho mejor."
+  delay-ticks: 40
+  cache-bust: true
+  log-status: true
+
 bedrock-guard:
   enabled: true
   limite: 150000

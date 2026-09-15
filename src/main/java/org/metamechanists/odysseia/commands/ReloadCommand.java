@@ -48,8 +48,11 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("maintenance")) {
             return handleMaintenance(sender, args);
         }
+        if (args[0].equalsIgnoreCase("pack")) {
+            return handlePack(sender, args);
+        }
         if (!args[0].equalsIgnoreCase("reload")) {
-            sender.sendMessage(color("&eUso: &f/odysseia <reload|status|vipalerts|sfmaster|maintenance>"));
+            sender.sendMessage(color("&eUso: &f/odysseia <reload|status|vipalerts|sfmaster|maintenance|pack>"));
             return true;
         }
         if (!sender.hasPermission("odysseia.reload")) {
@@ -73,6 +76,42 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(color("&c[Odysseia] Error al recargar: " + error.getMessage()));
             plugin.getLogger().severe("[Reload] Error al recargar: " + error.getMessage());
         }
+        return true;
+    }
+
+    private boolean handlePack(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("odysseia.reload")) {
+            sender.sendMessage(color("&cNo tienes permiso para reenviar el resource pack."));
+            return true;
+        }
+        org.metamechanists.odysseia.listeners.ResourcePackListener pack = plugin.getResourcePack();
+        if (pack == null || !pack.enabled()) {
+            sender.sendMessage(color("&c[Odysseia] resource-pack.enabled es false o falta la url en config.yml."));
+            return true;
+        }
+        java.util.List<org.bukkit.entity.Player> targets = new java.util.ArrayList<>();
+        if (args.length >= 2 && args[1].equalsIgnoreCase("all")) {
+            targets.addAll(org.bukkit.Bukkit.getOnlinePlayers());
+        } else if (args.length >= 2) {
+            org.bukkit.entity.Player p = org.bukkit.Bukkit.getPlayerExact(args[1]);
+            if (p == null) {
+                sender.sendMessage(color("&c[Odysseia] Jugador no conectado: " + args[1]));
+                return true;
+            }
+            targets.add(p);
+        } else if (sender instanceof org.bukkit.entity.Player self) {
+            targets.add(self);
+        } else {
+            sender.sendMessage(color("&eUso: &f/odysseia pack <jugador|all>"));
+            return true;
+        }
+        int sent = 0;
+        for (org.bukkit.entity.Player p : targets) {
+            if (!org.metamechanists.odysseia.listeners.ResourcePackListener.isBedrock(p) && pack.send(p)) {
+                sent++;
+            }
+        }
+        sender.sendMessage(color("&a[Odysseia] Resource pack enviado a " + sent + " jugador(es) Java."));
         return true;
     }
 
@@ -149,7 +188,7 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return List.of("reload", "status", "vipalerts", "sfmaster", "maintenance").stream()
+            return List.of("reload", "status", "vipalerts", "sfmaster", "maintenance", "pack").stream()
                     .filter(value -> value.startsWith(args[0].toLowerCase()))
                     .toList();
         }

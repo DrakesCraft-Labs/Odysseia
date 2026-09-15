@@ -57,6 +57,7 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.listeners.AutomationGuardListener automationGuard;
     private org.metamechanists.odysseia.listeners.SFMasterWatcherListener sfMasterWatcher;
     private org.metamechanists.odysseia.listeners.MaintenanceGuardListener maintenanceGuard;
+    private org.metamechanists.odysseia.listeners.ResourcePackListener resourcePack;
     private org.metamechanists.odysseia.services.VipExpiryAlertService vipExpiryAlertService;
     private org.metamechanists.odysseia.services.ServerChangelogService changelogService;
     @Getter
@@ -158,6 +159,8 @@ public final class Odysseia extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(chatFilter, this);
         Bukkit.getPluginManager().registerEvents(shopMenu, this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.StoreCommandGuardListener(), this);
+        this.resourcePack = new org.metamechanists.odysseia.listeners.ResourcePackListener(this);
+        Bukkit.getPluginManager().registerEvents(resourcePack, this);
         Bukkit.getPluginManager().registerEvents(
                 new org.metamechanists.odysseia.listeners.CorruptItemGuardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.metamechanists.odysseia.listeners.CommerceExploitGuardListener(this), this);
@@ -1098,6 +1101,10 @@ public final class Odysseia extends JavaPlugin {
 
     public org.metamechanists.odysseia.listeners.SFMasterWatcherListener getSfMasterWatcher() {
         return sfMasterWatcher;
+    }
+
+    public org.metamechanists.odysseia.listeners.ResourcePackListener getResourcePack() {
+        return resourcePack;
     }
 
     public org.metamechanists.odysseia.listeners.MaintenanceGuardListener getMaintenanceGuard() {
