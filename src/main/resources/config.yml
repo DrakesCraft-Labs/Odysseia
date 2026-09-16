@@ -262,7 +262,8 @@ starter-kit:
 chatgames:
   # Odysseia owns this schedule. Set ChatGames' external automatic-games to false
   # to avoid overlapping events after the next restart.
-  enabled: true
+  # 2026-09-16: desactivado; el plugin ChatGames es el unico motor de juegos de chat.
+  enabled: false
   timezone: "America/Santiago"
   minimum-players: 2
   min-interval-minutes: 12
