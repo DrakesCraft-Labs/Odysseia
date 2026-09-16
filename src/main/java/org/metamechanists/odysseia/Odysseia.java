@@ -217,6 +217,8 @@ public final class Odysseia extends JavaPlugin {
                 new org.metamechanists.odysseia.listeners.ClasicoVillagerTradeGuardListener(this, modalityService), this);
         Bukkit.getPluginManager().registerEvents(
                 new org.metamechanists.odysseia.listeners.ClasicoSlimefunGuardListener(this, modalityService), this);
+        Bukkit.getPluginManager().registerEvents(
+                new org.metamechanists.odysseia.listeners.ModalityBackGuardListener(this, modalityService), this);
 
         // Frontera del laboratorio. UniversalModalitySentinel fue retirado permanentemente:
         // su estrategia destructiva purgaba slots ante falsos positivos y llego a borrar
