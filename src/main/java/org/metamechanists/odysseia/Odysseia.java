@@ -212,9 +212,11 @@ public final class Odysseia extends JavaPlugin {
             getLogger().log(Level.SEVERE, "[Bovedas] No se pudo iniciar el almacen de bovedas por modalidad", error);
         }
 
-        // Blindaje de comercios de aldeanos en modalidad Clásico contra filtraciones de Slimefun / Cultivation
+        // Blindaje de comercios de aldeanos y jugabilidad en modalidad Clásico contra filtraciones de Slimefun / Cultivation
         Bukkit.getPluginManager().registerEvents(
                 new org.metamechanists.odysseia.listeners.ClasicoVillagerTradeGuardListener(this, modalityService), this);
+        Bukkit.getPluginManager().registerEvents(
+                new org.metamechanists.odysseia.listeners.ClasicoSlimefunGuardListener(this, modalityService), this);
 
         // Frontera del laboratorio. UniversalModalitySentinel fue retirado permanentemente:
         // su estrategia destructiva purgaba slots ante falsos positivos y llego a borrar
