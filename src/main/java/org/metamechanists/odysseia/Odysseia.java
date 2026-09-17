@@ -76,6 +76,8 @@ public final class Odysseia extends JavaPlugin {
     private org.metamechanists.odysseia.papa.PapaDeMarService papaService;
     private org.metamechanists.odysseia.cheques.ChequeService chequeService;
     private org.metamechanists.odysseia.saori.SaoriFreezeManager saoriFreezeManager;
+        @Getter
+    private org.metamechanists.odysseia.events.OdysseiaEventManager eventManager;
     private final List<BukkitTask> runtimeTasks = new ArrayList<>();
 
     @Override
@@ -241,6 +243,12 @@ public final class Odysseia extends JavaPlugin {
                             mundosLaboratorio), this);
             getLogger().info("[Modalidades] Aislamiento, avances, limites de maquinas y seguridad no destructiva de laboratorio activos.");
         }
+
+        this.eventManager = new org.metamechanists.odysseia.events.OdysseiaEventManager(this);
+        var eventoCmd = new org.metamechanists.odysseia.commands.EventoCommand(eventManager);
+        getCommand("evento").setExecutor(eventoCmd);
+        getCommand("evento").setTabCompleter(eventoCmd);
+        getLogger().info("[Eventos] Suite de eventos (Rush, Drops, Boosts, Boxes, Bosses, PvP) activa.");
 
         // Las arenas y el ciclo de vida de jefes pertenecen a DrakesBosses.
         this.bloodMoonManager = new BloodMoonManager(this);
@@ -700,6 +708,10 @@ public final class Odysseia extends JavaPlugin {
         if (saoriFreezeManager != null) {
             saoriFreezeManager.cleanup();
         }
+        if (eventManager != null) {
+            eventManager.shutdown();
+        }
+
 
         getLogger().info("Odysseia v" + getPluginMeta().getVersion() + " deshabilitado correctamente.");
     }

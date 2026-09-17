@@ -19,6 +19,11 @@ softdepend:
   - nLogin
 
 commands:
+  evento:
+    description: Suite de Eventos de Odysseia (Rush, Drops, Boosts, Cajas, Bosses, PvP).
+    aliases: [eventos, odysseiaevento]
+    permission: odysseia.evento.admin
+    usage: /evento <rush|drop|boost|box|boss|pvp|stop|status>
   survival:
     description: Te lleva a la modalidad principal (Survival).
     aliases: [principal, polis, main]
@@ -157,6 +162,9 @@ commands:
     aliases: [grantoldschool, viejodesde, oldschoolgive]
     usage: /esteusuarioesviejo <jugador>
 permissions:
+  odysseia.evento.admin:
+    description: Permite administrar la suite de eventos de Odysseia.
+    default: op
   odysseia.cheque.admin:
     description: Permite emitir cheques firmados desde consola o staff.
     default: op
