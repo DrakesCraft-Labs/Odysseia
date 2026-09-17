@@ -45,21 +45,36 @@ public final class ModalityBackGuardListener implements Listener {
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         Location from = event.getFrom();
         Location to = event.getTo();
-        if (from == null || from.getWorld() == null || to == null || to.getWorld() == null) {
-            return;
-        }
-
-        // Ignorar micro-movimientos en el mismo bloque
-        if (from.getWorld().equals(to.getWorld())
-                && from.getBlockX() == to.getBlockX()
-                && from.getBlockY() == to.getBlockY()
-                && from.getBlockZ() == to.getBlockZ()) {
+        if (isIgnoredTeleport(from, to)) {
             return;
         }
 
         Player player = event.getPlayer();
         Modality fromModality = modalityService.resolve(from.getWorld().getName());
         recordLocation(player.getUniqueId(), fromModality.id(), from);
+    }
+
+    /**
+     * Ignora micro-movimientos y traslados puramente verticales en la misma columna X/Z
+     * (como elevadores mecánicos de Slimefun, SimpleUtils o SensibleToolbox),
+     * evitando que el uso de un ascensor dentro de una base sobreescriba el destino previo de /back.
+     */
+    public static boolean isIgnoredTeleport(Location from, Location to) {
+        if (from == null || to == null) {
+            return true;
+        }
+
+        if (from.getWorld() != null && to.getWorld() != null && !from.getWorld().equals(to.getWorld())) {
+            return false;
+        }
+
+        // Si están dentro del mismo pozo vertical (tolerancia 1.5 bloques en X y Z)
+        if (Math.abs(from.getX() - to.getX()) < 1.5
+                && Math.abs(from.getZ() - to.getZ()) < 1.5) {
+            return true;
+        }
+
+        return false;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

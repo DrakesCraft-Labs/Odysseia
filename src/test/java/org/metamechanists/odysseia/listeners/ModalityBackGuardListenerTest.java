@@ -60,4 +60,16 @@ class ModalityBackGuardListenerTest {
         // Asegurar que clásico no fue sobreescrito ni contaminado
         assertEquals(100, listener.getLastLocation(playerId, "clasico").getX());
     }
+
+    @Test
+    void ignoresElevatorAndVerticalTeleportsInSameColumn() {
+        Location groundFloor = new Location(null, 100.5, 64.0, 200.5);
+        Location topFloor = new Location(null, 100.5, 80.0, 200.5);
+        Location basement = new Location(null, 100.0, 30.0, 200.0);
+        Location distant = new Location(null, 105.0, 64.0, 200.5);
+
+        assertTrue(ModalityBackGuardListener.isIgnoredTeleport(groundFloor, topFloor));
+        assertTrue(ModalityBackGuardListener.isIgnoredTeleport(topFloor, basement));
+        assertFalse(ModalityBackGuardListener.isIgnoredTeleport(groundFloor, distant));
+    }
 }
