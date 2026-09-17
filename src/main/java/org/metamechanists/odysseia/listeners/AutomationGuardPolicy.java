@@ -26,4 +26,31 @@ public final class AutomationGuardPolicy {
         return inactiveMillis >= inactivityLimitMillis
                 && displacedSquared >= minimumDisplacement * minimumDisplacement;
     }
+
+    public static long calculateQuarantineSeconds(int strikes, long strike1, long strike2, long strike3) {
+        if (strikes <= 1) return strike1;
+        if (strikes == 2) return strike2;
+        return strike3;
+    }
+
+    public static boolean isQuarantined(long now, long quarantineUntil) {
+        return now < quarantineUntil;
+    }
+
+    public static boolean shouldResetStrikes(long now, long lastKickTime, long decayMillis) {
+        return lastKickTime > 0 && (now - lastKickTime >= decayMillis);
+    }
+
+    public static boolean isGenuineLookChange(float yawFrom, float yawTo, float pitchFrom, float pitchTo) {
+        return Math.abs(yawFrom - yawTo) >= 15.0F || Math.abs(pitchFrom - pitchTo) >= 10.0F;
+    }
+
+    public static boolean shouldKickUnverifiedJoin(long now, long joinTime, int actionsObserved,
+                                                  long verificationLimitMillis, int requiredActions) {
+        return (now - joinTime >= verificationLimitMillis) && (actionsObserved < requiredActions);
+    }
+
+    public static boolean shouldKickEvasion(long inactiveMillis, long evasionLimitMillis) {
+        return inactiveMillis >= evasionLimitMillis;
+    }
 }

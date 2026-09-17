@@ -2,6 +2,7 @@ package org.metamechanists.odysseia.listeners;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,11 +13,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -31,11 +39,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/** Breaks verified vanilla clocks and suppresses unattended movement/fishing farms. */
+/**
+ * Protege TPS frenando relojes de redstone y suprime granjas automatizadas en ausencia.
+ * Incluye un sistema inteligente Anti-AFK con cuarentena de reconexión y verificación de actividad
+ * para neutralizar bucles de scripts de reconexión y mecanismos de evasión pasivos.
+ */
 public final class AutomationGuardListener implements Listener {
     private static final Set<Material> REDSTONE_COMPONENTS = Set.of(
             Material.REDSTONE_WIRE, Material.REPEATER, Material.COMPARATOR, Material.OBSERVER,
@@ -55,14 +70,16 @@ public final class AutomationGuardListener implements Listener {
     private final Map<BlockKey, PulseWindow> pulseWindows = new HashMap<>();
     private final Map<BlockKey, Long> disabledUntil = new HashMap<>();
     private final Map<BlockKey, ViolationWindow> violationWindows = new HashMap<>();
-    private final Map<UUID, ActivityState> activity = new HashMap<>();
-    private final BukkitTask cleanupTask;
+    private final Map<UUID, ActivityState> activity = new ConcurrentHashMap<>();
+    private final Map<UUID, AfkRecord> afkRecords = new ConcurrentHashMap<>();
+    private final BukkitTask watchdogTask;
 
     public AutomationGuardListener(Odysseia plugin) {
         this.plugin = plugin;
         migrateLegacyRedstoneDefaults();
-        this.cleanupTask = Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupExpiredState,
-                20L * 300L, 20L * 300L);
+        // El watchdog corre cada 10 segundos (200 ticks) para limpiar expiraciones y vigilar reconexiones ociosas
+        this.watchdogTask = Bukkit.getScheduler().runTaskTimer(plugin, this::runPeriodicWatchdog,
+                20L * 10L, 20L * 10L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -89,12 +106,18 @@ public final class AutomationGuardListener implements Listener {
         }
         Player player = event.getPlayer();
         ActivityState state = activity.computeIfAbsent(player.getUniqueId(), ignored -> ActivityState.activeAt(event.getFrom()));
+
         if (viewChanged(event.getFrom(), event.getTo())) {
             markActive(player, event.getTo());
+            if (AutomationGuardPolicy.isGenuineLookChange(
+                    event.getFrom().getYaw(), event.getTo().getYaw(),
+                    event.getFrom().getPitch(), event.getTo().getPitch())) {
+                noteAction(player, 1);
+            }
             return;
         }
         if (samePosition(event.getFrom(), event.getTo())) return;
-        if (player.hasPermission("odysseia.automation.bypass")) return;
+        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) return;
 
         long now = System.currentTimeMillis();
         long inactivityLimit = Math.clamp(plugin.getConfig().getLong(
@@ -103,8 +126,22 @@ public final class AutomationGuardListener implements Listener {
                 "automation-guard.afk.minimum-displacement", 4.0D), 2.0D, 32.0D);
         double displacedSquared = sameWorld(state.anchor(), event.getTo())
                 ? state.anchor().distanceSquared(event.getTo()) : Double.MAX_VALUE;
-        if (!AutomationGuardPolicy.shouldBlockAfkMotion(now - state.lastActive(), displacedSquared,
+
+        long inactiveTime = now - state.lastActive();
+        if (!AutomationGuardPolicy.shouldBlockAfkMotion(inactiveTime, displacedSquared,
                 inactivityLimit, minimumDisplacement)) {
+            return;
+        }
+
+        // Si lleva un tiempo excesivo atrapado en un mecanismo pasivo (agua, vagoneta, pistón) sin mover cámara
+        long evasionLimit = Math.clamp(plugin.getConfig().getLong(
+                "automation-guard.afk.evasion-kick-seconds", 900L), 300L, 3600L) * 1000L;
+        if (AutomationGuardPolicy.shouldKickEvasion(inactiveTime, evasionLimit)) {
+            player.kick(Component.text(
+                    "§6[DrakesCraft · Anti-AFK]\n"
+                    + "§cExpulsado por evasión de AFK (mecanismo pasivo prolongado).\n"
+                    + "§7Por favor interactúa activamente con el juego."));
+            recordAfkKick(player.getUniqueId(), player.getName(), "mecanismo pasivo de evasión");
             return;
         }
 
@@ -119,7 +156,8 @@ public final class AutomationGuardListener implements Listener {
     public void onFishing(PlayerFishEvent event) {
         if (!plugin.getConfig().getBoolean("automation-guard.enabled", true)
                 || !plugin.getConfig().getBoolean("automation-guard.afk.enabled", true)
-                || event.getPlayer().hasPermission("odysseia.automation.bypass")) {
+                || event.getPlayer().hasPermission("odysseia.automation.bypass")
+                || event.getPlayer().hasPermission("essentials.afk.kickexempt")) {
             return;
         }
         if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH
@@ -137,9 +175,72 @@ public final class AutomationGuardListener implements Listener {
                 "Pesca AFK detenida. El autoclicker está permitido, la ausencia no.");
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerKick(PlayerKickEvent event) {
+        if (!plugin.getConfig().getBoolean("automation-guard.enabled", true)
+                || !plugin.getConfig().getBoolean("automation-guard.afk.enabled", true)) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+            return;
+        }
+
+        String reason = PlainTextComponentSerializer.plainText().serialize(event.reason()).toLowerCase(Locale.ROOT);
+        if (reason.contains("inactiv") || reason.contains("afk") || reason.contains("ausencia")
+                || reason.contains("echado por estar inactivo")) {
+            recordAfkKick(player.getUniqueId(), player.getName(), "inactividad");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onLogin(PlayerLoginEvent event) {
+        if (!plugin.getConfig().getBoolean("automation-guard.enabled", true)
+                || !plugin.getConfig().getBoolean("automation-guard.afk.enabled", true)
+                || !plugin.getConfig().getBoolean("automation-guard.afk.reconnect-quarantine.enabled", true)) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+            return;
+        }
+
+        AfkRecord record = afkRecords.get(player.getUniqueId());
+        if (record == null) return;
+
+        long now = System.currentTimeMillis();
+        if (AutomationGuardPolicy.isQuarantined(now, record.quarantineUntil())) {
+            long remainingSec = Math.max(1L, (record.quarantineUntil() - now) / 1000L);
+            Component message = Component.text()
+                    .append(Component.text("§6[DrakesCraft · Anti-AFK]\n\n", NamedTextColor.GOLD))
+                    .append(Component.text("§cFuiste desconectado recientemente por inactividad.\n", NamedTextColor.RED))
+                    .append(Component.text("§eDetectado posible script o bucle de reconexión automática.\n\n", NamedTextColor.YELLOW))
+                    .append(Component.text("§7Por favor regresa cuando estés presente para jugar.\n", NamedTextColor.GRAY))
+                    .append(Component.text("§fReconexión disponible en: §b" + remainingSec + "s\n", NamedTextColor.WHITE))
+                    .append(Component.text("§8(Aviso de inactividad #" + record.strikes() + ")", NamedTextColor.DARK_GRAY))
+                    .build();
+            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, message);
+            plugin.getLogger().info("[Anti-AFK] Reconexión bloqueada para " + player.getName()
+                    + " (quedan " + remainingSec + "s de cuarentena, strike " + record.strikes() + ").");
+        }
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        markActive(event.getPlayer(), event.getPlayer().getLocation());
+        Player player = event.getPlayer();
+        markActive(player, player.getLocation());
+
+        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+            return;
+        }
+
+        AfkRecord record = afkRecords.get(player.getUniqueId());
+        if (record != null && record.strikes() > 0) {
+            record.setVerifying(true);
+            record.setJoinTime(System.currentTimeMillis());
+            record.setActionsObserved(0);
+        }
     }
 
     @EventHandler
@@ -147,32 +248,138 @@ public final class AutomationGuardListener implements Listener {
         activity.remove(event.getPlayer().getUniqueId());
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onChat(AsyncPlayerChatEvent event) {
+        noteAction(event.getPlayer(), 2);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent event) {
+        noteAction(event.getPlayer(), 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent event) {
+        noteAction(event.getPlayer(), 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInteract(PlayerInteractEvent event) {
+        noteAction(event.getPlayer(), 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) {
+            noteAction(player, 1);
+        }
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
-        markActive(event.getPlayer(), event.getPlayer().getLocation());
+        noteAction(event.getPlayer(), 1);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onInventory(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) markActive(player, player.getLocation());
+        if (event.getWhoClicked() instanceof Player player) noteAction(player, 1);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onSneak(PlayerToggleSneakEvent event) {
-        markActive(event.getPlayer(), event.getPlayer().getLocation());
+        noteAction(event.getPlayer(), 1);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onSprint(PlayerToggleSprintEvent event) {
-        markActive(event.getPlayer(), event.getPlayer().getLocation());
+        noteAction(event.getPlayer(), 1);
     }
 
     public void shutdown() {
-        cleanupTask.cancel();
+        watchdogTask.cancel();
         pulseWindows.clear();
         disabledUntil.clear();
         violationWindows.clear();
         activity.clear();
+        afkRecords.clear();
+    }
+
+    private void recordAfkKick(UUID uuid, String name, String detail) {
+        long now = System.currentTimeMillis();
+        long decayMillis = plugin.getConfig().getLong(
+                "automation-guard.afk.reconnect-quarantine.strike-decay-hours", 2L) * 3600L * 1000L;
+
+        AfkRecord record = afkRecords.computeIfAbsent(uuid, ignored -> new AfkRecord());
+        if (AutomationGuardPolicy.shouldResetStrikes(now, record.lastKickTime(), decayMillis)) {
+            record.setStrikes(0);
+        }
+
+        record.setStrikes(record.strikes() + 1);
+        record.setLastKickTime(now);
+        record.setVerifying(false);
+
+        long s1 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike1-seconds", 180L);
+        long s2 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike2-seconds", 600L);
+        long s3 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike3-seconds", 1800L);
+        long quarantineSec = AutomationGuardPolicy.calculateQuarantineSeconds(record.strikes(), s1, s2, s3);
+        record.setQuarantineUntil(now + (quarantineSec * 1000L));
+
+        plugin.getLogger().warning("[Anti-AFK] " + name + " registrado por inactividad (" + detail
+                + ", aviso #" + record.strikes() + "). Cuarentena de reconexión: " + quarantineSec + "s.");
+    }
+
+    private void noteAction(Player player, int count) {
+        markActive(player, player.getLocation());
+        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+            return;
+        }
+        AfkRecord record = afkRecords.get(player.getUniqueId());
+        if (record != null && record.verifying()) {
+            record.addAction(count);
+            int requiredActions = Math.clamp(plugin.getConfig().getInt(
+                    "automation-guard.afk.reconnect-quarantine.required-actions", 3), 1, 10);
+            if (record.actionsObserved() >= requiredActions) {
+                record.setVerifying(false);
+                player.sendActionBar(Component.text("Presencia activa verificada. ¡Buen juego!", NamedTextColor.GREEN));
+            }
+        }
+    }
+
+    private void runPeriodicWatchdog() {
+        cleanupExpiredState();
+        checkIdleWatchdog();
+    }
+
+    private void checkIdleWatchdog() {
+        if (!plugin.getConfig().getBoolean("automation-guard.enabled", true)
+                || !plugin.getConfig().getBoolean("automation-guard.afk.enabled", true)
+                || !plugin.getConfig().getBoolean("automation-guard.afk.reconnect-quarantine.enabled", true)) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long verificationLimit = Math.clamp(plugin.getConfig().getLong(
+                "automation-guard.afk.reconnect-quarantine.verification-seconds", 300L), 60L, 1800L) * 1000L;
+        int requiredActions = Math.clamp(plugin.getConfig().getInt(
+                "automation-guard.afk.reconnect-quarantine.required-actions", 3), 1, 10);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+                continue;
+            }
+            AfkRecord record = afkRecords.get(player.getUniqueId());
+            if (record != null && record.verifying()) {
+                if (AutomationGuardPolicy.shouldKickUnverifiedJoin(now, record.joinTime(),
+                        record.actionsObserved(), verificationLimit, requiredActions)) {
+                    record.setVerifying(false);
+                    player.kick(Component.text(
+                            "§6[DrakesCraft · Anti-AFK]\n"
+                            + "§cNo se detectó actividad tras reconectar del AFK previo.\n"
+                            + "§7Las reconexiones automatizadas en ausencia están prohibidas."));
+                    recordAfkKick(player.getUniqueId(), player.getName(), "reconexión desatendida");
+                }
+            }
+        }
     }
 
     private void inspectPulse(BlockRedstoneEvent event) {
@@ -213,23 +420,22 @@ public final class AutomationGuardListener implements Listener {
         ViolationWindow violations = violationWindows.computeIfAbsent(violationKey, ignored -> new ViolationWindow());
         int priorViolations = violations.count(now, violationWindow);
         AutomationGuardPolicy.ClockAction action = AutomationGuardPolicy.evaluateClock(
-                fastPulses, pulses.size(), true, fastLimit, longLimit, priorViolations, strikesBeforeBreak);
+                fastPulses, pulses.size(), structure.isClock(), fastLimit, longLimit,
+                priorViolations, strikesBeforeBreak);
         if (action == AutomationGuardPolicy.ClockAction.ALLOW) return;
 
         int strike = violations.record(now, violationWindow);
-        long suppressionMillis = Math.clamp(plugin.getConfig().getLong(
-                "automation-guard.redstone.suppression-seconds", 5L), 2L, 60L) * 1000L;
-        event.setNewCurrent(0);
-        disabledUntil.put(key, now + suppressionMillis);
-        disabledUntil.put(violationKey, now + suppressionMillis);
-        pulseWindows.remove(key);
         if (action == AutomationGuardPolicy.ClockAction.THROTTLE) {
+            long suppressDuration = Math.clamp(plugin.getConfig().getLong(
+                    "automation-guard.redstone.suppression-seconds", 5L), 1L, 30L) * 1000L;
+            disabledUntil.put(key, now + suppressDuration);
+            event.setNewCurrent(0);
             notifyClockThrottled(target.getLocation(), strike, strikesBeforeBreak);
             return;
         }
 
-        boolean broken = target.breakNaturally();
-        if (!broken && target.getType() != Material.AIR) target.setType(Material.AIR, false);
+        target.setType(Material.AIR, true);
+        disabledUntil.remove(key);
         violationWindows.remove(violationKey);
         notifyClockBroken(target.getLocation(), fastPulses, pulses.size());
     }
@@ -293,14 +499,30 @@ public final class AutomationGuardListener implements Listener {
     }
 
     private void markActive(Player player, Location location) {
-        activity.put(player.getUniqueId(), ActivityState.activeAt(location));
+        if (location == null) return;
+        activity.compute(player.getUniqueId(), (uuid, state) -> {
+            if (state == null) {
+                return ActivityState.activeAt(location);
+            }
+            state.markActive(location);
+            return state;
+        });
     }
 
     private void cleanupExpiredState() {
-        long cutoff = System.currentTimeMillis() - 15L * 60L * 1000L;
+        long now = System.currentTimeMillis();
+        long cutoff = now - 15L * 60L * 1000L;
         pulseWindows.entrySet().removeIf(entry -> entry.getValue().lastSeen() < cutoff);
-        disabledUntil.entrySet().removeIf(entry -> entry.getValue() < System.currentTimeMillis());
+        disabledUntil.entrySet().removeIf(entry -> entry.getValue() < now);
         violationWindows.entrySet().removeIf(entry -> entry.getValue().lastSeen() < cutoff);
+
+        // Limpiar registros AFK expirados de jugadores que no están conectados y llevan más de 4 horas sin actividad
+        long afkCleanupCutoff = now - 4L * 3600L * 1000L;
+        afkRecords.entrySet().removeIf(entry -> {
+            Player p = Bukkit.getPlayer(entry.getKey());
+            return (p == null || !p.isOnline()) && entry.getValue().lastKickTime() < afkCleanupCutoff
+                    && entry.getValue().quarantineUntil() < now;
+        });
     }
 
     /** Replaces the original destructive defaults only when the full legacy tuple is still present. */
@@ -399,9 +621,9 @@ public final class AutomationGuardListener implements Listener {
     }
 
     private static final class ActivityState {
-        private final long lastActive;
-        private final Location anchor;
-        private long lastNotice;
+        private volatile long lastActive;
+        private volatile Location anchor;
+        private volatile long lastNotice;
 
         private ActivityState(long lastActive, Location anchor) {
             this.lastActive = lastActive;
@@ -416,6 +638,11 @@ public final class AutomationGuardListener implements Listener {
             return lastActive;
         }
 
+        void markActive(Location location) {
+            this.lastActive = System.currentTimeMillis();
+            this.anchor = location.clone();
+        }
+
         Location anchor() {
             return anchor;
         }
@@ -425,7 +652,30 @@ public final class AutomationGuardListener implements Listener {
         }
 
         void lastNotice(long value) {
-            lastNotice = value;
+            this.lastNotice = value;
         }
+    }
+
+    public static final class AfkRecord {
+        private volatile int strikes;
+        private volatile long lastKickTime;
+        private volatile long quarantineUntil;
+        private volatile boolean verifying;
+        private volatile long joinTime;
+        private final AtomicInteger actionsObserved = new AtomicInteger(0);
+
+        public int strikes() { return strikes; }
+        public void setStrikes(int strikes) { this.strikes = strikes; }
+        public long lastKickTime() { return lastKickTime; }
+        public void setLastKickTime(long lastKickTime) { this.lastKickTime = lastKickTime; }
+        public long quarantineUntil() { return quarantineUntil; }
+        public void setQuarantineUntil(long quarantineUntil) { this.quarantineUntil = quarantineUntil; }
+        public boolean verifying() { return verifying; }
+        public void setVerifying(boolean verifying) { this.verifying = verifying; }
+        public long joinTime() { return joinTime; }
+        public void setJoinTime(long joinTime) { this.joinTime = joinTime; }
+        public int actionsObserved() { return actionsObserved.get(); }
+        public void setActionsObserved(int val) { actionsObserved.set(val); }
+        public void addAction(int count) { actionsObserved.addAndGet(count); }
     }
 }

@@ -929,6 +929,17 @@ automation-guard:
     inactivity-seconds: 300
     minimum-displacement: 4.0
     notification-cooldown-seconds: 30
+    # Cuarentena inteligente contra scripts y reconexiones automáticas
+    reconnect-quarantine:
+      enabled: true
+      strike1-seconds: 180
+      strike2-seconds: 600
+      strike3-seconds: 1800
+      strike-decay-hours: 2
+      verification-seconds: 300
+      required-actions: 3
+    # Límite máximo en mecanismos de evasión pasivos (agua/vagoneta/pistones)
+    evasion-kick-seconds: 900
 
 # ─────────────────────────────────────────────
 #  Tienda nativa y ProtectionStones
