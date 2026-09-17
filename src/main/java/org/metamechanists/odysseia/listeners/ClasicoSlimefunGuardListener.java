@@ -4,14 +4,22 @@ import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
@@ -32,6 +40,7 @@ import java.util.Set;
  *   <li>Limpia metadatos residuales en BlockStorage al romper bloques en Clásico para evitar que
  *       máquinas fantasmas o Lucky Blocks activen efectos en el mundo vainilla.</li>
  *   <li>Impide la colocación y el uso interactivo de ítems/herramientas de Slimefun en Clásico.</li>
+ *   <li>Purga automáticamente cualquier ítem de Slimefun del inventario, armadura y manos al entrar o interactuar en Clásico.</li>
  * </ul>
  * </p>
  */
@@ -51,7 +60,8 @@ public final class ClasicoSlimefunGuardListener implements Listener {
             "villagertrade",
             "sfcalc",
             "slimybees",
-            "slimytreetaps"
+            "slimytreetaps",
+            "equivalencytech"
     );
 
     private final Plugin plugin;
@@ -130,7 +140,7 @@ public final class ClasicoSlimefunGuardListener implements Listener {
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             for (NamespacedKey key : pdc.getKeys()) {
                 String ns = key.getNamespace().toLowerCase(Locale.ROOT);
-                if (SLIMEFUN_NAMESPACES.contains(ns) || ns.startsWith("slimefun")) {
+                if (SLIMEFUN_NAMESPACES.contains(ns) || ns.startsWith("slimefun") || ns.startsWith("equivalency")) {
                     return true;
                 }
             }
@@ -143,6 +153,7 @@ public final class ClasicoSlimefunGuardListener implements Listener {
                         String stripped = ChatColor.stripColor(line).toLowerCase(Locale.ROOT);
                         if (stripped.contains("slimefun")
                                 || stripped.contains("cultivation")
+                                || stripped.contains("equivalency")
                                 || stripped.startsWith("id: ")
                                 || stripped.contains("generado por sfmaster")) {
                             return true;
@@ -155,6 +166,50 @@ public final class ClasicoSlimefunGuardListener implements Listener {
         return false;
     }
 
+    /**
+     * Purga activamente todos los ítems de Slimefun o addons del inventario del jugador.
+     */
+    public int purgeSlimefunItems(Player player) {
+        if (player == null || !isClasico(player.getWorld())) {
+            return 0;
+        }
+        int removedCount = 0;
+        PlayerInventory inv = player.getInventory();
+
+        ItemStack[] contents = inv.getStorageContents();
+        for (int i = 0; i < contents.length; i++) {
+            if (isSlimefunOrCustomItem(contents[i])) {
+                inv.setItem(i, null);
+                removedCount++;
+            }
+        }
+
+        ItemStack offHand = inv.getItemInOffHand();
+        if (isSlimefunOrCustomItem(offHand)) {
+            inv.setItemInOffHand(null);
+            removedCount++;
+        }
+
+        ItemStack[] armors = inv.getArmorContents();
+        boolean armorModified = false;
+        for (int i = 0; i < armors.length; i++) {
+            if (isSlimefunOrCustomItem(armors[i])) {
+                armors[i] = null;
+                armorModified = true;
+                removedCount++;
+            }
+        }
+        if (armorModified) {
+            inv.setArmorContents(armors);
+        }
+
+        if (removedCount > 0) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &cSe han purgado " + removedCount + " objeto(s) de Slimefun de tu inventario (prohibidos en Clásico)."));
+        }
+        return removedCount;
+    }
+
     private void clearSlimefunBlockInfo(Block block) {
         if (blockStorageHasBlockInfo != null && blockStorageClearBlockInfo != null) {
             try {
@@ -164,6 +219,70 @@ public final class ClasicoSlimefunGuardListener implements Listener {
                 }
             } catch (ReflectiveOperationException ignored) {
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        if (isClasico(player.getWorld())) {
+            purgeSlimefunItems(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (isClasico(player.getWorld())) {
+            purgeSlimefunItems(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        if (isClasico(event.getRespawnLocation().getWorld()) && plugin != null) {
+            plugin.getServer().getScheduler().runTask(plugin, () -> purgeSlimefunItems(player));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!isClasico(player.getWorld())) return;
+
+        ItemStack current = event.getCurrentItem();
+        if (isSlimefunOrCustomItem(current)) {
+            event.setCancelled(true);
+            event.setCurrentItem(null);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &cLos objetos de Slimefun no están permitidos en Clásico y han sido removidos."));
+            return;
+        }
+
+        ItemStack cursor = event.getCursor();
+        if (isSlimefunOrCustomItem(cursor)) {
+            event.setCancelled(true);
+            event.getView().setCursor(null);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    "&6DrakesCraft &8· &cLos objetos de Slimefun no están permitidos en Clásico y han sido removidos."));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onEntityPickup(EntityPickupItemEvent event) {
+        if (!isClasico(event.getEntity().getWorld())) return;
+        if (isSlimefunOrCustomItem(event.getItem().getItemStack())) {
+            event.setCancelled(true);
+            event.getItem().remove();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        if (!isClasico(event.getPlayer().getWorld())) return;
+        if (isSlimefunOrCustomItem(event.getItemDrop().getItemStack())) {
+            event.getItemDrop().remove();
         }
     }
 
@@ -184,19 +303,17 @@ public final class ClasicoSlimefunGuardListener implements Listener {
         if (!isClasico(event.getBlock().getWorld())) return;
         if (isSlimefunOrCustomItem(event.getItemInHand())) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6DrakesCraft &8· &cLos bloques y objetos de Slimefun no están permitidos en Clásico."));
+            purgeSlimefunItems(event.getPlayer());
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (!isClasico(event.getPlayer().getWorld())) return;
         ItemStack item = event.getItem();
         if (isSlimefunOrCustomItem(item)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&6DrakesCraft &8· &cLas herramientas y objetos de Slimefun no están permitidos en Clásico."));
+            purgeSlimefunItems(event.getPlayer());
         }
     }
 }
