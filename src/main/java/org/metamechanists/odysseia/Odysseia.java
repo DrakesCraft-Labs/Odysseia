@@ -262,6 +262,8 @@ public final class Odysseia extends JavaPlugin {
 
         this.dragonMountService = new org.metamechanists.odysseia.dragon.DragonMountService(this);
         new org.metamechanists.odysseia.listeners.RankWalkerAbilitiesListener(this);
+        new org.metamechanists.odysseia.weapons.DivineWeaponService(this);
+        new org.metamechanists.odysseia.listeners.DivineEnchantmentListener(this);
         getCommand("mountdragon").setExecutor(dragonMountService);
         getCommand("mountdragon").setTabCompleter(dragonMountService);
         Bukkit.getPluginManager().registerEvents(dragonMountService, this);

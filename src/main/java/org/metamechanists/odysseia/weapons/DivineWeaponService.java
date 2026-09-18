@@ -68,6 +68,8 @@ public final class DivineWeaponService implements Listener {
             executeAbility(player, "artemisa", 10, () -> executeArtemisaAbility(player));
         } else if (name.contains("Seducción") || name.contains("Afrodita")) {
             executeAbility(player, "afrodita", 18, () -> executeAfroditaAbility(player));
+        } else if (name.contains("Atenea") || name.contains("Égida") || name.contains("Egida") || name.contains("Lanza Táctica")) {
+            executeAbility(player, "atenea", 15, () -> executeAteneaAbility(player));
         } else if (name.contains("Espada del Rayo") || name.contains("Zeus")) {
             executeAbility(player, "zeus", 15, () -> executeZeusAbility(player));
         } else if (name.contains("Mjolnir") || name.contains("Thor")) {
@@ -356,5 +358,18 @@ public final class DivineWeaponService implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 2L, 2L);
+    }
+
+    // 6.1 Atenea - Estrategia Tactica & Escudo de Sabiduria
+    private void executeAteneaAbility(Player player) {
+        Location loc = player.getLocation();
+        loc.getWorld().playSound(loc, Sound.ITEM_SHIELD_BLOCK, 1.0F, 1.2F);
+        loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 0.8F, 1.8F);
+        loc.getWorld().spawnParticle(Particle.FLASH, loc.add(0, 1, 0), 2);
+        loc.getWorld().spawnParticle(Particle.CRIT, loc, 25, 0.5, 0.5, 0.5, 0.1);
+        player.sendMessage(ChatColor.AQUA + "🛡 Atenea: ¡Égida Estratégica & Sabiduría Militar!");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 200, 2));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 400, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 200, 1));
     }
 }

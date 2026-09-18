@@ -61,22 +61,42 @@ public final class ArmorEffectsListener implements Listener {
 
         Set<PotionEffect> effectsToApply = new HashSet<>();
 
-        if (player.hasPermission("drakes.kit.oldschool") && (hasFullDiamond || hasFullNetherite || hasFullIron)) {
-            addConfiguredEffects(effectsToApply, "oldschool");
-        } else if (hasFullDiamond && player.hasPermission("drakes.kit.hercules")) {
-            addConfiguredEffects(effectsToApply, "hercules");
+        boolean hasArmor = hasFullDiamond || hasFullNetherite;
+
+        if (hasFullNetherite && (player.hasPermission("drakes.kit.titancaos") || player.hasPermission("drakes.kit.caos"))) {
+            addConfiguredEffects(effectsToApply, "titancaos");
+        } else if (hasFullNetherite && (player.hasPermission("drakes.kit.titancronos") || player.hasPermission("drakes.kit.cronos"))) {
+            addConfiguredEffects(effectsToApply, "titancronos");
+        } else if (hasFullNetherite && (player.hasPermission("drakes.kit.titanhiperion") || player.hasPermission("drakes.kit.hiperion"))) {
+            addConfiguredEffects(effectsToApply, "titanhiperion");
+        } else if (hasFullNetherite && (player.hasPermission("drakes.kit.titanoceanus") || player.hasPermission("drakes.kit.oceanus"))) {
+            addConfiguredEffects(effectsToApply, "titanoceanus");
+        } else if (hasFullNetherite && (player.hasPermission("drakes.kit.titanjapeto") || player.hasPermission("drakes.kit.japeto"))) {
+            addConfiguredEffects(effectsToApply, "titanjapeto");
+        } else if (hasFullNetherite && player.hasPermission("drakes.kit.poseidon")) {
+            addConfiguredEffects(effectsToApply, "poseidon");
+        } else if (hasFullNetherite && player.hasPermission("drakes.kit.anubis")) {
+            addConfiguredEffects(effectsToApply, "anubis");
+        } else if (hasFullNetherite && player.hasPermission("drakes.kit.thor")) {
+            addConfiguredEffects(effectsToApply, "thor");
         } else if (hasFullNetherite && player.hasPermission("drakes.kit.zeus")) {
             addConfiguredEffects(effectsToApply, "zeus");
-        } else if (hasFullNetherite && player.hasPermission("drakes.kit.afrodita")) {
+        } else if (hasArmor && player.hasPermission("drakes.kit.atenea")) {
+            addConfiguredEffects(effectsToApply, "atenea");
+        } else if (hasArmor && player.hasPermission("drakes.kit.afrodita")) {
             addConfiguredEffects(effectsToApply, "afrodita");
-        } else if (hasFullNetherite && player.hasPermission("drakes.kit.artemisa")) {
+        } else if (hasArmor && player.hasPermission("drakes.kit.artemisa")) {
             addConfiguredEffects(effectsToApply, "artemisa");
-        } else if (hasFullNetherite && player.hasPermission("drakes.kit.hefesto")) {
+        } else if (hasArmor && player.hasPermission("drakes.kit.hefesto")) {
             addConfiguredEffects(effectsToApply, "hefesto");
-        } else if (hasFullNetherite && player.hasPermission("drakes.kit.hermes")) {
+        } else if (hasArmor && player.hasPermission("drakes.kit.hermes")) {
             addConfiguredEffects(effectsToApply, "hermes");
-        } else if (hasFullNetherite && player.hasPermission("drakes.kit.hestia")) {
+        } else if (hasArmor && player.hasPermission("drakes.kit.hestia")) {
             addConfiguredEffects(effectsToApply, "hestia");
+        } else if (hasArmor && player.hasPermission("drakes.kit.hercules")) {
+            addConfiguredEffects(effectsToApply, "hercules");
+        } else if (player.hasPermission("drakes.kit.oldschool") && (hasArmor || hasFullIron)) {
+            addConfiguredEffects(effectsToApply, "oldschool");
         }
 
         // If we have effects to apply, apply them and track them

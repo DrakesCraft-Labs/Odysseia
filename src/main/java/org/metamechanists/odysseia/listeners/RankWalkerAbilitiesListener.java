@@ -103,9 +103,30 @@ public final class RankWalkerAbilitiesListener implements Listener {
             world.spawnParticle(Particle.SWEEP_ATTACK, loc.clone().add(0, 0.1, 0), 1, 0.1, 0.05, 0.1, 0);
         }
 
-        // 4. PASO DEL TRUENO Y RELÁMPAGO (Zeus)
-        if (hasZeus) {
-            world.spawnParticle(Particle.ELECTRIC_SPARK, loc.clone().add(0, 0.1, 0), 3, 0.2, 0.1, 0.2, 0.05);
+        // 4. PASO DEL TRUENO Y RELÁMPAGO (Zeus & Thor)
+        boolean hasThor = (player.hasPermission("drakes.kit.thor") || hasZeus) && isWearingFullArmor(player);
+        if (hasThor) {
+            world.spawnParticle(Particle.ELECTRIC_SPARK, loc.clone().add(0, 0.1, 0), 4, 0.2, 0.1, 0.2, 0.05);
+        }
+
+        // 5. PASO SOLAR (Hiperión)
+        boolean hasHiperion = (player.hasPermission("drakes.kit.titanhiperion") || player.hasPermission("drakes.kit.hiperion")) && isWearingFullArmor(player);
+        if (hasHiperion) {
+            world.spawnParticle(Particle.FLAME, loc.clone().add(0, 0.1, 0), 3, 0.2, 0.05, 0.2, 0.02);
+            world.spawnParticle(Particle.DUST, loc.clone().add(0, 0.1, 0), 2, 0.2, 0.05, 0.2, new Particle.DustOptions(Color.fromRGB(255, 215, 0), 1.2F));
+        }
+
+        // 6. PASO TEMPORAL (Cronos)
+        boolean hasCronos = (player.hasPermission("drakes.kit.titancronos") || player.hasPermission("drakes.kit.cronos")) && isWearingFullArmor(player);
+        if (hasCronos) {
+            world.spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, 0.1, 0), 4, 0.2, 0.1, 0.2, 0.05);
+        }
+
+        // 7. FISURA PRIMORDIAL DEL VACÍO (Caos)
+        boolean hasCaos = (player.hasPermission("drakes.kit.titancaos") || player.hasPermission("drakes.kit.caos")) && isWearingFullArmor(player);
+        if (hasCaos) {
+            world.spawnParticle(Particle.SQUID_INK, loc.clone().add(0, 0.1, 0), 3, 0.15, 0.05, 0.15, 0.02);
+            world.spawnParticle(Particle.DUST, loc.clone().add(0, 0.1, 0), 3, 0.2, 0.05, 0.2, new Particle.DustOptions(Color.fromRGB(255, 0, 85), 1.5F));
         }
     }
 
