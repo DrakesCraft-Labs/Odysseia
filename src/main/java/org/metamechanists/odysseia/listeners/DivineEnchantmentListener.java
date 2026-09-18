@@ -72,7 +72,9 @@ public final class DivineEnchantmentListener implements Listener {
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
         if (weapon == null || weapon.getType() == Material.AIR) return;
 
-        if (!(event.getEntity() instanceof LivingEntity target)) return;
+                if (!(event.getEntity() instanceof LivingEntity target)) return;
+        if (target instanceof ArmorStand || target.hasMetadata("NPC")) return;
+        if (attacker.equals(target)) return;
         Location loc = target.getLocation();
 
         // 1. HERCULES: Fuerza Herculea IV (Golpe Sismico & Knockback)
