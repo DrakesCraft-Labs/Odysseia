@@ -51,8 +51,11 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("pack")) {
             return handlePack(sender, args);
         }
+        if (args[0].equalsIgnoreCase("sii")) {
+            return handleSii(sender, args);
+        }
         if (!args[0].equalsIgnoreCase("reload")) {
-            sender.sendMessage(color("&eUso: &f/odysseia <reload|status|vipalerts|sfmaster|maintenance|pack>"));
+            sender.sendMessage(color("&eUso: &f/odysseia <reload|status|vipalerts|sfmaster|maintenance|pack|sii>"));
             return true;
         }
         if (!sender.hasPermission("odysseia.reload")) {
@@ -152,6 +155,53 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleSii(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("odysseia.sii.admin")) {
+            sender.sendMessage(color("&cNo tienes permiso para administrar el SII."));
+            return true;
+        }
+        org.metamechanists.odysseia.economy.EconomyWatchdog sii = plugin.getEconomyWatchdog();
+        if (sii == null) {
+            sender.sendMessage(color("&cEl vigilante de economia no esta activo."));
+            return true;
+        }
+        if (args.length < 2 || args[1].equalsIgnoreCase("estado")) {
+            sender.sendMessage(color("&6[SII] &7" + sii.resumen().replace("\n", "\n&7")));
+            return true;
+        }
+        if (args.length < 3) {
+            sender.sendMessage(color("&eUso: &f/odysseia sii <estado|liberar <jugador>|confiscar <jugador>|congelar <jugador> <horas> [motivo]>"));
+            return true;
+        }
+        org.bukkit.OfflinePlayer target = org.bukkit.Bukkit.getOfflinePlayer(args[2]);
+        switch (args[1].toLowerCase(java.util.Locale.ROOT)) {
+            case "liberar" -> {
+                double r = sii.liberar(target);
+                sender.sendMessage(color(r < 0 ? "&c" + args[2] + " no esta fiscalizado." : "&aLiberados ₯" + String.format("%,.0f", r) + " a " + args[2] + "."));
+            }
+            case "confiscar" -> {
+                double r = sii.confiscar(target);
+                sender.sendMessage(color(r < 0 ? "&c" + args[2] + " no esta fiscalizado." : "&aConfiscados ₯" + String.format("%,.0f", r) + " a " + args[2] + " (sii-confiscaciones.log)."));
+            }
+            case "congelar" -> {
+                org.bukkit.entity.Player online = target.getPlayer();
+                if (online == null) {
+                    sender.sendMessage(color("&c" + args[2] + " debe estar conectado para congelarlo."));
+                    return true;
+                }
+                double horas = 5;
+                if (args.length >= 4) {
+                    try { horas = Double.parseDouble(args[3]); } catch (NumberFormatException ignored) { }
+                }
+                String motivo = args.length >= 5 ? String.join(" ", java.util.Arrays.copyOfRange(args, 4, args.length)) : "orden del staff";
+                sii.congelar(online, horas, motivo);
+                sender.sendMessage(color("&a" + args[2] + " fiscalizado " + horas + " h."));
+            }
+            default -> sender.sendMessage(color("&eUso: &f/odysseia sii <estado|liberar|confiscar|congelar>"));
+        }
+        return true;
+    }
+
     private boolean handleMaintenance(CommandSender sender, String[] args) {
         if (!sender.hasPermission("odysseia.maintenance.admin")) {
             sender.sendMessage(color("&cNo tienes permiso para administrar mantenimiento."));
@@ -188,7 +238,7 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return List.of("reload", "status", "vipalerts", "sfmaster", "maintenance", "pack").stream()
+            return List.of("reload", "status", "vipalerts", "sfmaster", "maintenance", "pack", "sii").stream()
                     .filter(value -> value.startsWith(args[0].toLowerCase()))
                     .toList();
         }
@@ -197,6 +247,9 @@ public final class ReloadCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("maintenance")) {
             return List.of("start", "status", "cancel");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("sii")) {
+            return List.of("estado", "liberar", "confiscar", "congelar");
         }
         return List.of();
     }

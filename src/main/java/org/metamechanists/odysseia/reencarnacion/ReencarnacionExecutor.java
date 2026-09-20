@@ -143,11 +143,13 @@ public final class ReencarnacionExecutor {
         if (!sbankDb.exists()) return;
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + sbankDb.getAbsolutePath())) {
-            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM accounts WHERE uuid = ?")) {
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM banks WHERE uuid = ?")) {
                 ps.setString(1, uuid.toString());
                 ps.executeUpdate();
             }
-        } catch (SQLException ignored) {}
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.WARNING, "[Reencarnacion] No se pudo vaciar el banco sBank de " + uuid, e);
+        }
     }
 
     /**

@@ -204,6 +204,12 @@ permissions:
   odysseia.sfmaster.audit:
     description: Permite auditar candidatos legacy SFMaster sin borrarlos.
     default: op
+  odysseia.sii.admin:
+    description: Administra el vigilante de economia (SII) y recibe sus alertas.
+    default: op
+  odysseia.sii.exempt:
+    description: Excluye de la vigilancia de economia (staff, cuentas de servicio).
+    default: false
   odysseia.maintenance.admin:
     description: Permite abrir, consultar o cancelar la ventana segura de reinicio.
     default: op

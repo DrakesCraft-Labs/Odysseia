@@ -1,3 +1,14 @@
+# SII - vigilante de economia (INC-065). Patrimonio = monedero Vault + banco sBank.
+economy-watchdog:
+  enabled: true
+  poll-seconds: 20
+  window-seconds: 300
+  # ganancia neta maxima "normal" en la ventana y en una hora; por encima: fiscalizacion + retencion del exceso
+  max-gain-per-window: 1500000
+  max-gain-per-hour: 4000000
+  freeze-hours: 5
+  tolerance: 2000
+
 discord:
   enabled: true
   webhook-url: ''
