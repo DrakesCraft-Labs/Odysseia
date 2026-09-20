@@ -145,6 +145,8 @@
                     </testExcludes>
                     <compilerArgs>
                         <arg>-parameters</arg>
+                        <!-- OdysseiaNativeLoader usa java.lang.foreign (preview en 21); sin esto no compila -->
+                        <arg>--enable-preview</arg>
                     </compilerArgs>
                     <annotationProcessorPaths>
                         <path>
@@ -160,6 +162,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
                 <configuration>
+                    <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
             <plugin>

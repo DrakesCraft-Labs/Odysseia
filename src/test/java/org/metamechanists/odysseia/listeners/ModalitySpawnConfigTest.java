@@ -45,10 +45,8 @@ class ModalitySpawnConfigTest {
     @Test
     void survivalTieneMundoAsignadoPorSerLaDeRespaldo() throws Exception {
         YamlConfiguration config = config();
-        // survival no declara mundos a proposito --se queda con todo lo no declarado-- asi que
-        // es la unica que obligatoriamente necesita la asignacion explicita.
-        assertTrue(config.getStringList("modalidades.modos.survival.mundos").isEmpty(),
-                "si survival pasa a declarar mundos, revisa este razonamiento");
+        // survival es la modalidad de respaldo en codigo (ModalityService.FALLBACK_ID): declare o no
+        // mundos, todo lo no declarado cae en ella, asi que necesita la asignacion explicita.
         String asignado = config.getString("modalidades.spawn-por-modalidad.mundos.survival");
         assertNotNull(asignado, "survival necesita un mundo de spawn explicito");
         assertFalse(asignado.isBlank(), "el mundo de spawn de survival no puede estar vacio");

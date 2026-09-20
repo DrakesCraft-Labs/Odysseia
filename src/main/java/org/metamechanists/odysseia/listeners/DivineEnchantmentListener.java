@@ -1,5 +1,6 @@
 package org.metamechanists.odysseia.listeners;
 
+import org.metamechanists.odysseia.util.ParticleCompat;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -282,7 +283,7 @@ public final class DivineEnchantmentListener implements Listener {
                 try {
                     loc.getWorld().spawnParticle(Particle.SQUID_INK, loc.clone().add(0, 1, 0), 40, 0.5, 0.5, 0.5, 0.1);
                     loc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc.clone().add(0, 1, 0), 25, 0.4, 0.4, 0.4, 0.08);
-                    loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc.clone().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0.05);
+                    ParticleCompat.spawnDragonBreath(loc.getWorld(), loc.clone().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0.05, 0.0f);
                     attacker.playSound(loc, Sound.ENTITY_WITHER_SPAWN, 0.7f, 1.6f);
                     attacker.sendTitle("§4§l¡ANIQUILACION DEL CAOS!", "§cDesgarro del vacio desatado (-25% vida)", 5, 25, 5);
                 } catch (Exception ignored) {}
@@ -482,7 +483,7 @@ public final class DivineEnchantmentListener implements Listener {
                 loc.getWorld().playSound(loc, Sound.ITEM_TOTEM_USE, 1.0f, 0.8f);
                 loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.8f);
                 loc.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, loc.clone().add(0, 1.0, 0), 40, 0.4, 0.6, 0.4, 0.15);
-                loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc.clone().add(0, 1.0, 0), 25, 0.3, 0.5, 0.3, 0.05);
+                ParticleCompat.spawnDragonBreath(loc.getWorld(), loc.clone().add(0, 1.0, 0), 25, 0.3, 0.5, 0.3, 0.05, 0.0f);
             } catch (Exception ignored) {}
 
             player.sendTitle("§4§l¡AMBROSIA DEL CAOS!", "§ePoder primordial restaurado al 100%", 5, 40, 10);

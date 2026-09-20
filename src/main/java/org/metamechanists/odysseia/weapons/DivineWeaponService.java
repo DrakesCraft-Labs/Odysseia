@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.metamechanists.odysseia.util.ParticleCompat;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -365,7 +366,7 @@ public final class DivineWeaponService implements Listener {
         Location loc = player.getLocation();
         loc.getWorld().playSound(loc, Sound.ITEM_SHIELD_BLOCK, 1.0F, 1.2F);
         loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 0.8F, 1.8F);
-        loc.getWorld().spawnParticle(Particle.FLASH, loc.add(0, 1, 0), 2);
+        ParticleCompat.spawnFlash(loc.getWorld(), loc.add(0, 1, 0), 2);
         loc.getWorld().spawnParticle(Particle.CRIT, loc, 25, 0.5, 0.5, 0.5, 0.1);
         player.sendMessage(ChatColor.AQUA + "🛡 Atenea: ¡Égida Estratégica & Sabiduría Militar!");
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 200, 2));
