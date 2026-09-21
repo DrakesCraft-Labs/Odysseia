@@ -159,6 +159,32 @@ public final class PapaDeMarService {
     }
 
     /**
+     * Saca de la alcancia de la modalidad actual TODAS las papas guardadas y las
+     * devuelve al inventario. Espejo de {@link #depositar(Player)}. Sin merma: ya
+     * se cobro al guardar; cobrarla otra vez al sacar seria un doble impuesto.
+     *
+     * Anti-duplicacion: se descuenta la alcancia y se PERSISTE antes de entregar.
+     * Si el jugador spamea el boton, el contador ya esta en 0 y no puede sacar dos
+     * veces lo mismo. {@link #devolver(Player, int)} nunca pierde items: lo que no
+     * cabe en el inventario cae al suelo.
+     *
+     * @return cuantas papas se retiraron
+     */
+    public int retirar(Player jugador) {
+        String mod = obtenerModalidad(jugador.getWorld().getName());
+        int guardadas = enAlcancia(jugador.getUniqueId(), mod);
+        if (guardadas <= 0) return 0;
+        // 1) Bajar el contador y guardar ANTES de entregar: cierra la ventana de dupe.
+        canjes.set("alcancia." + mod + "." + jugador.getUniqueId(), 0);
+        guardarCanjes();
+        // 2) Entregar; devolver() suelta al suelo lo que no quepa, no lo pierde.
+        devolver(jugador, guardadas);
+        plugin.getLogger().info("[Papa] [" + mod + "] " + jugador.getName()
+                + " retiro " + guardadas + " papas de la alcancia.");
+        return guardadas;
+    }
+
+    /**
      * Cuantas papas se pierden al depositar {@code cuantas}.
      *
      * La papa se reparte sola cada 15 minutos y no se gasta en nada mas, asi que sin una fuga la

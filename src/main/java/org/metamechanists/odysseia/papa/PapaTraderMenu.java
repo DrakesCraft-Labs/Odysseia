@@ -103,6 +103,8 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
         menu.setItem(filas * 9 - 5, resumen(jugador, papas, yaCanjeados));
         menu.setItem(filas * 9 - 1, botonDeposito(jugador, soloLectura));
         holder.slotDeposito = filas * 9 - 1;
+        menu.setItem(filas * 9 - 2, botonRetiro(jugador));
+        holder.slotRetiro = filas * 9 - 2;
         jugador.openInventory(menu);
     }
 
@@ -127,6 +129,27 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
                                         + " &8(guardas " + (llevaba - servicio.merma(llevaba)) + ")")
                                 : color("&8No llevas papas encima."),
                 color("&8El mar se queda un " + (int) servicio.porcentajeMerma() + "% de lo que guardas.")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /** Boton para RECUPERAR al inventario lo guardado en la alcancia. Sin merma al sacar. */
+    private ItemStack botonRetiro(Player jugador) {
+        ItemStack item = new ItemStack(Material.HOPPER);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return item;
+        int guardadas = servicio.enAlcancia(jugador);
+        meta.setDisplayName(color("&6&lRetirar papas"));
+        meta.setLore(List.of(
+                color("&7Recupera al inventario las papas"),
+                color("&7que tienes en la alcancia."),
+                color(""),
+                color("&7En la alcancia: &6" + guardadas),
+                color(""),
+                guardadas > 0
+                        ? color("&a\u25b6 Click para retirar " + guardadas + " papas")
+                        : color("&8No tienes papas guardadas."),
+                color("&8Sin comision al sacar: la merma ya se cobro al guardar.")));
         item.setItemMeta(meta);
         return item;
     }
@@ -225,6 +248,15 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
             return;
         }
 
+        if (event.getRawSlot() == holder.slotRetiro) {
+            int retiradas = servicio.retirar(jugador);
+            jugador.sendMessage(color(retiradas > 0
+                    ? "&aRetiraste &e" + retiradas + "&a papas de la alcancia."
+                    : "&7No tienes papas guardadas que retirar."));
+            repintar(jugador);
+            return;
+        }
+
         String id = holder.porSlot.get(event.getRawSlot());
         if (id == null) return;
 
@@ -276,6 +308,7 @@ public final class PapaTraderMenu implements CommandExecutor, Listener {
     private static final class Holder implements InventoryHolder {
         private final Map<Integer, String> porSlot = new HashMap<>();
         private int slotDeposito = -1;
+        private int slotRetiro = -1;
         private Inventory inventory;
         /** Menu abierto fuera de Survival: se mira, no se toca. */
         private boolean soloLectura;
