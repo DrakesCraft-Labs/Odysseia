@@ -1,6 +1,8 @@
 package org.metamechanists.odysseia.papa;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.metamechanists.odysseia.cosmetics.Cosmetic;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,5 +108,46 @@ class PapaTraderRewardsTest {
             assertTrue(comandos.stream().anyMatch(c -> c.contains("drakes.cosmetics.use")),
                     "se regala un rastro sin el permiso base que lo hace funcionar");
         }
+    }
+
+    @Test
+    void hermesCuestaCuarentaYOchoStacksYAcumulaDuracion() {
+        YamlConfiguration datos = YamlConfiguration.loadConfiguration(new File(TRUEQUE.toString()));
+        assertEquals(3072, datos.getInt("niveles.hermes_temporal.coste"));
+        assertTrue(datos.getStringList("niveles.hermes_temporal.comandos")
+                .contains("lp user {jugador} parent addtemp hermes 5d accumulate"),
+                "cada canje debe sumar cinco dias en lugar de reemplazar el tiempo existente");
+    }
+
+    @Test
+    void todosLosNuevosPremiosTienenCosteYEntrega() {
+        YamlConfiguration datos = YamlConfiguration.loadConfiguration(new File(TRUEQUE.toString()));
+        var niveles = datos.getConfigurationSection("niveles");
+        assertTrue(niveles != null && niveles.getKeys(false).size() <= 45,
+                "el menu actual solo dispone de 45 espacios de premios; necesita paginacion si crece mas");
+        for (String id : List.of("tesoro_de_marea", "provisiones_explorador", "tesoro_abisal",
+                "rastro_plumas", "alas_doradas")) {
+            assertTrue(datos.getInt("niveles." + id + ".coste", 0) > 0,
+                    "coste invalido o ausente: " + id);
+            assertTrue(!datos.getStringList("niveles." + id + ".comandos").isEmpty(),
+                    "premio sin entrega configurada: " + id);
+        }
+    }
+
+    @Test
+    void materialesVanillaYCosmeticosNuevosExisten() {
+        Pattern give = Pattern.compile("^minecraft:give \\{jugador} minecraft:([a-z0-9_]+) \\d+$");
+        List<String> materialesInvalidos = new ArrayList<>();
+        for (String comando : comandos()) {
+            Matcher matcher = give.matcher(comando.trim());
+            if (matcher.matches() && Material.matchMaterial(matcher.group(1).toUpperCase(Locale.ROOT)) == null) {
+                materialesInvalidos.add(matcher.group(1));
+            }
+        }
+        assertEquals(List.of(), materialesInvalidos, "el trueque referencia materiales vanilla desconocidos");
+        assertTrue(Cosmetic.of("aura").stream().anyMatch(c -> c.id().equals("alas")),
+                "el premio debe usar un aura que exista en el catalogo de cosmeticos");
+        assertTrue(Cosmetic.of("rastro").stream().anyMatch(c -> c.id().equals("plumas")),
+                "el premio debe usar un rastro que exista en el catalogo de cosmeticos");
     }
 }

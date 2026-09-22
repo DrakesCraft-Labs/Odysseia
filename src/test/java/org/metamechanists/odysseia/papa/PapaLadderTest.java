@@ -27,7 +27,7 @@ class PapaLadderTest {
                 nivel("armadura", 4608, true),
                 nivel("cosmetico", 8, false),
                 nivel("cheque", 64, false),
-                nivel("hermes", 1280, false)));
+                nivel("hermes", 3072, false)));
     }
 
     @Test
@@ -70,21 +70,20 @@ class PapaLadderTest {
 
     @Test
     void calculaBienCuantasFaltan() {
-        assertEquals(1180, escalera().faltanParaSiguiente(100, Set.of()));
+        assertEquals(2972, escalera().faltanParaSiguiente(100, Set.of()));
     }
 
     @Test
     void haberCanjeadoUnRepetibleNoLoSacaDeLaCuenta() {
         // 'hermes' se puede canjear las veces que quiera, asi que sigue siendo la siguiente meta
         // aunque ya se lo haya llevado una vez.
-        assertEquals(1180, escalera().faltanParaSiguiente(100, Set.of("hermes")));
+        assertEquals(2972, escalera().faltanParaSiguiente(100, Set.of("hermes")));
     }
 
     @Test
     void haberCanjeadoElDeUnaVezSiLoSacaDeLaCuenta() {
-        // Con 1500 papas ya paso hermes; lo unico por delante era la armadura, y si ya la tiene
-        // no le queda nada a lo que aspirar.
-        assertEquals(0, escalera().faltanParaSiguiente(1500, Set.of("armadura")));
+        // Al subir Hermes a 3072, con 1500 papas vuelve a ser la proxima meta.
+        assertEquals(1572, escalera().faltanParaSiguiente(1500, Set.of("armadura")));
     }
 
     @Test

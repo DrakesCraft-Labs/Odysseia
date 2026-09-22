@@ -120,17 +120,85 @@ niveles:
       - "kitgive {jugador} pescador"
     unica: false
 
+  tesoro_de_marea:
+    nombre: "&b&lTesoro de la Marea"
+    coste: 512
+    icono: "SEA_LANTERN"
+    descripcion:
+      - "&7Prismarina y faroles marinos"
+      - "&7recogidos en una vieja ruta mercante."
+      - "&8Ocho stacks de papa."
+    comandos:
+      - "minecraft:give {jugador} minecraft:prismarine_shard 32"
+      - "minecraft:give {jugador} minecraft:prismarine_crystals 32"
+      - "minecraft:give {jugador} minecraft:sea_lantern 16"
+    unica: false
+
+  provisiones_explorador:
+    nombre: "&e&lProvisiones del Explorador"
+    coste: 896
+    icono: "GOLDEN_APPLE"
+    descripcion:
+      - "&7Comida, manzanas doradas"
+      - "&7y perlas para una expedicion larga."
+      - "&8Catorce stacks de papa."
+    comandos:
+      - "minecraft:give {jugador} minecraft:golden_apple 8"
+      - "minecraft:give {jugador} minecraft:cooked_beef 64"
+      - "minecraft:give {jugador} minecraft:ender_pearl 16"
+    unica: false
+
+  tesoro_abisal:
+    nombre: "&3&lTesoro Abisal"
+    coste: 1408
+    icono: "HEART_OF_THE_SEA"
+    descripcion:
+      - "&7Un corazon del mar, caparazones"
+      - "&7y perlas de una ciudad sumergida."
+      - "&8Veintidos stacks de papa."
+    comandos:
+      - "minecraft:give {jugador} minecraft:heart_of_the_sea 1"
+      - "minecraft:give {jugador} minecraft:shulker_shell 2"
+      - "minecraft:give {jugador} minecraft:ender_pearl 16"
+    unica: false
+
   # ── Llaves y rangos ───────────────────────────────────────
   hermes_temporal:
     nombre: "&b&lHERMES &fpor 5 días"
-    coste: 1280
+    coste: 3072
     icono: "FEATHER"
     descripcion:
-      - "&7El rango Hermes completo, gratis,"
-      - "&7durante cinco días."
-      - "&820 stacks de papa. Unas 320 horas."
+      - "&7El rango Hermes completo durante cinco días."
+      - "&7Canjes repetidos acumulan su duración."
+      - "&848 stacks de papa: unas 768 horas activas."
     comandos:
-      - "lp user {jugador} parent addtemp hermes 5d"
+      - "lp user {jugador} parent addtemp hermes 5d accumulate"
+    unica: false
+
+  rastro_plumas:
+    nombre: "&b&lRastro de Plumas &7(30 días)"
+    coste: 2560
+    icono: "FEATHER"
+    descripcion:
+      - "&7Un rastro de plumas de Hermes"
+      - "&7durante treinta días."
+      - "&8Cuarenta stacks de papa."
+    comandos:
+      - "lp user {jugador} permission settemp drakes.cosmetics.use true 30d accumulate"
+      - "lp user {jugador} permission settemp drakes.cosmetics.trail.plumas true 30d accumulate"
+    unica: false
+
+  alas_doradas:
+    nombre: "&6&lAlas Doradas &7(60 días)"
+    coste: 3584
+    icono: "ELYTRA"
+    descripcion:
+      - "&7La forma de Hermes, disponible"
+      - "&7durante sesenta días."
+      - "&8Cincuenta y seis stacks de papa."
+    comandos:
+      - "lp user {jugador} permission settemp drakes.cosmetics.use true 60d accumulate"
+      - "lp user {jugador} permission settemp drakes.cosmetics.aura.alas true 60d accumulate"
     unica: false
 
   # ── El equipo legendario ──────────────────────────────────
