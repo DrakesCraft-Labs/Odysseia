@@ -53,4 +53,8 @@ public final class AutomationGuardPolicy {
     public static boolean shouldKickEvasion(long inactiveMillis, long evasionLimitMillis) {
         return inactiveMillis >= evasionLimitMillis;
     }
+
+    public static boolean shouldIgnoreDuplicateKick(long now, long lastKickTime, long debounceMillis) {
+        return lastKickTime > 0 && (now - lastKickTime < debounceMillis);
+    }
 }

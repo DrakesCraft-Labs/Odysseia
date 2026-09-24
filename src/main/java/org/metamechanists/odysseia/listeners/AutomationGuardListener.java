@@ -137,10 +137,14 @@ public final class AutomationGuardListener implements Listener {
         long evasionLimit = Math.clamp(plugin.getConfig().getLong(
                 "automation-guard.afk.evasion-kick-seconds", 900L), 300L, 3600L) * 1000L;
         if (AutomationGuardPolicy.shouldKickEvasion(inactiveTime, evasionLimit)) {
-            player.kick(Component.text(
-                    "§6[DrakesCraft · Anti-AFK]\n"
-                    + "§cExpulsado por evasión de AFK (mecanismo pasivo prolongado).\n"
-                    + "§7Por favor interactúa activamente con el juego."));
+            player.kick(Component.text()
+                    .append(Component.text("§6[DrakesCraft · Anti-AFK]\n\n", NamedTextColor.GOLD))
+                    .append(Component.text("§cExpulsado por inactividad en mecanismo pasivo de evasión.\n", NamedTextColor.RED))
+                    .append(Component.text("§7Por favor interactúa activamente con el juego.\n\n", NamedTextColor.GRAY))
+                    .append(Component.text("§8──────────────────────────────────────────────────\n\n", NamedTextColor.DARK_GRAY))
+                    .append(Component.text("§cKicked for inactivity in an AFK evasion mechanism.\n", NamedTextColor.RED))
+                    .append(Component.text("§7Please interact actively with the game.", NamedTextColor.GRAY))
+                    .build());
             recordAfkKick(player.getUniqueId(), player.getName(), "mecanismo pasivo de evasión");
             return;
         }
@@ -149,7 +153,7 @@ public final class AutomationGuardListener implements Listener {
         player.setVelocity(new Vector());
         Entity vehicle = player.getVehicle();
         if (vehicle != null) vehicle.setVelocity(new Vector());
-        notifyBlocked(player, state, now, "Movimiento AFK detenido. Mueve la cámara para continuar.");
+        notifyBlocked(player, state, now, "Movimiento AFK pausado · Mueve la cámara / AFK motion paused · Move camera");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -172,7 +176,7 @@ public final class AutomationGuardListener implements Listener {
         if (now - state.lastActive() < inactivityLimit) return;
         event.setCancelled(true);
         notifyBlocked(event.getPlayer(), state, now,
-                "Pesca AFK detenida. El autoclicker está permitido, la ausencia no.");
+                "Pesca AFK pausada · Ausencia no permitida / AFK fishing paused");
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -213,12 +217,18 @@ public final class AutomationGuardListener implements Listener {
         if (AutomationGuardPolicy.isQuarantined(now, record.quarantineUntil())) {
             long remainingSec = Math.max(1L, (record.quarantineUntil() - now) / 1000L);
             Component message = Component.text()
-                    .append(Component.text("§6[DrakesCraft · Anti-AFK]\n\n", NamedTextColor.GOLD))
-                    .append(Component.text("§cFuiste desconectado recientemente por inactividad.\n", NamedTextColor.RED))
-                    .append(Component.text("§eDetectado posible script o bucle de reconexión automática.\n\n", NamedTextColor.YELLOW))
-                    .append(Component.text("§7Por favor regresa cuando estés presente para jugar.\n", NamedTextColor.GRAY))
-                    .append(Component.text("§fReconexión disponible en: §b" + remainingSec + "s\n", NamedTextColor.WHITE))
-                    .append(Component.text("§8(Aviso de inactividad #" + record.strikes() + ")", NamedTextColor.DARK_GRAY))
+                    .append(Component.text("§6[DrakesCraft · Anti-AFK Guard]\n\n", NamedTextColor.GOLD))
+                    .append(Component.text("§cDesconectado recientemente por inactividad (AFK).\n", NamedTextColor.RED))
+                    .append(Component.text("§7Para mantener el rendimiento y evitar granjas desatendidas,\n", NamedTextColor.GRAY))
+                    .append(Component.text("§7debes esperar un momento antes de volver a ingresar.\n", NamedTextColor.GRAY))
+                    .append(Component.text("§fReconexión disponible en: §b" + remainingSec + "s §8| §7Aviso #" + record.strikes() + "\n", NamedTextColor.WHITE))
+                    .append(Component.text("§ePor favor regresa cuando estés activo para jugar.\n\n", NamedTextColor.YELLOW))
+                    .append(Component.text("§8──────────────────────────────────────────────────\n\n", NamedTextColor.DARK_GRAY))
+                    .append(Component.text("§cRecently disconnected due to inactivity (AFK).\n", NamedTextColor.RED))
+                    .append(Component.text("§7To maintain server stability and prevent unattended farming,\n", NamedTextColor.GRAY))
+                    .append(Component.text("§7there is a short cooldown before you can reconnect.\n", NamedTextColor.GRAY))
+                    .append(Component.text("§fReconnect available in: §b" + remainingSec + "s §8| §7Strike #" + record.strikes() + "\n", NamedTextColor.WHITE))
+                    .append(Component.text("§ePlease return when you are back at your keyboard to play.", NamedTextColor.YELLOW))
                     .build();
             event.disallow(PlayerLoginEvent.Result.KICK_OTHER, message);
             plugin.getLogger().info("[Anti-AFK] Reconexión bloqueada para " + player.getName()
@@ -314,6 +324,11 @@ public final class AutomationGuardListener implements Listener {
             record.setStrikes(0);
         }
 
+        // Debounce: evitar doble registro de strike si se recibe más de un evento de kick en <5s
+        if (AutomationGuardPolicy.shouldIgnoreDuplicateKick(now, record.lastKickTime(), 5000L)) {
+            return;
+        }
+
         record.setStrikes(record.strikes() + 1);
         record.setLastKickTime(now);
         record.setVerifying(false);
@@ -340,7 +355,7 @@ public final class AutomationGuardListener implements Listener {
                     "automation-guard.afk.reconnect-quarantine.required-actions", 3), 1, 10);
             if (record.actionsObserved() >= requiredActions) {
                 record.setVerifying(false);
-                player.sendActionBar(Component.text("Presencia activa verificada. ¡Buen juego!", NamedTextColor.GREEN));
+                player.sendActionBar(Component.text("✔ Presencia activa verificada · ¡Buen juego! / Active presence confirmed!", NamedTextColor.GREEN));
             }
         }
     }
@@ -372,10 +387,14 @@ public final class AutomationGuardListener implements Listener {
                 if (AutomationGuardPolicy.shouldKickUnverifiedJoin(now, record.joinTime(),
                         record.actionsObserved(), verificationLimit, requiredActions)) {
                     record.setVerifying(false);
-                    player.kick(Component.text(
-                            "§6[DrakesCraft · Anti-AFK]\n"
-                            + "§cNo se detectó actividad tras reconectar del AFK previo.\n"
-                            + "§7Las reconexiones automatizadas en ausencia están prohibidas."));
+                    player.kick(Component.text()
+                            .append(Component.text("§6[DrakesCraft · Anti-AFK]\n\n", NamedTextColor.GOLD))
+                            .append(Component.text("§cNo se detectó actividad tras reconectar de una ausencia previa.\n", NamedTextColor.RED))
+                            .append(Component.text("§7Las reconexiones automatizadas en ausencia están prohibidas.\n\n", NamedTextColor.GRAY))
+                            .append(Component.text("§8──────────────────────────────────────────────────\n\n", NamedTextColor.DARK_GRAY))
+                            .append(Component.text("§cNo activity detected after reconnecting from previous AFK.\n", NamedTextColor.RED))
+                            .append(Component.text("§7Automated unattended reconnections are not allowed.", NamedTextColor.GRAY))
+                            .build());
                     recordAfkKick(player.getUniqueId(), player.getName(), "reconexión desatendida");
                 }
             }

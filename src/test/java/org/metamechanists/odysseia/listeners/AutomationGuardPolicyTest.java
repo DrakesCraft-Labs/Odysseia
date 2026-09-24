@@ -68,4 +68,15 @@ class AutomationGuardPolicyTest {
         assertFalse(AutomationGuardPolicy.shouldKickEvasion(899_000L, 900_000L));
         assertTrue(AutomationGuardPolicy.shouldKickEvasion(900_000L, 900_000L));
     }
+
+    @Test
+    void duplicateKickDebounceCheck() {
+        long lastKick = 1_000_000L;
+        long debounce = 5_000L;
+        assertFalse(AutomationGuardPolicy.shouldIgnoreDuplicateKick(lastKick, 0L, debounce));
+        assertTrue(AutomationGuardPolicy.shouldIgnoreDuplicateKick(lastKick + 100L, lastKick, debounce));
+        assertTrue(AutomationGuardPolicy.shouldIgnoreDuplicateKick(lastKick + 4_999L, lastKick, debounce));
+        assertFalse(AutomationGuardPolicy.shouldIgnoreDuplicateKick(lastKick + 5_000L, lastKick, debounce));
+        assertFalse(AutomationGuardPolicy.shouldIgnoreDuplicateKick(lastKick + 10_000L, lastKick, debounce));
+    }
 }
