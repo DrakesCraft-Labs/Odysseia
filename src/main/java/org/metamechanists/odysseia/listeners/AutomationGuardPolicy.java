@@ -34,7 +34,11 @@ public final class AutomationGuardPolicy {
     }
 
     public static boolean isQuarantined(long now, long quarantineUntil) {
-        return now < quarantineUntil;
+        return quarantineUntil > 0 && now < quarantineUntil;
+    }
+
+    public static boolean shouldVerifyJoin(int strikes) {
+        return strikes >= 2;
     }
 
     public static boolean shouldResetStrikes(long now, long lastKickTime, long decayMillis) {
@@ -42,7 +46,11 @@ public final class AutomationGuardPolicy {
     }
 
     public static boolean isGenuineLookChange(float yawFrom, float yawTo, float pitchFrom, float pitchTo) {
-        return Math.abs(yawFrom - yawTo) >= 15.0F || Math.abs(pitchFrom - pitchTo) >= 10.0F;
+        return Math.abs(yawFrom - yawTo) >= 8.0F || Math.abs(pitchFrom - pitchTo) >= 6.0F;
+    }
+
+    public static boolean isMeaningfulMovement(double displacedSquared, double threshold) {
+        return displacedSquared >= threshold * threshold;
     }
 
     public static boolean shouldKickUnverifiedJoin(long now, long joinTime, int actionsObserved,

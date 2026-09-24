@@ -36,6 +36,22 @@ class AutomationGuardPolicyTest {
         assertTrue(AutomationGuardPolicy.isQuarantined(now, 100_001L));
         assertFalse(AutomationGuardPolicy.isQuarantined(now, 100_000L));
         assertFalse(AutomationGuardPolicy.isQuarantined(now, 99_999L));
+        assertFalse(AutomationGuardPolicy.isQuarantined(now, 0L));
+    }
+
+    @Test
+    void verifyJoinRequiresAtLeastTwoStrikes() {
+        assertFalse(AutomationGuardPolicy.shouldVerifyJoin(0));
+        assertFalse(AutomationGuardPolicy.shouldVerifyJoin(1));
+        assertTrue(AutomationGuardPolicy.shouldVerifyJoin(2));
+        assertTrue(AutomationGuardPolicy.shouldVerifyJoin(3));
+    }
+
+    @Test
+    void meaningfulMovementCheck() {
+        assertFalse(AutomationGuardPolicy.isMeaningfulMovement(3.9D, 2.0D));
+        assertTrue(AutomationGuardPolicy.isMeaningfulMovement(4.0D, 2.0D));
+        assertTrue(AutomationGuardPolicy.isMeaningfulMovement(9.0D, 2.0D));
     }
 
     @Test
@@ -49,9 +65,9 @@ class AutomationGuardPolicyTest {
 
     @Test
     void lookChangeDetection() {
-        assertFalse(AutomationGuardPolicy.isGenuineLookChange(0.0f, 10.0f, 0.0f, 5.0f));
-        assertTrue(AutomationGuardPolicy.isGenuineLookChange(0.0f, 15.1f, 0.0f, 0.0f));
-        assertTrue(AutomationGuardPolicy.isGenuineLookChange(0.0f, 0.0f, 0.0f, 10.5f));
+        assertFalse(AutomationGuardPolicy.isGenuineLookChange(0.0f, 5.0f, 0.0f, 4.0f));
+        assertTrue(AutomationGuardPolicy.isGenuineLookChange(0.0f, 8.5f, 0.0f, 0.0f));
+        assertTrue(AutomationGuardPolicy.isGenuineLookChange(0.0f, 0.0f, 0.0f, 6.5f));
     }
 
     @Test

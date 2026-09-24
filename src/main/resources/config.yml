@@ -703,12 +703,12 @@ automation-guard:
     notification-cooldown-seconds: 30
     reconnect-quarantine:
       enabled: true
-      strike1-seconds: 180
-      strike2-seconds: 600
-      strike3-seconds: 1800
+      strike1-seconds: 0
+      strike2-seconds: 180
+      strike3-seconds: 600
       strike-decay-hours: 2
       verification-seconds: 300
-      required-actions: 3
+      required-actions: 2
     evasion-kick-seconds: 900
 tienda:
   url-web: https://web.drakescraft.cl/store.html

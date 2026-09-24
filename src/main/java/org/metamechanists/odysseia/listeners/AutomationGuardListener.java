@@ -128,6 +128,10 @@ public final class AutomationGuardListener implements Listener {
                 ? state.anchor().distanceSquared(event.getTo()) : Double.MAX_VALUE;
 
         long inactiveTime = now - state.lastActive();
+        if (player.getVehicle() == null && AutomationGuardPolicy.isMeaningfulMovement(displacedSquared, 2.0D)) {
+            noteAction(player, 1);
+        }
+
         if (!AutomationGuardPolicy.shouldBlockAfkMotion(inactiveTime, displacedSquared,
                 inactivityLimit, minimumDisplacement)) {
             return;
@@ -246,7 +250,7 @@ public final class AutomationGuardListener implements Listener {
         }
 
         AfkRecord record = afkRecords.get(player.getUniqueId());
-        if (record != null && record.strikes() > 0) {
+        if (record != null && AutomationGuardPolicy.shouldVerifyJoin(record.strikes())) {
             record.setVerifying(true);
             record.setJoinTime(System.currentTimeMillis());
             record.setActionsObserved(0);
@@ -333,11 +337,11 @@ public final class AutomationGuardListener implements Listener {
         record.setLastKickTime(now);
         record.setVerifying(false);
 
-        long s1 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike1-seconds", 180L);
-        long s2 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike2-seconds", 600L);
-        long s3 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike3-seconds", 1800L);
+        long s1 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike1-seconds", 0L);
+        long s2 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike2-seconds", 180L);
+        long s3 = plugin.getConfig().getLong("automation-guard.afk.reconnect-quarantine.strike3-seconds", 600L);
         long quarantineSec = AutomationGuardPolicy.calculateQuarantineSeconds(record.strikes(), s1, s2, s3);
-        record.setQuarantineUntil(now + (quarantineSec * 1000L));
+        record.setQuarantineUntil(quarantineSec > 0 ? now + (quarantineSec * 1000L) : 0L);
 
         plugin.getLogger().warning("[Anti-AFK] " + name + " registrado por inactividad (" + detail
                 + ", aviso #" + record.strikes() + "). Cuarentena de reconexión: " + quarantineSec + "s.");
@@ -389,13 +393,13 @@ public final class AutomationGuardListener implements Listener {
                     record.setVerifying(false);
                     player.kick(Component.text()
                             .append(Component.text("§6[DrakesCraft · Anti-AFK]\n\n", NamedTextColor.GOLD))
-                            .append(Component.text("§cNo se detectó actividad tras reconectar de una ausencia previa.\n", NamedTextColor.RED))
-                            .append(Component.text("§7Las reconexiones automatizadas en ausencia están prohibidas.\n\n", NamedTextColor.GRAY))
+                            .append(Component.text("§cDesconectado por inactividad prolongada tras reconectar.\n", NamedTextColor.RED))
+                            .append(Component.text("§7Por favor regresa e interactúa activamente con el juego cuando estés disponible.\n\n", NamedTextColor.GRAY))
                             .append(Component.text("§8──────────────────────────────────────────────────\n\n", NamedTextColor.DARK_GRAY))
-                            .append(Component.text("§cNo activity detected after reconnecting from previous AFK.\n", NamedTextColor.RED))
-                            .append(Component.text("§7Automated unattended reconnections are not allowed.", NamedTextColor.GRAY))
+                            .append(Component.text("§cDisconnected due to prolonged inactivity after reconnecting.\n", NamedTextColor.RED))
+                            .append(Component.text("§7Please return and actively play when you are available.", NamedTextColor.GRAY))
                             .build());
-                    recordAfkKick(player.getUniqueId(), player.getName(), "reconexión desatendida");
+                    recordAfkKick(player.getUniqueId(), player.getName(), "inactividad tras reconexión");
                 }
             }
         }
