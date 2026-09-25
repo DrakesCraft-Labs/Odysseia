@@ -32,7 +32,8 @@ import java.util.Locale;
  * cuanto el jugador cambia de item; un modificador sobrevive a ese recalculo y ademas se puede
  * retirar entero si se apaga la opcion.
  *
- * Tambien se anula el ataque en barrido, que no existia en 1.8 y reparte dano a quien pasaba cerca.
+ * El barrido (Sweeping Edge) se preserva para mobs y granjas PvE, anulandose unicamente contra
+ * jugadores si la opcion anular-barrido esta activada (estilo PvP 1.8).
  */
 public class LegacyCombatListener implements Listener {
 
@@ -46,17 +47,20 @@ public class LegacyCombatListener implements Listener {
 
     private final Odysseia plugin;
     private final NamespacedKey clave;
-    private final boolean activado;
-    private final List<String> mundos;
-    private final boolean anularBarrido;
+    private boolean activado;
+    private List<String> mundos;
+    private boolean anularBarrido;
 
     public LegacyCombatListener(Odysseia plugin) {
         this.plugin = plugin;
         this.clave = new NamespacedKey(plugin, "combate_clasico");
+        reload();
+    }
 
+    public void reload() {
         var seccion = plugin.getConfig().getConfigurationSection("combate-clasico");
         this.activado = seccion == null || seccion.getBoolean("activado", true);
-        this.anularBarrido = seccion == null || seccion.getBoolean("anular-barrido", true);
+        this.anularBarrido = seccion != null && seccion.getBoolean("anular-barrido", false);
         // Lista vacia: se aplica en todos los mundos.
         this.mundos = seccion == null ? List.of() : seccion.getStringList("mundos").stream()
                 .map(m -> m.toLowerCase(Locale.ROOT)).toList();
@@ -97,13 +101,21 @@ public class LegacyCombatListener implements Listener {
         aplicar(event.getPlayer());
     }
 
-    /** El barrido reparte dano a todo lo que rodea al objetivo; en 1.8 no existia. */
+    /**
+     * El barrido (Sweeping Edge) reparte dano a quien rodea al objetivo.
+     * En PvE (granjas de mobs, zombies, endermen) debe permitirse siempre.
+     * Solo se anula si el receptor colateral es otro jugador en PvP si anularBarrido es true.
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onSweep(EntityDamageByEntityEvent event) {
         if (!activado || !anularBarrido) {
             return;
         }
         if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
+            return;
+        }
+        // Solo anular barrido si afecta a otro jugador (PvP clasico 1.8), nunca a mobs PvE
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
         if (!afectaAlMundo(event.getEntity().getWorld().getName())) {

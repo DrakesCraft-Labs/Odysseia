@@ -3975,7 +3975,7 @@ quemar-al-sol:
   - world
 combate-clasico:
   activado: true
-  anular-barrido: true
+  anular-barrido: false
   mundos: []
 threadbudget:
   enabled: true
