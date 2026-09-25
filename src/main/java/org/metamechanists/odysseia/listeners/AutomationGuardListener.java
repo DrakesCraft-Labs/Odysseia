@@ -117,7 +117,7 @@ public final class AutomationGuardListener implements Listener {
             return;
         }
         if (samePosition(event.getFrom(), event.getTo())) return;
-        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) return;
+        if (hasAfkBypass(player)) return;
 
         long now = System.currentTimeMillis();
         long inactivityLimit = Math.clamp(plugin.getConfig().getLong(
@@ -164,8 +164,7 @@ public final class AutomationGuardListener implements Listener {
     public void onFishing(PlayerFishEvent event) {
         if (!plugin.getConfig().getBoolean("automation-guard.enabled", true)
                 || !plugin.getConfig().getBoolean("automation-guard.afk.enabled", true)
-                || event.getPlayer().hasPermission("odysseia.automation.bypass")
-                || event.getPlayer().hasPermission("essentials.afk.kickexempt")) {
+                || hasAfkBypass(event.getPlayer())) {
             return;
         }
         if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH
@@ -190,7 +189,7 @@ public final class AutomationGuardListener implements Listener {
             return;
         }
         Player player = event.getPlayer();
-        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+        if (hasAfkBypass(player)) {
             return;
         }
 
@@ -210,7 +209,7 @@ public final class AutomationGuardListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+        if (hasAfkBypass(player)) {
             return;
         }
 
@@ -245,7 +244,7 @@ public final class AutomationGuardListener implements Listener {
         Player player = event.getPlayer();
         markActive(player, player.getLocation());
 
-        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+        if (hasAfkBypass(player)) {
             return;
         }
 
@@ -347,9 +346,17 @@ public final class AutomationGuardListener implements Listener {
                 + ", aviso #" + record.strikes() + "). Cuarentena de reconexión: " + quarantineSec + "s.");
     }
 
+    public static boolean hasAfkBypass(Player player) {
+        if (player == null) return false;
+        return player.hasPermission("odysseia.automation.bypass")
+                || player.hasPermission("odysseia.afk.bypass")
+                || player.hasPermission("drakescraft.afk.unlocked")
+                || player.hasPermission("essentials.afk.kickexempt");
+    }
+
     private void noteAction(Player player, int count) {
         markActive(player, player.getLocation());
-        if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+        if (hasAfkBypass(player)) {
             return;
         }
         AfkRecord record = afkRecords.get(player.getUniqueId());
@@ -383,7 +390,7 @@ public final class AutomationGuardListener implements Listener {
                 "automation-guard.afk.reconnect-quarantine.required-actions", 3), 1, 10);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.hasPermission("odysseia.automation.bypass") || player.hasPermission("essentials.afk.kickexempt")) {
+            if (hasAfkBypass(player)) {
                 continue;
             }
             AfkRecord record = afkRecords.get(player.getUniqueId());
