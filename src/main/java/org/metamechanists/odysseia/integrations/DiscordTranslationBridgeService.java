@@ -64,7 +64,7 @@ public class DiscordTranslationBridgeService {
         }
 
         this.apiKey = config.getString("discord-translator.api-key", "");
-        this.translateDiscordToMc = config.getBoolean("discord-translator.translate-discord-to-mc", true);
+        this.translateDiscordToMc = config.getBoolean("discord-translator.translate-discord-to-mc", false);
         this.translateMcToDiscord = config.getBoolean("discord-translator.translate-mc-to-discord", false);
         this.mcTargetLanguage = config.getString("discord-translator.mc-target-language", "es");
         this.discordTargetLanguage = config.getString("discord-translator.discord-target-language", "en");
@@ -188,17 +188,23 @@ public class DiscordTranslationBridgeService {
      */
     @Subscribe
     public void onDiscordMessageReceived(DiscordGuildMessageReceivedEvent event) {
-        if (!enabled) return;
+        if (!enabled || !translateDiscordToMc) return;
 
         // Ignorar bots
         if (event.getAuthor() == null || event.getAuthor().isBot()) return;
+
+        // Validar estrictamente que el mensaje provenga del canal principal de chat de DiscordSRV
+        if (Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
+            github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel mainChat = DiscordSRV.getPlugin().getMainTextChannel();
+            if (mainChat == null || event.getChannel() == null || !event.getChannel().getId().equals(mainChat.getId())) {
+                return;
+            }
+        }
 
         String messageContent = event.getMessage().getContentDisplay();
         if (messageContent == null || messageContent.trim().isEmpty() || messageContent.startsWith("!")) return;
 
         String authorName = event.getAuthor().getName();
-
-        if (!translateDiscordToMc) return;
 
         // Detectar idioma y traducir
         detectLanguage(messageContent).thenAccept(detectedLang -> {
