@@ -1,7 +1,7 @@
 # El rango 9000000-9000099 esta reservado para placeholders invalidos.
 # ProductCatalog y la suite de integridad rechazan cualquier reintroduccion.
 catalog-version: 1
-expected-product-count: 35
+expected-product-count: 37
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -526,3 +526,32 @@ products:
       - {id: guide, type: SFMASTER_GUIDE, requires-online: true, refund: NOT_REVOCABLE}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&aPase SFMaster de 24 horas activado."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase SFMaster 24 horas"}}
+  anti_afk_permanent:
+    tebex-package-id: 7609651
+    name: "Pase Anti-AFK Vitalicio"
+    category: utility
+    description: "Inmunidad total y permanente al sistema de expulsión por inactividad y evasión pasiva."
+    source: "AutomationGuard + EssentialsX"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-afk, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "drakescraft.afk.unlocked"}}
+      - {id: perm-essentials, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.afk.kickexempt"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pase Anti-AFK Vitalicio activado! Eres inmune a la expulsión por inactividad."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase Anti-AFK Vitalicio"}}
+  anti_afk_30d:
+    tebex-package-id: 7609652
+    name: "Pase Anti-AFK 30 Días"
+    category: utility
+    description: "Inmunidad temporal de 30 días al sistema de expulsión por inactividad y evasión pasiva."
+    source: "AutomationGuard + EssentialsX"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-afk, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "drakescraft.afk.unlocked", duration: 30d}}
+      - {id: perm-essentials, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.afk.kickexempt", duration: 30d}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pase Anti-AFK (30 Días) activado! Eres inmune a la expulsión por inactividad."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase Anti-AFK 30 Días"}}
+
