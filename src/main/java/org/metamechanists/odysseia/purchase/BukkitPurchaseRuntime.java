@@ -239,7 +239,7 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
 
     private ActionResult controlledCommand(ExecutionContext context, ProductAction action) {
         String command = action.parameters().getOrDefault("command", "").replace("{player}", context.player());
-        if (!command.matches("(?:ps give|odykitgive|lp user|msg) [A-Za-z0-9_ .&áéíóúÁÉÍÓÚ-]+")) return ActionResult.manual("Comando fuera de allowlist");
+        if (!command.matches("(?:ps give|odykitgive|lp user|msg|evento boost|crates givekey|oraculo givekey) [A-Za-z0-9_ .&áéíóúÁÉÍÓÚ-]+")) return ActionResult.manual("Comando fuera de allowlist");
         return Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command) ? ActionResult.completed("command-dispatched") : ActionResult.retryable("Comando rechazado");
     }
 

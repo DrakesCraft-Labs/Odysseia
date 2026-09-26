@@ -1,7 +1,7 @@
 # El rango 9000000-9000099 esta reservado para placeholders invalidos.
 # ProductCatalog y la suite de integridad rechazan cualquier reintroduccion.
 catalog-version: 1
-expected-product-count: 37
+expected-product-count: 51
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -554,4 +554,186 @@ products:
       - {id: perm-essentials, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.afk.kickexempt", duration: 30d}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pase Anti-AFK (30 Días) activado! Eres inmune a la expulsión por inactividad."}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase Anti-AFK 30 Días"}}
+  protection_campamento:
+    tebex-package-id: 7609653
+    name: "Parcela Campamento (31x31)"
+    category: protection
+    description: "Protección inicial de 31x31 bloques (961 m²)."
+    source: "ProtectionStones production: viphercules"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphercules, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Parcela Campamento (31x31) entregada! Colócala en el suelo para proteger tu terreno."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Parcela Campamento (31x31)"}}
+  protection_aldea:
+    tebex-package-id: 7609654
+    name: "Parcela Aldea (61x61)"
+    category: protection
+    description: "Protección mediana de 61x61 bloques (3,721 m²)."
+    source: "ProtectionStones production: viphermes"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphermes, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Parcela Aldea (61x61) entregada!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Parcela Aldea (61x61)"}}
+  protection_fortaleza:
+    tebex-package-id: 7609655
+    name: "Parcela Fortaleza (101x101)"
+    category: protection
+    description: "Protección grande de 101x101 bloques (10,201 m²)."
+    source: "ProtectionStones production: viphefesto"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [ProtectionStones]
+    actions:
+      - {id: claim, type: PROTECTION_STONE, requires-online: true, refund: MANUAL_REVIEW, parameters: {alias: viphefesto, amount: "1"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Parcela Fortaleza (101x101) entregada!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Parcela Fortaleza (101x101)"}}
+  vaults_pack_3:
+    tebex-package-id: 7609656
+    name: "Pack +3 Bóvedas (/pv 2-4)"
+    category: utility
+    description: "Desbloqueo de 3 bóvedas virtuales adicionales (/pv 2 a /pv 4)."
+    source: "PlayerVaultsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-vault, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "playervaults.amount.4"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pack de 3 Bóvedas activado! Usa /pv 2 a /pv 4."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pack +3 Bóvedas"}}
+  vaults_pack_10:
+    tebex-package-id: 7609657
+    name: "Pack +10 Bóvedas (/pv 1-10)"
+    category: utility
+    description: "Desbloqueo de 10 bóvedas virtuales completas (/pv 1 al /pv 10)."
+    source: "PlayerVaultsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-vault, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "playervaults.amount.10"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pack de 10 Bóvedas activado! Usa /pv 1 a /pv 10."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pack +10 Bóvedas"}}
+  homes_pack_5:
+    tebex-package-id: 7609658
+    name: "Pack +5 Homes (/sethome)"
+    category: utility
+    description: "Capacidad para establecer hasta 5 puntos de teletransporte adicionales."
+    source: "EssentialsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-home, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.sethome.multiple.pack5"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pack de 5 Homes activado! Usa /sethome <nombre>."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pack +5 Homes"}}
+  homes_pack_15:
+    tebex-package-id: 7609659
+    name: "Pack +15 Homes (/sethome)"
+    category: utility
+    description: "Capacidad para establecer hasta 15 puntos de teletransporte adicionales."
+    source: "EssentialsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-home, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.sethome.multiple.pack15"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pack de 15 Homes activado! Usa /sethome <nombre>."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pack +15 Homes"}}
+  fly_pass_7d:
+    tebex-package-id: 7609660
+    name: "Pase Vuelo en Protecciones (7 Días)"
+    category: utility
+    description: "Permiso temporal de 7 días para activar /fly dentro de tus regiones protegidas."
+    source: "EssentialsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-fly, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.fly", duration: 7d}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pase de Vuelo (7 Días) activado! Usa /fly en tus protecciones."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase Vuelo Protecciones 7D"}}
+  fly_pass_30d:
+    tebex-package-id: 7609661
+    name: "Pase Vuelo en Protecciones (30 Días)"
+    category: utility
+    description: "Permiso temporal de 30 días para activar /fly dentro de tus regiones protegidas."
+    source: "EssentialsX + LuckPerms"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [LuckPerms]
+    actions:
+      - {id: perm-fly, type: TEMPORARY_PERMISSION, refund: AUTO_REVOKE, parameters: {permission: "essentials.fly", duration: 30d}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Pase de Vuelo (30 Días) activado! Usa /fly en tus protecciones."}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Pase Vuelo Protecciones 30D"}}
+  keys_atenea_3:
+    tebex-package-id: 7609662
+    name: "3x Llaves Relicario Atenea"
+    category: utility
+    description: "3 llaves sagradas para aperturas en el Relicario de Atenea."
+    source: "DrakesCrates"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: []
+    actions:
+      - {id: keys, type: CONSOLE_COMMAND, requires-online: true, refund: NOT_REVOCABLE, parameters: {command: "crates givekey {player} atenea 3"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has recibido 3 Llaves del Relicario de Atenea!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "3x Llaves Atenea"}}
+  keys_hermes_5:
+    tebex-package-id: 7609663
+    name: "5x Llaves Relicario Hermes"
+    category: utility
+    description: "5 llaves veloces para el Relicario de Hermes."
+    source: "DrakesCrates"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: []
+    actions:
+      - {id: keys, type: CONSOLE_COMMAND, requires-online: true, refund: NOT_REVOCABLE, parameters: {command: "crates givekey {player} hermes 5"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has recibido 5 Llaves del Relicario de Hermes!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "5x Llaves Hermes"}}
+  keys_zeus_3:
+    tebex-package-id: 7609664
+    name: "3x Llaves Relicario Zeus"
+    category: utility
+    description: "3 llaves divinas de máxima categoría para el Relicario Supremo de Zeus."
+    source: "DrakesCrates"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: []
+    actions:
+      - {id: keys, type: CONSOLE_COMMAND, requires-online: true, refund: NOT_REVOCABLE, parameters: {command: "crates givekey {player} zeus 3"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has recibido 3 Llaves del Relicario de Zeus!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "3x Llaves Zeus"}}
+  booster_money_1h:
+    tebex-package-id: 7609665
+    name: "Booster Global Dinero x2 (1h)"
+    category: utility
+    description: "Multiplicador x2 de dinero en toda la economía del servidor por 1 hora completa."
+    source: "Odysseia ServerBoostManager"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: []
+    actions:
+      - {id: boost, type: CONSOLE_COMMAND, refund: NOT_REVOCABLE, parameters: {command: "evento boost economia 2.0 60"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has activado un Booster Global de Dinero x2 por 1 hora!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Booster Global Dinero x2 (1h)"}}
+  booster_exp_1h:
+    tebex-package-id: 7609666
+    name: "Booster Global EXP x2 (1h)"
+    category: utility
+    description: "Multiplicador x2 de experiencia en todo el servidor por 1 hora completa."
+    source: "Odysseia ServerBoostManager"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: []
+    actions:
+      - {id: boost, type: CONSOLE_COMMAND, refund: NOT_REVOCABLE, parameters: {command: "evento boost xp 2.0 60"}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has activado un Booster Global de EXP x2 por 1 hora!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Booster Global EXP x2 (1h)"}}
 
