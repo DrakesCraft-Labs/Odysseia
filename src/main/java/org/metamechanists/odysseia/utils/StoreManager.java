@@ -276,21 +276,35 @@ public final class StoreManager {
             return true;
         }
 
-        String cleanText = discordAnnounce.replace("{player}", nick).replace("{product}", productName);
+        Player player = Bukkit.getPlayerExact(nick);
+        String serverNick = (player != null && player.getDisplayName() != null && !player.getDisplayName().isBlank())
+                ? ChatColor.stripColor(player.getDisplayName())
+                : nick;
+
+        String cleanText = discordAnnounce
+                .replace("{player}", nick)
+                .replace("{nick}", serverNick)
+                .replace("{product}", productName);
+
+        String playerValue = "`" + Odysseia.escapeJson(nick) + "`";
+        if (serverNick != null && !serverNick.isBlank() && !serverNick.equalsIgnoreCase(nick)) {
+            playerValue += " *(" + Odysseia.escapeJson(serverNick) + ")*";
+        }
+
         String jsonPayload = "{\"username\":\"DrakesCraft · Tienda\","
                 + "\"avatar_url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\","
                 + "\"embeds\":[{"
-                + "\"title\":\"⚡ ¡Compra Entregada con Éxito! ⚡\","
+                + "\"title\":\"⚡ ¡Compra Entregada en el Servidor! ⚡\","
                 + "\"description\":\"" + Odysseia.escapeJson(cleanText) + "\","
                 + "\"color\":15844367," // Color dorado (#f1c40f = 15844367)
-                + "\"thumbnail\":{\"url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\"},"
+                + "\"thumbnail\":{\"url\":\"https://mc-heads.net/avatar/" + Odysseia.escapeJson(nick) + "/128\"},"
                 + "\"fields\":["
-                + "{\"name\":\"🎮 Jugador\",\"value\":\"`" + Odysseia.escapeJson(nick) + "`\",\"inline\":true},"
-                + "{\"name\":\"📦 Producto\",\"value\":\"**" + Odysseia.escapeJson(productName) + "**\",\"inline\":true}"
+                + "{\"name\":\"🎮 Jugador en Servidor\",\"value\":\"" + playerValue + "\",\"inline\":true},"
+                + "{\"name\":\"📦 Detalle de Compra\",\"value\":\"**" + Odysseia.escapeJson(productName) + "**\",\"inline\":true},"
+                + "{\"name\":\"🏪 Tienda Oficial\",\"value\":\"[tienda.drakescraft.cl](https://tienda.drakescraft.cl)\",\"inline\":false}"
                 + "],"
-                + "\"footer\":{\"text\":\"DrakesCraft · Tienda Oficial · web.drakescraft.cl\"}"
+                + "\"footer\":{\"text\":\"DrakesCraft Network · Temporada 2 · ¡Gracias por apoyar el servidor!\",\"icon_url\":\"https://web.drakescraft.cl/assets/logo-drakescraft.png\"}"
                 + "}]}";
-
         WebhookSender.sendAsync(plugin, webhookUrl, jsonPayload);
         plugin.getLogger().info("[Purchase] Anuncio encolado para " + nick + " (" + productName + ").");
         return true;
