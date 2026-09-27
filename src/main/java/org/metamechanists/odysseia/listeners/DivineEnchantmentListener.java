@@ -31,6 +31,12 @@ public final class DivineEnchantmentListener implements Listener {
     private final Random random = new Random();
     private final Map<UUID, Long> duatCooldowns = new HashMap<>();
     private final Map<UUID, Long> cronosDodgeCooldowns = new HashMap<>();
+    /**
+     * Attackers currently applying an area secondary hit. Those hits fire another
+     * EntityDamageByEntityEvent synchronously, so their enchantments must not
+     * fan out a second time.
+     */
+    private final Set<UUID> secondaryDamageAttackers = new HashSet<>();
 
     public DivineEnchantmentListener(Odysseia plugin) {
         this.plugin = plugin;
@@ -69,6 +75,7 @@ public final class DivineEnchantmentListener implements Listener {
             attacker = p;
         }
         if (attacker == null) return;
+        if (secondaryDamageAttackers.contains(attacker.getUniqueId())) return;
 
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
         if (weapon == null || weapon.getType() == Material.AIR) return;
@@ -171,7 +178,7 @@ public final class DivineEnchantmentListener implements Listener {
                     int chained = 0;
                     for (Entity e : target.getNearbyEntities(6.0, 3.0, 6.0)) {
                         if (e instanceof LivingEntity near && near != attacker && near != target) {
-                            near.damage(10.0, attacker);
+                            applySecondaryDamage(near, 10.0, attacker);
                             near.getWorld().strikeLightningEffect(near.getLocation());
                             if (++chained >= 3) break;
                         }
@@ -187,7 +194,7 @@ public final class DivineEnchantmentListener implements Listener {
                 attacker.playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.2f);
                 for (Entity e : target.getNearbyEntities(6.0, 3.0, 6.0)) {
                     if (e instanceof LivingEntity near && near != attacker) {
-                        near.damage(8.0, attacker);
+                        applySecondaryDamage(near, 8.0, attacker);
                         near.setVelocity(new Vector(0, 0.8, 0));
                         near.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 2));
                     }
@@ -288,6 +295,17 @@ public final class DivineEnchantmentListener implements Listener {
                     attacker.sendTitle("§4§l¡ANIQUILACION DEL CAOS!", "§cDesgarro del vacio desatado (-25% vida)", 5, 25, 5);
                 } catch (Exception ignored) {}
             }
+        }
+    }
+
+    /** Applies an area hit while preventing its synchronous event from re-expanding. */
+    private void applySecondaryDamage(LivingEntity target, double damage, Player attacker) {
+        UUID attackerId = attacker.getUniqueId();
+        secondaryDamageAttackers.add(attackerId);
+        try {
+            target.damage(damage, attacker);
+        } finally {
+            secondaryDamageAttackers.remove(attackerId);
         }
     }
 
