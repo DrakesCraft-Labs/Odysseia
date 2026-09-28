@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -27,7 +28,7 @@ import java.util.*;
  */
 public final class DivineEnchantmentListener implements Listener {
 
-    private final Odysseia plugin;
+    private final Plugin plugin;
     private final Random random = new Random();
     private final Map<UUID, Long> duatCooldowns = new HashMap<>();
     private final Map<UUID, Long> cronosDodgeCooldowns = new HashMap<>();
@@ -38,7 +39,7 @@ public final class DivineEnchantmentListener implements Listener {
      */
     private final Set<UUID> secondaryDamageAttackers = new HashSet<>();
 
-    public DivineEnchantmentListener(Odysseia plugin) {
+    public DivineEnchantmentListener(Plugin plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
