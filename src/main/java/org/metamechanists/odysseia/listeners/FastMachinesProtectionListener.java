@@ -56,8 +56,10 @@ public final class FastMachinesProtectionListener implements Listener {
             isOwner = psRegion.getMethod("isOwner", UUID.class);
             isMember = psRegion.getMethod("isMember", UUID.class);
         } catch (ReflectiveOperationException exception) {
-            plugin.getLogger().log(Level.WARNING,
-                "[FastMachines] La integración de protecciones no está disponible; se reintentará al interactuar.", exception);
+            // ProtectionStones es opcional en staging. La integración se conserva inactiva
+            // hasta que exista, sin una traza de ClassNotFoundException en cada arranque.
+            plugin.getLogger().warning("[FastMachines] La integración de protecciones no está disponible ("
+                    + exception.getClass().getSimpleName() + "); se reintentará al interactuar.");
         }
 
         this.blockStorageCheckId = storageCheck;

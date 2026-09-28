@@ -134,7 +134,14 @@ public final class KitDeliveryService {
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 Enchantment enchantment = org.metamechanists.odysseia.kits.CustomContentResolver
                         .enchantment(String.valueOf(entry.getKey()));
-                if (enchantment != null) meta.addEnchant(enchantment, integer(entry.getValue(), 1), true);
+                // Nunca entregar un kit reducido: si su proveedor de encantamientos no está
+                // cargado, abortar el ítem y con ello la entrega atómica del kit.
+                if (enchantment == null) {
+                    plugin.getLogger().warning("[Kits] Encantamiento no resoluble al entregar "
+                            + entry.getKey() + "; se rechaza el kit completo.");
+                    return null;
+                }
+                meta.addEnchant(enchantment, integer(entry.getValue(), 1), true);
             }
         }
         if (meta instanceof org.bukkit.inventory.meta.ArmorMeta armorMeta) {

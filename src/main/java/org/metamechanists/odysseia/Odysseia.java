@@ -155,7 +155,17 @@ public final class Odysseia extends JavaPlugin {
         if (kitErrors.isEmpty()) {
             getLogger().info("[SUCCESS] Configuración de kits validada.");
         } else {
-            kitErrors.forEach(error -> getLogger().severe("[Kits] " + error));
+            // En staging pueden faltar proveedores opcionales de encantamientos. Mantener
+            // el diagnóstico sin convertir un único problema de dependencia en cientos de
+            // líneas ERROR que ocultan el resto del arranque.
+            getLogger().severe("[Kits] " + kitErrors.size()
+                    + " entradas no son resolubles; esos kits se rechazarán completos al entregarse.");
+            kitErrors.stream().limit(10)
+                    .forEach(error -> getLogger().warning("[Kits] " + error));
+            if (kitErrors.size() > 10) {
+                getLogger().warning("[Kits] Se omitieron " + (kitErrors.size() - 10)
+                        + " diagnósticos repetitivos; instala los proveedores de contenido antes de habilitar esos kits.");
+            }
         }
         Bukkit.getPluginManager().registerEvents(purchaseEngine, this);
         Bukkit.getPluginManager().registerEvents(pendingKits, this);
