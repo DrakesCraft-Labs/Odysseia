@@ -6,6 +6,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -46,7 +50,15 @@ class DivineEnchantmentListenerTest {
 
     @Test
     void impactoSecundarioDeMjolnirNoVuelveAExpandirElArea() {
-        DivineEnchantmentListener listener = new DivineEnchantmentListener(MockBukkit.createMockPlugin());
+        // The listener only needs an enabled Plugin identity for event registration;
+        // loading a MockBukkit plugin from a packaged JAR makes `mvn test` depend on
+        // a prior package phase.
+        Plugin plugin = mock(Plugin.class);
+        PluginLoader pluginLoader = mock(PluginLoader.class);
+        when(plugin.isEnabled()).thenReturn(true);
+        when(plugin.getPluginLoader()).thenReturn(pluginLoader);
+        when(pluginLoader.createRegisteredListeners(any(Listener.class), same(plugin))).thenReturn(java.util.Map.of());
+        DivineEnchantmentListener listener = new DivineEnchantmentListener(plugin);
         LivingEntity primary = livingEntityWithNearby();
         LivingEntity secondary = livingEntityWithNearby();
         LivingEntity tertiary = mock(LivingEntity.class);
