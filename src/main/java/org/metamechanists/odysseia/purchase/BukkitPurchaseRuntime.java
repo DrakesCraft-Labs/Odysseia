@@ -210,7 +210,7 @@ public final class BukkitPurchaseRuntime implements PurchaseActionRuntime {
 
         boolean accepted = Bukkit.dispatchCommand(
                 Bukkit.getConsoleSender(),
-                "slimefun research " + player.getName() + " all"
+                "sf research " + player.getName() + " all"
         );
         return accepted
                 ? ActionResult.completed("slimefun-research=all")
