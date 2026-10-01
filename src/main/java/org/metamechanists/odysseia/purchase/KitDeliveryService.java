@@ -70,8 +70,9 @@ public final class KitDeliveryService {
                 index++;
                 String path = kit + ".vanilla-items[" + index + "]";
                 boolean fromSlimefun = values.get("slimefun-item") != null;
+                boolean fromSpecial = values.get("special-item") != null;
                 Material material = Material.matchMaterial(String.valueOf(values.get("material")));
-                if (!fromSlimefun && (material == null || !material.isItem())) {
+                if (!fromSlimefun && !fromSpecial && (material == null || !material.isItem())) {
                     errors.add(path + ": material inválido");
                     continue;
                 }
@@ -97,13 +98,23 @@ public final class KitDeliveryService {
     }
 
     private List<ItemStack> createItems(Map<?, ?> values, String transaction) {
-        // Un kit puede partir de un item de Slimefun o de uno vanilla.
-        Object slimefunId = values.get("slimefun-item");
-        ItemStack item = slimefunId == null ? null
-                : org.metamechanists.odysseia.kits.CustomContentResolver.slimefunItem(String.valueOf(slimefunId));
-        if (slimefunId != null && item == null) {
-            plugin.getLogger().warning("[Kits] Item de Slimefun no encontrado: " + slimefunId);
-            return null;
+        // Un kit puede partir de un item especial (Papa de mar con PDC), Slimefun o vanilla.
+        Object special = values.get("special-item");
+        ItemStack item = null;
+        if (special != null) {
+            String specialName = String.valueOf(special).toUpperCase(Locale.ROOT);
+            if (specialName.contains("PAPA_DE_MAR")) {
+                item = plugin.createPapaDeMarItem();
+            }
+        }
+        if (item == null) {
+            Object slimefunId = values.get("slimefun-item");
+            item = slimefunId == null ? null
+                    : org.metamechanists.odysseia.kits.CustomContentResolver.slimefunItem(String.valueOf(slimefunId));
+            if (slimefunId != null && item == null) {
+                plugin.getLogger().warning("[Kits] Item de Slimefun no encontrado: " + slimefunId);
+                return null;
+            }
         }
         Material material = item != null ? item.getType()
                 : Material.matchMaterial(String.valueOf(values.get("material")));
@@ -167,6 +178,16 @@ public final class KitDeliveryService {
         }
         if (Boolean.parseBoolean(String.valueOf(values.containsKey("soulbound") ? values.get("soulbound") : false))) {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "soulbound"), PersistentDataType.BYTE, (byte) 1);
+        }
+        Object pdcMapObj = values.get("pdc");
+        if (pdcMapObj instanceof Map<?, ?> pdcMap) {
+            for (Map.Entry<?, ?> entry : pdcMap.entrySet()) {
+                String rawKey = String.valueOf(entry.getKey()).toLowerCase(Locale.ROOT);
+                NamespacedKey nKey = rawKey.contains(":") ? NamespacedKey.fromString(rawKey) : new NamespacedKey(plugin, rawKey);
+                if (nKey != null) {
+                    meta.getPersistentDataContainer().set(nKey, PersistentDataType.STRING, String.valueOf(entry.getValue()));
+                }
+            }
         }
         meta.getPersistentDataContainer().set(transactionKey, PersistentDataType.STRING, transaction);
         item.setItemMeta(meta);

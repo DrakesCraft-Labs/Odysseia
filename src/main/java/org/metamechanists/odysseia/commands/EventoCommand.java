@@ -76,6 +76,7 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
             case "box" -> handleBox(sender, args);
             case "boss" -> handleBoss(sender, args);
             case "pvp" -> handlePvP(sender, args);
+            case "seasonal" -> handleSeasonal(sender, args);
             case "stop" -> handleStop(sender, args);
             case "status" -> handleStatus(sender);
             default -> sendHelp(sender);
@@ -374,6 +375,58 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void handleSeasonal(CommandSender sender, String[] args) {
+        var sm = eventManager.getSeasonalManager();
+        if (sm == null) {
+            sender.sendMessage(ChatColor.RED + "El gestor estacional no está disponible.");
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(ChatColor.GOLD + "=== ESTADO DE EVENTOS ESTACIONALES ===");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "  • &cHalloween (Tártaro & Noche Perpetua): " + (sm.isHalloweenActive() ? "&aACTIVO" : "&cINACTIVO")));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "  • &eCumpleaños del Creador (29 Nov, 5X): " + (sm.isBirthdayActive() ? "&aACTIVO" : "&cINACTIVO")));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "  • &bSolsticio / Navidad (Diciembre): " + (sm.isWinterActive() ? "&aACTIVO" : "&cINACTIVO")));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "  • &dSan Valentín / Afrodita (Febrero): " + (sm.isValentinesActive() ? "&aACTIVO" : "&cINACTIVO")));
+            sender.sendMessage(ChatColor.YELLOW + "Uso: /evento seasonal <halloween|cumplejack|solsticio|valentin> <on|off|auto>");
+            return;
+        }
+
+        String mode = args[1].toLowerCase(Locale.ROOT);
+        String state = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : "toggle";
+
+        Boolean val = switch (state) {
+            case "on", "true", "1" -> Boolean.TRUE;
+            case "off", "false", "0" -> Boolean.FALSE;
+            case "auto", "default", "reset" -> null;
+            default -> null;
+        };
+
+        switch (mode) {
+            case "halloween", "tartaro" -> {
+                if ("toggle".equals(state)) val = !sm.isHalloweenActive();
+                sm.setForceHalloween(val);
+                sender.sendMessage(ChatColor.GREEN + "Halloween forzado a: " + (val == null ? "AUTO" : (val ? "ON" : "OFF")));
+            }
+            case "cumplejack", "birthday", "creador" -> {
+                if ("toggle".equals(state)) val = !sm.isBirthdayActive();
+                sm.setForceBirthday(val);
+                sender.sendMessage(ChatColor.GREEN + "Cumpleaños del Creador forzado a: " + (val == null ? "AUTO" : (val ? "ON" : "OFF")));
+            }
+            case "solsticio", "navidad", "winter" -> {
+                if ("toggle".equals(state)) val = !sm.isWinterActive();
+                sm.setForceWinter(val);
+                sender.sendMessage(ChatColor.GREEN + "Solsticio/Navidad forzado a: " + (val == null ? "AUTO" : (val ? "ON" : "OFF")));
+            }
+            case "valentin", "afrodita" -> {
+                if ("toggle".equals(state)) val = !sm.isValentinesActive();
+                sm.setForceValentines(val);
+                sender.sendMessage(ChatColor.GREEN + "San Valentín forzado a: " + (val == null ? "AUTO" : (val ? "ON" : "OFF")));
+            }
+            default -> sender.sendMessage(ChatColor.RED + "Modo estacional desconocido. Opciones: halloween, cumplejack, solsticio, valentin.");
+        }
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', """
         &6&l═══════ SUITE DE EVENTOS ODYSSEIA ═══════
@@ -383,6 +436,7 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
         &e/evento box <save|list|give|delete> &7- Cajas y plantillas de premios
         &e/evento boss spawn <tipo> &7- Invocar jefe con reparto por daño
         &e/evento pvp <start|stop|rank|setspawn> &7- Torneo PvP 100% seguro
+        &e/evento seasonal [modo] [on|off|auto] &7- Eventos de Halloween y Calendario
         &e/evento status &7- Ver eventos activos
         &e/evento stop [rush|drop|boost|pvp|all] &7- Detener eventos
         &6&l═════════════════════════════════════════
@@ -394,7 +448,7 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> list = new ArrayList<>(List.of("status"));
             if (sender.hasPermission("odysseia.evento.admin")) {
-                list.addAll(List.of("rush", "drop", "boost", "box", "boss", "pvp", "stop"));
+                list.addAll(List.of("rush", "drop", "boost", "box", "boss", "pvp", "seasonal", "stop"));
             } else if (eventManager.getPvpManager().isActive()) {
                 list.add("pvp");
             }
@@ -409,6 +463,7 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
                 case "boost" -> filter(List.of("economia", "xp", "slimefun", "dracmas"), args[1]);
                 case "box" -> filter(List.of("save", "list", "give", "delete"), args[1]);
                 case "boss" -> filter(List.of("spawn"), args[1]);
+                case "seasonal" -> filter(List.of("halloween", "cumplejack", "solsticio", "valentin"), args[1]);
                 case "pvp" -> {
                     if (sender.hasPermission("odysseia.evento.admin")) {
                         yield filter(List.of("start", "stop", "join", "leave", "rank", "setspawn"), args[1]);
@@ -431,6 +486,8 @@ public class EventoCommand implements CommandExecutor, TabCompleter {
                 return filter(List.of("gladiador", "tanque", "arquero", "berserker"), args[2]);
             } else if (sub.equals("boss") && args[1].equalsIgnoreCase("spawn")) {
                 return filter(List.of("zeus", "poseidon", "hades", "thor", "odin", "ares", "kratos", "garou", "cerbero", "hidra"), args[2]);
+            } else if (sub.equals("seasonal")) {
+                return filter(List.of("on", "off", "auto"), args[2]);
             }
         }
 

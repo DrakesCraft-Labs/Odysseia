@@ -35,6 +35,7 @@ public class OdysseiaEventManager {
     @Getter private final StaffBoxRepository boxRepository;
     @Getter private final EventBossManager bossManager;
     @Getter private final EventPvPManager pvpManager;
+    @Getter private final SeasonalEventManager seasonalManager;
 
     @Getter private RushEvent currentRush;
     @Getter private SupplyDropEvent currentDrop;
@@ -64,9 +65,11 @@ public class OdysseiaEventManager {
 
         this.bossManager = new EventBossManager(plugin, discordWebhookUrl);
         this.pvpManager = new EventPvPManager(plugin, discordWebhookUrl);
+        this.seasonalManager = new SeasonalEventManager(plugin, boostManager, discordWebhookUrl);
 
         registerListeners();
         startTickTask();
+        seasonalManager.start();
 
         plugin.getLogger().info("[OdysseiaEvents] Suite de Eventos inicializada correctamente.");
     }
@@ -161,6 +164,9 @@ public class OdysseiaEventManager {
         }
         if (pvpManager != null) {
             pvpManager.shutdown();
+        }
+        if (seasonalManager != null) {
+            seasonalManager.shutdown();
         }
     }
 }

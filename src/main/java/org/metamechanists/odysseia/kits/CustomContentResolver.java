@@ -96,6 +96,15 @@ public final class CustomContentResolver {
             NamespacedKey key = raw.contains(":") ? NamespacedKey.fromString(raw) : NamespacedKey.minecraft(raw);
             if (key == null) continue;
             Attribute attribute = Registry.ATTRIBUTE.get(key);
+            if (attribute == null) {
+                if (key.getKey().startsWith("generic.")) {
+                    NamespacedKey altKey = NamespacedKey.minecraft(key.getKey().substring(8));
+                    attribute = Registry.ATTRIBUTE.get(altKey);
+                } else {
+                    NamespacedKey altKey = NamespacedKey.minecraft("generic." + key.getKey());
+                    attribute = Registry.ATTRIBUTE.get(altKey);
+                }
+            }
             if (attribute == null) continue;
             double amount;
             try {

@@ -3720,6 +3720,171 @@ kits:
       amount: 64
     - material: TOTEM_OF_UNDYING
       amount: 8
+  halloween_tartaro:
+    cooldown: -1
+    permission: odysseia.kit.halloween_tartaro
+    vanilla-items:
+    - material: NETHERITE_HELMET
+      amount: 1
+      name: '&4&l✦ Corona del Rey del Tártaro ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&cForjada en las entrañas de los fosos de Cronos.'
+      - '&7Imbuida con las almas perdidas de la Odisea.'
+      - '&5✦ Vínculo del Inframundo: Inmunidad a Radiación Slimefun'
+      - '&6✦ Corazón de Titán: +5 Corazones (+10 HP)'
+      - '&c✦ [Vínculo Divino] Soulbound'
+      - '&8&m--------------------------------'
+      enchantments:
+        protection: 6
+        unbreaking: 10
+        respiration: 5
+        aqua_affinity: 1
+        mending: 1
+      attributes:
+        generic.max_health: 5.0
+      trim-material: netherite
+      trim-pattern: silence
+      soulbound: true
+      unbreakable: true
+      pdc:
+        "odysseia:tartaro_armor": "1"
+    - material: NETHERITE_CHESTPLATE
+      amount: 1
+      name: '&4&l✦ Coraza del Castigo Eterno ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&cEl acero negro del Tártaro refracta toda energía mortal.'
+      - '&7Rivaliza con la esencia primordial de la Armadura de Infinity.'
+      - '&5✦ Vínculo del Inframundo: Inmunidad a Radiación Slimefun'
+      - '&6✦ Corazón de Titán: +5 Corazones (+10 HP)'
+      - '&e✦ Furia de Ares: +3 Daño de Ataque Base'
+      - '&c✦ [Vínculo Divino] Soulbound'
+      - '&8&m--------------------------------'
+      enchantments:
+        protection: 6
+        unbreaking: 10
+        mending: 1
+      attributes:
+        generic.max_health: 5.0
+        generic.attack_damage: 3.0
+      trim-material: redstone
+      trim-pattern: vex
+      soulbound: true
+      unbreakable: true
+      pdc:
+        "odysseia:tartaro_armor": "1"
+    - material: NETHERITE_LEGGINGS
+      amount: 1
+      name: '&4&l✦ Grebas de las Cadenas Primordiales ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&cFundidas a partir de los grilletes que aprisionaron a Tifón.'
+      - '&7La gravedad del inframundo no puede frenar tu paso.'
+      - '&5✦ Vínculo del Inframundo: Inmunidad a Radiación Slimefun'
+      - '&6✦ Corazón de Titán: +5 Corazones (+10 HP)'
+      - '&b✦ Zancada Fantasmal: +15% Velocidad de Movimiento'
+      - '&c✦ [Vínculo Divino] Soulbound'
+      - '&8&m--------------------------------'
+      enchantments:
+        protection: 6
+        unbreaking: 10
+        swift_sneak: 3
+        mending: 1
+      attributes:
+        generic.max_health: 5.0
+        generic.movement_speed: 0.015
+      trim-material: amethyst
+      trim-pattern: rib
+      soulbound: true
+      unbreakable: true
+      pdc:
+        "odysseia:tartaro_armor": "1"
+    - material: NETHERITE_BOOTS
+      amount: 1
+      name: '&4&l✦ Botas del Río Aqueronte ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&cPermite caminar sobre los fuegos del Flegetonte y la lava hirviente.'
+      - '&7El barquero Caronte no puede cobrar peaje a quien pisa este calzado.'
+      - '&5✦ Vínculo del Inframundo: Inmunidad a Radiación Slimefun'
+      - '&6✦ Corazón de Titán: +5 Corazones (+10 HP)'
+      - '&c✦ [Vínculo Divino] Soulbound'
+      - '&8&m--------------------------------'
+      enchantments:
+        protection: 6
+        unbreaking: 10
+        feather_falling: 5
+        depth_strider: 3
+        soul_speed: 3
+        mending: 1
+      attributes:
+        generic.max_health: 5.0
+      trim-material: gold
+      trim-pattern: ward
+      soulbound: true
+      unbreakable: true
+      pdc:
+        "odysseia:tartaro_armor": "1"
+    - material: NETHERITE_HOE
+      amount: 1
+      name: '&4&l✦ Guadaña Espectral de Caronte ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&cReclamada en la orilla del río de las almas en pena.'
+      - '&7Segadora de reyes, titanes y monstruos del vacío.'
+      - '&4⚔ Daño Verdadero del Tártaro &7(Atraviesa armadura e invulnerabilidad)'
+      - '&6✦ Alcance Fantasmal: +1.5 Bloques de Interacción'
+      - '&c✦ [Vínculo Divino] Soulbound'
+      - '&8&m--------------------------------'
+      enchantments:
+        sharpness: 7
+        fire_aspect: 3
+        unbreaking: 10
+        mending: 1
+      attributes:
+        generic.attack_damage: 15.0
+        generic.attack_speed: -2.4
+        player.entity_interaction_range: 1.5
+      soulbound: true
+      unbreakable: true
+      pdc:
+        "odysseia:charon_scythe": "1"
+    - special-item: PAPA_DE_MAR_ESPECTRAL
+      material: POISONOUS_POTATO
+      amount: 1
+      name: '&4&l✦ Papa de Mar Espectral de Halloween ✦'
+      lore:
+      - '&8&m--------------------------------'
+      - '&7Relicario ancestral de DrakesCraft teñido por la niebla del Tártaro.'
+      - '&7Cruzó temporadas y guerras, y ahora porta la bendición de Caronte.'
+      - '&5✦ Portarla en tu inventario te hace inmune a las Sombras del Vacío.'
+      - '&8"Quien entrega una moneda a Caronte cruza el río; quien entrega esta papa manda sobre él."'
+      - '&8&m--------------------------------'
+      enchantments:
+        unbreaking: 10
+        luck_of_the_sea: 5
+        lure: 5
+    - slimefun-item: DAXI_STRENGTH
+      amount: 1
+    - slimefun-item: DAXI_ABSORPTION
+      amount: 1
+    - slimefun-item: DAXI_FORTITUDE
+      amount: 1
+    - slimefun-item: DAXI_SATURATION
+      amount: 1
+    - slimefun-item: DAXI_REGENERATION
+      amount: 1
+    - slimefun-item: REINFORCED_ALLOY_INGOT
+      amount: 64
+    - slimefun-item: CARBONADO
+      amount: 32
+    - slimefun-item: SYNTHETIC_DIAMOND
+      amount: 64
+    - slimefun-item: MAGIC_EYE_OF_ENDER
+      amount: 16
+    - slimefun-item: ENHANCED_AUTO_CRAFTER
+      amount: 1
 polis-baseline:
   enabled: true
   default-group: default

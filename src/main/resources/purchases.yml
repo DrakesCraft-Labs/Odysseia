@@ -1,7 +1,7 @@
 # El rango 9000000-9000099 esta reservado para placeholders invalidos.
 # ProductCatalog y la suite de integridad rechazan cualquier reintroduccion.
 catalog-version: 1
-expected-product-count: 51
+expected-product-count: 52
 source: "DrakesCraft production audit 2026-07-10"
 
 products:
@@ -736,4 +736,19 @@ products:
       - {id: boost, type: CONSOLE_COMMAND, refund: NOT_REVOCABLE, parameters: {command: "evento boost xp 2.0 60"}}
       - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&a¡Has activado un Booster Global de EXP x2 por 1 hora!"}}
       - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Booster Global EXP x2 (1h)"}}
+  kit_halloween_tartaro:
+    tebex-package-id: 7707436
+    name: "Kit Legendario: Sombras del Tártaro (Halloween Edition)"
+    category: kits
+    description: "Kit mítico de edición limitada de Halloween. Armadura completa del Rey del Tártaro con inmunidad a radiación y +10 corazones, Guadaña espectral de Caronte con daño verdadero, 5 Cores Daxi de TranscEndence, Papa de Mar Espectral y 500,000 Dragmas."
+    source: "Odysseia Halloween Event 2026"
+    version: 1
+    verification: VERIFIED_PRODUCTION
+    dependencies: [Vault]
+    actions:
+      - {id: money, type: ECONOMY, refund: MANUAL_REVIEW, parameters: {amount: "500000"}}
+      - {id: kit, type: KIT, requires-online: true, refund: MANUAL_REVIEW, parameters: {kit: halloween_tartaro}}
+      - {id: tag, type: CONSOLE_COMMAND, refund: NOT_REVOCABLE, parameters: {command: "lp user {username} meta setsuffix 100 \" &8[&4🎃 TÁRTARO&8]\""}}
+      - {id: notify, type: NOTIFICATION, requires-online: true, required: false, refund: NOT_REVOCABLE, parameters: {message: "&4&l✦ ¡Has reclamado el legendario Kit Sombras del Tártaro (Halloween Edition)!"}}
+      - {id: announce, type: ANNOUNCEMENT, refund: NOT_REVOCABLE, parameters: {product: "Kit Legendario: Sombras del Tártaro (Halloween Edition)"}}
 
