@@ -236,24 +236,10 @@ between unrelated servers, publish it, or delete it while issued cheques are sti
 
 ---
 
-## 📜 License & Credits
+## 📄 License & Upstream Attribution
 
-- **Author & Maintainer**: **DrakesCraft Labs**
-- **License**: [GPL-3.0](./LICENSE) — Open source, robust, and built for production.
-- **Minecraft**: Compatible with Paper / Purpur 1.21.11.
+This project is a sovereign fork maintained by [**JackStar6677-1**](https://github.com/JackStar6677-1) under [**DrakesCraft Labs**](https://github.com/DrakesCraft-Labs).
 
-<div align="center">
-
-**Built with ☕, 🦀, and architectural rigor for DrakesCraft.**
-
-</div>
-
-## ⚖️ Upstream Attribution & License / Licencia y Créditos
-
-- **Original Project / Upstream**: Slimefun4 Community Addon.
-- **Port & Maintenance**: DrakesCraft Labs team (Compatibility for Paper / Purpur 1.21.11).
-- **License**: GPL-3.0 / MIT.
-- **Source Code**: [GitHub Repository](https://github.com/DrakesCraft-Labs/Odysseia)
-- **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/Odysseia/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
-
-*This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets and concepts belong to their respective creators.*
+- **Original Project:** Created by the upstream authors and the open-source community.
+- **DrakesCraft Optimizations:** Modernized for Paper/Purpur 1.21.11+, Java 21, high concurrency, asynchronous safety, and exploit/duplication prevention.
+- **License:** Distributed under the original **GNU General Public License v3.0 (GPLv3)** (or original upstream license). See the [LICENSE](LICENSE) file for complete terms.
