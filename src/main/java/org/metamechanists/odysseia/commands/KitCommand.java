@@ -24,6 +24,19 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
     private final KitDeliveryService delivery;
     private final KitClaimService claims;
 
+    private static final java.util.Map<String, String> KIT_ALIASES = java.util.Map.of(
+            "initial", "inicial",
+            "start", "inicial",
+            "starter", "inicial",
+            "inicio", "inicial"
+    );
+
+    public static String resolveKitAlias(String input) {
+        if (input == null) return null;
+        String rawKit = input.toLowerCase(Locale.ROOT).trim();
+        return KIT_ALIASES.getOrDefault(rawKit, rawKit);
+    }
+
     public KitCommand(Odysseia plugin) {
         this.plugin = plugin;
         this.delivery = new KitDeliveryService(plugin);
@@ -43,10 +56,11 @@ public final class KitCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(color(availableKits.isEmpty()
                     ? "&7No tienes kits disponibles con tu rango actual."
                     : "&7Disponibles: &f" + String.join(", ", availableKits)));
+            player.sendMessage(color("&7Menú interactivo: &f/menu kits &7o &f/kitsvip"));
             return true;
         }
 
-        String kit = args[0].toLowerCase(Locale.ROOT);
+        String kit = resolveKitAlias(args[0]);
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("kits." + kit);
         if (section == null) {
             player.sendMessage(color("&cEse kit no existe."));
