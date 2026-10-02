@@ -32,6 +32,7 @@ ultragod:
     cooldown-minutes: 30
 horror-night:
   enabled: true
+  min-interval-minutes: 15
   worlds:
   - world
 protection-border:

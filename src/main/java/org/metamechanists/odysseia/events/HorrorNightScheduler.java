@@ -40,6 +40,7 @@ public class HorrorNightScheduler implements Listener {
     private final Odysseia plugin;
     private final Random random = new Random();
     private final ConcurrentHashMap<String, Long> lastNightProcessedPerWorld = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> lastTriggerAtPerWorld = new ConcurrentHashMap<>();
     private BukkitTask task;
 
     public HorrorNightScheduler(Odysseia plugin) {
@@ -85,17 +86,29 @@ public class HorrorNightScheduler implements Listener {
                 String worldKey = world.getName();
                 Long lastDay = lastNightProcessedPerWorld.get(worldKey);
 
-                if (lastDay == null || lastDay < dayIndex) {
+                long now = System.currentTimeMillis();
+                long minIntervalMs = Math.max(0L, plugin.getConfig().getLong("horror-night.min-interval-minutes", 15L)) * 60_000L;
+
+                // La noche perpetua de Halloween (SeasonalEventManager) usa setTime, que adelanta fullTime
+                // y abre un "día" nuevo cada pocos minutos: el intervalo real evita repetir la secuencia.
+                if (shouldTrigger(lastDay, dayIndex, lastTriggerAtPerWorld.get(worldKey), now, minIntervalMs)) {
                     lastNightProcessedPerWorld.put(worldKey, dayIndex);
+                    lastTriggerAtPerWorld.put(worldKey, now);
                     triggerNightHorrorSequence(world);
                 }
             }
         }
     }
 
+    static boolean shouldTrigger(Long lastDay, long dayIndex, Long lastTriggerAt, long now, long minIntervalMs) {
+        boolean newNight = lastDay == null || lastDay < dayIndex;
+        boolean intervalElapsed = lastTriggerAt == null || now - lastTriggerAt >= minIntervalMs;
+        return newNight && intervalElapsed;
+    }
+
     /** Dispara la secuencia nocturna cinematográfica. */
     private void triggerNightHorrorSequence(World world) {
-        plugin.getLogger().info("[HorrorNight] Secuencia del Multiverso iniciada en el día " + (world.getFullTime() / 24000L));
+        plugin.getLogger().info("[HorrorNight] Secuencia del Multiverso iniciada en " + world.getName() + ", día " + (world.getFullTime() / 24000L));
 
         for (Player p : world.getPlayers()) {
             p.sendMessage(ChatColor.translateAlternateColorCodes('&',
