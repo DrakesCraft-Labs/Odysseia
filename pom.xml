@@ -13,6 +13,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <mockbukkit.artifactId>mockbukkit-v1.21</mockbukkit.artifactId>
+        <mockbukkit.version>4.116.3</mockbukkit.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -51,13 +53,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
+            <version>5.23.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockbukkit.mockbukkit</groupId>
-            <artifactId>mockbukkit-v1.21</artifactId>
-            <version>4.116.3</version>
+            <artifactId>${mockbukkit.artifactId}</artifactId>
+            <version>${mockbukkit.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -120,6 +122,24 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <!-- MockBukkit publishes registry fixtures per Paper generation.  Keep this opt-in so
+             Dallas builds retain their 1.21.11 test harness. -->
+        <profile>
+            <id>paper-26x-tests</id>
+            <activation>
+                <property>
+                    <name>paper26</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <mockbukkit.artifactId>mockbukkit-v26.2</mockbukkit.artifactId>
+                <mockbukkit.version>4.116.1</mockbukkit.version>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <defaultGoal>clean package</defaultGoal>

@@ -2,6 +2,7 @@ package org.metamechanists.odysseia.listeners;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,6 +23,8 @@ import org.metamechanists.odysseia.utils.WebhookSender;
 public final class ModerationListener implements Listener {
 
     private final Odysseia plugin;
+    /** Avoid a noisy warning for every moderation event when the optional endpoint is absent. */
+    private final AtomicBoolean invalidWebhookWarningLogged = new AtomicBoolean();
 
     public ModerationListener(Odysseia plugin) {
         this.plugin = plugin;
@@ -202,12 +205,19 @@ public final class ModerationListener implements Listener {
 
     private String moderationWebhook() {
         String url = plugin.getConfig().getString("discord.webhook-moderation-url", "");
-        if (url == null || url.isBlank() || url.startsWith("REPLACE_ME")
-                || !WebhookSender.isDiscordWebhookUrl(url) || !WebhookSender.isAllowedHttpsUrl(url)) {
-            plugin.getLogger().warning("[Moderation] Webhook de moderación inválido o no configurado.");
+        if (!isValidModerationWebhook(url)) {
+            if (invalidWebhookWarningLogged.compareAndSet(false, true)) {
+                plugin.getLogger().warning("[Moderation] Webhook de moderación inválido o no configurado; "
+                        + "los avisos posteriores se omitirán hasta el próximo arranque.");
+            }
             return null;
         }
         return url;
+    }
+
+    static boolean isValidModerationWebhook(String url) {
+        return url != null && !url.isBlank() && !url.startsWith("REPLACE_ME")
+                && WebhookSender.isDiscordWebhookUrl(url) && WebhookSender.isAllowedHttpsUrl(url);
     }
 
     private String serverLabel() {
