@@ -64,14 +64,46 @@ public class HorrorFogCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("odysseia.horrorfog") && !sender.hasPermission("drakes.staff")) {
-            sender.sendMessage(ChatColor.RED + "No tienes permiso para controlar la Niebla de Terror.");
+        // Si se intenta aplicar a otros jugadores o a todos ('all'), requiere permisos de staff
+        if (args.length >= 2 && !sender.hasPermission("odysseia.horrorfog") && !sender.hasPermission("drakes.staff")) {
+            sender.sendMessage(ChatColor.RED + "No tienes permiso para modificar la niebla de otros jugadores.");
             return true;
         }
 
+        // Obtener gestor estacional si está disponible
+        org.metamechanists.odysseia.events.SeasonalEventManager seasonalManager = null;
+        if (plugin.getEventManager() != null) {
+            seasonalManager = plugin.getEventManager().getSeasonalManager();
+        }
+
+        // Caso sin argumentos: auto-toggle personal para jugadores
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.GOLD + "Uso: " + ChatColor.YELLOW + "/niebla <on|off|toggle> [jugador|all]");
-            return true;
+            if (sender instanceof Player player) {
+                boolean isOrangeOff = (seasonalManager != null && seasonalManager.isOrangeFogDisabled(player.getUniqueId()));
+                boolean isDenseOn = fogActivePlayers.contains(player.getUniqueId());
+
+                if (isDenseOn || !isOrangeOff) {
+                    // Desactivar niebla personal
+                    fogActivePlayers.remove(player.getUniqueId());
+                    player.removePotionEffect(PotionEffectType.DARKNESS);
+                    player.removePotionEffect(PotionEffectType.BLINDNESS);
+                    if (seasonalManager != null) {
+                        seasonalManager.setOrangeFogDisabled(player.getUniqueId(), true);
+                    }
+                    player.sendMessage(ChatColor.GRAY + "🌫️ " + ChatColor.GREEN + "Has desactivado la niebla atmosférica de Halloween.");
+                } else {
+                    // Activar niebla personal
+                    if (seasonalManager != null) {
+                        seasonalManager.setOrangeFogDisabled(player.getUniqueId(), false);
+                    }
+                    player.sendMessage(ChatColor.GOLD + "🎃 " + ChatColor.YELLOW + "Has activado la niebla naranja de Halloween.");
+                    player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 0.5f);
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatColor.GOLD + "Uso: " + ChatColor.YELLOW + "/niebla <on|off|toggle> [jugador|all]");
+                return true;
+            }
         }
 
         String action = args[0].toLowerCase(Locale.ROOT);
@@ -99,33 +131,52 @@ public class HorrorFogCommand implements CommandExecutor, TabCompleter {
         switch (action) {
             case "on", "enable", "activar" -> {
                 for (Player target : targets) {
-                    fogActivePlayers.add(target.getUniqueId());
-                    target.sendMessage(ChatColor.DARK_GRAY + "🌫️ " + ChatColor.DARK_RED + "Una niebla ultra densa ha envuelto tus sentidos...");
-                    target.playSound(target.getLocation(), Sound.AMBIENT_CAVE, 1.5f, 0.4f);
+                    if (sender.hasPermission("odysseia.horrorfog") || sender.hasPermission("drakes.staff")) {
+                        fogActivePlayers.add(target.getUniqueId());
+                    }
+                    if (seasonalManager != null) {
+                        seasonalManager.setOrangeFogDisabled(target.getUniqueId(), false);
+                    }
+                    target.sendMessage(ChatColor.GOLD + "🎃 " + ChatColor.YELLOW + "La niebla de Halloween ha envuelto tus sentidos...");
+                    target.playSound(target.getLocation(), Sound.AMBIENT_CAVE, 1.2f, 0.4f);
                 }
-                sender.sendMessage(ChatColor.GREEN + "Niebla densa activada para " + targets.size() + " jugador(es).");
+                sender.sendMessage(ChatColor.GREEN + "Niebla activada para " + targets.size() + " jugador(es).");
             }
             case "off", "disable", "desactivar" -> {
                 for (Player target : targets) {
                     fogActivePlayers.remove(target.getUniqueId());
                     target.removePotionEffect(PotionEffectType.DARKNESS);
                     target.removePotionEffect(PotionEffectType.BLINDNESS);
+                    if (seasonalManager != null) {
+                        seasonalManager.setOrangeFogDisabled(target.getUniqueId(), true);
+                    }
                     target.sendMessage(ChatColor.GRAY + "🌫️ " + ChatColor.GREEN + "La densa niebla se ha disipado.");
                 }
-                sender.sendMessage(ChatColor.GREEN + "Niebla densa desactivada para " + targets.size() + " jugador(es).");
+                sender.sendMessage(ChatColor.GREEN + "Niebla desactivada para " + targets.size() + " jugador(es).");
             }
             case "toggle" -> {
                 int countOn = 0;
                 for (Player target : targets) {
-                    if (fogActivePlayers.contains(target.getUniqueId())) {
+                    boolean isOrangeOff = (seasonalManager != null && seasonalManager.isOrangeFogDisabled(target.getUniqueId()));
+                    boolean isDenseOn = fogActivePlayers.contains(target.getUniqueId());
+
+                    if (isDenseOn || !isOrangeOff) {
                         fogActivePlayers.remove(target.getUniqueId());
                         target.removePotionEffect(PotionEffectType.DARKNESS);
                         target.removePotionEffect(PotionEffectType.BLINDNESS);
-                        target.sendMessage(ChatColor.GRAY + "🌫️ " + ChatColor.GREEN + "La densa niebla se ha disipado.");
+                        if (seasonalManager != null) {
+                            seasonalManager.setOrangeFogDisabled(target.getUniqueId(), true);
+                        }
+                        target.sendMessage(ChatColor.GRAY + "🌫️ " + ChatColor.GREEN + "La niebla de Halloween se ha disipado.");
                     } else {
-                        fogActivePlayers.add(target.getUniqueId());
-                        target.sendMessage(ChatColor.DARK_GRAY + "🌫️ " + ChatColor.DARK_RED + "Una niebla ultra densa ha envuelto tus sentidos...");
-                        target.playSound(target.getLocation(), Sound.AMBIENT_CAVE, 1.5f, 0.4f);
+                        if (sender.hasPermission("odysseia.horrorfog") || sender.hasPermission("drakes.staff")) {
+                            fogActivePlayers.add(target.getUniqueId());
+                        }
+                        if (seasonalManager != null) {
+                            seasonalManager.setOrangeFogDisabled(target.getUniqueId(), false);
+                        }
+                        target.sendMessage(ChatColor.GOLD + "🎃 " + ChatColor.YELLOW + "La niebla de Halloween ha envuelto tus sentidos...");
+                        target.playSound(target.getLocation(), Sound.AMBIENT_CAVE, 1.2f, 0.4f);
                         countOn++;
                     }
                 }

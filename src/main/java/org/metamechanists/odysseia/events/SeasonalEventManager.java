@@ -1,16 +1,22 @@
 package org.metamechanists.odysseia.events;
 
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.world.TimeSkipEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -53,6 +59,10 @@ public class SeasonalEventManager implements Listener {
     private BukkitTask tickTask;
     private long lastAtmosphericBroadcast = 0;
     private long lastBirthdayBroadcast = 0;
+
+    private static final NamespacedKey HALLOWEEN_TREAT_KEY = new NamespacedKey("odysseia", "halloween_treat");
+    private final Set<UUID> orangeFogDisabled = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final java.util.concurrent.ConcurrentHashMap<String, Long> midnightBellChimedPerWorld = new java.util.concurrent.ConcurrentHashMap<>();
 
     // Moduladores administrativos (null = ciclo automático de calendario)
     private Boolean forceHalloween = null;
@@ -98,11 +108,51 @@ public class SeasonalEventManager implements Listener {
 
         // 1. MÓDULO HALLOWEEN (OCTUBRE)
         if (isHalloweenActive()) {
-            // Noche perpetua en mundos normales
+            // Bruma y Niebla Naranja atmosférica en mundos normales
             for (World world : Bukkit.getWorlds()) {
-                if (world.getEnvironment() == World.Environment.NORMAL) {
-                    if (world.getTime() < 13000 || world.getTime() > 23000) {
-                        world.setTime(18000L); // Medianoche exacta
+                if (world.getEnvironment() != World.Environment.NORMAL) continue;
+                long time = world.getTime();
+                boolean isNightOrStorm = (time >= 12000 && time <= 23500) || world.hasStorm();
+
+                // Campanada lúgubre de medianoche (una vez por noche por mundo)
+                if (time >= 17900 && time <= 18100) {
+                    long day = world.getFullTime() / 24000L;
+                    Long lastDay = midnightBellChimedPerWorld.get(world.getName());
+                    if (lastDay == null || lastDay < day) {
+                        midnightBellChimedPerWorld.put(world.getName(), day);
+                        for (Player p : world.getPlayers()) {
+                            p.playSound(p.getLocation(), Sound.BLOCK_BELL_RESONATE, 1.2f, 0.4f);
+                            p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 0.5f);
+                        }
+                    }
+                }
+
+                // Inmersión de Niebla Naranja y partículas para jugadores activos
+                for (Player player : world.getPlayers()) {
+                    if (!player.isOnline() || player.isDead() || player.getGameMode() == GameMode.SPECTATOR) continue;
+                    if (orangeFogDisabled.contains(player.getUniqueId())) continue;
+
+                    // Si es de noche o tormenta, contraer suavemente el plano de niebla (DARKNESS amp 0, ambient)
+                    if (isNightOrStorm) {
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 45, 0, true, false, false));
+                    }
+
+                    // Esparcir partículas de niebla naranja alrededor del jugador
+                    Location eye = player.getEyeLocation();
+                    double dx = (random.nextDouble() - 0.5) * 10.0;
+                    double dy = (random.nextDouble() - 0.5) * 3.5;
+                    double dz = (random.nextDouble() - 0.5) * 10.0;
+                    Particle.DustOptions dust = (random.nextBoolean())
+                            ? new Particle.DustOptions(Color.fromRGB(255, 115, 0), 1.8f)
+                            : new Particle.DustOptions(Color.fromRGB(230, 65, 0), 1.5f);
+                    player.spawnParticle(Particle.DUST, eye.clone().add(dx, dy, dz), 1, dust);
+
+                    // Pequeñas chispas y esporas flotantes
+                    if (random.nextDouble() < 0.35) {
+                        player.spawnParticle(Particle.FLAME, eye.clone().add((random.nextDouble() - 0.5) * 6, (random.nextDouble() - 0.5) * 2, (random.nextDouble() - 0.5) * 6), 1, 0, 0.01, 0, 0.01);
+                    }
+                    if (random.nextDouble() < 0.25) {
+                        player.spawnParticle(Particle.CRIMSON_SPORE, eye.clone().add((random.nextDouble() - 0.5) * 8, (random.nextDouble() - 0.5) * 3, (random.nextDouble() - 0.5) * 8), 1, 0, 0.01, 0, 0.01);
                     }
                 }
             }
@@ -162,20 +212,27 @@ public class SeasonalEventManager implements Listener {
     // ==========================================
 
     /**
-     * Cancela el salto de tiempo cuando los jugadores duermen en la cama.
-     * En Halloween la noche es perpetua y el amanecer nunca debe llegar.
+     * Permite que los jugadores duerman en sus camas y avancen la noche al alba con normalidad.
+     * Al saltar la noche, emite un mensaje temático de Halloween al amanecer.
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTimeSkip(TimeSkipEvent event) {
         if (!isHalloweenActive()) return;
         if (event.getSkipReason() == TimeSkipEvent.SkipReason.NIGHT_SKIP) {
-            event.setCancelled(true);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            "&8[&6🎃&8] &6El velo de la noche otoñal cede ante el tenue resplandor del alba... Has sobrevivido a otra noche de Halloween en DrakesCraft."));
+                    p.playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.9f, 1.4f);
+                    p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.8f);
+                }
+            }, 5L);
         }
     }
 
     /**
      * Permite dormir para resetear el insomnio (evita que aparezcan Phantoms)
-     * y acompaña al jugador con la inmersión de la Noche Perpetua.
+     * y acompaña al jugador con la inmersión de Halloween.
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBedLeave(PlayerBedLeaveEvent event) {
@@ -188,9 +245,87 @@ public class SeasonalEventManager implements Listener {
         } catch (Throwable ignored) {}
 
         player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&8[&4&lTÁRTARO&8] &7Dormiste bajo el firmamento eterno de Halloween. Tus ojos descansan, pero la noche no se desvanece..."));
-        player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.2f, 0.4f);
-        player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 1.2f, 0.5f);
+                "&8[&6🎃&8] &eHas descansado en tu cama. El insomnio se disipa bajo la bruma otoñal de Halloween."));
+        player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.2f);
+    }
+
+    /**
+     * Equipar cabezas de calabaza y Jack-o'-Lanterns a monstruos hostiles durante Halloween.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onMonsterSpawn(CreatureSpawnEvent event) {
+        if (!isHalloweenActive()) return;
+        if (!(event.getEntity() instanceof Monster monster)) return;
+        if (monster.getWorld().getEnvironment() != World.Environment.NORMAL) return;
+
+        EntityType type = monster.getType();
+        if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.STRAY
+                || type == EntityType.DROWNED || type == EntityType.HUSK || type == EntityType.WITHER_SKELETON
+                || type == EntityType.PIGLIN || type == EntityType.ZOMBIFIED_PIGLIN) {
+
+            double roll = random.nextDouble();
+            if (roll < 0.15) {
+                // 15% Jack-o'-Lantern
+                if (monster.getEquipment() != null) {
+                    monster.getEquipment().setHelmet(new ItemStack(Material.JACK_O_LANTERN));
+                    monster.getEquipment().setHelmetDropChance(0.04f);
+                    monster.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, true, false));
+                }
+            } else if (roll < 0.50) {
+                // 35% Carved Pumpkin (0.15 a 0.50 = 35%)
+                if (monster.getEquipment() != null) {
+                    monster.getEquipment().setHelmet(new ItemStack(Material.CARVED_PUMPKIN));
+                    monster.getEquipment().setHelmetDropChance(0.04f);
+                }
+            }
+        }
+    }
+
+    /**
+     * Dropeo de Dulces de Halloween al eliminar monstruos durante octubre.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onHalloweenMobKill(EntityDeathEvent event) {
+        if (!isHalloweenActive()) return;
+        if (!(event.getEntity() instanceof Monster mob)) return;
+        Player killer = mob.getKiller();
+        if (killer == null) return;
+
+        // 15% probabilidad de dropear un Dulce de Halloween
+        if (random.nextDouble() < 0.15) {
+            ItemStack treat = createHalloweenTreat(1);
+            event.getDrops().add(treat);
+            Location loc = mob.getLocation();
+            loc.getWorld().spawnParticle(Particle.FLAME, loc.add(0, 0.5, 0), 12, 0.3, 0.3, 0.3, 0.05);
+        }
+    }
+
+    /**
+     * Consumo del Dulce de Halloween: regenera vida, saciedad, otorga buffs y 2,500 Dracmas.
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onHalloweenTreatConsume(PlayerItemConsumeEvent event) {
+        ItemStack item = event.getItem();
+        if (!isHalloweenTreat(item)) return;
+
+        Player player = event.getPlayer();
+        player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + 8.0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 300, 0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 60, 1));
+
+        // Recompensa en Dracmas vía Vault
+        try {
+            var rsp = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+            if (rsp != null && rsp.getProvider() != null) {
+                rsp.getProvider().depositPlayer(player, 2500.0);
+            }
+        } catch (Throwable ignored) {}
+
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1.0f, 1.0f);
+        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.2f);
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6&l🎃 &e¡Te has deleitado con un &6Dulce de Halloween&e! Has recuperado salud, saciedad y ganado &6+2,500 Dracmas&e."));
     }
 
     // ==========================================
@@ -385,6 +520,54 @@ public class SeasonalEventManager implements Listener {
 
         String name = item.getItemMeta().getDisplayName().toLowerCase(Locale.ROOT);
         return name.contains("guadaña") || name.contains("guadana") || name.contains("caronte");
+    }
+
+    public void toggleOrangeFog(UUID uuid) {
+        if (orangeFogDisabled.contains(uuid)) {
+            orangeFogDisabled.remove(uuid);
+        } else {
+            orangeFogDisabled.add(uuid);
+        }
+    }
+
+    public void setOrangeFogDisabled(UUID uuid, boolean disabled) {
+        if (disabled) {
+            orangeFogDisabled.add(uuid);
+        } else {
+            orangeFogDisabled.remove(uuid);
+        }
+    }
+
+    public boolean isOrangeFogDisabled(UUID uuid) {
+        return orangeFogDisabled.contains(uuid);
+    }
+
+    public ItemStack createHalloweenTreat(int amount) {
+        ItemStack item = new ItemStack(Material.PUMPKIN_PIE, amount);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&l🎃 Dulce de Halloween"));
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&e✦ Manjar otoñal de DrakesCraft"));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Golosina encantada recolectada durante el mes del terror."));
+            lore.add("");
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&a✦ Al consumirlo:"));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7• Restaura &c❤ +8 HP de Salud &7y &6🍖 Saturación"));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7• Otorga &eRegeneración II &7y &bVelocidad I &7(15s)"));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7• Otorga &6+2,500 Dracmas &7a tu saldo bancario"));
+            meta.setLore(lore);
+            meta.getPersistentDataContainer().set(HALLOWEEN_TREAT_KEY, PersistentDataType.BYTE, (byte) 1);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public boolean isHalloweenTreat(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
+        if (pdc.has(HALLOWEEN_TREAT_KEY, PersistentDataType.BYTE)) return true;
+        String name = item.getItemMeta().getDisplayName();
+        return name != null && name.contains("Dulce de Halloween");
     }
 
     private ZoneId configuredZone() {
